@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — RJ Fashion Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="navbar admin-navbar">
+    <div class="logo">RJ Fashion Collection · Admin</div>
+    <nav>
+      <a href="index.html">Store</a>
+      <a href="#" id="logoutBtn" class="logout-link">Logout</a>
+    </nav>
+  </header>
+
+  <!-- LOGIN SCREEN -->
+  <section class="admin-login" id="adminLogin">
+    <div class="admin-login-card">
+      <div class="admin-login-icon">🔒</div>
+      <h1>Admin Access</h1>
+      <p>Sign in with your Firebase admin account.</p>
+      <div class="admin-input-group">
+        <input type="email" id="adminEmail" placeholder="you@email.com" autocomplete="username" />
+        <input type="password" id="adminPassword" placeholder="Password" autocomplete="current-password" />
+      </div>
+      <button class="btn-primary admin-btn-full" id="loginBtn">Sign In</button>
+      <a href="#" id="forgotBtn" class="admin-forgot">Forgot password?</a>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </section>
+
+  <!-- ADMIN PANEL -->
+  <section class="admin-panel" id="adminPanel" style="display:none;">
+    
+    <div class="admin-header">
+      <h1>Dashboard</h1>
+      <p>Manage your orders and category media</p>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="tab-btn active" data-tab="orders">📦 Orders</button>
+      <button class="tab-btn" data-tab="catalog">🖼️ Catalog Media</button>
+      <button class="tab-btn" data-tab="products">🛍️ Products</button>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="tab-content" id="tab-orders">
+      <div class="admin-section-header">
+        <h2>All Orders</h2>
+        <span class="admin-badge" id="ordersCount">0</span>
+      </div>
+      <div id="ordersList" class="orders-list"></div>
+      <p class="empty-msg" id="noOrders">No orders yet.</p>
+    </div>
+
+    <!-- CATALOG MEDIA TAB -->
+    <div class="tab-content" id="tab-catalog" style="display:none;">
+      
+      <div class="admin-header" style="margin-bottom:20px;">
+        <h1 style="font-size:24px;">Catalog Media Manager</h1>
+        <p>For every category item, add up to <strong>4 image URLs</strong> and <strong>2 video URLs</strong>. These will appear on the homepage when customers click the category.</p>
+      </div>
+
+      <div id="catalogSections"></div>
+
+      <div style="margin-top:30px;">
+        <button class="btn-primary" id="saveAllCatalogBtn" style="min-width:200px;">💾 Save All Changes</button>
+        <p class="form-hint" style="margin-top:10px;">Changes are saved to Firebase and will appear on the store homepage.</p>
+      </div>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div class="tab-content" id="tab-products" style="display:none;">
+      
+      <div class="admin-form-card">
+        <h2 id="productFormTitle">➕ Add a New Product</h2>
+        <p class="admin-form-subtitle">Fill in the details below to add or update a product.</p>
+        
+        <form class="product-form" id="productForm">
+          <input type="hidden" id="editProductId" />
+          
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" id="pName" required placeholder="e.g., Floral Maxi Dress" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Price (₹) *</label>
+              <input type="number" step="0.01" min="0" id="pPrice" required placeholder="1999" />
+            </div>
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="pCategory" required>
+                <option value="">— Select Category —</option>
+                <optgroup label="New & Featured">
+                  <option value="New Arrivals">New Arrivals</option>
+                  <option value="Party Wear">Party Wear</option>
+                  <option value="Co-ord Sets">Co-ord Sets</option>
+                </optgroup>
+                <optgroup label="Western Wear">
+                  <option value="Tops">Tops</option>
+                  <option value="T-Shirts">T-Shirts</option>
+                  <option value="Shirts">Shirts</option>
+                  <option value="Crop Tops">Crop Tops</option>
+                  <option value="Jeans">Jeans</option>
+                  <option value="Trousers">Trousers / Pants</option>
+                  <option value="Skirts">Skirts</option>
+                  <option value="Shorts">Shorts</option>
+                  <option value="Jumpsuits">Jumpsuits</option>
+                </optgroup>
+                <optgroup label="Dresses">
+                  <option value="Mini Dresses">Mini Dresses</option>
+                  <option value="Midi Dresses">Midi Dresses</option>
+                  <option value="Maxi Dresses">Maxi Dresses</option>
+                  <option value="A-Line Dresses">A-Line Dresses</option>
+                  <option value="Bodycon Dresses">Bodycon Dresses</option>
+                  <option value="Party Dresses">Party Dresses</option>
+                  <option value="Casual Dresses">Casual Dresses</option>
+                  <option value="Gowns">Gowns</option>
+                </optgroup>
+                <optgroup label="Indian / Ethnic Wear">
+                  <option value="Sarees">Sarees</option>
+                  <option value="Kurtis">Kurtis</option>
+                  <option value="Kurta Sets">Kurta Sets</option>
+                  <option value="Salwar Suits">Salwar Suits</option>
+                  <option value="Anarkali Suits">Anarkali Suits</option>
+                  <option value="Lehenga Choli">Lehenga Choli</option>
+                  <option value="Sharara Sets">Sharara Sets</option>
+                  <option value="Gharara Sets">Gharara Sets</option>
+                  <option value="Palazzo Sets">Palazzo Sets</option>
+                  <option value="Dupattas">Dupattas</option>
+                </optgroup>
+                <optgroup label="Party & Occasion Wear">
+                  <option value="Party Gowns">Party Gowns</option>
+                  <option value="Sequin Dresses">Sequin Dresses</option>
+                  <option value="Designer Sarees">Designer Sarees</option>
+                  <option value="Wedding Lehengas">Wedding Lehengas</option>
+                  <option value="Festive Dresses">Festive Dresses</option>
+                  <option value="Fancy Blouses">Fancy Blouses</option>
+                </optgroup>
+                <optgroup label="Activewear">
+                  <option value="Sports T-Shirts">Sports T-Shirts</option>
+                  <option value="Sports Tops">Sports Tops</option>
+                  <option value="Leggings">Leggings</option>
+                  <option value="Track Pants">Track Pants</option>
+                  <option value="Workout Shorts">Workout Shorts</option>
+                  <option value="Sports Bras">Sports Bras</option>
+                </optgroup>
+                <optgroup label="Nightwear">
+                  <option value="Night Suits">Night Suits</option>
+                  <option value="Pajama Sets">Pajama Sets</option>
+                  <option value="Night Dresses">Night Dresses</option>
+                  <option value="Robes">Robes</option>
+                </optgroup>
+                <optgroup label="Outerwear">
+                  <option value="Jackets">Jackets</option>
+                  <option value="Blazers">Blazers</option>
+                  <option value="Shrugs">Shrugs</option>
+                  <option value="Cardigans">Cardigans</option>
+                  <option value="Coats">Coats</option>
+                </optgroup>
+                <optgroup label="Accessories">
+                  <option value="Handbags">Handbags</option>
+                  <option value="Clutches">Clutches</option>
+                  <option value="Wallets">Wallets</option>
+                  <option value="Scarves">Scarves</option>
+                  <option value="Belts">Belts</option>
+                  <option value="Jewellery">Jewellery</option>
+                  <option value="Sunglasses">Sunglasses</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Stock Status *</label>
+            <select id="pStock" required>
+              <option value="in">✅ In Stock</option>
+              <option value="out">❌ Out of Stock</option>
+            </select>
+          </div>
+
+          <h3 class="admin-section-title">Product Media</h3>
+
+          <div class="form-group">
+            <label>Image 1 URL *</label>
+            <input type="text" id="pImage1" required placeholder="https://i.postimg.cc/xxxxx/image1.jpg" />
+          </div>
+          <div class="form-group">
+            <label>Image 2 URL</label>
+            <input type="text" id="pImage2" placeholder="https://i.postimg.cc/xxxxx/image2.jpg" />
+          </div>
+          <div class="form-group">
+            <label>Image 3 URL</label>
+            <input type="text" id="pImage3" placeholder="https://i.postimg.cc/xxxxx/image3.jpg" />
+          </div>
+          <div class="form-group">
+            <label>Image 4 URL</label>
+            <input type="text" id="pImage4" placeholder="https://i.postimg.cc/xxxxx/image4.jpg" />
+          </div>
+          <div class="form-group">
+            <label>Video 1 URL (Optional)</label>
+            <input type="text" id="pVideo1" placeholder="https://www.youtube.com/watch?v=xxxxx or .mp4 link" />
+          </div>
+          <div class="form-group">
+            <label>Video 2 URL (Optional)</label>
+            <input type="text" id="pVideo2" placeholder="https://www.youtube.com/watch?v=xxxxx or .mp4 link" />
+          </div>
+
+          <div class="form-group">
+            <label>Preview</label>
+            <div id="mediaPreviewGrid" class="media-preview-grid"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary admin-btn-full" id="addProductBtn">➕ Add Product</button>
+            <button type="button" class="btn-outline admin-btn-full" id="cancelEditBtn" style="display:none; margin-top:10px;">Cancel Edit</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-section-header" style="margin-top: 40px;">
+        <h2>Existing Products</h2>
+        <span class="admin-badge" id="productsCount">0</span>
+      </div>
+      <div id="adminProductsList" class="admin-products-list"></div>
+    </div>
+  </section>
+
+  <!-- Load runtime config BEFORE the module script -->
+  <script src="config.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getAuth, signInWithEmailAndPassword, onAuthStateChanged,
+      signOut, sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, deleteDoc,
+      doc, query, orderBy, updateDoc, setDoc, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { firebaseConfig, ADMIN_EMAIL } from "./firebase-config.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Admin email loaded from runtime config.
+    // Real security is enforced by Firestore Rules — this is only UI gating.
+    const ADMIN_EMAILS = [ADMIN_EMAIL].filter(Boolean);
+
+    let products = [];
+    let catalogData = {};
+
+    const loginScreen = document.getElementById('adminLogin');
+    const adminPanel = document.getElementById('adminPanel');
+    const loginBtn = document.getElementById('loginBtn');
+    const emailInput = document.getElementById('adminEmail');
+    const passwordInput = document.getElementById('adminPassword');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const forgotBtn = document.getElementById('forgotBtn');
+
+    // ============================================
+    // XSS PROTECTION HELPER
+    // ============================================
+    function escapeHtml(str) {
+      if (str == null) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function isAdminEmail(email) {
+      return ADMIN_EMAILS.map(x => x.toLowerCase()).includes((email || '').toLowerCase());
+    }
+
+    // ============================================
+    // CATALOG STRUCTURE
+    // ============================================
+    const CATALOG_SECTIONS = [
+      { title: "New & Featured", items: ["New Arrivals", "Party Wear", "Co-ord Sets"] },
+      { title: "Western Wear", items: ["Tops", "T-Shirts", "Shirts", "Crop Tops", "Jeans", "Trousers / Pants", "Skirts", "Shorts", "Jumpsuits", "Co-ord Sets"] },
+      { title: "Dresses", items: ["Mini Dresses", "Midi Dresses", "Maxi Dresses", "A-Line Dresses", "Bodycon Dresses", "Party Dresses", "Casual Dresses", "Gowns"] },
+      { title: "Indian / Ethnic", items: ["Sarees", "Kurtis", "Kurta Sets", "Salwar Suits", "Anarkali Suits", "Lehenga Choli", "Sharara Sets", "Gharara Sets", "Palazzo Sets", "Dupattas"] },
+      { title: "Party & Occasion", items: ["Party Gowns", "Sequin Dresses", "Designer Sarees", "Wedding Lehengas", "Festive Dresses", "Fancy Blouses"] },
+      { title: "Activewear", items: ["Sports T-Shirts", "Sports Tops", "Leggings", "Track Pants", "Workout Shorts", "Sports Bras"] },
+      { title: "Nightwear", items: ["Night Suits", "Pajama Sets", "Night Dresses", "Robes"] },
+      { title: "Outerwear", items: ["Jackets", "Blazers", "Shrugs", "Cardigans", "Coats"] },
+      { title: "Accessories", items: ["Handbags", "Clutches", "Wallets", "Scarves", "Belts", "Jewellery", "Sunglasses"] }
+    ];
+
+    // ============================================
+    // LOGIN
+    // ============================================
+    loginBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      loginError.textContent = '';
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        loginError.textContent = 'Please enter both email and password.';
+        return;
+      }
+      if (!isAdminEmail(email)) {
+        loginError.textContent = '❌ This account is not authorized as admin.';
+        return;
+      }
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        console.error(error);
+        if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          loginError.textContent = '❌ Wrong email or password.';
+        } else if (error.code === 'auth/too-many-requests') {
+          loginError.textContent = '⏳ Too many attempts. Try again later.';
+        } else if (error.code === 'auth/invalid-email') {
+          loginError.textContent = '❌ Invalid email format.';
+        } else {
+          loginError.textContent = '❌ ' + (error.message || 'Login failed.');
+        }
+      }
+    });
+
+    forgotBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      if (!email) {
+        loginError.textContent = 'Enter your email first, then tap Forgot password.';
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        loginError.style.color = '#16a34a';
+        loginError.textContent = '✅ Reset link sent! Check your email.';
+        setTimeout(() => { loginError.style.color = ''; }, 5000);
+      } catch (err) {
+        console.error(err);
+        loginError.style.color = '#e03e3e';
+        loginError.textContent = '❌ ' + (err.message || 'Could not send reset link.');
+      }
+    });
+
+    logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      location.reload();
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user && isAdminEmail(user.email)) {
+        loginScreen.style.display = 'none';
+        adminPanel.style.display = 'block';
+        await loadProducts();
+        await loadCatalogData();
+        await renderOrders();
+        renderAdminProducts();
+        renderCatalogSections();
+      } else if (user) {
+        await signOut(auth);
+        loginScreen.style.display = 'flex';
+        adminPanel.style.display = 'none';
+        loginError.textContent = '❌ This account is not authorized as admin.';
+      } else {
+        loginScreen.style.display = 'flex';
+        adminPanel.style.display = 'none';
+      }
+    });
+
+    // ============================================
+    // TABS
+    // ============================================
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
+        btn.classList.add("active");
+        document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+      });
+    });
+
+    // ============================================
+    // CATALOG MEDIA DATA
+    // ============================================
+    async function loadCatalogData() {
+      catalogData = {};
+      try {
+        const snap = await getDoc(doc(db, "catalog", "media"));
+        if (snap.exists()) {
+          catalogData = snap.data();
+        }
+      } catch (err) {
+        console.error("Catalog load error:", err);
+      }
+    }
+
+    function renderCatalogSections() {
+      const container = document.getElementById("catalogSections");
+      container.innerHTML = "";
+
+      CATALOG_SECTIONS.forEach(section => {
+        const sectionDiv = document.createElement("div");
+        sectionDiv.className = "admin-form-card";
+        sectionDiv.style.marginBottom = "24px";
+
+        let itemsHTML = "";
+        section.items.forEach(item => {
+          const key = `${section.title}::${item}`;
+          const data = catalogData[key] || {};
+          const images = data.images || ["", "", "", ""];
+          const videos = data.videos || ["", ""];
+          const safeKey = escapeHtml(key);
+
+          itemsHTML += `
+            <div class="catalog-item-row" style="border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px; background:#faf9f7;">
+              <h4 style="font-size:14px; font-weight:700; color:var(--primary); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">${escapeHtml(item)}</h4>
+              <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:10px;">
+                <input type="text" class="cat-img" data-key="${safeKey}" data-idx="0" placeholder="Image URL 1" value="${escapeHtml(images[0] || '')}" style="padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:white;" />
+                <input type="text" class="cat-img" data-key="${safeKey}" data-idx="1" placeholder="Image URL 2" value="${escapeHtml(images[1] || '')}" style="padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:white;" />
+                <input type="text" class="cat-img" data-key="${safeKey}" data-idx="2" placeholder="Image URL 3" value="${escapeHtml(images[2] || '')}" style="padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:white;" />
+                <input type="text" class="cat-img" data-key="${safeKey}" data-idx="3" placeholder="Image URL 4" value="${escapeHtml(images[3] || '')}" style="padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:white;" />
+              </div>
+              <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px;">
+                <input type="text" class="cat-vid" data-key="${safeKey}" data-idx="0" placeholder="Video URL 1" value="${escapeHtml(videos[0] || '')}" style="padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:white;" />
+                <input type="text" class="cat-vid" data-key="${safeKey}" data-idx="1" placeholder="Video URL 2" value="${escapeHtml(videos[1] || '')}" style="padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; background:white;" />
+              </div>
+            </div>
+          `;
+        });
+
+        sectionDiv.innerHTML = `
+          <h2 style="font-family:'Fraunces',serif; font-size:20px; font-weight:700; color:var(--primary); margin-bottom:6px;">${escapeHtml(section.title)}</h2>
+          <p class="admin-form-subtitle" style="margin-bottom:18px;">${section.items.length} items · Add up to 4 images + 2 videos per item</p>
+          ${itemsHTML}
+        `;
+        container.appendChild(sectionDiv);
+      });
+    }
+
+    document.getElementById("saveAllCatalogBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("saveAllCatalogBtn");
+      btn.disabled = true;
+      btn.textContent = "⏳ Saving…";
+
+      const newData = {};
+
+      document.querySelectorAll(".cat-img").forEach(input => {
+        const key = input.dataset.key;
+        const idx = parseInt(input.dataset.idx);
+        if (!newData[key]) newData[key] = { images: ["", "", "", ""], videos: ["", ""] };
+        newData[key].images[idx] = input.value.trim();
+      });
+
+      document.querySelectorAll(".cat-vid").forEach(input => {
+        const key = input.dataset.key;
+        const idx = parseInt(input.dataset.idx);
+        if (!newData[key]) newData[key] = { images: ["", "", "", ""], videos: ["", ""] };
+        newData[key].videos[idx] = input.value.trim();
+      });
+
+      try {
+        await setDoc(doc(db, "catalog", "media"), newData);
+        catalogData = newData;
+        alert("✅ All catalog media saved successfully!");
+      } catch (err) {
+        console.error(err);
+        alert("❌ Failed to save: " + (err.message || ""));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 Save All Changes";
+      }
+    });
+
+    // ============================================
+    // PRODUCTS
+    // ============================================
+    document.getElementById("productForm").addEventListener("submit", handleAddOrUpdateProduct);
+    document.getElementById("cancelEditBtn").addEventListener("click", resetProductForm);
+
+    ["pImage1", "pImage2", "pImage3", "pImage4"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderMediaPreview);
+    });
+    ["pVideo1", "pVideo2"].forEach(id => {
+      document.getElementById(id).addEventListener("input", renderMediaPreview);
+    });
+
+    function renderMediaPreview() {
+      const grid = document.getElementById("mediaPreviewGrid");
+      grid.innerHTML = "";
+      const urls = [
+        document.getElementById("pImage1").value.trim(),
+        document.getElementById("pImage2").value.trim(),
+        document.getElementById("pImage3").value.trim(),
+        document.getElementById("pImage4").value.trim(),
+      ].filter(u => u);
+
+      urls.forEach((url) => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.onerror = () => { img.src = "https://via.placeholder.com/60?text=?"; };
+        grid.appendChild(img);
+      });
+
+      const videos = [
+        document.getElementById("pVideo1").value.trim(),
+        document.getElementById("pVideo2").value.trim(),
+      ].filter(v => v);
+
+      videos.forEach(() => {
+        const badge = document.createElement("div");
+        badge.className = "video-preview-badge";
+        badge.textContent = "▶";
+        grid.appendChild(badge);
+      });
+    }
+
+    async function loadProducts() {
+      try {
+        const snapshot = await getDocs(collection(db, "products"));
+        products = [];
+        snapshot.forEach(d => products.push({ id: d.id, ...d.data() }));
+      } catch (err) { console.error(err); }
+    }
+
+    async function handleAddOrUpdateProduct(e) {
+      e.preventDefault();
+      const editId = document.getElementById("editProductId").value;
+      const name = document.getElementById("pName").value.trim();
+      const price = parseFloat(document.getElementById("pPrice").value);
+      const stockStatus = document.getElementById("pStock").value;
+      const category = document.getElementById("pCategory").value.trim();
+      const image1 = document.getElementById("pImage1").value.trim();
+      const image2 = document.getElementById("pImage2").value.trim();
+      const image3 = document.getElementById("pImage3").value.trim();
+      const image4 = document.getElementById("pImage4").value.trim();
+      const video1 = document.getElementById("pVideo1").value.trim();
+      const video2 = document.getElementById("pVideo2").value.trim();
+
+      if (!image1) { alert("Please provide at least one image URL."); return; }
+      if (!category) { alert("Please select a category."); return; }
+
+      const images = [image1, image2, image3, image4].filter(u => u);
+      const videos = [video1, video2].filter(v => v);
+
+      const btn = document.getElementById("addProductBtn");
+      btn.disabled = true;
+      btn.textContent = "⏳ Saving…";
+
+      try {
+        const productData = {
+          name, price, stockStatus, category, images, image: images[0], videos, video: videos[0] || ""
+        };
+
+        if (editId) {
+          await updateDoc(doc(db, "products", editId), productData);
+          const idx = products.findIndex(p => p.id === editId);
+          if (idx > -1) products[idx] = { id: editId, ...productData };
+          alert("✅ Product updated!");
+        } else {
+          const docRef = await addDoc(collection(db, "products"), productData);
+          products.push({ id: docRef.id, ...productData });
+          alert("✅ Product added!");
+        }
+        resetProductForm();
+        renderAdminProducts();
+      } catch (err) {
+        console.error(err);
+        alert("Failed to save product: " + (err.message || ""));
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "➕ Add Product";
+      }
+    }
+
+    function resetProductForm() {
+      document.getElementById("productForm").reset();
+      document.getElementById("editProductId").value = "";
+      document.getElementById("mediaPreviewGrid").innerHTML = "";
+      document.getElementById("productFormTitle").textContent = "➕ Add a New Product";
+      document.getElementById("addProductBtn").textContent = "➕ Add Product";
+      document.getElementById("cancelEditBtn").style.display = "none";
+      document.getElementById("pStock").value = "in";
+    }
+
+    function editProduct(id) {
+      const p = products.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById("editProductId").value = p.id;
+      document.getElementById("pName").value = p.name;
+      document.getElementById("pPrice").value = p.price;
+      document.getElementById("pStock").value = p.stockStatus === "out" ? "out" : "in";
+
+      const catSelect = document.getElementById("pCategory");
+      for (let i = 0; i < catSelect.options.length; i++) {
+        if (catSelect.options[i].value === p.category) {
+          catSelect.selectedIndex = i;
+          break;
+        }
+      }
+
+      const imgs = p.images || (p.image ? [p.image] : []);
+      document.getElementById("pImage1").value = imgs[0] || "";
+      document.getElementById("pImage2").value = imgs[1] || "";
+      document.getElementById("pImage3").value = imgs[2] || "";
+      document.getElementById("pImage4").value = imgs[3] || "";
+
+      const vids = p.videos || (p.video ? [p.video] : []);
+      document.getElementById("pVideo1").value = vids[0] || "";
+      document.getElementById("pVideo2").value = vids[1] || "";
+
+      renderMediaPreview();
+
+      document.getElementById("productFormTitle").textContent = "✏️ Edit Product";
+      document.getElementById("addProductBtn").textContent = "💾 Save Changes";
+      document.getElementById("cancelEditBtn").style.display = "block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderAdminProducts() {
+      const list = document.getElementById("adminProductsList");
+      const countBadge = document.getElementById("productsCount");
+      list.innerHTML = "";
+      if (countBadge) countBadge.textContent = products.length;
+
+      if (products.length === 0) {
+        list.innerHTML = `<p class="empty-msg" style="grid-column:1/-1;">No products yet. Add your first product above.</p>`;
+        return;
+      }
+
+      products.forEach(p => {
+        const cover = p.image || (p.images && p.images[0]) || "https://via.placeholder.com/300?text=No+Image";
+        const imgCount = (p.images ? p.images.length : (p.image ? 1 : 0));
+        const vidCount = (p.videos ? p.videos.length : (p.video ? 1 : 0));
+        const isOut = p.stockStatus === "out";
+        const stockLabel = isOut
+          ? '<span class="stock-badge out">❌ Out of Stock</span>'
+          : '<span class="stock-badge in">✅ In Stock</span>';
+
+        const card = document.createElement("div");
+        card.classList.add("admin-product-card");
+        card.innerHTML = `
+          <div class="admin-product-img-wrap">
+            <img src="${escapeHtml(cover)}" alt="${escapeHtml(p.name)}" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" />
+            <span class="media-count">🖼️ ${imgCount} ${vidCount > 0 ? '🎥 '+vidCount : ''}</span>
+          </div>
+          <div class="admin-product-info">
+            <h4>${escapeHtml(p.name)}</h4>
+            <p class="admin-product-cat">${escapeHtml(p.category || "Uncategorized")}</p>
+            <p class="admin-product-price">₹${Number(p.price).toFixed(2)}</p>
+            <div class="admin-product-stock">${stockLabel}</div>
+            <div class="admin-product-actions">
+              <button class="admin-edit-btn" data-id="${escapeHtml(p.id)}">✏️ Edit</button>
+              <button class="admin-delete-btn" data-id="${escapeHtml(p.id)}">🗑️</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      document.querySelectorAll(".admin-edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => editProduct(btn.dataset.id));
+      });
+
+      document.querySelectorAll(".admin-delete-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("Delete this product?")) return;
+          try {
+            await deleteDoc(doc(db, "products", btn.dataset.id));
+            products = products.filter(x => x.id !== btn.dataset.id);
+            renderAdminProducts();
+          } catch (err) {
+            console.error(err);
+            alert("Failed to delete: " + (err.message || ""));
+          }
+        });
+      });
+    }
+
+    // ============================================
+    // ORDERS
+    // ============================================
+    async function renderOrders() {
+      const ordersList = document.getElementById("ordersList");
+      let orders = [];
+      try {
+        const q = query(collection(db, "orders"), orderBy("placedAt", "desc"));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(d => orders.push({ id: d.id, ...d.data() }));
+      } catch (err) { console.error(err); }
+
+      const noOrders = document.getElementById("noOrders");
+      const countBadge = document.getElementById("ordersCount");
+      if (countBadge) countBadge.textContent = orders.length;
+
+      if (orders.length === 0) {
+        ordersList.innerHTML = "";
+        noOrders.style.display = "block";
+        return;
+      }
+      noOrders.style.display = "none";
+      ordersList.innerHTML = "";
+
+      orders.forEach(order => {
+        const card = document.createElement("div");
+        card.classList.add("order-card");
+        let itemsHTML = "";
+        (order.items || []).forEach(item => {
+          const p = products.find(x => x.id === item.id);
+          const name = p ? p.name : "Unknown Product";
+          const price = p ? Number(p.price) : 0;
+          itemsHTML += `<div class="item-line"><span>${escapeHtml(name)} × ${item.quantity}</span><span>₹${(price * item.quantity).toFixed(2)}</span></div>`;
+        });
+
+        const status = order.status || "pending";
+        card.innerHTML = `
+          <div class="order-card-header">
+            <h3>${escapeHtml(order.name)}</h3>
+            <span class="order-status ${escapeHtml(status)}">${escapeHtml(status)}</span>
+          </div>
+          <div class="order-id">ID: ${escapeHtml(order.id)}</div>
+          <div class="order-details">
+            <div class="order-detail-row"><span>📧 Email:</span> ${escapeHtml(order.email)}</div>
+            <div class="order-detail-row"><span>📱 Phone:</span> ${escapeHtml(order.phone)}</div>
+            <div class="order-detail-row"><span>🏠 Address:</span> ${escapeHtml(order.address)}</div>
+            <div class="order-detail-row"><span>🏙️ City:</span> ${escapeHtml(order.city)} - ${escapeHtml(order.postal)}</div>
+            <div class="order-detail-row"><span>💳 UPI Txn:</span> <code>${escapeHtml(order.txnId || "—")}</code></div>
+            <div class="order-detail-row"><span>🕒 Placed:</span> ${new Date(order.placedAt).toLocaleString()}</div>
+          </div>
+          <div class="order-items">${itemsHTML}</div>
+          <div class="order-total">Total: ₹${Number(order.total).toFixed(2)}</div>
+          <div class="status-actions">
+            <button data-id="${escapeHtml(order.id)}" data-status="pending">Pending</button>
+            <button data-id="${escapeHtml(order.id)}" data-status="shipped">Shipped</button>
+            <button data-id="${escapeHtml(order.id)}" data-status="delivered">Delivered</button>
+            <button data-id="${escapeHtml(order.id)}" class="delete-order-btn">🗑️ Delete</button>
+          </div>
+        `;
+        ordersList.appendChild(card);
+      });
+
+      document.querySelectorAll(".status-actions button").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (btn.classList.contains("delete-order-btn")) {
+            if (confirm("Are you sure you want to delete this order?")) {
+              try {
+                await deleteDoc(doc(db, "orders", btn.dataset.id));
+                renderOrders();
+              } catch (err) {
+                console.error(err);
+                alert("Failed to delete: " + (err.message || ""));
+              }
+            }
+            return;
+          }
+          try {
+            await updateDoc(doc(db, "orders", btn.dataset.id), { status: btn.dataset.status });
+            renderOrders();
+          } catch (err) {
+            console.error(err);
+            alert("Failed to update: " + (err.message || ""));
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>
