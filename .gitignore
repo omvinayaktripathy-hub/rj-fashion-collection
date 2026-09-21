@@ -49,3 +49,4 @@ config.json
 serviceAccountKey.json
 node_modules/
 setAdmin.js
+checkAdmin.js
