@@ -46,3 +46,6 @@ build/
 *.log
 .env
 config.json
+serviceAccountKey.json
+node_modules/
+setAdmin.js
