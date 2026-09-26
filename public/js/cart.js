@@ -235,3 +235,16 @@ async function moveToWishlistFromCart(productId, cartItemId) {
 }
 
 document.addEventListener('DOMContentLoaded', loadCart);
+
+function handleCartProceedCheckout() {
+  let user = null;
+  const localUser = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
+  if (localUser) {
+    try { user = JSON.parse(localUser); } catch (_) {}
+  }
+  if (!user) {
+    window.location.href = '/login.html?redirect=/delivery.html';
+  } else {
+    window.location.href = '/delivery.html';
+  }
+}

@@ -3,43 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flipkart Style Checkout - RJ Fashion Collection</title>
+  <title>Select Delivery Address - RJ Fashion Collection</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-5">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-5">
   <style>
-    /* Checkout Specific Micro-styles */
-    .fk-login-perks {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
+    body {
+      background: #f1f3f6;
+      color: #212121;
     }
-    .fk-perk-item {
+    .checkout-stepper-wrap {
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 14px 0;
+      margin-bottom: 24px;
+    }
+    .stepper-nav {
       display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      font-size: 0.85rem;
-      color: #555;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
     }
-    .fk-perk-icon {
+    .stepper-nav-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #878787;
+      text-decoration: none;
+    }
+    .stepper-nav-step.active {
       color: var(--primary);
-      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .stepper-nav-step.completed {
+      color: #10b981;
+    }
+    .stepper-nav-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+    }
+    .stepper-nav-step.active .stepper-nav-circle {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(112, 0, 55, 0.25);
+    }
+    .stepper-nav-step.completed .stepper-nav-circle {
+      background: #10b981;
+      color: #fff;
+      border-color: #10b981;
+    }
+    .stepper-nav-line {
+      flex: 1;
+      max-width: 60px;
+      height: 2px;
+      background: #e2e8f0;
+    }
+    .stepper-nav-line.completed {
+      background: #10b981;
+    }
+    .delivery-page-card {
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .delivery-card-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+    }
+    .delivery-card-header h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .delivery-card-body {
+      padding: 22px;
+    }
+    .addr-select-item {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .addr-select-item:hover {
+      border-color: #cbd5e1;
+    }
+    .addr-select-item.selected {
+      border-color: var(--primary);
+      background: #fdfaf6;
+      box-shadow: 0 2px 8px rgba(122, 0, 60, 0.08);
+    }
+    .addr-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      margin-left: 8px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .addr-tag.default-tag {
+      background: #ecfdf5;
+      color: #047857;
+    }
+    .proceed-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 14px 28px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(122, 0, 60, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .proceed-btn:hover {
+      background: #60002f;
+      transform: translateY(-1px);
+    }
+    .toggle-add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border: 1px dashed var(--primary);
+      border-radius: 6px;
+      background: #fdfaf6;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+    .toggle-add-btn:hover {
+      background: #fbf3e8;
+    }
+    .user-chip-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      font-size: 0.88rem;
+      color: #475569;
     }
   </style>
 </head>
-<body style="background: #f1f3f6;">
+<body>
 
   <!-- Top Announcement Bar -->
   <div class="top-bar">
     <span>🔒 100% SECURE & ENCRYPTED CHECKOUT</span> | Authentic Indian Festive Wear
   </div>
 
-  <!-- Minimal Flipkart-style Checkout Header -->
+  <!-- Minimal Header -->
   <header style="background: #ffffff; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100;">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px;">
       <a href="/" class="brand-logo" style="text-decoration: none;">
@@ -48,110 +206,89 @@
       </a>
 
       <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #388e3c; font-weight: 700;">
-        <span>🛡️ 100% Safe and Secure Payments</span>
+        <span>🛡️ 100% Safe and Secure Checkout</span>
       </div>
     </div>
   </header>
 
+  <!-- Checkout Stepper Bar -->
+  <div class="checkout-stepper-wrap">
+    <div class="stepper-nav">
+      <a href="/cart.html" class="stepper-nav-step completed" title="Return to Cart">
+        <span class="stepper-nav-circle">✓</span>
+        <span>1. Bag & Cart</span>
+      </a>
+      <div class="stepper-nav-line completed"></div>
+      <div class="stepper-nav-step active">
+        <span class="stepper-nav-circle">2</span>
+        <span>2. Delivery Address</span>
+      </div>
+      <div class="stepper-nav-line"></div>
+      <div class="stepper-nav-step">
+        <span class="stepper-nav-circle">3</span>
+        <span>3. Payment & Review</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Container -->
-  <main class="container" style="padding-top: 24px; padding-bottom: 60px; max-width: 1200px;">
+  <main class="container" style="padding-bottom: 60px; max-width: 1200px;">
     
-    <div class="fk-checkout-layout">
-      <!-- Left Column: The 4 Flipkart Accordion Steps -->
-      <div id="fk-checkout-steps-column">
-
-        <!-- ================= STEP 1: LOGIN ================= -->
-        <div class="fk-step-card" id="fk-step-1-card">
-          <div class="fk-step-header">
-            <div class="fk-step-title-wrap">
-              <span class="fk-step-badge" id="fk-step-1-badge">1</span>
-              <h2 class="fk-step-title">LOGIN</h2>
-              <span class="fk-step-completed-text" id="fk-step-1-completed-text" style="display: none;"></span>
-            </div>
-            <button class="fk-change-btn" id="fk-step-1-change-btn" onclick="openStep(1)" style="display: none;">CHANGE</button>
-          </div>
-
-          <!-- Step 1 Body: If not logged in -->
-          <div class="fk-step-body" id="fk-step-1-body">
-            <div id="fk-step-1-unauth-view" style="display: none;">
-              <p style="font-size: 0.92rem; color: #475569; margin-bottom: 16px;">
-                Enter your login details to access your saved addresses, track your order, and complete payment.
-              </p>
-
-              <form onsubmit="handleInlineLogin(event)" style="max-width: 440px;">
-                <div class="form-group-auth" style="margin-bottom: 14px;">
-                  <label>Email Address / Username *</label>
-                  <input type="email" id="inline-login-email" placeholder="Enter your registered email" required>
-                </div>
-                <div class="form-group-auth" style="margin-bottom: 18px;">
-                  <label>Password *</label>
-                  <input type="password" id="inline-login-password" placeholder="Enter your password" required>
-                </div>
-                <div style="display: flex; gap: 12px; align-items: center;">
-                  <button type="submit" class="fk-deliver-btn" id="inline-login-submit-btn">CONTINUE</button>
-                  <a href="/login.html?redirect=/delivery.html" style="font-size: 0.88rem; color: var(--primary); font-weight: 600;">Create an account</a>
-                </div>
-              </form>
-
-              <div class="fk-login-perks">
-                <div class="fk-perk-item">
-                  <span class="fk-perk-icon">🚚</span>
-                  <span>Easily Track Orders, Upgrade Details &amp; More</span>
-                </div>
-                <div class="fk-perk-item">
-                  <span class="fk-perk-icon">💎</span>
-                  <span>Instant Access to Saved Addresses &amp; Faster Checkout</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Step 1 Body: If logged in -->
-            <div id="fk-step-1-auth-view" style="display: none;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-weight: 700; font-size: 1rem; color: #212121;" id="fk-logged-user-name">Loading...</div>
-                  <div style="font-size: 0.88rem; color: #64748b; margin-top: 2px;" id="fk-logged-user-email"></div>
-                </div>
-                <button class="fk-deliver-btn" style="padding: 10px 24px; font-size: 0.85rem;" onclick="openStep(2)">CONTINUE CHECKOUT</button>
-              </div>
-            </div>
-          </div>
+    <!-- User Login Status Chip -->
+    <div class="user-chip-bar" id="user-status-chip">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.2rem;">👤</span>
+        <div>
+          <span>Delivering order for: </span>
+          <strong id="deliv-user-name" style="color: #1e293b;">Loading account...</strong>
+          <span id="deliv-user-email" style="color: #64748b; font-size: 0.82rem; margin-left: 6px;"></span>
         </div>
+      </div>
+      <div>
+        <a href="/login.html?redirect=/delivery.html" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.82rem;">
+          Switch Account →
+        </a>
+      </div>
+    </div>
 
-        <!-- ================= STEP 2: DELIVERY ADDRESS ================= -->
-        <div class="fk-step-card" id="fk-step-2-card">
-          <div class="fk-step-header">
-            <div class="fk-step-title-wrap">
-              <span class="fk-step-badge" id="fk-step-2-badge">2</span>
-              <h2 class="fk-step-title">DELIVERY ADDRESS</h2>
-              <span class="fk-step-completed-text" id="fk-step-2-completed-text" style="display: none;"></span>
-            </div>
-            <button class="fk-change-btn" id="fk-step-2-change-btn" onclick="openStep(2)" style="display: none;">CHANGE</button>
+    <div class="fk-checkout-layout">
+      <!-- Left Column: Delivery Address Selection & Form -->
+      <div>
+        
+        <div class="delivery-page-card">
+          <div class="delivery-card-header">
+            <h2>
+              <span>📍</span> Select Delivery Address
+            </h2>
+            <span style="font-size: 0.82rem; color: #64748b;">Step 2 of 3</span>
           </div>
 
-          <div class="fk-step-body" id="fk-step-2-body">
+          <div class="delivery-card-body">
             <!-- Saved Addresses List Container -->
-            <div id="fk-saved-addresses-list" class="fk-address-list">
-              <p style="color: var(--muted); margin: 0; font-size: 0.9rem;">Checking saved addresses...</p>
+            <div id="saved-addresses-list">
+              <p style="color: var(--muted); margin: 0; font-size: 0.9rem;">Checking your saved addresses...</p>
             </div>
 
-            <!-- Add New Address Accordion Button -->
-            <div class="fk-add-addr-toggle" id="fk-add-addr-toggle-btn" onclick="toggleNewAddressForm()">
-              <span style="font-size: 1.2rem; font-weight: 800;">+</span>
-              <span>ADD A NEW ADDRESS</span>
-            </div>
+            <!-- Add New Address Toggle Button -->
+            <button type="button" class="toggle-add-btn" id="toggle-new-addr-btn" onclick="toggleNewAddressForm()">
+              <span style="font-size: 1.1rem; font-weight: 800;">+</span>
+              <span>ADD A NEW DELIVERY ADDRESS</span>
+            </button>
 
             <!-- New Address Form Box -->
-            <div id="fk-new-address-form-box" style="display: none; background: #ffffff; border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-top: 14px;">
-              <h4 style="font-size: 0.95rem; font-weight: 700; margin: 0 0 16px 0; text-transform: uppercase; color: #212121;">
-                Add New Delivery Address
-              </h4>
+            <div id="new-address-form-box" style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 22px; margin-top: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h4 style="font-size: 1rem; font-weight: 700; margin: 0; color: #1e293b; text-transform: uppercase;">
+                  Add New Delivery Address
+                </h4>
+                <button type="button" onclick="toggleNewAddressForm()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">✕</button>
+              </div>
 
               <form onsubmit="handleSaveNewAddress(event)">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
                   <div class="form-group-auth">
                     <label>Full Name *</label>
-                    <input type="text" id="deliv-name" placeholder="Receiver Name" required>
+                    <input type="text" id="deliv-name" placeholder="Receiver Full Name" required>
                   </div>
                   <div class="form-group-auth">
                     <label>10-digit Mobile Number *</label>
@@ -165,14 +302,14 @@
                     <input type="text" id="deliv-pincode" placeholder="6-digit PIN code" maxlength="6" required>
                   </div>
                   <div class="form-group-auth">
-                    <label>Locality / Area *</label>
+                    <label>Locality / Colony / Area *</label>
                     <input type="text" id="deliv-street" placeholder="Locality, Colony, or Area" required>
                   </div>
                 </div>
 
                 <div class="form-group-auth" style="margin-bottom: 14px;">
                   <label>Address (Flat, House No., Building) *</label>
-                  <input type="text" id="deliv-house" placeholder="Flat No. 402, Royal Residency" required>
+                  <input type="text" id="deliv-house" placeholder="Flat No. 402, Royal Residency, Street 4" required>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
@@ -186,83 +323,31 @@
                   </div>
                 </div>
 
-                <div style="display: flex; gap: 16px; align-items: center; margin-top: 18px;">
-                  <button type="submit" class="fk-deliver-btn" id="deliv-save-btn">SAVE AND DELIVER HERE</button>
-                  <button type="button" class="fk-change-btn" onclick="toggleNewAddressForm()">CANCEL</button>
+                <div style="margin-bottom: 18px;">
+                  <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 6px; text-transform: uppercase;">Address Type</label>
+                  <div style="display: flex; gap: 20px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
+                      <input type="radio" name="address_type" value="Home" checked style="accent-color: var(--primary);">
+                      <span>Home (All day delivery)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
+                      <input type="radio" name="address_type" value="Work" style="accent-color: var(--primary);">
+                      <span>Work (Delivery between 10 AM - 5 PM)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 14px; align-items: center;">
+                  <button type="submit" class="proceed-btn" id="deliv-save-btn">
+                    SAVE & DELIVER TO THIS ADDRESS ➔
+                  </button>
+                  <button type="button" onclick="toggleNewAddressForm()" style="background: none; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; color: #475569;">
+                    Cancel
+                  </button>
                 </div>
               </form>
             </div>
-          </div>
-        </div>
 
-        <!-- ================= STEP 3: ORDER SUMMARY ================= -->
-        <div class="fk-step-card" id="fk-step-3-card">
-          <div class="fk-step-header">
-            <div class="fk-step-title-wrap">
-              <span class="fk-step-badge" id="fk-step-3-badge">3</span>
-              <h2 class="fk-step-title">ORDER SUMMARY</h2>
-              <span class="fk-step-completed-text" id="fk-step-3-completed-text" style="display: none;"></span>
-            </div>
-            <button class="fk-change-btn" id="fk-step-3-change-btn" onclick="openStep(3)" style="display: none;">CHANGE</button>
-          </div>
-
-          <div class="fk-step-body" id="fk-step-3-body">
-            <!-- Order Items List -->
-            <div id="fk-order-items-list">
-              <p style="color: var(--muted); margin: 0;">Loading items...</p>
-            </div>
-
-            <!-- Email Notification & Continue Button -->
-            <div style="padding: 16px 20px; background: #fafafa; border-top: 1px solid #f0f0f0; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 16px;">
-              <div style="font-size: 0.88rem; color: #475569;">
-                Order confirmation email will be sent to: <strong id="fk-order-confirm-email" style="color: #212121;">your email</strong>
-              </div>
-              <button class="fk-deliver-btn" onclick="openStep(4)" style="padding: 14px 44px;">
-                CONTINUE
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ================= STEP 4: PAYMENT OPTIONS ================= -->
-        <div class="fk-step-card" id="fk-step-4-card">
-          <div class="fk-step-header">
-            <div class="fk-step-title-wrap">
-              <span class="fk-step-badge" id="fk-step-4-badge">4</span>
-              <h2 class="fk-step-title">PAYMENT OPTIONS</h2>
-            </div>
-          </div>
-
-          <div class="fk-step-body" id="fk-step-4-body">
-            <div style="display: flex; flex-direction: column; gap: 14px;">
-              
-              <!-- Cash on Delivery -->
-              <label style="display: flex; gap: 14px; padding: 18px; border: 2px solid var(--primary); border-radius: 4px; cursor: pointer; background: #fff;">
-                <input type="radio" name="fk_payment_method" value="Cash on Delivery" checked style="accent-color: var(--primary); width: 18px; height: 18px; margin-top: 2px;">
-                <div style="flex: 1;">
-                  <div style="font-weight: 700; font-size: 1rem; color: #212121;">
-                    💵 Cash on Delivery (Pay on Delivery)
-                  </div>
-                  <div style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">
-                    Pay with Cash or UPI directly to the courier executive upon doorstep delivery.
-                  </div>
-                  
-                  <div style="margin-top: 14px;">
-                    <label style="font-size: 0.8rem; font-weight: 700; color: #475569; text-transform: uppercase;">Delivery Notes (Optional)</label>
-                    <input type="text" id="fk-order-notes" placeholder="e.g. Please deliver after 5 PM or call on arrival" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.88rem; margin-top: 4px;">
-                  </div>
-
-                  <div style="margin-top: 16px;">
-                    <button class="fk-deliver-btn" id="fk-place-order-btn" onclick="handlePlaceOrder()" style="padding: 14px 44px;">
-                      CONFIRM ORDER
-                    </button>
-                  </div>
-                </div>
-              </label>
-
-              <!-- Online Payment (Razorpay) -->
-              <div id="fk-razorpay-container"></div>
-            </div>
           </div>
         </div>
 
@@ -277,7 +362,7 @@
           </div>
           <div class="fk-trust-badge">
             <span style="font-size: 1.4rem;">🛡️</span>
-            <div>Safe and Secure Payments. Easy checkout. 100% Authentic Handcrafted Wear.</div>
+            <div>Safe and Secure Payments. 100% Authentic Handcrafted Wear. Free Pan-India Delivery.</div>
           </div>
         </div>
       </aside>
@@ -285,31 +370,8 @@
 
   </main>
 
-  <!-- Order Success Modal -->
-  <div id="order-success-modal" class="modal-backdrop">
-    <div class="modal-window" style="text-align: center; padding: 36px 28px; max-width: 480px;">
-      <div style="width: 64px; height: 64px; background: #dcfce7; color: #15803d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 16px;">
-        ✓
-      </div>
-      <h2 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--dark); margin-bottom: 8px;">Order Placed Successfully!</h2>
-      <p style="color: var(--muted); font-size: 0.92rem; margin-bottom: 20px;">
-        Thank you for shopping with RJ Fashion Collection. We are preparing your royal attire for shipment.
-      </p>
-
-      <div style="background: var(--bg-light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--muted); font-weight: 700;">Order Reference ID</div>
-        <div id="modal-order-number" style="font-weight: 800; font-size: 1.25rem; color: var(--primary); margin: 4px 0;">RJFC-XXXX</div>
-        <div style="font-size: 0.88rem; color: var(--dark);">Total Amount: <strong id="modal-order-total">₹0</strong></div>
-      </div>
-
-      <div style="display: flex; gap: 12px;">
-        <a href="/orders.html" class="btn btn-primary btn-block" style="padding: 12px;">VIEW MY ORDERS</a>
-        <a href="/shop.html" class="btn btn-outline-primary btn-block" style="padding: 12px;">CONTINUE SHOPPING</a>
-      </div>
-    </div>
-  </div>
-
-  <script src="/js/app.js"></script>
-  <script src="/js/delivery.js"></script>
+  <script src="/firebase-config.js?v=20260927-5"></script>
+  <script src="/js/app.js?v=20260927-5"></script>
+  <script src="/js/delivery.js?v=20260927-5"></script>
 </body>
 </html>
