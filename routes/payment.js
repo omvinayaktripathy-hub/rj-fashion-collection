@@ -4,12 +4,15 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const { createRazorpayOrder, verifyPaymentSignature, RAZORPAY_ENABLED } = require('../services/payment');
 
-// GET /api/payment/config — send Razorpay key to frontend
+// GET /api/payment/config — send payment configuration to frontend
 router.get('/config', (req, res) => {
   res.json({
     success: true,
     enabled: RAZORPAY_ENABLED,
-    keyId: RAZORPAY_ENABLED ? process.env.RAZORPAY_KEY_ID : null
+    keyId: RAZORPAY_ENABLED ? process.env.RAZORPAY_KEY_ID : null,
+    upiId: process.env.MERCHANT_UPI_ID || 'q070080131@ybl',
+    merchantName: 'RJ FASHION COLLECTION',
+    phone: '7894093586'
   });
 });
 

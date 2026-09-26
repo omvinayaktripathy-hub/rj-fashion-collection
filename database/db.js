@@ -173,7 +173,7 @@ function initSchema() {
 function seedInitialData() {
   const usersCount = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
   if (usersCount === 0) {
-    const adminHash = bcrypt.hashSync('Admin@123', 10);
+    const adminHash = bcrypt.hashSync('OMvinayak@01092003', 10);
     const customerHash = bcrypt.hashSync('Customer@123', 10);
 
     const insertUser = db.prepare(`
@@ -181,7 +181,7 @@ function seedInitialData() {
       VALUES (?, ?, ?, ?, ?)
     `);
 
-    insertUser.run('RJ Fashion Admin', 'admin@rjfashion.com', '+91 98765 43210', adminHash, 'admin');
+    insertUser.run('RJ Fashion Admin (Om Vinayak)', 'omvinayakwork@gmail.com', '7894093586', adminHash, 'admin');
     insertUser.run('Priya Sharma', 'priya@example.com', '+91 98765 12345', customerHash, 'customer');
     console.log('Seeded default Admin and Demo Customer accounts.');
   }

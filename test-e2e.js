@@ -201,8 +201,8 @@ async function runTests() {
     // 9. Admin Authentication & Dashboard
     console.log('\n--- Testing Admin Authentication & Management ---');
     const adminLoginRes = await request('POST', '/api/auth/admin-login', {
-      email: 'admin@rjfashion.com',
-      password: 'Admin@123'
+      email: 'omvinayakwork@gmail.com',
+      password: 'OMvinayak@01092003'
     });
     assert(adminLoginRes.statusCode === 200 && adminLoginRes.json.user.role === 'admin', 'Super Admin authentication succeeded');
     const adminCookie = adminLoginRes.cookie;

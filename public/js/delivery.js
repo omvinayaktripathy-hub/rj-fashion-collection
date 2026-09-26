@@ -438,48 +438,60 @@ async function loadPaymentConfig() {
                 <div style="font-size: 0.82rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px;">
                   Scan &amp; Pay using Any UPI App
                 </div>
-                <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; font-size: 0.75rem; font-weight: 700;">
+                <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; font-size: 0.75rem; font-weight: 700;">
                   <span style="color: #6d28d9;">PhonePe</span> • <span style="color: #0284c7;">Google Pay</span> • <span style="color: #00838f;">Paytm</span> • <span style="color: #ea580c;">BHIM</span>
                 </div>
 
-                <!-- Authentic Styled UPI QR Code (SVG) -->
-                <div style="background: #ffffff; padding: 14px; border: 2px solid #cbd5e1; border-radius: 8px; display: inline-block; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative;">
-                  <svg width="180" height="180" viewBox="0 0 180 180" style="display: block;">
-                    <!-- QR Pattern background -->
-                    <rect width="180" height="180" fill="#ffffff" />
-                    <!-- Top Left Marker -->
-                    <rect x="10" y="10" width="45" height="45" fill="#1e293b" rx="4" />
-                    <rect x="18" y="18" width="29" height="29" fill="#ffffff" rx="2" />
-                    <rect x="24" y="24" width="17" height="17" fill="#700037" rx="2" />
-                    <!-- Top Right Marker -->
-                    <rect x="125" y="10" width="45" height="45" fill="#1e293b" rx="4" />
-                    <rect x="133" y="18" width="29" height="29" fill="#ffffff" rx="2" />
-                    <rect x="139" y="24" width="17" height="17" fill="#700037" rx="2" />
-                    <!-- Bottom Left Marker -->
-                    <rect x="10" y="125" width="45" height="45" fill="#1e293b" rx="4" />
-                    <rect x="18" y="133" width="29" height="29" fill="#ffffff" rx="2" />
-                    <rect x="24" y="139" width="17" height="17" fill="#700037" rx="2" />
-                    <!-- Simulated Matrix Bits -->
-                    <path d="M65,15 h10 v10 h-10 z M85,15 h10 v10 h-10 z M105,15 h10 v10 h-10 z M65,35 h20 v10 h-20 z M95,35 h20 v10 h-20 z M65,55 h10 v20 h-10 z M85,55 h30 v10 h-30 z M15,65 h10 v10 h-10 z M35,65 h20 v10 h-20 z M125,65 h20 v10 h-20 z M155,65 h15 v10 h-15 z M15,85 h30 v10 h-30 z M135,85 h35 v10 h-35 z M15,105 h20 v10 h-20 z M45,105 h10 v10 h-10 z M125,105 h10 v20 h-10 z M145,105 h25 v10 h-25 z M65,125 h15 v10 h-15 z M90,125 h25 v10 h-25 z M65,145 h30 v10 h-30 z M105,145 h15 v20 h-15 z M65,160 h20 v10 h-20 z M95,160 h10 v10 h-10 z M130,140 h15 v10 h-15 z M155,140 h15 v10 h-15 z M130,160 h30 v10 h-30 z" fill="#1e293b" />
-                    <!-- UPI Center Badge -->
-                    <rect x="68" y="68" width="44" height="44" fill="#ffffff" rx="6" stroke="#e2e8f0" stroke-width="2" />
-                    <text x="90" y="94" font-family="Arial, sans-serif" font-weight="900" font-size="13" fill="#700037" text-anchor="middle">UPI</text>
-                  </svg>
+                <!-- Merchant UPI ID Display with Copy -->
+                <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 12px; margin-bottom: 12px; display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem;">
+                  <span style="color: #64748b; font-weight: 600;">Merchant UPI ID:</span>
+                  <strong style="color: #700037; font-weight: 800; font-family: monospace; font-size: 0.92rem;">q070080131@ybl</strong>
+                  <button type="button" onclick="navigator.clipboard.writeText('q070080131@ybl'); showToast('UPI ID copied: q070080131@ybl', 'success');" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.72rem; cursor: pointer; font-weight: 700;">📋 Copy</button>
                 </div>
 
-                <div style="margin-top: 10px; font-size: 0.85rem; font-weight: 700; color: #1e293b;">
+                <!-- Authentic Live Dynamic UPI QR Code for q070080131@ybl -->
+                <div style="background: #ffffff; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; display: inline-block; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative;">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi%3A%2F%2Fpay%3Fpa%3Dq070080131%40ybl%26pn%3DRJ%2BFASHION%2BCOLLECTION%26cu%3DINR" 
+                       alt="UPI QR Code - RJ Fashion Collection" 
+                       style="width: 180px; height: 180px; display: block; border-radius: 4px;"
+                       onerror="this.style.display='none'; document.getElementById('fallback-qr-svg').style.display='block';">
+                  <div id="fallback-qr-svg" style="display: none;">
+                    <svg width="180" height="180" viewBox="0 0 180 180" style="display: block;">
+                      <rect width="180" height="180" fill="#ffffff" />
+                      <rect x="10" y="10" width="45" height="45" fill="#1e293b" rx="4" />
+                      <rect x="18" y="18" width="29" height="29" fill="#ffffff" rx="2" />
+                      <rect x="24" y="24" width="17" height="17" fill="#700037" rx="2" />
+                      <rect x="125" y="10" width="45" height="45" fill="#1e293b" rx="4" />
+                      <rect x="133" y="18" width="29" height="29" fill="#ffffff" rx="2" />
+                      <rect x="139" y="24" width="17" height="17" fill="#700037" rx="2" />
+                      <rect x="10" y="125" width="45" height="45" fill="#1e293b" rx="4" />
+                      <rect x="18" y="133" width="29" height="29" fill="#ffffff" rx="2" />
+                      <rect x="24" y="139" width="17" height="17" fill="#700037" rx="2" />
+                      <rect x="68" y="68" width="44" height="44" fill="#ffffff" rx="6" stroke="#e2e8f0" stroke-width="2" />
+                      <text x="90" y="94" font-family="Arial, sans-serif" font-weight="900" font-size="13" fill="#700037" text-anchor="middle">UPI</text>
+                    </svg>
+                  </div>
+                </div>
+
+                <div style="margin-top: 10px; font-size: 0.88rem; font-weight: 700; color: #1e293b;">
                   RJ Fashion Collection
                 </div>
                 <div style="font-size: 0.78rem; color: #15803d; font-weight: 600;">
-                  ● Verified Merchant • Fast Verification
+                  ● Verified Merchant: q070080131@ybl
                 </div>
                 <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">
                   ⏳ QR Code valid for <strong id="fk-qr-timer">09:48</strong> mins
                 </div>
 
-                <div style="margin-top: 14px;">
+                <!-- Direct Pay Intent Link for Mobile Users -->
+                <div style="margin-top: 12px;">
+                  <a href="upi://pay?pa=q070080131@ybl&pn=RJ+Fashion+Collection&cu=INR" 
+                     class="fk-deliver-btn" 
+                     style="display: block; text-decoration: none; text-align: center; width: 100%; padding: 10px; font-size: 0.82rem; background: #6d28d9; margin-bottom: 8px;">
+                    📱 OPEN IN PHONEPE / GPAY / PAYTM
+                  </a>
                   <button type="button" class="fk-deliver-btn" onclick="simulateUpiSuccess('UPI QR Code')" style="width: 100%; padding: 12px; font-size: 0.88rem; background: #16a34a;">
-                    ⚡ SIMULATE PAYMENT COMPLETE
+                    ⚡ I HAVE PAID (CONFIRM ORDER)
                   </button>
                 </div>
               </div>
@@ -487,7 +499,10 @@ async function loadPaymentConfig() {
 
             <!-- Tab 2: PhonePe & UPI Apps -->
             <div id="fk-upi-tab-apps" style="display: none;" onclick="event.stopPropagation()">
-              <div style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 10px;">Select UPI App:</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div style="font-size: 0.85rem; font-weight: 700; color: #475569;">Select UPI App:</div>
+                <div style="font-size: 0.78rem; color: #700037; font-weight: 700;">Pay to: q070080131@ybl</div>
+              </div>
               <div class="fk-app-grid">
                 <div class="fk-app-btn selected" id="app-btn-phonepe" onclick="selectUpiApp('PhonePe')">
                   <span style="font-size: 1.4rem;">🟣</span>
@@ -512,10 +527,10 @@ async function loadPaymentConfig() {
                 <div style="display: flex; gap: 10px; margin-top: 6px;">
                   <input type="text" id="fk-upi-vpa-input" value="user@ybl" placeholder="e.g. mobile@ybl, name@okhdfcbank" style="flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem;">
                   <button type="button" class="fk-deliver-btn" onclick="simulateUpiSuccess('PhonePe / UPI VPA')" style="padding: 10px 20px; font-size: 0.88rem; background: #6d28d9; white-space: nowrap;">
-                    VERIFY &amp; PAY
+                    PAY VIA UPI
                   </button>
                 </div>
-                <div style="font-size: 0.78rem; color: #64748b; margin-top: 6px;">A payment request will be sent to your PhonePe / UPI app.</div>
+                <div style="font-size: 0.78rem; color: #64748b; margin-top: 6px;">Payable to verified merchant <strong>q070080131@ybl</strong> (RJ Fashion Collection).</div>
               </div>
             </div>
 
