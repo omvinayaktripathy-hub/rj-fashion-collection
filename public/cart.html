@@ -5,18 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopping Cart - RJ Fashion Collection</title>
   <script>
-    (function(){
-      try {
-        var t = localStorage.getItem('rjfc_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-      } catch(e){}
-    })();
+    // Instant Theme Controller - zero delay, zero external dependencies
+    window.applyTheme = function(theme) {
+      var isDark = theme === 'dark';
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+        if (document.body) document.body.classList.add('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'dark'); } catch(e){}
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.documentElement.classList.remove('dark-theme');
+        if (document.body) document.body.classList.remove('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'light'); } catch(e){}
+      }
+      window.updateAllThemeToggles(theme);
+    };
+
+    window.toggleTheme = function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      window.applyTheme(isDark ? 'light' : 'dark');
+    };
+
+    window.updateAllThemeToggles = function(theme) {
+      var isDark = theme === 'dark';
+      document.querySelectorAll('.theme-mode-text').forEach(function(el) {
+        el.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+      });
+      document.querySelectorAll('.theme-toggle-icon, .floating-theme-icon').forEach(function(el) {
+        el.textContent = isDark ? '☀️' : '🌙';
+      });
+      document.querySelectorAll('.theme-switch-container').forEach(function(el) {
+        el.setAttribute('aria-checked', isDark ? 'true' : 'false');
+        el.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+      });
+    };
+
+    // Run immediately on parse to prevent flash
+    try {
+      var saved = localStorage.getItem('rjfc_theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var activeTheme = saved ? saved : (prefersDark ? 'dark' : 'light');
+      if (activeTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+      }
+    } catch(e){}
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      window.updateAllThemeToggles(isDark ? 'dark' : 'light');
+    });
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20260927-2">
-  <link rel="stylesheet" href="/css/responsive.css?v=20260927-2">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-3">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-3">
   <style>
     /* Flipkart-style Cart Elements */
     .fk-cart-delivery-bar {
@@ -72,9 +117,15 @@
 </head>
 <body>
 
-  <!-- Top Announcement Bar -->
+  <!-- Top Announcement Bar with Theme Switcher -->
   <div class="top-bar">
-    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Handcrafted Indian Fashion
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div><span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Indian Ethnic Wear</div>
+      <button class="theme-toggle-top-btn" onclick="toggleTheme()" aria-label="Toggle Dark or Light Mode" title="Toggle Dark/Light Mode" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); color: #ffffff; padding: 3px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;">
+        <span class="theme-toggle-icon">🌙</span>
+        <span class="theme-mode-text">Dark Mode</span>
+      </button>
+    </div>
   </div>
 
   <!-- Site Header -->
