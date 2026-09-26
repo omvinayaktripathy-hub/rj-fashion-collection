@@ -13,39 +13,43 @@ const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'rj-fashion-colle
 const serviceAccountPath = path.join(__dirname, '..', 'serviceAccountKey.json');
 
 function initFirebase() {
-  if (admin) return { admin, db, messaging, isReady: true };
+  if (db) return { db, messaging, isReady: true };
 
   try {
-    admin = require('firebase-admin');
+    const { getApps, initializeApp, cert } = require('firebase-admin/app');
+    const { getFirestore } = require('firebase-admin/firestore');
+    const { getMessaging } = require('firebase-admin/messaging');
 
-    if (fs.existsSync(serviceAccountPath)) {
+    let app;
+    if (getApps().length > 0) {
+      app = getApps()[0];
+    } else if (fs.existsSync(serviceAccountPath)) {
       const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+      app = initializeApp({
+        credential: cert(serviceAccount),
         projectId: FIREBASE_PROJECT_ID
       });
       console.log(`[Firebase] Initialized with Service Account for project: ${FIREBASE_PROJECT_ID}`);
     } else {
-      // Initialize with Application Default Credentials or Project ID
-      admin.initializeApp({
+      app = initializeApp({
         projectId: FIREBASE_PROJECT_ID
       });
       console.log(`[Firebase] Initialized in default mode for project: ${FIREBASE_PROJECT_ID}`);
     }
 
     try {
-      db = admin.firestore();
+      db = getFirestore(app);
     } catch (e) {
       console.warn('[Firebase] Firestore not initialized:', e.message);
     }
 
     try {
-      messaging = admin.messaging();
+      messaging = getMessaging(app);
     } catch (e) {
       console.warn('[Firebase] Cloud Messaging not initialized:', e.message);
     }
 
-    return { admin, db, messaging, isReady: true };
+    return { admin, db, messaging, isReady: !!db };
   } catch (err) {
     console.warn('[Firebase] Note: Firebase initialized in simulated mode. Place serviceAccountKey.json to activate full live cloud sync.', err.message);
     return { admin: null, db: null, messaging: null, isReady: false };
