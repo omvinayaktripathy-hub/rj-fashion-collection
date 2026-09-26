@@ -131,16 +131,60 @@ async function loadProducts() {
   q.append('page', currentFilters.page);
   q.append('limit', currentFilters.limit);
 
+  let data;
   try {
     const res = await fetch(`${API_BASE}/products?${q.toString()}`);
-    const data = await res.json();
+    if (res.ok) {
+      data = await res.json();
+    } else {
+      throw new Error(`API returned ${res.status}`);
+    }
+  } catch (err) {
+    // Graceful fallback for Netlify static hosting
+    try {
+      const fbRes = await fetch('/data/products.json');
+      const staticData = await fbRes.json();
+      let filtered = staticData.products || [];
 
-    if (!data.success) {
+      if (currentFilters.search) {
+        const s = currentFilters.search.toLowerCase();
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(s) || (p.description && p.description.toLowerCase().includes(s)));
+      }
+      if (currentFilters.department) {
+        filtered = filtered.filter(p => p.department === currentFilters.department);
+      }
+      if (currentFilters.subcategory) {
+        filtered = filtered.filter(p => p.subcategory === currentFilters.subcategory);
+      }
+      if (currentFilters.category) {
+        filtered = filtered.filter(p => p.category_slug === currentFilters.category);
+      }
+      if (currentFilters.inStock) {
+        filtered = filtered.filter(p => p.stock > 0);
+      }
+      if (currentFilters.minPrice) {
+        filtered = filtered.filter(p => p.price >= Number(currentFilters.minPrice));
+      }
+      if (currentFilters.maxPrice) {
+        filtered = filtered.filter(p => p.price <= Number(currentFilters.maxPrice));
+      }
+      data = {
+        success: true,
+        products: filtered,
+        pagination: { total: filtered.length, page: 1, limit: filtered.length, totalPages: 1 }
+      };
+    } catch (e2) {
       container.innerHTML = `<div class="empty-state"><p>Could not load products. Please refresh the page.</p></div>`;
       return;
     }
+  }
 
-    const { products, pagination } = data;
+  if (!data || !data.success) {
+    container.innerHTML = `<div class="empty-state"><p>Could not load products. Please refresh the page.</p></div>`;
+    return;
+  }
+
+  const { products, pagination } = data;
 
     // Update Heading
     if (titleDisplay) {
@@ -315,26 +359,38 @@ async function loadSidebarCategories() {
   const list = document.getElementById('sidebar-category-list');
   if (!list) return;
 
+  let data;
   try {
     const res = await fetch(`${API_BASE}/categories`);
-    const data = await res.json();
-    if (data.success) {
-      list.innerHTML = `
-        <li style="margin-bottom: 8px;">
-          <a href="#" onclick="applyCategoryFilter(''); return false;" style="font-size: 0.88rem; font-weight: ${!currentFilters.category ? '700; color:var(--primary)' : '500; color:var(--dark)'}">
-            All Categories
-          </a>
-        </li>
-      ` + data.categories.map(cat => `
-        <li style="margin-bottom: 8px;">
-          <a href="#" onclick="applyCategoryFilter('${cat.slug}'); return false;"
-             style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: ${currentFilters.category === cat.slug ? '700; color:var(--primary)' : '500; color:var(--dark)'}">
-            <span>${cat.name}</span>
-            <span style="color:var(--muted); font-size:0.75rem;">(${cat.product_count})</span>
-          </a>
-        </li>
-      `).join('');
+    if (res.ok) {
+      data = await res.json();
+    } else {
+      throw new Error();
     }
+  } catch (err) {
+    try {
+      const fb = await fetch('/data/categories.json');
+      data = await fb.json();
+    } catch(e) {}
+  }
+
+  if (data && data.success && data.categories) {
+    list.innerHTML = `
+      <li style="margin-bottom: 8px;">
+        <a href="#" onclick="applyCategoryFilter(''); return false;" style="font-size: 0.88rem; font-weight: ${!currentFilters.category ? '700; color:var(--primary)' : '500; color:var(--dark)'}">
+          All Categories
+        </a>
+      </li>
+    ` + data.categories.map(cat => `
+      <li style="margin-bottom: 8px;">
+        <a href="#" onclick="applyCategoryFilter('${cat.slug}'); return false;"
+           style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: ${currentFilters.category === cat.slug ? '700; color:var(--primary)' : '500; color:var(--dark)'}">
+          <span>${cat.name}</span>
+          <span style="color:var(--muted); font-size:0.75rem;">(${cat.product_count || 5})</span>
+        </a>
+      </li>
+    `).join('');
+  }
   } catch (err) {
     console.error('Failed to load categories in sidebar:', err);
   }

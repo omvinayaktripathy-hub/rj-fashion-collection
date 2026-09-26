@@ -681,20 +681,38 @@
     // Load Homepage Dynamic Products
     async function loadHomepageSections() {
       try {
-        // Load featured
-        const featRes = await fetch(`${API_BASE}/products?featured=true&limit=4`);
-        const featData = await featRes.json();
-        const featGrid = document.getElementById('homepage-featured-grid');
-        if (featGrid && featData.success && featData.products.length > 0) {
-          featGrid.innerHTML = featData.products.map(createProductCard).join('');
+        let featProducts = [];
+        let newProducts = [];
+
+        try {
+          const featRes = await fetch(`${API_BASE}/products?featured=true&limit=4`);
+          if (featRes.ok) {
+            const featData = await featRes.json();
+            if (featData.success) featProducts = featData.products;
+          }
+          const newRes = await fetch(`${API_BASE}/products?newArrival=true&limit=4`);
+          if (newRes.ok) {
+            const newData = await newRes.json();
+            if (newData.success) newProducts = newData.products;
+          }
+        } catch (e) {
+          // Netlify static fallback
+          try {
+            const fb = await fetch('/data/products.json');
+            const d = await fb.json();
+            featProducts = (d.products || []).slice(0, 4);
+            newProducts = (d.products || []).slice(4, 8);
+          } catch(e2) {}
         }
 
-        // Load new arrivals
-        const newRes = await fetch(`${API_BASE}/products?newArrival=true&limit=4`);
-        const newData = await newRes.json();
+        const featGrid = document.getElementById('homepage-featured-grid');
+        if (featGrid && featProducts.length > 0) {
+          featGrid.innerHTML = featProducts.map(createProductCard).join('');
+        }
+
         const newGrid = document.getElementById('homepage-new-grid');
-        if (newGrid && newData.success && newData.products.length > 0) {
-          newGrid.innerHTML = newData.products.map(createProductCard).join('');
+        if (newGrid && newProducts.length > 0) {
+          newGrid.innerHTML = newProducts.map(createProductCard).join('');
         }
       } catch (err) {
         console.error('Failed to load homepage sections:', err);

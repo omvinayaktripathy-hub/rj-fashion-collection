@@ -1,0 +1,126 @@
+{
+  "success": true,
+  "count": 12,
+  "categories": [
+    {
+      "id": 1,
+      "name": "Sarees",
+      "slug": "sarees",
+      "description": "Handcrafted Silk, Kanjivaram, Banarasi, and Georgette sarees with royal zari work",
+      "image": "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 1,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 2,
+      "name": "Jewelry",
+      "slug": "jewelry",
+      "description": "Bridal necklaces, Kundan sets, temple jewelry, jhumkas, and bangles",
+      "image": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 2,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 3,
+      "name": "Ethnic Wear",
+      "slug": "ethnic-wear",
+      "description": "Anarkalis, Shararas, Ghararas, and festive celebratory attire",
+      "image": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 3,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 4,
+      "name": "Kurtis",
+      "slug": "kurtis",
+      "description": "Embroidered, printed, and festive designer kurtis and tunic sets",
+      "image": "https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 4,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 5,
+      "name": "Lehengas",
+      "slug": "lehengas",
+      "description": "Bridal and party-wear lehenga cholis with elaborate embroidery",
+      "image": "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 5,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 6,
+      "name": "Dresses",
+      "slug": "dresses",
+      "description": "Fusion Indo-Western dresses, gowns, and contemporary evening wear",
+      "image": "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 6,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 7,
+      "name": "Accessories",
+      "slug": "accessories",
+      "description": "Potli bags, clutch purses, dupattas, and ornate ethnic footwear",
+      "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 7,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 8,
+      "name": "New Arrivals",
+      "slug": "new-arrivals",
+      "description": "Fresh festive season arrivals and trending runway designs",
+      "image": "https://images.unsplash.com/photo-1610030469668-935a8df2d2b5?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 8,
+      "created_at": "2026-09-26 09:51:13"
+    },
+    {
+      "id": 9,
+      "name": "Men Ethnic Wear",
+      "slug": "men-ethnic",
+      "description": "Royal Sherwanis, Kurta Sets, Nehru Jackets, and Dhoti Kurtas for Men",
+      "image": "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 9,
+      "created_at": "2026-09-26 13:49:15"
+    },
+    {
+      "id": 10,
+      "name": "Men Western Wear",
+      "slug": "men-western",
+      "description": "Shirts, Trousers, Suits, Blazers, and Jeans for Men",
+      "image": "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 10,
+      "created_at": "2026-09-26 13:49:15"
+    },
+    {
+      "id": 11,
+      "name": "Kids Ethnic Wear",
+      "slug": "kids-ethnic",
+      "description": "Traditional Kurta Sets, Sherwanis, Lehengas, and Frocks for Boys and Girls",
+      "image": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 11,
+      "created_at": "2026-09-26 13:49:15"
+    },
+    {
+      "id": 12,
+      "name": "Kids Western Wear",
+      "slug": "kids-western",
+      "description": "Party Dresses, Frocks, T-Shirts, and Jeans for Children",
+      "image": "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=700&q=80",
+      "active": 1,
+      "display_order": 12,
+      "created_at": "2026-09-26 13:49:15"
+    }
+  ]
+}

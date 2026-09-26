@@ -20,28 +20,40 @@ async function loadProductDetails() {
   const container = document.getElementById('product-detail-container');
   if (!container) return;
 
+  let data;
   try {
     const res = await fetch(`${API_BASE}/products/${id}`);
-    const data = await res.json();
-
-    if (!data.success || !data.product) {
-      container.innerHTML = `
-        <div class="empty-state" style="margin: 40px auto; max-width: 600px;">
-          <h3>Product Not Found</h3>
-          <p>The product you are looking for is currently unavailable or may have been removed.</p>
-          <a href="/shop.html" class="btn btn-primary">Return to Shop</a>
-        </div>
-      `;
-      return;
+    if (res.ok) {
+      data = await res.json();
+    } else {
+      throw new Error(`API returned ${res.status}`);
     }
-
-    currentProduct = data.product;
-    renderProduct(data.product);
-    loadRelatedProducts(data.product.id);
   } catch (err) {
-    console.error('Error fetching product details:', err);
-    container.innerHTML = `<div class="empty-state"><p>Failed to load product details.</p></div>`;
+    // Netlify static fallback
+    try {
+      const fbRes = await fetch('/data/products.json');
+      const staticData = await fbRes.json();
+      const found = (staticData.products || []).find(p => String(p.id) === String(id));
+      if (found) {
+        data = { success: true, product: found };
+      }
+    } catch (e2) {}
   }
+
+  if (!data || !data.success || !data.product) {
+    container.innerHTML = `
+      <div class="empty-state" style="margin: 40px auto; max-width: 600px;">
+        <h3>Product Not Found</h3>
+        <p>The product you are looking for is currently unavailable or may have been removed.</p>
+        <a href="/shop.html" class="btn btn-primary">Return to Shop</a>
+      </div>
+    `;
+    return;
+  }
+
+  currentProduct = data.product;
+  renderProduct(data.product);
+  loadRelatedProducts(data.product.id);
 }
 
 function renderProduct(p) {

@@ -77,19 +77,27 @@ function renderAuthNav(user) {
 
 // Update Badges
 async function updateCartCount() {
+  let count = 0;
   try {
     const res = await fetch(`${API_BASE}/cart`);
-    const data = await res.json();
-    if (data.success) {
-      const count = data.itemCount || 0;
-      document.querySelectorAll('.cart-count-badge').forEach(badge => {
-        badge.textContent = count;
-        badge.style.display = count > 0 ? 'inline-flex' : 'none';
-      });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        count = data.itemCount || 0;
+      }
+    } else {
+      throw new Error();
     }
   } catch (err) {
-    console.error('Failed to update cart count:', err);
+    try {
+      const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+      count = local.reduce((s, i) => s + (i.quantity || 1), 0);
+    } catch(e) {}
   }
+  document.querySelectorAll('.cart-count-badge').forEach(badge => {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-flex' : 'none';
+  });
 }
 
 async function updateWishlistCount() {
@@ -121,16 +129,47 @@ async function addToCart(productId, quantity = 1, size = 'Free Size') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId, quantity, size })
     });
-    const data = await res.json();
-    if (data.success) {
-      showToast(data.message || 'Added to cart!', 'success');
-      updateCartCount();
-      return true;
-    } else {
-      showToast(data.message || 'Could not add to cart', 'error');
-      return false;
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message || 'Added to cart!', 'success');
+        updateCartCount();
+        return true;
+      }
     }
+    throw new Error('API cart failed');
   } catch (err) {
+    // Netlify static fallback using localStorage
+    try {
+      const fbRes = await fetch('/data/products.json');
+      const fbData = await fbRes.json();
+      const product = (fbData.products || []).find(p => String(p.id) === String(productId));
+      if (product) {
+        const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+        const existing = local.find(i => String(i.product_id) === String(productId) && i.size === size);
+        if (existing) {
+          existing.quantity = (existing.quantity || 1) + quantity;
+        } else {
+          local.push({
+            id: Date.now(),
+            product_id: product.id,
+            name: product.name,
+            price: product.price,
+            original_price: product.original_price,
+            discount: product.discount,
+            image: product.image,
+            brand: product.brand,
+            size: size,
+            quantity: quantity,
+            stock: product.stock
+          });
+        }
+        localStorage.setItem('rjfc_local_cart', JSON.stringify(local));
+        showToast('Added to cart!', 'success');
+        updateCartCount();
+        return true;
+      }
+    } catch(e2) {}
     showToast('Failed to add item to cart', 'error');
     return false;
   }

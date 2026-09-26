@@ -30,17 +30,37 @@ async function loadCart() {
     // Non-fatal
   }
 
+  let data;
   try {
     const res = await fetch(`${API_BASE}/cart`);
-    const data = await res.json();
-
-    if (!data.success || !data.items || data.items.length === 0) {
-      if (cartLayout) cartLayout.style.display = 'none';
-      if (emptyState) emptyState.style.display = 'block';
-      if (headingCount) headingCount.textContent = '0';
-      updateCartCount();
-      return;
+    if (res.ok) {
+      data = await res.json();
+    } else {
+      throw new Error();
     }
+  } catch (err) {
+    try {
+      const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+      const count = local.reduce((s, i) => s + (i.quantity || 1), 0);
+      const subtotal = local.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
+      data = {
+        success: true,
+        items: local,
+        itemCount: count,
+        subtotal: subtotal,
+        total: subtotal,
+        discount: 0
+      };
+    } catch(e) {}
+  }
+
+  if (!data || !data.success || !data.items || data.items.length === 0) {
+    if (cartLayout) cartLayout.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'block';
+    if (headingCount) headingCount.textContent = '0';
+    updateCartCount();
+    return;
+  }
 
     if (cartLayout) cartLayout.style.display = 'grid';
     if (emptyState) emptyState.style.display = 'none';
