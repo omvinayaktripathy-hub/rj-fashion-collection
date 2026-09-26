@@ -146,21 +146,34 @@ async function handleAdminLogin(e) {
     // Server not available (e.g. Netlify static hosting)
   }
 
-  // 2. Direct verification for Owner / Super Admin
-  if (email.toLowerCase() === 'omvinayakwork@gmail.com' && password === 'OMvinayak@01092003') {
-    adminUser = {
-      id: 1,
-      name: 'RJ Fashion Admin (Om Vinayak)',
-      email: 'omvinayakwork@gmail.com',
-      role: 'admin',
-      uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1'
-    };
-    sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-    hideAdminLoginScreen();
-    document.getElementById('admin-topbar-username').textContent = adminUser.name;
-    showToast('Admin access granted! Welcome Om Vinayak 👑', 'success');
-    loadDashboardStats();
-    return;
+  // 2. Authenticate securely via Firebase Authentication (Zero client secrets)
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    try {
+      const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
+      const user = cred.user;
+      if (user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
+        adminUser = {
+          id: 1,
+          name: 'RJ Fashion Admin (Om Vinayak)',
+          email: user.email,
+          role: 'admin',
+          uid: user.uid
+        };
+        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+        hideAdminLoginScreen();
+        document.getElementById('admin-topbar-username').textContent = adminUser.name;
+        showToast('Admin access granted! Welcome Om Vinayak 👑', 'success');
+        loadDashboardStats();
+        loadAdminProducts();
+        return;
+      }
+    } catch (fbErr) {
+      document.getElementById('admin-login-error').textContent = fbErr.message || 'Invalid administrator credentials.';
+      document.getElementById('admin-login-error').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign In to Admin Portal';
+      return;
+    }
   }
 
   document.getElementById('admin-login-error').textContent = 'Invalid administrator credentials. Please check your email and password.';
