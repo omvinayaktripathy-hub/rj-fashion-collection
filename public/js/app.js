@@ -109,24 +109,25 @@ async function updateCartCount() {
 }
 
 async function updateWishlistCount() {
-  if (!currentUser) {
-    document.querySelectorAll('.wishlist-count-badge').forEach(badge => badge.style.display = 'none');
-    return;
-  }
+  let count = 0;
   try {
     const res = await fetch(`${API_BASE}/wishlist`);
-    if (res.status === 401) return;
-    const data = await res.json();
-    if (data.success) {
-      const count = data.count || 0;
-      document.querySelectorAll('.wishlist-count-badge').forEach(badge => {
-        badge.textContent = count;
-        badge.style.display = count > 0 ? 'inline-flex' : 'none';
-      });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) count = data.count || 0;
+    } else {
+      throw new Error();
     }
-  } catch (err) {
-    console.error('Failed to update wishlist count:', err);
+  } catch (_) {
+    try {
+      const local = JSON.parse(localStorage.getItem('rjfc_wishlist') || '[]');
+      count = local.length;
+    } catch (_) {}
   }
+  document.querySelectorAll('.wishlist-count-badge').forEach(badge => {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-flex' : 'none';
+  });
 }
 
 // Global Add to Cart
@@ -185,47 +186,44 @@ async function addToCart(productId, quantity = 1, size = 'Free Size') {
 
 // Global Toggle Wishlist
 async function toggleWishlist(productId, btnElement) {
-  if (!currentUser) {
-    showToast('Please login to use your wishlist', 'info');
-    setTimeout(() => {
-      window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
-    }, 1200);
-    return;
-  }
-
+  let isSaved = btnElement && btnElement.classList.contains('active');
+  let localIds = [];
   try {
-    const isSaved = btnElement && btnElement.classList.contains('active');
-    if (isSaved) {
-      const res = await fetch(`${API_BASE}/wishlist/${productId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        if (btnElement) {
-          btnElement.classList.remove('active');
-          btnElement.innerHTML = '♡';
-        }
-        showToast('Removed from wishlist', 'info');
-        updateWishlistCount();
-      }
-    } else {
-      const res = await fetch(`${API_BASE}/wishlist`, {
+    localIds = JSON.parse(localStorage.getItem('rjfc_wishlist') || '[]');
+  } catch (_) {}
+
+  if (isSaved || localIds.some(id => String(id) === String(productId))) {
+    // Remove
+    try {
+      await fetch(`${API_BASE}/wishlist/${productId}`, { method: 'DELETE' });
+    } catch (_) {}
+    localIds = localIds.filter(id => String(id) !== String(productId));
+    localStorage.setItem('rjfc_wishlist', JSON.stringify(localIds));
+    if (btnElement) {
+      btnElement.classList.remove('active');
+      btnElement.innerHTML = '♡';
+    }
+    showToast('Removed from wishlist', 'info');
+    updateWishlistCount();
+  } else {
+    // Add
+    try {
+      await fetch(`${API_BASE}/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId })
       });
-      const data = await res.json();
-      if (data.success) {
-        if (btnElement) {
-          btnElement.classList.add('active');
-          btnElement.innerHTML = '♥';
-        }
-        showToast('Added to wishlist!', 'success');
-        updateWishlistCount();
-      } else {
-        showToast(data.message || 'Could not update wishlist', 'error');
-      }
+    } catch (_) {}
+    if (!localIds.some(id => String(id) === String(productId))) {
+      localIds.push(productId);
+      localStorage.setItem('rjfc_wishlist', JSON.stringify(localIds));
     }
-  } catch (err) {
-    showToast('Error updating wishlist', 'error');
+    if (btnElement) {
+      btnElement.classList.add('active');
+      btnElement.innerHTML = '♥';
+    }
+    showToast('Added to wishlist! ❤️', 'success');
+    updateWishlistCount();
   }
 }
 
