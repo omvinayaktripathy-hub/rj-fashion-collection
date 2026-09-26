@@ -108,11 +108,12 @@ async function loadProducts() {
 
   if (!container) return;
 
-  container.innerHTML = `
-    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
-      <p style="font-size: 1.1rem; color: var(--muted);">Loading royal fashion collection...</p>
-    </div>
-  `;
+  try {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
+        <p style="font-size: 1.1rem; color: var(--muted);">Loading royal fashion collection...</p>
+      </div>
+    `;
 
   // Build query string
   const q = new URLSearchParams();
@@ -359,7 +360,8 @@ async function loadSidebarCategories() {
   const list = document.getElementById('sidebar-category-list');
   if (!list) return;
 
-  let data;
+  try {
+    let data;
   try {
     const res = await fetch(`${API_BASE}/categories`);
     if (res.ok) {

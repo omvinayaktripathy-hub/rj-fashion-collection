@@ -10,7 +10,8 @@ async function loadCart() {
 
   if (!container) return;
 
-  // Load user default address if available
+  try {
+    // Load user default address if available
   try {
     const authRes = await fetch(`${API_BASE}/me`);
     const authData = await authRes.json();

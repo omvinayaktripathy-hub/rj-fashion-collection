@@ -33,6 +33,15 @@ function showToast(message, type = 'info') {
 let currentUser = null;
 
 async function checkAuth() {
+  const local = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
+  if (local) {
+    try {
+      currentUser = JSON.parse(local);
+      renderAuthNav(currentUser);
+      return;
+    } catch (_) {}
+  }
+
   try {
     const res = await fetch(`${API_BASE}/me`);
     const data = await res.json();
@@ -44,7 +53,6 @@ async function checkAuth() {
       renderAuthNav(null);
     }
   } catch (err) {
-    console.error('Auth check failed:', err);
     renderAuthNav(null);
   }
 }

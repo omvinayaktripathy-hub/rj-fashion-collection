@@ -2,15 +2,22 @@
 
 async function initAccount() {
   try {
-    const res = await fetch(`${API_BASE}/me`);
-    const data = await res.json();
+    let user = null;
+    const stored = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
+    if (stored) {
+      try { user = JSON.parse(stored); } catch (_) {}
+    }
 
-    if (!data.success || !data.user) {
+    if (!user) {
+      const res = await fetch(`${API_BASE}/me`);
+      const data = await res.json();
+      if (data.success && data.user) user = data.user;
+    }
+
+    if (!user) {
       window.location.href = '/login.html?redirect=/account.html';
       return;
     }
-
-    const user = data.user;
     document.getElementById('acc-user-name').textContent = user.name;
     document.getElementById('acc-user-email').textContent = user.email;
 
@@ -154,15 +161,20 @@ async function deleteAccountAddress(id) {
 }
 
 async function handleLogout() {
+  localStorage.removeItem('rjfc_user');
+  sessionStorage.removeItem('rjfc_user');
+  try {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      await firebase.auth().signOut();
+    }
+  } catch (_) {}
   try {
     await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
-    showToast('Logged out successfully', 'info');
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 600);
-  } catch (err) {
+  } catch (err) {}
+  showToast('Logged out successfully', 'info');
+  setTimeout(() => {
     window.location.href = '/';
-  }
+  }, 600);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
