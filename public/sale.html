@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mega Sale & Offers — Up to 70% OFF | RJ Fashion Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <style>
+    /* ── Sale Page Specific Styles ─────────────────────────────── */
+    .sale-hero {
+      background: linear-gradient(135deg, #3e001f 0%, #7a003c 50%, #a0044e 100%);
+      border-radius: var(--radius-md);
+      padding: 56px 40px;
+      text-align: center;
+      margin-bottom: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sale-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(197,155,39,0.18) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 50%, rgba(197,155,39,0.12) 0%, transparent 60%);
+    }
+    .sale-hero-badge {
+      display: inline-block;
+      background: var(--gold);
+      color: #1a0a00;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      padding: 5px 16px;
+      border-radius: 50px;
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .sale-hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 12px;
+      position: relative;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .sale-hero-title span {
+      color: var(--gold);
+    }
+    .sale-hero-subtitle {
+      font-size: 1.05rem;
+      color: #f8e8d4;
+      max-width: 520px;
+      margin: 0 auto 28px;
+      line-height: 1.6;
+      position: relative;
+    }
+    .sale-hero-cta {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.65);
+      position: relative;
+    }
+    .sale-hero-cta strong {
+      color: var(--gold);
+    }
+
+    /* Countdown Strip */
+    .sale-urgency-strip {
+      background: #fff8e8;
+      border: 1px solid #f0d080;
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #7a003c;
+      flex-wrap: wrap;
+    }
+    .urgency-timer {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .timer-block {
+      background: #7a003c;
+      color: #fff;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      min-width: 36px;
+      text-align: center;
+    }
+    .timer-sep { color: #7a003c; font-weight: 700; }
+
+    /* Filter Tabs */
+    .sale-filter-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      align-items: center;
+    }
+    .sale-filter-tabs .tab-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 4px;
+    }
+    .sale-tab {
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 2px solid var(--border);
+      background: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sale-tab:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .sale-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Deal Count Bar */
+    .deal-count-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .deal-count-text {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .deal-count-text strong {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* Spinner */
+    .sale-spinner {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .spinner-ring {
+      display: inline-block;
+      width: 48px;
+      height: 48px;
+      border: 4px solid #f3e0e8;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .sale-spinner p {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* Empty State */
+    .sale-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .sale-empty .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    .sale-empty h3 { font-size: 1.3rem; color: var(--dark); margin-bottom: 8px; }
+
+    /* Trust Badges */
+    .trust-badges {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 40px 0;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .trust-badge-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .trust-badge-item .badge-icon { font-size: 1.4rem; }
+    .trust-badge-item strong { font-size: 0.85rem; display: block; }
+    .trust-badge-item span { font-size: 0.78rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>🔥 MEGA SALE IS LIVE!</span> Up to 70% OFF on Sarees, Jewelry & Ethnic Wear | FREE EXPRESS SHIPPING on orders above ₹999
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-main">
+      <a href="/" class="brand-logo">
+        <span class="logo-title">RJ Fashion Collection</span>
+        <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
+      </a>
+
+      <div class="header-search">
+        <form class="header-search-form" action="/shop.html" method="GET">
+          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <button type="submit" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="header-actions">
+        <div class="auth-nav-slot">
+          <a href="/login.html" class="action-btn">
+            <span>👤 Login / Account</span>
+          </a>
+        </div>
+        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
+          <span>♡ Wishlist</span>
+          <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
+        </a>
+        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+          <span>🛒 Cart</span>
+          <span class="action-badge cart-count-badge" style="display: none;">0</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/categories.html">Categories</a></li>
+          <li><a href="/shop.html?category=sarees">Sarees</a></li>
+          <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
+          <li><a href="/sale.html" class="highlight active">Offers 🔥</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container" style="padding-top: 28px; padding-bottom: 60px;">
+
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 20px;">
+      <a href="/">Home</a> / <strong style="color: var(--primary);">Sale & Offers</strong>
+    </div>
+
+    <!-- Hero Banner -->
+    <div class="sale-hero">
+      <div class="sale-hero-badge">⚡ Limited Time Deals</div>
+      <h1 class="sale-hero-title">🔥 MEGA <span>SALE</span></h1>
+      <p class="sale-hero-subtitle">Exclusive deals up to 70% OFF on Sarees, Jewelry & Ethnic Wear — handpicked for you!</p>
+      <div class="sale-hero-cta">Use code <strong>RJSALE70</strong> for extra ₹200 off on orders above ₹2999</div>
+    </div>
+
+    <!-- Urgency / Countdown Strip -->
+    <div class="sale-urgency-strip">
+      <span>⏰ Sale ends in:</span>
+      <div class="urgency-timer">
+        <span class="timer-block" id="timer-h">--</span>
+        <span class="timer-sep">h</span>
+        <span class="timer-block" id="timer-m">--</span>
+        <span class="timer-sep">m</span>
+        <span class="timer-block" id="timer-s">--</span>
+        <span class="timer-sep">s</span>
+      </div>
+      <span>🎁 Free gift on orders ₹3000+</span>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="sale-filter-tabs">
+      <span class="tab-label">Filter:</span>
+      <button class="sale-tab active" data-min-discount="0">All Offers</button>
+      <button class="sale-tab" data-min-discount="40">40–50% OFF</button>
+      <button class="sale-tab" data-min-discount="50">50–60% OFF</button>
+      <button class="sale-tab" data-min-discount="60">60%+ OFF 🔥</button>
+    </div>
+
+    <!-- Product Count Row -->
+    <div class="deal-count-bar">
+      <p class="deal-count-text" id="sale-count-display">Loading deals…</p>
+      <a href="/shop.html" style="font-size: 0.82rem; color: var(--primary); font-weight: 600;">View All Products →</a>
+    </div>
+
+    <!-- Product Grid -->
+    <div id="sale-product-grid" class="product-grid">
+      <!-- Populated via JS -->
+    </div>
+
+    <!-- Loading Spinner (shown while fetching) -->
+    <div class="sale-spinner" id="sale-spinner">
+      <div class="spinner-ring"></div>
+      <p>Finding the best deals for you…</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="sale-empty" id="sale-empty" style="display: none;">
+      <div class="empty-icon">🏷️</div>
+      <h3>No deals found in this range</h3>
+      <p>Try a different discount filter or <a href="/shop.html" style="color: var(--primary);">browse all products</a>.</p>
+    </div>
+
+    <!-- Trust Badges -->
+    <div class="trust-badges">
+      <div class="trust-badge-item">
+        <div class="badge-icon">✅</div>
+        <div>
+          <strong>100% Authentic</strong>
+          <span>Genuine handcrafted products</span>
+        </div>
+      </div>
+      <div class="trust-badge-item">
+        <div class="badge-icon">🚚</div>
+        <div>
+          <strong>Free Express Shipping</strong>
+          <span>On orders above ₹999</span>
+        </div>
+      </div>
+      <div class="trust-badge-item">
+        <div class="badge-icon">🔄</div>
+        <div>
+          <strong>Easy Returns</strong>
+          <span>7-day hassle-free returns</span>
+        </div>
+      </div>
+      <div class="trust-badge-item">
+        <div class="badge-icon">🔒</div>
+        <div>
+          <strong>Secure Payments</strong>
+          <span>UPI, Cards, COD & more</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>RJ FASHION COLLECTION</h3>
+          <p>India's premier online boutique for royal bridal sarees, intricate Kundan jewelry, and contemporary festive ethnic ensembles designed for celebrations.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+            <li><a href="/sale.html">🔥 HOT DEALS</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/account.html">My Account</a></li>
+            <li><a href="/orders.html">My Orders</a></li>
+            <li><a href="/wishlist.html">Wishlist</a></li>
+            <li><a href="/faq.html">FAQs</a></li>
+            <li><a href="/contact.html">Customer Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="/about.html">About RJ Fashion</a></li>
+            <li><a href="/contact.html">Contact Us</a></li>
+            <li><a href="/size-guide.html">Size Guide</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/about.html#terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="/" class="bottom-nav-item">
+      <span class="bottom-nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/categories.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">📁</span>
+      <span>Categories</span>
+    </a>
+    <a href="/wishlist.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        ♡
+        <span class="bottom-badge wishlist-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Wishlist</span>
+    </a>
+    <a href="/cart.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        🛒
+        <span class="bottom-badge cart-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Cart</span>
+    </a>
+    <a href="/account.html" class="bottom-nav-item" id="mobile-account-link">
+      <span class="bottom-nav-icon">👤</span>
+      <span>Account</span>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
+  <script src="/js/products.js"></script>
+  <script>
+    // ── Sale Page Logic ───────────────────────────────────────────
+
+    let currentMinDiscount = 0; // tracks active filter tab
+
+    /**
+     * Fetch sale products from the API.
+     * @param {number} minDiscount - minimum discount percentage (0 = all offers)
+     */
+    async function loadSaleProducts(minDiscount) {
+      const grid    = document.getElementById('sale-product-grid');
+      const spinner = document.getElementById('sale-spinner');
+      const empty   = document.getElementById('sale-empty');
+      const counter = document.getElementById('sale-count-display');
+
+      // Show spinner, clear previous grid
+      grid.innerHTML = '';
+      grid.style.display = 'none';
+      spinner.style.display = 'block';
+      empty.style.display   = 'none';
+      counter.innerHTML     = 'Loading deals…';
+
+      try {
+        // Build query params
+        let url = `${API_BASE}/products?offer=true&sort=discount&limit=50`;
+        if (minDiscount > 0) {
+          url += `&minDiscount=${minDiscount}`;
+        }
+
+        const res  = await fetch(url);
+        const data = await res.json();
+
+        spinner.style.display = 'none';
+
+        if (!data.success || !data.products || data.products.length === 0) {
+          empty.style.display = 'block';
+          counter.innerHTML   = 'Showing <strong>0</strong> deals';
+          return;
+        }
+
+        // Client-side discount range filtering for tab "40-50%" and "50-60%"
+        let products = data.products;
+        if (minDiscount === 40) {
+          // Show 40-59% only
+          products = products.filter(p => (p.discount || 0) >= 40 && (p.discount || 0) < 50);
+        } else if (minDiscount === 50) {
+          // Show 50-59% only
+          products = products.filter(p => (p.discount || 0) >= 50 && (p.discount || 0) < 60);
+        }
+        // minDiscount === 0 → all, minDiscount === 60 → API already filtered ≥60
+
+        if (products.length === 0) {
+          empty.style.display = 'block';
+          counter.innerHTML   = 'Showing <strong>0</strong> deals in this range';
+          return;
+        }
+
+        grid.style.display = '';
+        grid.innerHTML     = products.map(createProductCard).join('');
+        counter.innerHTML  = `Showing <strong>${products.length}</strong> deal${products.length !== 1 ? 's' : ''}`;
+
+      } catch (err) {
+        spinner.style.display = 'none';
+        console.error('Failed to load sale products:', err);
+        counter.innerHTML = 'Could not load deals. Please refresh.';
+      }
+    }
+
+    // ── Filter Tab Click Handlers ─────────────────────────────────
+    document.querySelectorAll('.sale-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.sale-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        currentMinDiscount = parseInt(tab.dataset.minDiscount, 10);
+        loadSaleProducts(currentMinDiscount);
+      });
+    });
+
+    // ── Countdown Timer ───────────────────────────────────────────
+    (function initCountdown() {
+      // Set a fixed end time: midnight tonight (IST)
+      var now    = new Date();
+      var end    = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0); // tomorrow midnight
+
+      function tick() {
+        var diff = Math.max(0, Math.floor((end - new Date()) / 1000));
+        var h    = Math.floor(diff / 3600);
+        var m    = Math.floor((diff % 3600) / 60);
+        var s    = diff % 60;
+        document.getElementById('timer-h').textContent = String(h).padStart(2, '0');
+        document.getElementById('timer-m').textContent = String(m).padStart(2, '0');
+        document.getElementById('timer-s').textContent = String(s).padStart(2, '0');
+      }
+
+      tick();
+      setInterval(tick, 1000);
+    })();
+
+    // ── Initial Load ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSaleProducts(0);
+    });
+  </script>
+</body>
+</html>

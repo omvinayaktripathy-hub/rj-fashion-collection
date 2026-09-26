@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Fashion Categories - RJ Fashion Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Handcrafted Indian Fashion
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-main">
+      <a href="/" class="brand-logo">
+        <span class="logo-title">RJ Fashion Collection</span>
+        <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
+      </a>
+
+      <div class="header-search">
+        <form class="header-search-form" action="/shop.html" method="GET">
+          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <button type="submit" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="header-actions">
+        <div class="auth-nav-slot">
+          <a href="/login.html" class="action-btn">
+            <span>👤 Login / Account</span>
+          </a>
+        </div>
+
+        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
+          <span>♡ Wishlist</span>
+          <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
+        </a>
+
+        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+          <span>🛒 Cart</span>
+          <span class="action-badge cart-count-badge" style="display: none;">0</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+
+          <!-- WOMEN MEGA MENU -->
+          <li class="has-mega-menu">
+            <a href="/shop.html?department=women" class="nav-dept-link">
+              WOMEN <span class="nav-arrow">▾</span>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <!-- Column 1: New & Featured + Activewear + Nightwear -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">✨ New & Featured</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&newArrival=true">New Arrivals</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=party-wear">Party Wear</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=co-ord-sets">Co-ord Sets</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">⚡ Activewear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=sports-tshirts">Sports T-Shirts</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=sports-tops">Sports Tops</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=leggings">Leggings</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=track-pants">Track Pants</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=workout-shorts">Workout Shorts</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=sports-bras">Sports Bras</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">🌙 Nightwear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=night-suits">Night Suits</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=pajama-sets">Pajama Sets</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=night-dresses">Night Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=robes">Robes</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Column 2: Indian / Ethnic -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">🪷 Indian / Ethnic</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=sarees">Sarees</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=kurtis">Kurtis</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=kurta-sets">Kurta Sets</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=salwar-suits">Salwar Suits</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=anarkali-suits">Anarkali Suits</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=lehenga-choli">Lehenga Choli</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=sharara-sets">Sharara Sets</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=gharara-sets">Gharara Sets</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=palazzo-sets">Palazzo Sets</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=dupattas">Dupattas</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Column 3: Western Wear + Outerwear -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👗 Western Wear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=tops">Tops</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=t-shirts">T-Shirts</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=shirts">Shirts</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=crop-tops">Crop Tops</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=jeans">Jeans</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=pants">Trousers / Pants</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=skirts">Skirts</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=shorts">Shorts</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=jumpsuits">Jumpsuits</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=co-ord-sets">Co-ord Sets</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">🧥 Outerwear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=jackets">Jackets</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=blazers">Blazers</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=shrugs">Shrugs</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=cardigans">Cardigans</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=coats">Coats</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Column 4: Dresses + Party & Occasion -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">💃 Dresses</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=mini-dresses">Mini Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=midi-dresses">Midi Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=maxi-dresses">Maxi Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=a-line-dresses">A-Line Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=bodycon-dresses">Bodycon Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=party-dresses">Party Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=casual-dresses">Casual Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=gowns">Gowns</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">🎉 Party & Occasion</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=party-gowns">Party Gowns</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=sequin-dresses">Sequin Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=designer-sarees">Designer Sarees</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=wedding-lehengas">Wedding Lehengas</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=festive-dresses">Festive Dresses</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=fancy-blouses">Fancy Blouses</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Column 5: Accessories + Promo -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👜 Accessories</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=women&subcategory=handbags">Handbags</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=clutches">Clutches</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=wallets">Wallets</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=scarves">Scarves</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=belts">Belts</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=jewellery">Jewellery</a></li>
+                      <li><a href="/shop.html?department=women&subcategory=sunglasses">Sunglasses</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">Festive Edit</span>
+                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80" alt="Women Promo" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Grand Festive Silk</h4>
+                    <p class="mega-promo-sub">Flat 40% - 60% Off on Heritage Sarees & Gowns</p>
+                    <a href="/shop.html?department=women" class="mega-promo-btn">Shop Women</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- MEN MEGA MENU -->
+          <li class="has-mega-menu">
+            <a href="/shop.html?department=men" class="nav-dept-link">
+              MEN <span class="nav-arrow">▾</span>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <!-- Col 1: New & Featured + Footwear -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">✨ New & Featured</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=men&newArrival=true">New Arrivals</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=trending">Trending Now</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=wedding">Wedding Collection</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=royal-heritage">Royal Heritage</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👞 Footwear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=men&subcategory=mojaris">Royal Mojaris & Juttis</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=formal-shoes">Formal Oxford Shoes</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=loafers">Leather Loafers</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=sandals">Ethnic Kolhapuris & Sandals</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 2: Indian & Ethnic Wear -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👑 Indian & Ethnic</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=men&subcategory=kurta-pyjama">Kurta Pyjama Sets</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=sherwanis">Royal Sherwanis</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=nehru-jackets">Nehru & Modi Jackets</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=indo-western">Indo-Western Sets</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=dhotis">Dhoti & Kurta Sets</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=bandhgala">Bandhgala Suits</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 3: Western & Formal -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👔 Western & Formal</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=men&subcategory=formal-shirts">Pure Cotton Formal Shirts</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=casual-shirts">Printed & Linen Shirts</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=t-shirts">Polo & Solid T-Shirts</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=blazers">Blazers & Suits</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=trousers">Trousers & Chinos</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=jeans">Denim & Jeans</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 4: Accessories & Loungewear -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">💼 Men's Accessories</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=men&subcategory=wallets-belts">Leather Wallets & Belts</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=cufflinks">Royal Brooches & Cufflinks</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=watches">Watches & Sunglasses</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=ties">Silk Ties & Pocket Squares</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">🩳 Loungewear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=men&subcategory=track-pants">Track Pants & Joggers</a></li>
+                      <li><a href="/shop.html?department=men&subcategory=nightwear">Cotton Night Suits</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 5: Promo Card -->
+                <div class="mega-menu-col">
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">Men's Royal Edit</span>
+                    <img src="https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=200&q=80" alt="Men Promo" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Groom & Festive Wear</h4>
+                    <p class="mega-promo-sub">Handcrafted Silk Sherwanis & Nehru Jackets</p>
+                    <a href="/shop.html?department=men" class="mega-promo-btn">Shop Men</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- KIDS / CHILDREN MEGA MENU -->
+          <li class="has-mega-menu">
+            <a href="/shop.html?department=kids" class="nav-dept-link">
+              KIDS <span class="nav-arrow">▾</span>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <!-- Col 1: Boys Clothing -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👦 Boys Clothing</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=kids&subcategory=boys-ethnic">Kurta Pyjama & Dhoti Sets</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=boys-jackets">Nehru Waistcoats</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=boys-shirts">Shirts & T-Shirts</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=boys-jeans">Jeans & Trousers</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=boys-party">Party Suits & Blazers</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=boys-shorts">Casual Shorts & Joggers</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 2: Girls Clothing -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👧 Girls Clothing</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=kids&subcategory=girls-lehengas">Festive Lehenga Choli</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=girls-dresses">Frocks & Party Gowns</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=girls-ethnic">Anarkali & Sharara Sets</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=girls-tops">Tops, Tees & Skirts</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=girls-jumpsuits">Jumpsuits & Dungarees</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 3: Baby & Infants (0-2 Yrs) -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">🍼 Baby & Infants (0-2 Yrs)</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=kids&subcategory=baby-rompers">Cotton Rompers & Onesies</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=infant-ethnic">Infant Ethnic Kurta Sets</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=baby-sleepsuits">Sleepsuits & Nightwear</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=baby-blankets">Soft Swaddles & Blankets</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 4: Footwear & Accessories -->
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">👟 Kids Footwear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=kids&subcategory=kids-juttis">Ethnic Juttis & Mojaris</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=kids-sandals">Party Sandals & Bellies</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=kids-sneakers">Casual Sneakers</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">🎀 Accessories</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?department=kids&subcategory=kids-hair">Hair Accessories & Bows</a></li>
+                      <li><a href="/shop.html?department=kids&subcategory=kids-caps">Caps, Hats & Sunglasses</a></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Col 5: Promo Card -->
+                <div class="mega-menu-col">
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">Little Royals</span>
+                    <img src="https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=200&q=80" alt="Kids Promo" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Kids Festive Carnival</h4>
+                    <p class="mega-promo-sub">Soft, itch-free cotton festive wear from ₹499</p>
+                    <a href="/shop.html?department=kids" class="mega-promo-btn">Shop Kids</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li><a href="/sale.html" class="highlight">Offers 🔥</a></li>
+          <li><a href="/categories.html" class="active">Categories</a></li>
+          <li><a href="/shop.html">All Products</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Categories Grid -->
+  <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <div class="section-header">
+      <h1 class="section-title">Explore Indian Fashion Collections</h1>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;" id="all-categories-container">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </main>
+
+  <!-- Site Footer (NO returns, NO newsletter, NO admin login) -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>RJ FASHION COLLECTION</h3>
+          <p>India's premier online boutique for royal bridal sarees, intricate Kundan jewelry, and contemporary festive ethnic ensembles designed for celebrations.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+            <li><a href="/shop.html?offer=true">Offers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/account.html">My Account</a></li>
+            <li><a href="/orders.html">My Orders</a></li>
+            <li><a href="/wishlist.html">Wishlist</a></li>
+            <li><a href="/contact.html">Customer Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="/about.html">About RJ Fashion</a></li>
+            <li><a href="/contact.html">Contact Us</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/about.html#terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="/" class="bottom-nav-item">
+      <span class="bottom-nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/categories.html" class="bottom-nav-item active">
+      <span class="bottom-nav-icon">📁</span>
+      <span>Categories</span>
+    </a>
+    <a href="/wishlist.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        ♡
+        <span class="bottom-badge wishlist-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Wishlist</span>
+    </a>
+    <a href="/cart.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        🛒
+        <span class="bottom-badge cart-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Cart</span>
+    </a>
+    <a href="/account.html" class="bottom-nav-item" id="mobile-account-link">
+      <span class="bottom-nav-icon">👤</span>
+      <span>Account</span>
+    </a>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    async function loadAllCategories() {
+      const container = document.getElementById('all-categories-container');
+      if (!container) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/categories`);
+        const data = await res.json();
+        if (data.success && data.categories) {
+          container.innerHTML = data.categories.map(c => `
+            <a href="/shop.html?category=${c.slug}" class="cart-items-card" style="display: flex; flex-direction: column; overflow: hidden; padding: 0; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;">
+              <div style="height: 220px; overflow: hidden; position: relative;">
+                <img src="${c.image}" alt="${c.name}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;">
+                <div style="position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%); display: flex; align-items: flex-end; padding: 16px;">
+                  <div>
+                    <h3 style="color: #fff; font-family: var(--font-serif); font-size: 1.4rem; margin: 0;">${c.name}</h3>
+                    <span style="color: var(--gold); font-size: 0.82rem; font-weight: 600;">${c.product_count} Exclusive Designs</span>
+                  </div>
+                </div>
+              </div>
+              <div style="padding: 16px; background: #fff; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <p style="font-size: 0.85rem; color: #4b5563; margin-bottom: 12px; line-height: 1.5;">${c.description || 'Discover festive selections in this category.'}</p>
+                <span style="color: var(--primary); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 4px;">
+                  Explore Collection →
+                </span>
+              </div>
+            </a>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadAllCategories);
+  </script>
+</body>
+</html>

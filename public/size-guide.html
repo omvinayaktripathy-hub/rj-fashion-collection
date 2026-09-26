@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Size Guide — Sarees, Kurtis, Lehengas & Jewelry | RJ Fashion Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <style>
+    /* ── Size Guide Page Styles ─────────────────────────────────── */
+    .sg-hero {
+      background: linear-gradient(135deg, #3e001f 0%, #7a003c 60%, #a0044e 100%);
+      border-radius: var(--radius-md);
+      padding: 48px 40px;
+      text-align: center;
+      color: #fff;
+      margin-bottom: 36px;
+    }
+    .sg-hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      margin: 0 0 10px;
+    }
+    .sg-hero p { color: #f8e8d4; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+
+    /* Section Headers */
+    .sg-section {
+      margin-bottom: 48px;
+    }
+    .sg-section-title {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 3px solid #f3e0e8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sg-section-subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    /* Tables */
+    .sg-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+    .sg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: #fff;
+    }
+    .sg-table thead th {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .sg-table thead th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+    .sg-table thead th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
+    .sg-table tbody tr:nth-child(even) { background: #fdf5f8; }
+    .sg-table tbody tr:hover { background: #fce8f0; }
+    .sg-table tbody td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--dark);
+      vertical-align: middle;
+    }
+    .sg-table tbody td:first-child { font-weight: 700; color: var(--primary); }
+    .sg-table tfoot td {
+      background: #fff8e8;
+      font-size: 0.8rem;
+      color: #7a6020;
+      padding: 10px 16px;
+      border-top: 2px solid #f0d080;
+    }
+
+    /* Table badge for gold cells */
+    .gold-badge {
+      display: inline-block;
+      background: var(--gold);
+      color: #1a0a00;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 50px;
+      margin-left: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Measure Instructions */
+    .measure-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .measure-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .measure-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .measure-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #fdf5f8, #f3e0e8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .measure-card h4 {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--primary);
+      margin: 0;
+    }
+    .measure-card p {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.65;
+      margin: 0;
+    }
+    .measure-card ol {
+      padding-left: 18px;
+      margin: 0;
+      font-size: 0.84rem;
+      color: #555;
+      line-height: 1.7;
+    }
+
+    /* Tips Section */
+    .sg-tips {
+      background: linear-gradient(135deg, #fff8e8 0%, #fffdf5 100%);
+      border: 1px solid #f0d080;
+      border-left: 4px solid var(--gold);
+      border-radius: var(--radius-sm);
+      padding: 24px 28px;
+      margin-bottom: 32px;
+    }
+    .sg-tips h3 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      color: #7a6020;
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sg-tips ul {
+      padding-left: 20px;
+      margin: 0;
+    }
+    .sg-tips li {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 2px;
+    }
+    .sg-tips li strong { color: var(--primary); }
+
+    /* Draping Guide */
+    .drape-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .drape-step {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      position: relative;
+    }
+    .drape-step-num {
+      width: 28px;
+      height: 28px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .drape-step h5 { font-size: 0.88rem; font-weight: 700; color: var(--dark); margin: 0 0 6px; }
+    .drape-step p  { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin: 0; }
+
+    /* Jewelry sizes two-column grid */
+    .jewelry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 640px) { .jewelry-grid { grid-template-columns: 1fr; } }
+
+    /* CTA */
+    .sg-cta {
+      background: linear-gradient(135deg, #7a003c, #3e001f);
+      border-radius: var(--radius-md);
+      padding: 36px 40px;
+      text-align: center;
+      color: #fff;
+      margin-top: 32px;
+    }
+    .sg-cta h3 { font-family: var(--font-serif); font-size: 1.5rem; margin: 0 0 8px; }
+    .sg-cta p  { color: #f8e8d4; font-size: 0.92rem; margin: 0 0 20px; }
+    .sg-cta .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .sg-cta .btn-gold { background: var(--gold); color: #1a0a00; font-weight: 700; }
+    .sg-cta .btn-outline-white { border: 2px solid rgba(255,255,255,0.6); color: #fff; background: transparent; padding: 11px 24px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
+    .sg-cta .btn-outline-white:hover { background: rgba(255,255,255,0.1); }
+
+    /* Navigation anchor links */
+    .sg-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+      padding: 16px 20px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .sg-nav a {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 50px;
+      border: 1px solid #f3e0e8;
+      background: #fdf5f8;
+      transition: all 0.2s;
+    }
+    .sg-nav a:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .sg-nav .nav-label { font-size: 0.82rem; font-weight: 700; color: var(--muted); align-self: center; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Handcrafted Indian Fashion
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-main">
+      <a href="/" class="brand-logo">
+        <span class="logo-title">RJ Fashion Collection</span>
+        <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
+      </a>
+
+      <div class="header-search">
+        <form class="header-search-form" action="/shop.html" method="GET">
+          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <button type="submit" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="header-actions">
+        <div class="auth-nav-slot">
+          <a href="/login.html" class="action-btn">
+            <span>👤 Login / Account</span>
+          </a>
+        </div>
+        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
+          <span>♡ Wishlist</span>
+          <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
+        </a>
+        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+          <span>🛒 Cart</span>
+          <span class="action-badge cart-count-badge" style="display: none;">0</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/categories.html">Categories</a></li>
+          <li><a href="/shop.html?category=sarees">Sarees</a></li>
+          <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
+          <li><a href="/sale.html" class="highlight">Offers 🔥</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container" style="padding-top: 28px; padding-bottom: 60px;">
+
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 20px;">
+      <a href="/">Home</a> / <strong style="color: var(--primary);">Size Guide</strong>
+    </div>
+
+    <!-- Hero -->
+    <div class="sg-hero">
+      <h1>📏 Size Guide</h1>
+      <p>Find your perfect fit with our comprehensive measurement charts for Sarees, Kurtis, Lehengas, and Jewelry.</p>
+    </div>
+
+    <!-- Quick Nav -->
+    <div class="sg-nav">
+      <span class="nav-label">Jump to:</span>
+      <a href="#how-to-measure">📐 How to Measure</a>
+      <a href="#sarees">🥻 Sarees & Blouse</a>
+      <a href="#kurtis">👗 Kurtis</a>
+      <a href="#lehengas">✨ Lehengas</a>
+      <a href="#jewelry">💍 Jewelry</a>
+      <a href="#tips">💡 Shopping Tips</a>
+    </div>
+
+    <!-- ── HOW TO MEASURE ─────────────────────────────────────── -->
+    <div class="sg-section" id="how-to-measure">
+      <h2 class="sg-section-title">📐 How to Take Your Measurements</h2>
+      <p class="sg-section-subtitle">
+        Use a soft measuring tape (not a metal ruler) for the most accurate results. Measure directly on your body or over minimal clothing. Have someone assist you for back measurements. All measurements are in centimeters (cm) unless stated.
+      </p>
+
+      <div class="measure-grid">
+        <div class="measure-card">
+          <div class="measure-card-header">
+            <div class="measure-icon">👚</div>
+            <h4>Bust / Chest</h4>
+          </div>
+          <ol>
+            <li>Stand straight, arms relaxed at sides.</li>
+            <li>Wrap the tape around the fullest part of your chest.</li>
+            <li>Keep the tape parallel to the floor.</li>
+            <li>Breathe normally — don't hold your breath or pull in.</li>
+            <li>Note the measurement in cm.</li>
+          </ol>
+        </div>
+
+        <div class="measure-card">
+          <div class="measure-card-header">
+            <div class="measure-icon">🎀</div>
+            <h4>Waist</h4>
+          </div>
+          <ol>
+            <li>Find your natural waist — the narrowest part of your torso, typically 1 inch above your navel.</li>
+            <li>Wrap the tape snugly (not tight) around this point.</li>
+            <li>Keep your posture natural and relaxed.</li>
+            <li>Record the measurement.</li>
+          </ol>
+        </div>
+
+        <div class="measure-card">
+          <div class="measure-card-header">
+            <div class="measure-icon">🩲</div>
+            <h4>Hip</h4>
+          </div>
+          <ol>
+            <li>Stand with feet together.</li>
+            <li>Measure around the fullest part of your hips and buttocks — usually 7–9 inches below your waist.</li>
+            <li>Keep the tape level and parallel to the floor.</li>
+            <li>Do not pull the tape too tight.</li>
+          </ol>
+        </div>
+
+        <div class="measure-card">
+          <div class="measure-card-header">
+            <div class="measure-icon">📏</div>
+            <h4>Length / Height</h4>
+          </div>
+          <ol>
+            <li>For kurti/dress length: measure from your shoulder (at the neck point) straight down to the desired hemline.</li>
+            <li>For inseam/length: stand straight, measure from the crotch to the ankle.</li>
+            <li>Wear the footwear you intend to pair with the garment while measuring.</li>
+          </ol>
+        </div>
+
+        <div class="measure-card">
+          <div class="measure-card-header">
+            <div class="measure-icon">💪</div>
+            <h4>Shoulder Width</h4>
+          </div>
+          <ol>
+            <li>Stand naturally with arms at sides.</li>
+            <li>Measure across the back from the edge of one shoulder to the edge of the other.</li>
+            <li>This is the top seam measurement, not armhole.</li>
+            <li>Useful for blouse and kurti tops.</li>
+          </ol>
+        </div>
+
+        <div class="measure-card">
+          <div class="measure-card-header">
+            <div class="measure-icon">💍</div>
+            <h4>Wrist / Ring Size</h4>
+          </div>
+          <ol>
+            <li>For bangles: wrap a thread around your knuckles (all four fingers together) — this determines the bangle size.</li>
+            <li>For rings: wrap a thin paper strip around your finger, mark where it meets, and measure the length in mm.</li>
+            <li>Measure in the evening when fingers are at their largest.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="sg-tips">
+        <h3>⚠️ Measurement Tips</h3>
+        <ul>
+          <li>Always measure in <strong>centimeters (cm)</strong> for precision. The conversion is: <strong>1 inch = 2.54 cm</strong>.</li>
+          <li>Do not suck in your stomach — measure naturally.</li>
+          <li>If you are between two sizes, always <strong>size up</strong> for comfort in traditional Indian wear.</li>
+          <li>For custom stitching orders, take measurements with the undergarments you intend to wear.</li>
+          <li>Re-check measurements every 6 months if your weight changes significantly.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── SAREES & BLOUSE ──────────────────────────────────────── -->
+    <div class="sg-section" id="sarees">
+      <h2 class="sg-section-title">🥻 Sarees & Blouse Sizing</h2>
+      <p class="sg-section-subtitle">
+        All our sarees are 5.5 meters (for sarees with blouse piece) or 6 meters (plain sarees without blouse piece). The blouse piece is typically 0.8–1 meter. Refer to the chart below for your blouse size. Sarees fit all body types as the pallu and pleats can be adjusted.
+      </p>
+
+      <!-- Blouse Size Chart -->
+      <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: var(--dark);">Saree Blouse Size Chart</h3>
+      <div class="sg-table-wrap">
+        <table class="sg-table">
+          <thead>
+            <tr>
+              <th>Size Label</th>
+              <th>Bust (cm)</th>
+              <th>Bust (inches)</th>
+              <th>Waist (cm)</th>
+              <th>Waist (inches)</th>
+              <th>Typical Indian Size</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>XS</td>
+              <td>76–80</td>
+              <td>30–32</td>
+              <td>60–64</td>
+              <td>24–25</td>
+              <td>32</td>
+              <td>Petite frame</td>
+            </tr>
+            <tr>
+              <td>S</td>
+              <td>81–86</td>
+              <td>32–34</td>
+              <td>65–70</td>
+              <td>25–27</td>
+              <td>34</td>
+              <td>Slim fit</td>
+            </tr>
+            <tr>
+              <td>M <span class="gold-badge">Popular</span></td>
+              <td>87–92</td>
+              <td>34–36</td>
+              <td>71–76</td>
+              <td>27–30</td>
+              <td>36</td>
+              <td>Most ordered size</td>
+            </tr>
+            <tr>
+              <td>L</td>
+              <td>93–98</td>
+              <td>37–39</td>
+              <td>77–82</td>
+              <td>30–32</td>
+              <td>38</td>
+              <td>Regular fit</td>
+            </tr>
+            <tr>
+              <td>XL</td>
+              <td>99–104</td>
+              <td>39–41</td>
+              <td>83–88</td>
+              <td>33–35</td>
+              <td>40</td>
+              <td>Relaxed fit</td>
+            </tr>
+            <tr>
+              <td>XXL</td>
+              <td>105–112</td>
+              <td>41–44</td>
+              <td>89–96</td>
+              <td>35–38</td>
+              <td>42–44</td>
+              <td>Plus size</td>
+            </tr>
+            <tr>
+              <td>XXXL</td>
+              <td>113–120</td>
+              <td>45–47</td>
+              <td>97–104</td>
+              <td>38–41</td>
+              <td>46–48</td>
+              <td>Plus size</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="7">💡 Can't find your exact size? Contact us for custom blouse stitching — available for any measurement!</td></tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- How to Drape a Saree -->
+      <h3 style="font-size: 1.05rem; font-weight: 700; margin: 24px 0 12px; color: var(--dark);">How to Drape a Saree (Nivi Style — Most Common)</h3>
+      <div class="drape-steps">
+        <div class="drape-step">
+          <div class="drape-step-num">1</div>
+          <h5>Tuck the Start</h5>
+          <p>Start with the plain end of the saree. Tuck it into the petticoat at your right hip, going once around your waist.</p>
+        </div>
+        <div class="drape-step">
+          <div class="drape-step-num">2</div>
+          <h5>Make Pleats</h5>
+          <p>Make 5–7 even pleats (each about 5 inches wide). Tuck them at your navel into the petticoat, angled slightly to the left.</p>
+        </div>
+        <div class="drape-step">
+          <div class="drape-step-num">3</div>
+          <h5>Drape Across</h5>
+          <p>Take the remaining fabric across your waist from right to left, wrapping it once around your body.</p>
+        </div>
+        <div class="drape-step">
+          <div class="drape-step-num">4</div>
+          <h5>Pallu Over Shoulder</h5>
+          <p>Drape the pallu (decorated end) over your left shoulder from front to back. Adjust length so it falls elegantly.</p>
+        </div>
+        <div class="drape-step">
+          <div class="drape-step-num">5</div>
+          <h5>Pin & Secure</h5>
+          <p>Use safety pins at the shoulder seam and at the pleats to secure the drape. Adjust for a clean, even look.</p>
+        </div>
+        <div class="drape-step">
+          <div class="drape-step-num">6</div>
+          <h5>Final Adjustments</h5>
+          <p>Ensure the hemline is even — about 1 inch above the ground. Fluff pleats and pallu for a graceful finish.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── KURTIS ──────────────────────────────────────────────── -->
+    <div class="sg-section" id="kurtis">
+      <h2 class="sg-section-title">👗 Kurtis Size Chart</h2>
+      <p class="sg-section-subtitle">
+        Kurtis are measured by bust size. Length varies by style — typically Short (35–40"), Regular (42–46"), Long (48–52"), or Floor Length (54"+). Always check the individual product description for exact length measurements.
+      </p>
+
+      <div class="sg-table-wrap">
+        <table class="sg-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Bust (cm)</th>
+              <th>Bust (inches)</th>
+              <th>Waist (cm)</th>
+              <th>Waist (inches)</th>
+              <th>Hip (cm)</th>
+              <th>Hip (inches)</th>
+              <th>Recommended Height</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>XS</td>
+              <td>76–80</td>
+              <td>30–32"</td>
+              <td>60–64</td>
+              <td>24–25"</td>
+              <td>84–88</td>
+              <td>33–35"</td>
+              <td>Below 5' 2"</td>
+            </tr>
+            <tr>
+              <td>S</td>
+              <td>81–86</td>
+              <td>32–34"</td>
+              <td>64–70</td>
+              <td>25–27"</td>
+              <td>88–92</td>
+              <td>35–36"</td>
+              <td>5' 2" – 5' 4"</td>
+            </tr>
+            <tr>
+              <td>M <span class="gold-badge">Popular</span></td>
+              <td>87–92</td>
+              <td>34–36"</td>
+              <td>70–76</td>
+              <td>27–30"</td>
+              <td>92–97</td>
+              <td>36–38"</td>
+              <td>5' 4" – 5' 6"</td>
+            </tr>
+            <tr>
+              <td>L</td>
+              <td>93–98</td>
+              <td>37–39"</td>
+              <td>76–82</td>
+              <td>30–32"</td>
+              <td>97–102</td>
+              <td>38–40"</td>
+              <td>5' 5" – 5' 7"</td>
+            </tr>
+            <tr>
+              <td>XL</td>
+              <td>99–104</td>
+              <td>39–41"</td>
+              <td>82–88</td>
+              <td>32–35"</td>
+              <td>102–108</td>
+              <td>40–43"</td>
+              <td>5' 6" – 5' 8"</td>
+            </tr>
+            <tr>
+              <td>XXL</td>
+              <td>105–112</td>
+              <td>41–44"</td>
+              <td>88–96</td>
+              <td>35–38"</td>
+              <td>108–114</td>
+              <td>43–45"</td>
+              <td>Any height</td>
+            </tr>
+            <tr>
+              <td>XXXL</td>
+              <td>113–120</td>
+              <td>45–47"</td>
+              <td>96–104</td>
+              <td>38–41"</td>
+              <td>114–120</td>
+              <td>45–47"</td>
+              <td>Any height</td>
+            </tr>
+            <tr>
+              <td>4XL</td>
+              <td>121–128</td>
+              <td>48–50"</td>
+              <td>104–112</td>
+              <td>41–44"</td>
+              <td>120–126</td>
+              <td>47–50"</td>
+              <td>Any height</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="8">💡 For Chikankari Kurtis: fabric has natural stretch — you may go one size down for a fitted look.</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── LEHENGAS ──────────────────────────────────────────────── -->
+    <div class="sg-section" id="lehengas">
+      <h2 class="sg-section-title">✨ Lehenga Size Chart</h2>
+      <p class="sg-section-subtitle">
+        Lehengas come as sets: Choli (top) + Skirt (lehenga) + Dupatta. The choli is sized by bust, and the lehenga skirt is usually free-size with a drawstring waist fitting 26"–36". For bridal lehengas, we recommend custom sizing for the perfect drape. Always mention bust, waist, and hip measurements when ordering.
+      </p>
+
+      <!-- Choli Chart -->
+      <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: var(--dark);">Lehenga Choli (Top) — Size Chart</h3>
+      <div class="sg-table-wrap">
+        <table class="sg-table">
+          <thead>
+            <tr>
+              <th>Size</th>
+              <th>Bust (cm)</th>
+              <th>Bust (inches)</th>
+              <th>Waist (cm)</th>
+              <th>Waist (inches)</th>
+              <th>Shoulder (cm)</th>
+              <th>Fit Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>S</td><td>81–86</td><td>32–34"</td><td>64–70</td><td>25–27"</td><td>36–37</td><td>Fitted / Bralette</td></tr>
+            <tr><td>M <span class="gold-badge">Popular</span></td><td>87–92</td><td>34–36"</td><td>70–76</td><td>27–30"</td><td>37–38</td><td>Semi-fitted</td></tr>
+            <tr><td>L</td><td>93–98</td><td>37–39"</td><td>76–82</td><td>30–32"</td><td>38–39</td><td>Regular</td></tr>
+            <tr><td>XL</td><td>99–104</td><td>39–41"</td><td>82–88</td><td>32–35"</td><td>39–41</td><td>Relaxed</td></tr>
+            <tr><td>XXL</td><td>105–112</td><td>41–44"</td><td>88–96</td><td>35–38"</td><td>41–43</td><td>Plus size</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Lehenga Skirt Chart -->
+      <h3 style="font-size: 1.05rem; font-weight: 700; margin: 24px 0 12px; color: var(--dark);">Lehenga Skirt — Length Guide</h3>
+      <div class="sg-table-wrap">
+        <table class="sg-table">
+          <thead>
+            <tr>
+              <th>Length Type</th>
+              <th>Length (inches)</th>
+              <th>Length (cm)</th>
+              <th>Ideal For</th>
+              <th>Hip (max cm)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Knee Length</td><td>~38–40"</td><td>96–102 cm</td><td>Indo-western, casual</td><td>Up to 112</td></tr>
+            <tr><td>Midi / Calf</td><td>~42–44"</td><td>107–112 cm</td><td>Festive, party wear</td><td>Up to 116</td></tr>
+            <tr><td>Anarkali / Floor <span class="gold-badge">Popular</span></td><td>~46–48"</td><td>117–122 cm</td><td>Weddings, functions</td><td>Up to 120</td></tr>
+            <tr><td>Trail / Bridal</td><td>~52–56"</td><td>132–142 cm</td><td>Bridal, photoshoots</td><td>Custom</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="5">💡 Most of our lehenga skirts have a 2"–3" hem allowance for alteration. Waist drawstring fits 26"–44".</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── JEWELRY ──────────────────────────────────────────────── -->
+    <div class="sg-section" id="jewelry">
+      <h2 class="sg-section-title">💍 Jewelry Size Guide</h2>
+      <p class="sg-section-subtitle">
+        Getting the right jewelry size is crucial for comfort and elegance. Use the charts below to find your perfect bangle diameter, ring size, and necklace length.
+      </p>
+
+      <div class="jewelry-grid">
+
+        <!-- Bangle Sizes -->
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: var(--dark);">Bangle Diameter Chart</h3>
+          <div class="sg-table-wrap">
+            <table class="sg-table">
+              <thead>
+                <tr>
+                  <th>Indian Size</th>
+                  <th>Diameter (mm)</th>
+                  <th>Circumference (cm)</th>
+                  <th>Wrist Size</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>2/2</td><td>52 mm</td><td>~16.3 cm</td><td>Extra Small</td></tr>
+                <tr><td>2/4</td><td>56 mm</td><td>~17.6 cm</td><td>Small</td></tr>
+                <tr><td>2/6 <span class="gold-badge">Common</span></td><td>60 mm</td><td>~18.8 cm</td><td>Medium</td></tr>
+                <tr><td>2/8</td><td>64 mm</td><td>~20.1 cm</td><td>Medium-Large</td></tr>
+                <tr><td>2/10</td><td>68 mm</td><td>~21.4 cm</td><td>Large</td></tr>
+                <tr><td>2/12</td><td>72 mm</td><td>~22.6 cm</td><td>Extra Large</td></tr>
+              </tbody>
+              <tfoot>
+                <tr><td colspan="4">Measure: wrap a thread around your knuckles (4 fingers), mark & measure in cm. Divide by π (3.14) for diameter.</td></tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ring Sizes -->
+        <div>
+          <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; color: var(--dark);">Ring Size Chart</h3>
+          <div class="sg-table-wrap">
+            <table class="sg-table">
+              <thead>
+                <tr>
+                  <th>Indian Size</th>
+                  <th>US Size</th>
+                  <th>Inner Circumference (mm)</th>
+                  <th>Inner Diameter (mm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>5</td><td>5</td><td>49.0 mm</td><td>15.7 mm</td></tr>
+                <tr><td>6</td><td>6</td><td>51.5 mm</td><td>16.5 mm</td></tr>
+                <tr><td>7</td><td>7</td><td>54.0 mm</td><td>17.3 mm</td></tr>
+                <tr><td>8 <span class="gold-badge">Common</span></td><td>8</td><td>56.3 mm</td><td>18.2 mm</td></tr>
+                <tr><td>9</td><td>9</td><td>58.6 mm</td><td>18.9 mm</td></tr>
+                <tr><td>10</td><td>10</td><td>62.1 mm</td><td>19.8 mm</td></tr>
+                <tr><td>11</td><td>11</td><td>64.4 mm</td><td>20.6 mm</td></tr>
+                <tr><td>12</td><td>12</td><td>66.7 mm</td><td>21.4 mm</td></tr>
+              </tbody>
+              <tfoot>
+                <tr><td colspan="4">Tip: Measure at the end of the day when fingers are slightly larger. If between sizes, go up.</td></tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Necklace Length Guide -->
+      <h3 style="font-size: 1.05rem; font-weight: 700; margin: 24px 0 12px; color: var(--dark);">Necklace Length Guide</h3>
+      <div class="sg-table-wrap">
+        <table class="sg-table">
+          <thead>
+            <tr>
+              <th>Length</th>
+              <th>Style Name</th>
+              <th>Falls At</th>
+              <th>Best Worn With</th>
+              <th>Typical Use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>14–16"</td><td>Choker</td><td>Base of neck</td><td>Off-shoulder, boat neck blouses</td><td>Everyday / Indo-western</td></tr>
+            <tr><td>17–18" <span class="gold-badge">Popular</span></td><td>Princess / Collar</td><td>Collarbone / upper chest</td><td>Most necklines — versatile</td><td>All occasions</td></tr>
+            <tr><td>20–22"</td><td>Matinee</td><td>Mid-chest</td><td>Sarees, high-neck blouses</td><td>Festive / Office</td></tr>
+            <tr><td>24–28"</td><td>Opera / Long</td><td>Below bust</td><td>Anarkalis, Kurtis</td><td>Traditional / Bridal</td></tr>
+            <tr><td>30"+"</td><td>Rope / Haar</td><td>Waist / hip</td><td>Sarees, Lehengas</td><td>Bridal / Ceremonial</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="5">💡 For layering necklaces, choose pieces that differ by at least 4–5 inches in length for a balanced look.</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── ONLINE SHOPPING TIPS ─────────────────────────────────── -->
+    <div class="sg-section" id="tips">
+      <h2 class="sg-section-title">💡 Tips for Online Shopping — Indian Ethnic Wear</h2>
+
+      <div class="sg-tips">
+        <h3>🛍️ Before You Order</h3>
+        <ul>
+          <li>Always <strong>measure yourself fresh</strong> — don't rely on measurements from months ago.</li>
+          <li>Read the <strong>product description carefully</strong> for fabric type (pure silk, art silk, georgette, etc.) as they fit differently.</li>
+          <li>Check the <strong>weight of the fabric</strong> (grams per meter) — heavier silk sarees (600–900 gsm) drape differently than lighter ones (300–500 gsm).</li>
+          <li>For festive and bridal wear, <strong>order 2–3 weeks in advance</strong> to allow time for any alterations.</li>
+          <li>Check the <strong>number of product photos</strong> — more photos mean higher confidence in color and fabric representation.</li>
+        </ul>
+      </div>
+
+      <div class="sg-tips">
+        <h3>🪡 Fabric & Fit Insights</h3>
+        <ul>
+          <li><strong>Pure Silk Sarees</strong> (Kanjivaram, Banarasi) — Stiff when new, soften beautifully with wear. They hold pleats better than lighter fabrics.</li>
+          <li><strong>Georgette & Chiffon Sarees</strong> — Flow beautifully but may need extra pins for pleating. Great for parties and casual events.</li>
+          <li><strong>Kurtis with embroidery</strong> — May feel slightly stiffer at the embroidered areas. Choose 1 size up for full comfort.</li>
+          <li><strong>Lehenga Skirts</strong> — Always have a 2"–3" alteration margin at the hem. If unsure about length, go slightly longer — it's easier to shorten than lengthen.</li>
+          <li><strong>Silk Blouses</strong> — Silk has minimal stretch. For a comfortable fit, add 1"–2" to your actual bust measurement when selecting a size.</li>
+          <li><strong>Jewelry Fit</strong> — Bangles should slip over your hand knuckles with slight resistance — too easy = will fall off; too tight = uncomfortable.</li>
+        </ul>
+      </div>
+
+      <div class="sg-tips">
+        <h3>🌿 Care & Maintenance Tips</h3>
+        <ul>
+          <li>Dry-clean pure silk sarees; hand-wash art silk, georgette, and cotton sarees gently.</li>
+          <li>Always store sarees and lehengas folded in <strong>muslin cotton cloth</strong> — avoid plastic covers that trap moisture.</li>
+          <li>Store silver jewelry in anti-tarnish pouches. Wipe with a soft dry cloth after each wear.</li>
+          <li>Air your garments before storing — especially after festive events where you may have perspired.</li>
+          <li>For embellished garments, fold with the embroidery facing <strong>inward</strong> to protect the zari and stone work.</li>
+          <li>Never iron directly on zari embroidery — use a pressing cloth or steam from a safe distance.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="sg-cta">
+      <h3>Still unsure about your size?</h3>
+      <p>Our style experts are happy to help you find the perfect fit. Chat with us Monday–Saturday, 9 AM to 7 PM IST.</p>
+      <div class="cta-row">
+        <a href="/contact.html" class="btn btn-gold" style="padding: 12px 28px; border-radius: var(--radius-sm);">💬 Get Size Help</a>
+        <a href="/shop.html?category=sarees" class="btn-outline-white">🛍️ Shop Sarees</a>
+        <a href="/faq.html" class="btn-outline-white">❓ FAQs</a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>RJ FASHION COLLECTION</h3>
+          <p>India's premier online boutique for royal bridal sarees, intricate Kundan jewelry, and contemporary festive ethnic ensembles designed for celebrations.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+            <li><a href="/sale.html">🔥 HOT DEALS</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/account.html">My Account</a></li>
+            <li><a href="/orders.html">My Orders</a></li>
+            <li><a href="/wishlist.html">Wishlist</a></li>
+            <li><a href="/faq.html">FAQs</a></li>
+            <li><a href="/contact.html">Customer Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="/about.html">About RJ Fashion</a></li>
+            <li><a href="/contact.html">Contact Us</a></li>
+            <li><a href="/size-guide.html">Size Guide</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/about.html#terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="/" class="bottom-nav-item">
+      <span class="bottom-nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/categories.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">📁</span>
+      <span>Categories</span>
+    </a>
+    <a href="/wishlist.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        ♡
+        <span class="bottom-badge wishlist-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Wishlist</span>
+    </a>
+    <a href="/cart.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        🛒
+        <span class="bottom-badge cart-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Cart</span>
+    </a>
+    <a href="/account.html" class="bottom-nav-item" id="mobile-account-link">
+      <span class="bottom-nav-icon">👤</span>
+      <span>Account</span>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
+</body>
+</html>

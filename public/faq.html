@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frequently Asked Questions | RJ Fashion Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <style>
+    /* ── FAQ Page Styles ──────────────────────────────────────────── */
+    .faq-hero {
+      background: linear-gradient(135deg, #3e001f 0%, #7a003c 100%);
+      border-radius: var(--radius-md);
+      padding: 48px 40px;
+      text-align: center;
+      margin-bottom: 36px;
+      color: #fff;
+    }
+    .faq-hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      margin: 0 0 10px;
+    }
+    .faq-hero p {
+      color: #f8e8d4;
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Search Box */
+    .faq-search-wrap {
+      max-width: 560px;
+      margin: 0 auto 36px;
+      position: relative;
+    }
+    .faq-search-wrap input {
+      width: 100%;
+      padding: 14px 48px 14px 20px;
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      font-size: 0.95rem;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .faq-search-wrap input:focus { border-color: var(--primary); }
+    .faq-search-wrap .search-icon {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      pointer-events: none;
+      color: var(--muted);
+    }
+    .faq-search-empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    /* Category Nav */
+    .faq-category-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 14px;
+    }
+    .faq-cat-btn {
+      padding: 7px 18px;
+      border-radius: 50px;
+      border: 2px solid var(--border);
+      background: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--dark);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .faq-cat-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .faq-cat-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* Section Header */
+    .faq-section { margin-bottom: 40px; }
+    .faq-section-title {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f3e0e8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Accordion Items */
+    .faq-list { list-style: none; padding: 0; margin: 0; }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .faq-item:hover { box-shadow: var(--shadow-sm); }
+    .faq-item.hidden { display: none; }
+
+    .faq-question {
+      width: 100%;
+      text-align: left;
+      background: #fff;
+      border: none;
+      padding: 16px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--dark);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: #fdf5f8; }
+    .faq-question.open { background: #fdf5f8; color: var(--primary); }
+    .faq-question-text { flex: 1; line-height: 1.45; }
+    .faq-chevron {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f3e0e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      transition: transform 0.3s, background 0.2s;
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .faq-question.open .faq-chevron {
+      transform: rotate(180deg);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease, padding 0.2s;
+    }
+    .faq-answer.open {
+      max-height: 600px;
+    }
+    .faq-answer-inner {
+      padding: 0 20px 18px;
+      font-size: 0.9rem;
+      color: #444;
+      line-height: 1.75;
+      border-top: 1px solid #f3e0e8;
+    }
+    .faq-answer-inner ul {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    .faq-answer-inner li { margin-bottom: 4px; }
+    .faq-answer-inner a { color: var(--primary); font-weight: 600; }
+
+    /* Support CTA */
+    .faq-support-cta {
+      background: linear-gradient(135deg, #fdf5f8 0%, #fff8e8 100%);
+      border: 1px solid #f0d0e0;
+      border-radius: var(--radius-md);
+      padding: 40px;
+      text-align: center;
+      margin-top: 40px;
+    }
+    .faq-support-cta h3 {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    .faq-support-cta p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      max-width: 400px;
+      margin: 0 auto 20px;
+    }
+    .faq-support-cta .cta-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Highlight matched text */
+    mark {
+      background: #fff3a0;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Handcrafted Indian Fashion
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-main">
+      <a href="/" class="brand-logo">
+        <span class="logo-title">RJ Fashion Collection</span>
+        <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
+      </a>
+
+      <div class="header-search">
+        <form class="header-search-form" action="/shop.html" method="GET">
+          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <button type="submit" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="header-actions">
+        <div class="auth-nav-slot">
+          <a href="/login.html" class="action-btn">
+            <span>👤 Login / Account</span>
+          </a>
+        </div>
+        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
+          <span>♡ Wishlist</span>
+          <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
+        </a>
+        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+          <span>🛒 Cart</span>
+          <span class="action-badge cart-count-badge" style="display: none;">0</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/categories.html">Categories</a></li>
+          <li><a href="/shop.html?category=sarees">Sarees</a></li>
+          <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
+          <li><a href="/sale.html" class="highlight">Offers 🔥</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container" style="padding-top: 28px; padding-bottom: 60px;">
+
+    <!-- Breadcrumb -->
+    <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 20px;">
+      <a href="/">Home</a> / <strong style="color: var(--primary);">FAQs</strong>
+    </div>
+
+    <!-- Hero -->
+    <div class="faq-hero">
+      <h1>❓ Frequently Asked Questions</h1>
+      <p>Find quick answers to common questions about ordering, shipping, products, and your account.</p>
+    </div>
+
+    <!-- Search -->
+    <div class="faq-search-wrap">
+      <input type="text" id="faq-search" placeholder="🔍  Search your question here…" autocomplete="off">
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="faq-category-nav" id="faq-cat-nav">
+      <button class="faq-cat-btn active" data-cat="all">📋 All</button>
+      <button class="faq-cat-btn" data-cat="ordering">💳 Ordering & Payment</button>
+      <button class="faq-cat-btn" data-cat="shipping">🚚 Shipping & Delivery</button>
+      <button class="faq-cat-btn" data-cat="products">✨ Products & Quality</button>
+      <button class="faq-cat-btn" data-cat="account">👤 Account & Profile</button>
+    </div>
+
+    <!-- Search Empty State -->
+    <div class="faq-search-empty" id="faq-search-empty">
+      😕 No matching questions found. Try different keywords or <a href="/contact.html" style="color: var(--primary); font-weight: 600;">contact our support team</a>.
+    </div>
+
+    <!-- ── SECTION 1: Ordering & Payment ───────────────────────────── -->
+    <div class="faq-section" data-section="ordering">
+      <h2 class="faq-section-title">💳 Ordering & Payment</h2>
+      <ul class="faq-list">
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">What payment methods are accepted at RJ Fashion Collection?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              We accept a wide range of payment options for your convenience:
+              <ul>
+                <li><strong>UPI</strong> — Google Pay, PhonePe, Paytm, BHIM UPI</li>
+                <li><strong>Credit & Debit Cards</strong> — Visa, Mastercard, RuPay, American Express</li>
+                <li><strong>Net Banking</strong> — All major Indian banks supported</li>
+                <li><strong>Cash on Delivery (COD)</strong> — Available for orders below ₹10,000</li>
+                <li><strong>EMI</strong> — No-cost EMI on select cards for orders above ₹3,000</li>
+                <li><strong>Wallets</strong> — Paytm, Mobikwik, FreeCharge</li>
+              </ul>
+              All online transactions are secured with 256-bit SSL encryption.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Is Cash on Delivery (COD) available for my order?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes! Cash on Delivery is available for most pin codes across India for orders below ₹10,000. To check COD availability at your pin code, simply add items to your cart and proceed to checkout — the system will automatically indicate if COD is available for your address. A nominal COD handling fee of ₹49 may apply on some orders.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I apply a discount coupon or promo code?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              To apply a coupon code:
+              <ul>
+                <li>Add your desired products to the cart.</li>
+                <li>Go to the <a href="/cart.html">Shopping Cart</a> page.</li>
+                <li>Enter your coupon code in the "Apply Coupon" field.</li>
+                <li>Click <strong>Apply</strong> — the discount will reflect instantly.</li>
+              </ul>
+              Please note that only one coupon can be applied per order. Some coupons have minimum order value requirements or are valid only on specific product categories.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Can I modify or cancel my order after placing it?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Orders can be modified or cancelled <strong>within 24 hours</strong> of placement, provided they have not yet been shipped. To request a cancellation:
+              <ul>
+                <li>Log into your account and go to <a href="/orders.html">My Orders</a>.</li>
+                <li>Select the order and click "Cancel Order".</li>
+                <li>Choose your reason and confirm.</li>
+              </ul>
+              If your order has already been dispatched, cancellation is not possible. However, you may initiate a return once you receive the product. For urgent requests, <a href="/contact.html">contact our support team</a> immediately.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">What should I do if my payment failed but money was deducted?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Don't worry — this is a common banking-side delay. If your payment failed but money was debited from your account:
+              <ul>
+                <li>Wait <strong>4–5 business days</strong> for an automatic reversal by your bank.</li>
+                <li>If not reversed, email us at <strong>support@rjfashion.com</strong> with your transaction ID and bank statement screenshot.</li>
+                <li>We will raise a dispute with the payment gateway and ensure a full refund within 7–10 business days.</li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Do you offer GST invoice for business purchases?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes, we provide GST-compliant tax invoices for all orders. Your invoice is automatically generated after the order is confirmed and can be downloaded from <a href="/orders.html">My Orders</a>. If you need a business GST invoice with your company's GSTIN, please add it during checkout in the billing details section or <a href="/contact.html">contact us</a> within 24 hours of ordering.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Is it safe to save my card details on RJ Fashion Collection?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Absolutely. We use industry-standard PCI-DSS compliant payment gateways and never store your full card number on our servers. Saved card details are securely tokenized by our payment partners (Razorpay/PayU). You can manage or delete saved payment methods anytime from your <a href="/account.html">Account Settings</a>.
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+
+    <!-- ── SECTION 2: Shipping & Delivery ─────────────────────────── -->
+    <div class="faq-section" data-section="shipping">
+      <h2 class="faq-section-title">🚚 Shipping & Delivery</h2>
+      <ul class="faq-list">
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How long does delivery take across India?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Delivery timelines vary by location:
+              <ul>
+                <li><strong>Metro Cities</strong> (Mumbai, Delhi, Bangalore, Chennai, Hyderabad, Kolkata): 2–4 business days</li>
+                <li><strong>Tier-2 Cities</strong>: 4–6 business days</li>
+                <li><strong>Remote / Tier-3 Areas</strong>: 6–10 business days</li>
+              </ul>
+              Express delivery (1–2 days) is available for select pin codes for an additional charge. Delivery times may be longer during festive seasons (Diwali, Navratri, Eid) due to high demand.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Is free shipping available? What is the minimum order value?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes! We offer <strong>Free Express Shipping on all orders above ₹999</strong> across India. For orders below ₹999, a flat shipping fee of ₹79 applies. Premium sarees and heavy jewelry pieces may have special packaging charges of ₹49, which will be shown clearly at checkout.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How can I track my order?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Once your order is dispatched, you will receive:
+              <ul>
+                <li>An email and SMS with a tracking link and AWB (Air Waybill) number.</li>
+                <li>You can also track your order live from <a href="/orders.html">My Orders</a> in your account.</li>
+              </ul>
+              We use trusted courier partners including BlueDart, Delhivery, Ekart, and India Post for reliable delivery pan India.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">What happens if I miss my delivery attempt?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Our courier partners typically make <strong>3 delivery attempts</strong> on consecutive days. If all attempts fail, your package will be held at the nearest courier facility for 7 days for self-pickup. After 7 days, the package is returned to us and a re-delivery fee will apply. To avoid this, please ensure someone is available at the delivery address, or contact our support team to arrange a convenient delivery slot.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Do you ship internationally — outside India?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Currently, RJ Fashion Collection ships across all states and union territories within India. International shipping to select countries (USA, UK, Canada, UAE, Australia, Singapore) is available for orders above ₹5,000. International shipping charges and timelines (typically 10–20 business days) vary by destination. Please <a href="/contact.html">contact us</a> for international shipping quotes and customs information.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">My order arrived damaged. What should I do?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              We apologize for this experience. If your order arrives damaged or defective:
+              <ul>
+                <li>Do NOT accept the package if it appears severely tampered. Note the refusal on the courier delivery sheet.</li>
+                <li>If you have already accepted it, take clear photos/video of the damage.</li>
+                <li>Email <strong>support@rjfashion.com</strong> within <strong>48 hours</strong> of delivery with your order number and photos.</li>
+              </ul>
+              We will arrange a free pickup and full replacement or refund within 5–7 business days.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Can I change my delivery address after placing the order?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Address changes are possible only if the order has not yet been dispatched. To request a change, go to <a href="/orders.html">My Orders</a> and use the "Edit Address" option, or <a href="/contact.html">contact our support team</a> immediately with your order ID and the corrected address. Once dispatched, we are unable to reroute shipments.
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+
+    <!-- ── SECTION 3: Products & Quality ──────────────────────────── -->
+    <div class="faq-section" data-section="products">
+      <h2 class="faq-section-title">✨ Products & Quality</h2>
+      <ul class="faq-list">
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Are the sarees on RJ Fashion Collection 100% authentic and handwoven?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes, absolutely. We source directly from certified weavers and artisan clusters across India — including Varanasi (Banarasi), Kanchipuram, Chanderi, and Sambalpuri. Each premium saree comes with a <strong>Silk Mark India certification tag</strong> verifying its authenticity. Our quality control team physically inspects every piece before dispatch to ensure it meets our luxury standards.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How accurate are the colors shown in product photos?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              We use professional photography under calibrated studio lighting to ensure color accuracy. However, colors may appear slightly different depending on your screen's calibration, brightness, and display settings. We always include <strong>multiple angles</strong> and closeup detail shots to give you the best possible view. If you're uncertain about a color, contact our team — we can send additional photos or fabric swatches on request for orders above ₹5,000.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I know what size saree blouse or kurti to order?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              We have a comprehensive <a href="/size-guide.html"><strong>Size Guide</strong></a> with detailed measurement charts for all our product categories — including saree blouses, kurtis, lehengas, and even jewelry sizes. We strongly recommend measuring your bust, waist, and hip before ordering. If you're between sizes, we recommend sizing up. Custom tailoring is also available on select products — look for the "Customize Size" option on the product page.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I care for and wash my silk saree at home?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Silk sarees require gentle care to maintain their luster and longevity:
+              <ul>
+                <li><strong>Dry clean only</strong> for pure Kanjivaram and Banarasi silks.</li>
+                <li>For semi-silk or art silk sarees, hand-wash in cold water with mild silk-safe detergent.</li>
+                <li><strong>Never machine wash</strong> or tumble dry silk sarees.</li>
+                <li>Do not wring or squeeze — gently roll in a soft dry towel to remove moisture.</li>
+                <li>Dry in shade (never direct sunlight) to prevent color fading.</li>
+                <li>Store wrapped in muslin cloth in a cool, dry place. Avoid plastic covers.</li>
+              </ul>
+              Care instructions are also printed on the tag attached to your garment.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">What is your return and exchange policy?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              We offer a <strong>7-day hassle-free return policy</strong> from the date of delivery. To be eligible for a return:
+              <ul>
+                <li>The item must be unused, unwashed, and in its original packaging with all tags intact.</li>
+                <li>Initiate the return from <a href="/orders.html">My Orders</a> within 7 days.</li>
+                <li>Our team will schedule a free pickup within 48 hours.</li>
+                <li>Refund will be processed within 5–7 business days of receiving the returned item.</li>
+              </ul>
+              <strong>Non-returnable items:</strong> Customized products, intimate wear, accessories in opened packaging, and items purchased during clearance sales (marked "Final Sale").
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Can I request a product customization (embroidery, blouse stitching, etc.)?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes! We offer customization services for select products:
+              <ul>
+                <li><strong>Blouse stitching</strong> — Custom measurements, neck design, sleeve style (add-on: ₹299–₹799)</li>
+                <li><strong>Fall & Pico</strong> — Professional saree finishing (₹99)</li>
+                <li><strong>Embroidery additions</strong> — Additional zari, thread, or mirror work on request</li>
+              </ul>
+              To request customization, <a href="/contact.html">contact us</a> after placing your order or look for the "Add Customization" option on the product page. Customized orders have a delivery timeline of 7–14 days and are not eligible for returns unless defective.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">Do you offer gift wrapping or special packaging for occasions?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Yes! We offer premium gift packaging for an additional ₹99 per item. This includes a beautiful branded box, tissue wrapping, a personalized greeting card, and a satin ribbon. You can select gift packaging during checkout and add a personal message. It's perfect for birthdays, weddings, baby showers, anniversaries, or any celebration. We also offer corporate bulk gifting — <a href="/contact.html">contact us</a> for bulk orders.
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+
+    <!-- ── SECTION 4: Account & Profile ───────────────────────────── -->
+    <div class="faq-section" data-section="account">
+      <h2 class="faq-section-title">👤 Account & Profile</h2>
+      <ul class="faq-list">
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I create an account on RJ Fashion Collection?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Creating an account is free and easy:
+              <ul>
+                <li>Click <a href="/login.html">Login / Account</a> in the top navigation.</li>
+                <li>Select "Create New Account".</li>
+                <li>Enter your name, email address, and a secure password.</li>
+                <li>Verify your email via the link we send you.</li>
+              </ul>
+              With an account, you can track orders, manage wishlists, save addresses, view purchase history, and get exclusive member-only offers.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">I forgot my password. How do I reset it?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              To reset your password:
+              <ul>
+                <li>Go to <a href="/login.html">Login</a> and click "Forgot Password?"</li>
+                <li>Enter your registered email address.</li>
+                <li>Check your inbox for a password reset link (valid for 1 hour).</li>
+                <li>Click the link and enter your new password.</li>
+              </ul>
+              If you don't receive the email within 5 minutes, check your spam/junk folder. Still having trouble? <a href="/contact.html">Contact support</a>.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I manage my saved addresses?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              You can save multiple delivery addresses to your account for convenient checkout. To manage addresses:
+              <ul>
+                <li>Log in and go to <a href="/account.html">My Account</a>.</li>
+                <li>Select "Manage Addresses".</li>
+                <li>Add, edit, or delete saved addresses.</li>
+                <li>Set a "Default Address" for faster checkout.</li>
+              </ul>
+              You can save home, office, and other addresses separately.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How does the Wishlist work? Can I share it with someone?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              Your <a href="/wishlist.html">Wishlist</a> lets you save products you love for later. Simply click the ♡ heart icon on any product to add it. You must be logged in to save your wishlist permanently. Currently, wishlists are private to your account — sharing directly from the website is coming soon. In the meantime, you can copy and share the product page URL with friends or family.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I update my email address or mobile number?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              To update your contact information:
+              <ul>
+                <li>Log in and go to <a href="/account.html">My Account</a> → Edit Profile.</li>
+                <li>Update your email address or phone number.</li>
+                <li>Email changes require verification via a link sent to the new address.</li>
+                <li>Phone number changes may require OTP verification.</li>
+              </ul>
+              For security, we limit profile changes to 3 updates per 30 days. If you face issues, <a href="/contact.html">contact support</a>.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I permanently delete my account?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              You can request account deletion by emailing <strong>privacy@rjfashion.com</strong> from your registered email with the subject line "Account Deletion Request". We will process the request within 7 business days and send a confirmation. Please note:
+              <ul>
+                <li>All your order history, wishlist, and saved data will be permanently deleted.</li>
+                <li>Any pending orders must be resolved before deletion.</li>
+                <li>Active loyalty points will be forfeited upon deletion.</li>
+              </ul>
+              This action cannot be undone.
+            </div>
+          </div>
+        </li>
+
+        <li class="faq-item">
+          <button class="faq-question">
+            <span class="faq-question-text">How do I unsubscribe from promotional emails and SMS?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer">
+            <div class="faq-answer-inner">
+              To manage your communication preferences:
+              <ul>
+                <li>Click the "Unsubscribe" link at the bottom of any promotional email.</li>
+                <li>Or go to <a href="/account.html">My Account</a> → Notification Settings → toggle off "Promotional Emails" and "SMS Alerts".</li>
+              </ul>
+              You will continue to receive essential transactional messages (order confirmations, shipping updates) even after unsubscribing from promotions. Unsubscription takes effect within 48 hours.
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+
+    <!-- Support CTA -->
+    <div class="faq-support-cta">
+      <h3>Still have questions? We're here to help! 😊</h3>
+      <p>Our friendly customer support team is available Mon–Sat, 9 AM to 7 PM IST to assist you.</p>
+      <div class="cta-buttons">
+        <a href="/contact.html" class="btn btn-primary">📩 Contact Support</a>
+        <a href="tel:+919876543210" class="btn btn-outline" style="border: 2px solid var(--primary); color: var(--primary);">📞 Call Us</a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>RJ FASHION COLLECTION</h3>
+          <p>India's premier online boutique for royal bridal sarees, intricate Kundan jewelry, and contemporary festive ethnic ensembles designed for celebrations.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+            <li><a href="/sale.html">🔥 HOT DEALS</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/account.html">My Account</a></li>
+            <li><a href="/orders.html">My Orders</a></li>
+            <li><a href="/wishlist.html">Wishlist</a></li>
+            <li><a href="/faq.html">FAQs</a></li>
+            <li><a href="/contact.html">Customer Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="/about.html">About RJ Fashion</a></li>
+            <li><a href="/contact.html">Contact Us</a></li>
+            <li><a href="/size-guide.html">Size Guide</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/about.html#terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="/" class="bottom-nav-item">
+      <span class="bottom-nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/categories.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">📁</span>
+      <span>Categories</span>
+    </a>
+    <a href="/wishlist.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        ♡
+        <span class="bottom-badge wishlist-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Wishlist</span>
+    </a>
+    <a href="/cart.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        🛒
+        <span class="bottom-badge cart-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Cart</span>
+    </a>
+    <a href="/account.html" class="bottom-nav-item" id="mobile-account-link">
+      <span class="bottom-nav-icon">👤</span>
+      <span>Account</span>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/app.js"></script>
+  <script>
+    // ── FAQ Accordion ────────────────────────────────────────────
+    document.querySelectorAll('.faq-question').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var answer   = btn.nextElementSibling;
+        var isOpen   = btn.classList.contains('open');
+
+        // Close all others in same section
+        var section  = btn.closest('.faq-list');
+        section.querySelectorAll('.faq-question.open').forEach(function(other) {
+          if (other !== btn) {
+            other.classList.remove('open');
+            other.nextElementSibling.classList.remove('open');
+          }
+        });
+
+        // Toggle current
+        btn.classList.toggle('open', !isOpen);
+        answer.classList.toggle('open', !isOpen);
+      });
+    });
+
+    // ── Category Tab Filter ──────────────────────────────────────
+    document.querySelectorAll('.faq-cat-btn').forEach(function(catBtn) {
+      catBtn.addEventListener('click', function() {
+        document.querySelectorAll('.faq-cat-btn').forEach(function(b) { b.classList.remove('active'); });
+        catBtn.classList.add('active');
+
+        var target = catBtn.dataset.cat;
+        document.querySelectorAll('.faq-section').forEach(function(sec) {
+          sec.style.display = (target === 'all' || sec.dataset.section === target) ? '' : 'none';
+        });
+
+        // Reset search
+        document.getElementById('faq-search').value = '';
+        document.getElementById('faq-search-empty').style.display = 'none';
+        document.querySelectorAll('.faq-item').forEach(function(item) {
+          item.classList.remove('hidden');
+          // Remove highlights
+          item.querySelectorAll('.faq-question-text, .faq-answer-inner').forEach(restoreText);
+        });
+      });
+    });
+
+    // ── Search / Keyword Filter ──────────────────────────────────
+    // Store original text of each question and answer for restore
+    var faqOriginals = new Map();
+    document.querySelectorAll('.faq-item').forEach(function(item) {
+      var qEl = item.querySelector('.faq-question-text');
+      var aEl = item.querySelector('.faq-answer-inner');
+      faqOriginals.set(item, { qHtml: qEl.innerHTML, aHtml: aEl.innerHTML });
+    });
+
+    function restoreText(el) {
+      var item   = el.closest('.faq-item');
+      var stored = faqOriginals.get(item);
+      if (!stored) return;
+      var qEl = item.querySelector('.faq-question-text');
+      var aEl = item.querySelector('.faq-answer-inner');
+      qEl.innerHTML = stored.qHtml;
+      aEl.innerHTML = stored.aHtml;
+    }
+
+    function highlightText(el, keyword) {
+      // Only highlight in text nodes to avoid breaking HTML tags
+      var item   = el.closest('.faq-item');
+      var stored = faqOriginals.get(item);
+      if (!stored) return;
+      var qEl = item.querySelector('.faq-question-text');
+      var aEl = item.querySelector('.faq-answer-inner');
+      var escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re      = new RegExp('(' + escaped + ')', 'gi');
+      // Restore first, then highlight in plain text portions only
+      qEl.innerHTML = stored.qHtml.replace(re, '<mark>$1</mark>');
+      aEl.innerHTML = stored.aHtml.replace(re, '<mark>$1</mark>');
+    }
+
+    document.getElementById('faq-search').addEventListener('input', function() {
+      var kw      = this.value.trim().toLowerCase();
+      var emptyEl = document.getElementById('faq-search-empty');
+      var found   = 0;
+
+      // Show all sections when searching
+      document.querySelectorAll('.faq-section').forEach(function(sec) { sec.style.display = ''; });
+      // Reset category tabs
+      document.querySelectorAll('.faq-cat-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelector('.faq-cat-btn[data-cat="all"]').classList.add('active');
+
+      document.querySelectorAll('.faq-item').forEach(function(item) {
+        var qText = item.querySelector('.faq-question-text');
+        var aText = item.querySelector('.faq-answer-inner');
+
+        // Restore originals first
+        restoreText(qText);
+
+        if (!kw) {
+          item.classList.remove('hidden');
+          found++;
+          return;
+        }
+
+        var stored  = faqOriginals.get(item);
+        var combined = (stored.qHtml + ' ' + stored.aHtml).replace(/<[^>]+>/g, ' ').toLowerCase();
+        var matches  = combined.includes(kw);
+
+        if (matches) {
+          item.classList.remove('hidden');
+          highlightText(qText, kw);
+          found++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      emptyEl.style.display = (kw && found === 0) ? 'block' : 'none';
+    });
+  </script>
+</body>
+</html>

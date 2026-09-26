@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account - RJ Fashion Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Handcrafted Indian Fashion
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-main">
+      <a href="/" class="brand-logo">
+        <span class="logo-title">RJ Fashion Collection</span>
+        <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
+      </a>
+
+      <div class="header-search">
+        <form class="header-search-form" action="/shop.html" method="GET">
+          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <button type="submit" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="header-actions">
+        <div class="auth-nav-slot">
+          <a href="/login.html" class="action-btn">
+            <span>👤 Login / Account</span>
+          </a>
+        </div>
+
+        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
+          <span>♡ Wishlist</span>
+          <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
+        </a>
+
+        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+          <span>🛒 Cart</span>
+          <span class="action-badge cart-count-badge" style="display: none;">0</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/categories.html">Categories</a></li>
+          <li><a href="/shop.html?category=sarees">Sarees</a></li>
+          <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
+          <li><a href="/shop.html?offer=true" class="highlight">Offers 🔥</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Account Dashboard -->
+  <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start;">
+      <!-- Account Sidebar -->
+      <aside style="background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm);">
+        <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+            👤
+          </div>
+          <h3 id="acc-user-name" style="font-size: 1.1rem; margin: 0;">Loading...</h3>
+          <div id="acc-user-email" style="font-size: 0.82rem; color: var(--muted); margin-top: 2px;"></div>
+        </div>
+
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
+          <li>
+            <a href="/orders.html" style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.92rem; color: var(--dark); padding: 8px 12px; border-radius: 6px; background: #f8f9fa;">
+              <span>📦</span> My Orders
+            </a>
+          </li>
+          <li>
+            <a href="/wishlist.html" style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.92rem; color: var(--dark); padding: 8px 12px; border-radius: 6px;">
+              <span>♡</span> My Wishlist
+            </a>
+          </li>
+          <li>
+            <a href="/cart.html" style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.92rem; color: var(--dark); padding: 8px 12px; border-radius: 6px;">
+              <span>🛒</span> Shopping Bag
+            </a>
+          </li>
+          <li style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px;">
+            <button onclick="handleLogout()" style="width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; color: var(--danger); font-weight: 600; font-size: 0.92rem; padding: 8px 12px; cursor: pointer;">
+              <span>🚪</span> Sign Out
+            </button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Account Main Details -->
+      <div>
+        <!-- Profile Info Card -->
+        <div class="cart-items-card" style="margin-bottom: 24px;">
+          <h3 class="summary-title">Profile Information</h3>
+          <form id="profile-form">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="form-group-auth">
+                <label>Full Name</label>
+                <input type="text" id="profile-name" required>
+              </div>
+              <div class="form-group-auth">
+                <label>Email Address</label>
+                <input type="email" id="profile-email" disabled style="background: #f1f3f6;">
+              </div>
+            </div>
+
+            <div class="form-group-auth" style="max-width: 50%;">
+              <label>Phone Number</label>
+              <input type="tel" id="profile-phone" placeholder="+91 98765 43210">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.85rem;">
+              SAVE PROFILE CHANGES
+            </button>
+          </form>
+        </div>
+
+        <!-- Saved Addresses -->
+        <div class="cart-items-card" style="margin-bottom: 24px;">
+          <h3 class="summary-title">Saved Delivery Addresses</h3>
+          <div id="account-addresses-list">
+            <p style="color: var(--muted);">Loading addresses...</p>
+          </div>
+
+          <h4 style="font-size: 0.95rem; font-weight: 700; margin: 20px 0 12px; text-transform: uppercase;">Add a New Address</h4>
+          <form id="new-account-address-form" style="background: #fafafa; border: 1px dashed var(--border); border-radius: 8px; padding: 18px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group-auth">
+                <label>Full Name *</label>
+                <input type="text" id="new-addr-name" required placeholder="Recipient name">
+              </div>
+              <div class="form-group-auth">
+                <label>Phone Number *</label>
+                <input type="tel" id="new-addr-phone" required placeholder="10-digit mobile">
+              </div>
+            </div>
+
+            <div class="form-group-auth">
+              <label>House / Flat / Building *</label>
+              <input type="text" id="new-addr-house" required placeholder="Apartment / House number">
+            </div>
+
+            <div class="form-group-auth">
+              <label>Street / Locality / Landmark *</label>
+              <input type="text" id="new-addr-street" required placeholder="Street address">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+              <div class="form-group-auth">
+                <label>City *</label>
+                <input type="text" id="new-addr-city" required placeholder="City">
+              </div>
+              <div class="form-group-auth">
+                <label>State *</label>
+                <input type="text" id="new-addr-state" required placeholder="State">
+              </div>
+              <div class="form-group-auth">
+                <label>PIN Code *</label>
+                <input type="text" id="new-addr-pincode" required placeholder="PIN Code">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-outline-primary" style="padding: 10px 20px; font-size: 0.85rem;">
+              + SAVE ADDRESS
+            </button>
+          </form>
+        </div>
+
+        <!-- Change Password Card -->
+        <div class="cart-items-card">
+          <h3 class="summary-title">Change Password</h3>
+          <form id="change-pwd-form" style="max-width: 440px;">
+            <div class="form-group-auth">
+              <label>Current Password</label>
+              <input type="password" id="current-pwd" required placeholder="Enter current password">
+            </div>
+            <div class="form-group-auth">
+              <label>New Password (min 6 chars)</label>
+              <input type="password" id="new-pwd" required minlength="6" placeholder="Enter new password">
+            </div>
+            <div class="form-group-auth">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirm-new-pwd" required minlength="6" placeholder="Repeat new password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.85rem;">
+              UPDATE PASSWORD
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Site Footer (NO returns, NO newsletter, NO admin login) -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>RJ FASHION COLLECTION</h3>
+          <p>India's premier online boutique for royal bridal sarees, intricate Kundan jewelry, and contemporary festive ethnic ensembles designed for celebrations.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+            <li><a href="/shop.html?offer=true">Offers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/account.html">My Account</a></li>
+            <li><a href="/orders.html">My Orders</a></li>
+            <li><a href="/wishlist.html">Wishlist</a></li>
+            <li><a href="/contact.html">Customer Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="/about.html">About RJ Fashion</a></li>
+            <li><a href="/contact.html">Contact Us</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/about.html#terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="/" class="bottom-nav-item">
+      <span class="bottom-nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/categories.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">📁</span>
+      <span>Categories</span>
+    </a>
+    <a href="/wishlist.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        ♡
+        <span class="bottom-badge wishlist-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Wishlist</span>
+    </a>
+    <a href="/cart.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        🛒
+        <span class="bottom-badge cart-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Cart</span>
+    </a>
+    <a href="/account.html" class="bottom-nav-item active">
+      <span class="bottom-nav-icon">👤</span>
+      <span>Account</span>
+    </a>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/account.js"></script>
+</body>
+</html>

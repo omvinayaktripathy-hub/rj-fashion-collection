@@ -1,0 +1,31 @@
+{
+  "name": "rj-fashion-collection",
+  "version": "1.0.0",
+  "description": "Production-style full-stack Indian fashion e-commerce platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "ecommerce",
+    "fashion",
+    "sarees",
+    "jewelry",
+    "fullstack",
+    "express",
+    "sqlite"
+  ],
+  "author": "RJ Fashion Collection",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2",
+    "nodemailer": "^10.0.10",
+    "razorpay": "^2.9.8"
+  }
+}

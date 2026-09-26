@@ -1,0 +1,198 @@
+/* ===================================================================
+   RJ FASHION COLLECTION - RESPONSIVE STYLES
+   Breakpoints: Desktop (1200px), Tablet (992px, 768px), Mobile (576px)
+   =================================================================== */
+
+/* Bottom Navigation for Mobile */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: #ffffff;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+  z-index: 990;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748b;
+  position: relative;
+  text-decoration: none;
+  flex: 1;
+  height: 100%;
+}
+
+.bottom-nav-item.active,
+.bottom-nav-item:hover {
+  color: var(--primary);
+}
+
+.bottom-nav-icon {
+  font-size: 1.25rem;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.bottom-badge {
+  position: absolute;
+  top: -4px;
+  right: -10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+/* Tablet Breakpoint (max-width: 992px) */
+@media (max-width: 992px) {
+  .header-main {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .header-search {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .hero-slider {
+    min-height: 350px;
+  }
+
+  .hero-title {
+    font-size: 2.2rem;
+  }
+}
+
+/* Mobile Breakpoint (max-width: 768px) */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 70px; /* Space for bottom nav */
+  }
+
+  .bottom-nav {
+    display: flex;
+  }
+
+  .top-bar {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  .brand-logo .logo-title {
+    font-size: 1.25rem;
+  }
+
+  .brand-logo .logo-subtitle {
+    font-size: 0.6rem;
+  }
+
+  .nav-links {
+    gap: 16px;
+    font-size: 0.82rem;
+  }
+
+  .hero-slider {
+    min-height: 300px;
+    margin-top: 10px;
+  }
+
+  .hero-content {
+    padding: 30px 20px;
+  }
+
+  .hero-title {
+    font-size: 1.65rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .product-card .product-details {
+    padding: 10px;
+  }
+
+  .product-title {
+    font-size: 0.85rem;
+    height: 2.4em;
+  }
+
+  .price-current {
+    font-size: 1rem;
+  }
+
+  .price-original {
+    font-size: 0.78rem;
+  }
+
+  .product-actions {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .cart-item {
+    grid-template-columns: 80px 1fr;
+  }
+
+  .cart-item-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .btn-card {
+    padding: 6px 4px;
+    font-size: 0.74rem;
+  }
+}

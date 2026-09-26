@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders - RJ Fashion Collection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Handcrafted Indian Fashion
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-main">
+      <a href="/" class="brand-logo">
+        <span class="logo-title">RJ Fashion Collection</span>
+        <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
+      </a>
+
+      <div class="header-search">
+        <form class="header-search-form" action="/shop.html" method="GET">
+          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <button type="submit" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="header-actions">
+        <div class="auth-nav-slot">
+          <a href="/login.html" class="action-btn">
+            <span>👤 Login / Account</span>
+          </a>
+        </div>
+
+        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
+          <span>♡ Wishlist</span>
+          <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
+        </a>
+
+        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+          <span>🛒 Cart</span>
+          <span class="action-badge cart-count-badge" style="display: none;">0</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/categories.html">Categories</a></li>
+          <li><a href="/shop.html?category=sarees">Sarees</a></li>
+          <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
+          <li><a href="/shop.html?offer=true" class="highlight">Offers 🔥</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Orders Content -->
+  <main class="container" style="padding-top: 30px; padding-bottom: 60px; max-width: 900px;">
+    <div class="section-header">
+      <h1 class="section-title">My Orders & Purchases</h1>
+    </div>
+
+    <!-- Empty State -->
+    <div id="orders-empty-state" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">📦</div>
+      <h3>No Orders Placed Yet</h3>
+      <p>You haven't placed any orders yet. Discover our latest royal silk sarees and festive collection.</p>
+      <a href="/shop.html" class="btn btn-primary">START SHOPPING</a>
+    </div>
+
+    <!-- Orders List Container -->
+    <div id="orders-list-container">
+      <p style="color: var(--muted); text-align: center; padding: 40px 0;">Loading your order history...</p>
+    </div>
+  </main>
+
+  <!-- Cancel Order Modal -->
+  <div id="cancel-order-modal" class="modal-backdrop">
+    <div class="modal-window" style="padding: 28px; max-width: 460px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-family: var(--font-serif); font-size: 1.3rem; margin: 0; color: #212121;">Cancel Order</h3>
+        <button onclick="closeCancelModal()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: #878787;">✕</button>
+      </div>
+      <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">
+        Are you sure you want to cancel order <strong id="cancel-modal-order-num" style="color: var(--primary);"></strong>? The items will be returned to store stock.
+      </p>
+
+      <div style="margin-bottom: 18px;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 6px;">Reason for Cancellation</label>
+        <select id="cancel-reason-select" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: #fff;">
+          <option value="Changed my mind">Changed my mind</option>
+          <option value="Ordered by mistake">Ordered by mistake</option>
+          <option value="Need to change delivery address or phone">Need to change delivery address or phone</option>
+          <option value="Found a better outfit / price">Found a better outfit / price</option>
+          <option value="Other reasons">Other reasons</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" class="fk-change-btn" onclick="closeCancelModal()">Keep Order</button>
+        <button type="button" id="confirm-cancel-order-btn" class="btn btn-danger" style="padding: 10px 22px; font-size: 0.88rem; font-weight: 700; background: #dc2626; color: #fff; border: none; border-radius: 4px; cursor: pointer;" onclick="submitOrderCancellation()">
+          CONFIRM CANCELLATION
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer (NO returns, NO newsletter, NO admin login) -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>RJ FASHION COLLECTION</h3>
+          <p>India's premier online boutique for royal bridal sarees, intricate Kundan jewelry, and contemporary festive ethnic ensembles designed for celebrations.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+            <li><a href="/shop.html?offer=true">Offers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/account.html">My Account</a></li>
+            <li><a href="/orders.html">My Orders</a></li>
+            <li><a href="/wishlist.html">Wishlist</a></li>
+            <li><a href="/contact.html">Customer Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="/about.html">About RJ Fashion</a></li>
+            <li><a href="/contact.html">Contact Us</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/about.html#terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="/" class="bottom-nav-item">
+      <span class="bottom-nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/categories.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">📁</span>
+      <span>Categories</span>
+    </a>
+    <a href="/wishlist.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        ♡
+        <span class="bottom-badge wishlist-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Wishlist</span>
+    </a>
+    <a href="/cart.html" class="bottom-nav-item">
+      <span class="bottom-nav-icon">
+        🛒
+        <span class="bottom-badge cart-count-badge" style="display: none;">0</span>
+      </span>
+      <span>Cart</span>
+    </a>
+    <a href="/account.html" class="bottom-nav-item active">
+      <span class="bottom-nav-icon">👤</span>
+      <span>Account</span>
+    </a>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/orders.js"></script>
+</body>
+</html>
