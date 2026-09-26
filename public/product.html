@@ -46,11 +46,15 @@
       </div>
 
       <div class="header-actions">
-        <!-- Dark / Light Mode Toggle -->
-        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Light / Dark Mode" title="Toggle Theme">
-          <span class="theme-toggle-icon">🌙</span>
-          <span class="theme-toggle-text">Dark Mode</span>
-        </button>
+        <!-- Luxury Interactive Theme Switcher Slider -->
+        <div class="theme-switch-container" onclick="toggleTheme()" role="button" tabindex="0" title="Switch Theme">
+          <span class="theme-label-icon">☀️</span>
+          <div class="theme-switch-track">
+            <div class="theme-switch-thumb"></div>
+          </div>
+          <span class="theme-label-icon">🌙</span>
+          <span class="theme-mode-text">Dark Mode</span>
+        </div>
 
         <div class="auth-nav-slot">
           <a href="/login.html" class="action-btn">
@@ -506,6 +510,12 @@
   <script src="/js/app.js?v=20260927"></script>
   <script src="/js/products.js?v=20260927"></script>
   <script src="/js/product-detail.js?v=20260927"></script>
+
+  <!-- Floating Quick Theme Switcher Pill (Always Visible) -->
+  <button id="floating-theme-toggle" class="floating-theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark and Light Mode" title="Toggle Dark/Light Mode">
+    <span class="floating-theme-icon">🌙</span>
+    <span class="floating-theme-text">Dark Mode</span>
+  </button>
 
   <!-- Floating WhatsApp VIP Concierge Button -->
   <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20your%20luxury%20collection." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="Chat on WhatsApp with RJ Fashion Concierge">

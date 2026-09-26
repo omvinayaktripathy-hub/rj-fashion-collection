@@ -2239,7 +2239,137 @@ button {
   gap: 26px;
 }
 
-/* ================= THEME TOGGLE BUTTON ================= */
+/* ================= THEME TOGGLE BUTTON & SLIDER SWITCH ================= */
+.theme-switch-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg-white);
+  border: 1.5px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.theme-switch-container:hover {
+  border-color: var(--gold);
+  box-shadow: 0 4px 12px rgba(197, 155, 39, 0.2);
+  transform: translateY(-1px);
+}
+
+.theme-label-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.theme-switch-track {
+  width: 40px;
+  height: 20px;
+  background: #cbd5e1;
+  border-radius: 20px;
+  position: relative;
+  transition: background-color 0.3s ease;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.theme-switch-thumb {
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-mode-text {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--dark);
+  white-space: nowrap;
+}
+
+/* Dark state for the slider */
+[data-theme="dark"] .theme-switch-container {
+  background: #181824;
+  border-color: #38384e;
+}
+
+[data-theme="dark"] .theme-switch-track {
+  background: linear-gradient(135deg, #700037 0%, #c59b27 100%);
+}
+
+[data-theme="dark"] .theme-switch-thumb {
+  transform: translateX(20px);
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(226, 190, 103, 0.8);
+}
+
+[data-theme="dark"] .theme-mode-text {
+  color: #f1f5f9;
+}
+
+/* ================= FLOATING QUICK THEME TOGGLE ================= */
+.floating-theme-toggle {
+  position: fixed;
+  bottom: 28px;
+  left: 28px;
+  z-index: 9999;
+  background: #ffffff;
+  color: #121214;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 50px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.86rem;
+  letter-spacing: 0.4px;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  outline: none;
+}
+
+.floating-theme-toggle:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 12px 32px rgba(197, 155, 39, 0.3), 0 4px 10px rgba(0, 0, 0, 0.12);
+  border-color: var(--gold);
+}
+
+.floating-theme-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+[data-theme="dark"] .floating-theme-toggle {
+  background: #181824;
+  color: #f8fafc;
+  border-color: #38384e;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5), 0 0 12px rgba(226, 190, 103, 0.25);
+}
+
+[data-theme="dark"] .floating-theme-toggle:hover {
+  border-color: var(--gold);
+  box-shadow: 0 12px 34px rgba(226, 190, 103, 0.4);
+}
+
+@media (max-width: 768px) {
+  .floating-theme-toggle {
+    bottom: 84px;
+    left: 18px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+}
+
 .theme-toggle-btn {
   display: inline-flex;
   align-items: center;
@@ -2267,6 +2397,7 @@ button {
   font-size: 1rem;
   line-height: 1;
 }
+
 
 /* ================= COMPREHENSIVE DARK MODE SYSTEM ================= */
 [data-theme="dark"] {

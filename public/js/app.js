@@ -252,11 +252,39 @@ function toggleTheme() {
 }
 
 function updateThemeToggleUI(theme) {
+  const isDark = theme === 'dark';
+
+  // 1. Update all header theme switch slider containers
+  const switchContainers = document.querySelectorAll('.theme-switch-container');
+  switchContainers.forEach(container => {
+    const text = container.querySelector('.theme-mode-text');
+    if (text) text.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+    container.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+    container.setAttribute('aria-checked', isDark ? 'true' : 'false');
+  });
+
+  // 2. Update floating theme quick toggles
+  const floatingBtns = document.querySelectorAll('.floating-theme-toggle');
+  floatingBtns.forEach(btn => {
+    const icon = btn.querySelector('.floating-theme-icon');
+    const text = btn.querySelector('.floating-theme-text');
+    if (isDark) {
+      if (icon) icon.textContent = '☀️';
+      if (text) text.textContent = 'Light Mode';
+      btn.setAttribute('title', 'Switch to Light Mode');
+    } else {
+      if (icon) icon.textContent = '🌙';
+      if (text) text.textContent = 'Dark Mode';
+      btn.setAttribute('title', 'Switch to Dark Mode');
+    }
+  });
+
+  // 3. Fallback for any legacy buttons
   const btns = document.querySelectorAll('.theme-toggle-btn');
   btns.forEach(btn => {
     const iconSpan = btn.querySelector('.theme-toggle-icon');
     const textSpan = btn.querySelector('.theme-toggle-text');
-    if (theme === 'dark') {
+    if (isDark) {
       if (iconSpan) iconSpan.textContent = '☀️';
       if (textSpan) textSpan.textContent = 'Light Mode';
       btn.setAttribute('title', 'Switch to Light Mode');
