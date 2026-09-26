@@ -2296,78 +2296,34 @@ button {
 }
 
 /* Dark state for the slider */
-[data-theme="dark"] .theme-switch-container {
-  background: #181824;
-  border-color: #38384e;
+[data-theme="dark"] .theme-switch-container,
+.dark-theme .theme-switch-container {
+  background: #181824 !important;
+  border-color: #38384e !important;
 }
 
-[data-theme="dark"] .theme-switch-track {
-  background: linear-gradient(135deg, #700037 0%, #c59b27 100%);
+[data-theme="dark"] .theme-switch-track,
+.dark-theme .theme-switch-track {
+  background: linear-gradient(135deg, #700037 0%, #c59b27 100%) !important;
 }
 
-[data-theme="dark"] .theme-switch-thumb {
-  transform: translateX(20px);
-  background: #ffffff;
-  box-shadow: 0 0 8px rgba(226, 190, 103, 0.8);
+[data-theme="dark"] .theme-switch-thumb,
+.dark-theme .theme-switch-thumb {
+  transform: translateX(20px) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 8px rgba(226, 190, 103, 0.8) !important;
 }
 
-[data-theme="dark"] .theme-mode-text {
-  color: #f1f5f9;
+[data-theme="dark"] .theme-mode-text,
+.dark-theme .theme-mode-text {
+  color: #f1f5f9 !important;
 }
 
-/* ================= FLOATING QUICK THEME TOGGLE ================= */
-.floating-theme-toggle {
-  position: fixed;
-  bottom: 28px;
-  left: 28px;
-  z-index: 9999;
-  background: #ffffff;
-  color: #121214;
-  border: 2px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 18px;
-  border-radius: 50px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  font-weight: 800;
-  font-size: 0.86rem;
-  letter-spacing: 0.4px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  outline: none;
-}
-
-.floating-theme-toggle:hover {
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 12px 32px rgba(197, 155, 39, 0.3), 0 4px 10px rgba(0, 0, 0, 0.12);
-  border-color: var(--gold);
-}
-
-.floating-theme-icon {
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-[data-theme="dark"] .floating-theme-toggle {
-  background: #181824;
-  color: #f8fafc;
-  border-color: #38384e;
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5), 0 0 12px rgba(226, 190, 103, 0.25);
-}
-
-[data-theme="dark"] .floating-theme-toggle:hover {
-  border-color: var(--gold);
-  box-shadow: 0 12px 34px rgba(226, 190, 103, 0.4);
-}
-
-@media (max-width: 768px) {
-  .floating-theme-toggle {
-    bottom: 84px;
-    left: 18px;
-    padding: 10px 14px;
-    font-size: 0.8rem;
-  }
+/* ================= FLOATING QUICK THEME TOGGLE (DISABLED - SINGLE HEADER SWITCH ONLY) ================= */
+.floating-theme-toggle,
+.theme-toggle-top-btn,
+.theme-nav-btn {
+  display: none !important;
 }
 
 .theme-toggle-btn {

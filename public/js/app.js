@@ -236,20 +236,29 @@ function initTheme() {
 }
 
 function applyTheme(theme) {
-  if (theme === 'dark') {
+  const isDark = theme === 'dark';
+  if (isDark) {
     document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('rjfc_theme', 'dark');
+    document.documentElement.classList.add('dark-theme');
+    if (document.body) document.body.classList.add('dark-theme');
+    try { localStorage.setItem('rjfc_theme', 'dark'); } catch(e){}
   } else {
     document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('rjfc_theme', 'light');
+    document.documentElement.classList.remove('dark-theme');
+    if (document.body) document.body.classList.remove('dark-theme');
+    try { localStorage.setItem('rjfc_theme', 'light'); } catch(e){}
   }
   updateThemeToggleUI(theme);
 }
 
 function toggleTheme() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
   applyTheme(isDark ? 'light' : 'dark');
 }
+
+window.applyTheme = applyTheme;
+window.toggleTheme = toggleTheme;
+window.updateAllThemeToggles = updateThemeToggleUI;
 
 function updateThemeToggleUI(theme) {
   const isDark = theme === 'dark';

@@ -30,10 +30,7 @@
     window.updateAllThemeToggles = function(theme) {
       var isDark = theme === 'dark';
       document.querySelectorAll('.theme-mode-text').forEach(function(el) {
-        el.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-      });
-      document.querySelectorAll('.theme-toggle-icon, .floating-theme-icon').forEach(function(el) {
-        el.textContent = isDark ? '☀️' : '🌙';
+        el.textContent = isDark ? 'Dark Mode' : 'Light Mode';
       });
       document.querySelectorAll('.theme-switch-container').forEach(function(el) {
         el.setAttribute('aria-checked', isDark ? 'true' : 'false');
@@ -53,27 +50,22 @@
     } catch(e){}
 
     document.addEventListener('DOMContentLoaded', function() {
-      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      if (isDark && document.body) document.body.classList.add('dark-theme');
       window.updateAllThemeToggles(isDark ? 'dark' : 'light');
     });
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20260927-3">
-  <link rel="stylesheet" href="/css/responsive.css?v=20260927-3">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-4">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-4">
 </head>
 <body>
 
-  <!-- Top Announcement Bar with Theme Switcher -->
+  <!-- Top Announcement Bar -->
   <div class="top-bar">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <div><span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Indian Ethnic Wear</div>
-      <button class="theme-toggle-top-btn" onclick="toggleTheme()" aria-label="Toggle Dark or Light Mode" title="Toggle Dark/Light Mode" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); color: #ffffff; padding: 3px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;">
-        <span class="theme-toggle-icon">🌙</span>
-        <span class="theme-mode-text">Dark Mode</span>
-      </button>
-    </div>
+    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Indian Ethnic Wear
   </div>
 
   <!-- Site Header -->
@@ -561,12 +553,6 @@
   <script src="/js/app.js?v=20260927"></script>
   <script src="/js/products.js?v=20260927"></script>
   <script src="/js/product-detail.js?v=20260927"></script>
-
-  <!-- Floating Quick Theme Switcher Pill (Always Visible) -->
-  <button id="floating-theme-toggle" class="floating-theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark and Light Mode" title="Toggle Dark/Light Mode">
-    <span class="floating-theme-icon">🌙</span>
-    <span class="floating-theme-text">Dark Mode</span>
-  </button>
 
   <!-- Floating WhatsApp VIP Concierge Button -->
   <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20your%20luxury%20collection." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="Chat on WhatsApp with RJ Fashion Concierge">

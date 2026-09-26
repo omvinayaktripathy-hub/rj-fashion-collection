@@ -30,10 +30,7 @@
     window.updateAllThemeToggles = function(theme) {
       var isDark = theme === 'dark';
       document.querySelectorAll('.theme-mode-text').forEach(function(el) {
-        el.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-      });
-      document.querySelectorAll('.theme-toggle-icon, .floating-theme-icon').forEach(function(el) {
-        el.textContent = isDark ? '☀️' : '🌙';
+        el.textContent = isDark ? 'Dark Mode' : 'Light Mode';
       });
       document.querySelectorAll('.theme-switch-container').forEach(function(el) {
         el.setAttribute('aria-checked', isDark ? 'true' : 'false');
@@ -53,15 +50,16 @@
     } catch(e){}
 
     document.addEventListener('DOMContentLoaded', function() {
-      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      if (isDark && document.body) document.body.classList.add('dark-theme');
       window.updateAllThemeToggles(isDark ? 'dark' : 'light');
     });
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20260927-3">
-  <link rel="stylesheet" href="/css/responsive.css?v=20260927-3">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-4">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-4">
   <style>
     .auth-card {
       max-width: 440px;
@@ -125,15 +123,9 @@
 </head>
 <body>
 
-  <!-- Top Announcement Bar with Theme Switcher -->
+  <!-- Top Announcement Bar -->
   <div class="top-bar">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <div><span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Indian Ethnic Wear</div>
-      <button class="theme-toggle-top-btn" onclick="toggleTheme()" aria-label="Toggle Dark or Light Mode" title="Toggle Dark/Light Mode" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); color: #ffffff; padding: 3px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;">
-        <span class="theme-toggle-icon">🌙</span>
-        <span class="theme-mode-text">Dark Mode</span>
-      </button>
-    </div>
+    <span>FREE EXPRESS SHIPPING</span> on orders above ₹999 | 100% Authentic Indian Ethnic Wear
   </div>
 
   <!-- Site Header -->
@@ -157,11 +149,15 @@
       </div>
 
       <div class="header-actions">
-        <!-- Dark / Light Mode Toggle -->
-        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Light / Dark Mode" title="Toggle Theme">
-          <span class="theme-toggle-icon">🌙</span>
-          <span class="theme-toggle-text">Dark Mode</span>
-        </button>
+        <!-- Luxury Interactive Theme Switcher Slider -->
+        <div class="theme-switch-container" onclick="toggleTheme()" role="button" tabindex="0" title="Switch Theme">
+          <span class="theme-label-icon">☀️</span>
+          <div class="theme-switch-track">
+            <div class="theme-switch-thumb"></div>
+          </div>
+          <span class="theme-label-icon">🌙</span>
+          <span class="theme-mode-text">Dark Mode</span>
+        </div>
 
         <div class="auth-nav-slot">
           <a href="/login.html" class="action-btn">

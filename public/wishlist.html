@@ -4,11 +4,62 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Wishlist - RJ Fashion Collection</title>
+  <script>
+    // Instant Theme Controller - zero delay, zero external dependencies
+    window.applyTheme = function(theme) {
+      var isDark = theme === 'dark';
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+        if (document.body) document.body.classList.add('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'dark'); } catch(e){}
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.documentElement.classList.remove('dark-theme');
+        if (document.body) document.body.classList.remove('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'light'); } catch(e){}
+      }
+      window.updateAllThemeToggles(theme);
+    };
+
+    window.toggleTheme = function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      window.applyTheme(isDark ? 'light' : 'dark');
+    };
+
+    window.updateAllThemeToggles = function(theme) {
+      var isDark = theme === 'dark';
+      document.querySelectorAll('.theme-mode-text').forEach(function(el) {
+        el.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+      });
+      document.querySelectorAll('.theme-switch-container').forEach(function(el) {
+        el.setAttribute('aria-checked', isDark ? 'true' : 'false');
+        el.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+      });
+    };
+
+    // Run immediately on parse to prevent flash
+    try {
+      var saved = localStorage.getItem('rjfc_theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var activeTheme = saved ? saved : (prefersDark ? 'dark' : 'light');
+      if (activeTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+      }
+    } catch(e){}
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      if (isDark && document.body) document.body.classList.add('dark-theme');
+      window.updateAllThemeToggles(isDark ? 'dark' : 'light');
+    });
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-4">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-4">
 </head>
 <body>
 
@@ -38,6 +89,16 @@
       </div>
 
       <div class="header-actions">
+        <!-- Luxury Interactive Theme Switcher Slider -->
+        <div class="theme-switch-container" onclick="toggleTheme()" role="button" tabindex="0" title="Switch Theme">
+          <span class="theme-label-icon">☀️</span>
+          <div class="theme-switch-track">
+            <div class="theme-switch-thumb"></div>
+          </div>
+          <span class="theme-label-icon">🌙</span>
+          <span class="theme-mode-text">Dark Mode</span>
+        </div>
+
         <div class="auth-nav-slot">
           <a href="/login.html" class="action-btn">
             <span>👤 Login / Account</span>
