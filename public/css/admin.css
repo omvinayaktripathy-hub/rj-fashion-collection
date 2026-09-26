@@ -719,50 +719,77 @@ body.admin-body {
   color: #166534;
 }
 
-/* ================= INLINE FAST STOCK ADJUSTER ================= */
+/* ================= INLINE FAST STOCK ADJUSTER & COMPACT STEPPER ================= */
+.compact-stock-stepper,
 .stock-adjuster {
-  display: inline-flex;
-  align-items: center;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 6px;
-  background: #ffffff;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  display: inline-flex !important;
+  align-items: center !important;
+  width: auto !important;
+  max-width: 86px !important;
+  height: 28px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  background: #ffffff !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  flex-shrink: 0 !important;
 }
 
+.compact-stock-stepper:hover,
+.stock-adjuster:hover {
+  border-color: #94a3b8 !important;
+}
+
+.stepper-btn,
 .stock-adjust-btn {
-  background: #f8fafc;
-  border: none;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.95rem;
-  color: #334155;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
+  background: #f8fafc !important;
+  border: none !important;
+  width: 26px !important;
+  min-width: 26px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 800 !important;
+  font-size: 0.95rem !important;
+  color: #334155 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  user-select: none !important;
+  padding: 0 !important;
+  line-height: 1 !important;
 }
 
+.stepper-btn:hover,
 .stock-adjust-btn:hover {
-  background: #e2e8f0;
-  color: var(--admin-primary);
+  background: #e2e8f0 !important;
+  color: var(--admin-primary) !important;
 }
 
+.stepper-btn:active,
 .stock-adjust-btn:active {
-  background: #cbd5e1;
-  transform: scale(0.92);
+  background: #cbd5e1 !important;
+  transform: scale(0.92) !important;
 }
 
+.stepper-val,
 .stock-qty-display {
-  min-width: 32px;
-  text-align: center;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: #1e293b;
-  padding: 0 4px;
+  min-width: 32px !important;
+  max-width: 34px !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+  color: #1e293b !important;
+  padding: 0 2px !important;
+  user-select: none !important;
+}
+
+.stock-control-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 5px !important;
+  width: fit-content !important;
 }
 
 /* ================= WHATSAPP CONCIERGE BUTTON ================= */

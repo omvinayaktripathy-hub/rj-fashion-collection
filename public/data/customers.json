@@ -1,0 +1,60 @@
+{
+  "success": true,
+  "count": 6,
+  "customers": [
+    {
+      "id": 1,
+      "name": "Priyanka Sharma",
+      "email": "priyanka.sharma@example.com",
+      "phone": "+91 98201 44521",
+      "created_at": "2026-08-14 11:20:00",
+      "order_count": 4,
+      "total_spent": 14999
+    },
+    {
+      "id": 2,
+      "name": "Rohit Verma",
+      "email": "rohit.verma@example.com",
+      "phone": "+91 98450 12398",
+      "created_at": "2026-08-28 15:45:00",
+      "order_count": 2,
+      "total_spent": 8499
+    },
+    {
+      "id": 3,
+      "name": "Ananya Roy",
+      "email": "ananya.roy@example.com",
+      "phone": "+91 97110 88214",
+      "created_at": "2026-09-02 09:12:00",
+      "order_count": 3,
+      "total_spent": 12899
+    },
+    {
+      "id": 4,
+      "name": "Deepak Patel",
+      "email": "deepak.patel@example.com",
+      "phone": "+91 99042 66321",
+      "created_at": "2026-09-10 17:30:00",
+      "order_count": 1,
+      "total_spent": 4299
+    },
+    {
+      "id": 5,
+      "name": "Kavita Singhania",
+      "email": "kavita.singhania@example.com",
+      "phone": "+91 98190 77112",
+      "created_at": "2026-09-18 14:05:00",
+      "order_count": 5,
+      "total_spent": 28950
+    },
+    {
+      "id": 6,
+      "name": "Siddharth Rao",
+      "email": "siddharth.rao@example.com",
+      "phone": "+91 96500 33219",
+      "created_at": "2026-09-22 18:40:00",
+      "order_count": 2,
+      "total_spent": 6799
+    }
+  ]
+}
