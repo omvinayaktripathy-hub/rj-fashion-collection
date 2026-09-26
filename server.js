@@ -17,6 +17,7 @@ const orderRoutes = require('./routes/orders');
 const bannerRoutes = require('./routes/banners');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payment');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -67,6 +68,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Private Admin URL route
 app.get('/admin', (req, res) => {
