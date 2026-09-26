@@ -8,6 +8,12 @@ jspm_packages/
 .env.development.local
 .env.test.local
 .env.production.local
+serviceAccountKey.json
+*serviceAccount*.json
+*.pem
+*.key
+*.cert
+credentials.json
 
 # SQLite Database journal & lock files
 database/*.sqlite-journal

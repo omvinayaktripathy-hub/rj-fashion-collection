@@ -7,23 +7,36 @@ let currentOrders = [];
 
 // Initialize Admin
 async function initAdmin() {
+  // Check persistent session first
   try {
-    const res = await fetch(`${API_BASE}/me`);
-    const data = await res.json();
-
-    if (data.success && data.user && data.user.role === 'admin') {
-      adminUser = data.user;
+    const saved = sessionStorage.getItem('rjfc_admin_session');
+    if (saved) {
+      adminUser = JSON.parse(saved);
       hideAdminLoginScreen();
       document.getElementById('admin-topbar-username').textContent = adminUser.name;
       loadDashboardStats();
-      loadCategoriesList(); // cached for dropdowns
-    } else {
-      showAdminLoginScreen();
+      loadCategoriesList();
+      return;
     }
-  } catch (err) {
-    console.error('Admin init failed:', err);
-    showAdminLoginScreen();
-  }
+  } catch (e) {}
+
+  try {
+    const res = await fetch(`${API_BASE}/me`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.user && data.user.role === 'admin') {
+        adminUser = data.user;
+        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+        hideAdminLoginScreen();
+        document.getElementById('admin-topbar-username').textContent = adminUser.name;
+        loadDashboardStats();
+        loadCategoriesList();
+        return;
+      }
+    }
+  } catch (err) {}
+
+  showAdminLoginScreen();
 }
 
 function showAdminLoginScreen() {
@@ -46,44 +59,61 @@ async function handleAdminLogin(e) {
   const email = document.getElementById('admin-email').value.trim();
   const password = document.getElementById('admin-password').value;
 
+  // 1. Try server API login first (localhost or node server)
   try {
     const res = await fetch(`${API_BASE}/auth/admin-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    const data = await res.json();
-
-    if (data.success && data.user?.role === 'admin') {
-      adminUser = data.user;
-      hideAdminLoginScreen();
-      document.getElementById('admin-topbar-username').textContent = adminUser.name;
-      showToast('Admin access granted', 'success');
-      loadDashboardStats();
-    } else {
-      document.getElementById('admin-login-error').textContent = data.message || 'Invalid administrator credentials';
-      document.getElementById('admin-login-error').style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Sign In to Admin Portal';
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.user?.role === 'admin') {
+        adminUser = data.user;
+        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+        hideAdminLoginScreen();
+        document.getElementById('admin-topbar-username').textContent = adminUser.name;
+        showToast('Admin access granted! 👑', 'success');
+        loadDashboardStats();
+        return;
+      }
     }
   } catch (err) {
-    document.getElementById('admin-login-error').textContent = 'Server connection error';
-    document.getElementById('admin-login-error').style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Sign In to Admin Portal';
+    // Server not available (e.g. Netlify static hosting)
   }
+
+  // 2. Direct verification for Owner / Super Admin
+  if (email.toLowerCase() === 'omvinayakwork@gmail.com' && password === 'OMvinayak@01092003') {
+    adminUser = {
+      id: 1,
+      name: 'RJ Fashion Admin (Om Vinayak)',
+      email: 'omvinayakwork@gmail.com',
+      role: 'admin',
+      uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1'
+    };
+    sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+    hideAdminLoginScreen();
+    document.getElementById('admin-topbar-username').textContent = adminUser.name;
+    showToast('Admin access granted! Welcome Om Vinayak 👑', 'success');
+    loadDashboardStats();
+    return;
+  }
+
+  document.getElementById('admin-login-error').textContent = 'Invalid administrator credentials. Please check your email and password.';
+  document.getElementById('admin-login-error').style.display = 'block';
+  btn.disabled = false;
+  btn.textContent = 'Sign In to Admin Portal';
 }
 
 // Admin Logout
 async function handleAdminLogout() {
   try {
     await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
-    adminUser = null;
-    showToast('Logged out of admin portal', 'info');
-    showAdminLoginScreen();
-  } catch (err) {
-    showAdminLoginScreen();
-  }
+  } catch (err) {}
+  sessionStorage.removeItem('rjfc_admin_session');
+  adminUser = null;
+  showToast('Logged out of admin portal', 'info');
+  showAdminLoginScreen();
 }
 
 // Switch Admin Section
@@ -128,18 +158,56 @@ function switchAdminTab(tabName) {
 // 1. Dashboard Stats
 async function loadDashboardStats() {
   try {
-    const res = await fetch(`${API_BASE}/admin/stats`);
-    const data = await res.json();
-    if (!data.success) return;
+    let stats = null;
+    let recentOrders = [];
+    let lowStockItems = [];
 
-    const { stats, recentOrders, lowStockItems } = data;
+    try {
+      const res = await fetch(`${API_BASE}/admin/stats`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          stats = data.stats;
+          recentOrders = data.recentOrders || [];
+          lowStockItems = data.lowStockItems || [];
+        }
+      }
+    } catch (_) {}
 
-    document.getElementById('stat-total-sales').textContent = formatPrice(stats.totalSales);
-    document.getElementById('stat-total-orders').textContent = stats.totalOrders;
-    document.getElementById('stat-total-products').textContent = stats.totalProducts;
-    document.getElementById('stat-total-customers').textContent = stats.totalCustomers;
-    document.getElementById('stat-pending-orders').textContent = stats.pendingOrders;
-    document.getElementById('stat-low-stock').textContent = stats.lowStockCount;
+    // Fallback if backend API is not available (e.g. Netlify static hosting)
+    if (!stats) {
+      let prods = [];
+      try {
+        const pRes = await fetch('/data/products.json');
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          prods = pData.products || [];
+        }
+      } catch (_) {}
+
+      const inStock = prods.filter(p => (p.stock || 0) > 0);
+      const lowStock = prods.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 4);
+      const outOfStock = prods.filter(p => (p.stock || 0) <= 0);
+
+      stats = {
+        totalSales: 0,
+        totalOrders: 0,
+        totalProducts: prods.length,
+        totalCustomers: 1,
+        pendingOrders: 0,
+        lowStockCount: lowStock.length,
+        outOfStockCount: outOfStock.length
+      };
+      recentOrders = [];
+      lowStockItems = lowStock.slice(0, 5);
+    }
+
+    document.getElementById('stat-total-sales').textContent = formatPrice(stats.totalSales || 0);
+    document.getElementById('stat-total-orders').textContent = stats.totalOrders || 0;
+    document.getElementById('stat-total-products').textContent = stats.totalProducts || 0;
+    document.getElementById('stat-total-customers').textContent = stats.totalCustomers || 0;
+    document.getElementById('stat-pending-orders').textContent = stats.pendingOrders || 0;
+    document.getElementById('stat-low-stock').textContent = stats.lowStockCount || 0;
     const outOfStockEl = document.getElementById('stat-out-of-stock');
     if (outOfStockEl) outOfStockEl.textContent = stats.outOfStockCount || 0;
 
@@ -226,11 +294,45 @@ async function loadAdminProducts() {
   if (department) q.append('department', department);
 
   try {
-    const res = await fetch(`${API_BASE}/admin/products?${q.toString()}`);
-    const data = await res.json();
-    if (!data.success) return;
+    let prods = null;
+    try {
+      const res = await fetch(`${API_BASE}/admin/products?${q.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.products)) {
+          prods = data.products;
+        }
+      }
+    } catch (_) {}
 
-    currentProducts = data.products;
+    if (!prods) {
+      // Fallback for Netlify static hosting
+      const pRes = await fetch('/data/products.json');
+      const pData = await pRes.json();
+      prods = pData.products || [];
+
+      // Filter locally
+      if (search) {
+        const sLower = search.toLowerCase();
+        prods = prods.filter(p => 
+          (p.name && p.name.toLowerCase().includes(sLower)) ||
+          (p.brand && p.brand.toLowerCase().includes(sLower)) ||
+          (p.subcategory && p.subcategory.toLowerCase().includes(sLower))
+        );
+      }
+      if (department) {
+        prods = prods.filter(p => (p.department || '').toLowerCase() === department.toLowerCase());
+      }
+      if (stockStatus === 'in') {
+        prods = prods.filter(p => (p.stock || 0) > 0);
+      } else if (stockStatus === 'low') {
+        prods = prods.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 4);
+      } else if (stockStatus === 'out') {
+        prods = prods.filter(p => (p.stock || 0) <= 0);
+      }
+    }
+
+    currentProducts = prods;
 
     if (summaryEl) {
       const inStockCount = currentProducts.filter(p => p.stock > 0).length;
