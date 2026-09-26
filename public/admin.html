@@ -132,6 +132,11 @@
           <span>⚙️</span> Settings
         </button>
       </li>
+      <li class="admin-nav-item" id="nav-notifications">
+        <button onclick="switchAdminTab('notifications')">
+          <span>🔔</span> Cloud Messaging
+        </button>
+      </li>
     </ul>
 
     <div class="admin-nav-footer">
@@ -448,6 +453,67 @@
             <div><strong>Database:</strong> SQLite (Migration-Ready for PostgreSQL/MySQL)</div>
             <div><strong>Password Security:</strong> Bcrypt Salted Hashing (Rounds: 10)</div>
             <div><strong>Admin Access URL:</strong> <code>/admin</code> (Private protected portal)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 8: CLOUD MESSAGING (FIREBASE) -->
+      <section id="pane-notifications" class="admin-section-pane" style="display: none;">
+        <div class="admin-card" style="padding: 28px; max-width: 800px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 4px;">🔥 Firebase Cloud Messaging (FCM)</h2>
+              <p style="font-size: 0.85rem; color: #64748b;">Send instant web push notifications to customer browsers and mobile devices.</p>
+            </div>
+            <span style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+              Project: rj-fashion-app (Connected)
+            </span>
+          </div>
+
+          <!-- Notification Dispatch Form -->
+          <form onsubmit="handleSendAdminNotification(event)" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="form-group">
+              <label style="font-size: 0.85rem; font-weight: 700; color: #334155;">Notification Title *</label>
+              <input type="text" id="notif-title" required value="Festive Royal Offer — 50% Off Sarees 🪷" style="padding: 10px 14px; border: 1px solid var(--admin-border); border-radius: 6px; font-size: 0.95rem; width: 100%;">
+            </div>
+
+            <div class="form-group">
+              <label style="font-size: 0.85rem; font-weight: 700; color: #334155;">Message Body *</label>
+              <textarea id="notif-body" rows="3" required style="padding: 10px 14px; border: 1px solid var(--admin-border); border-radius: 6px; font-size: 0.92rem; width: 100%; font-family: inherit;">Handcrafted Kanjivaram and Banarasi silk sarees ready to ship across India with special festive discounts!</textarea>
+            </div>
+
+            <div class="form-group">
+              <label style="font-size: 0.85rem; font-weight: 700; color: #334155;">Click Action URL</label>
+              <input type="text" id="notif-url" value="/shop.html?offer=true" style="padding: 10px 14px; border: 1px solid var(--admin-border); border-radius: 6px; font-size: 0.95rem; width: 100%;">
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap;">
+              <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                <span>🚀</span> Send Push Notification to Customers
+              </button>
+              <button type="button" class="btn btn-outline" onclick="triggerDeviceTestNotification()" style="padding: 10px 20px; font-size: 0.9rem; font-weight: 700; border: 1px solid #cbd5e1; color: #334155; display: inline-flex; align-items: center; gap: 8px;">
+                <span>🔔</span> Test My Device (Show Notification Now)
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Help Guide for Firebase Console settings/cloudmessaging -->
+        <div class="admin-card" style="padding: 24px; max-width: 800px; background: #fafafa; border: 1px dashed #cbd5e1;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; color: #1e293b;">
+            💡 Why does Firebase Console (settings/cloudmessaging) look empty?
+          </h3>
+          <div style="font-size: 0.88rem; color: #475569; line-height: 1.7;">
+            <p style="margin-bottom: 10px;">
+              In the new Google Firebase Console, the Cloud Messaging page does not show data until you generate your <strong>Web Push Certificate</strong>. Here is how to complete it in 30 seconds:
+            </p>
+            <ol style="margin-left: 20px; margin-bottom: 14px;">
+              <li style="margin-bottom: 6px;">Open <a href="https://console.firebase.google.com/u/0/project/rj-fashion-app/settings/cloudmessaging" target="_blank" style="color: #6d28d9; font-weight: 700;">Firebase Console: Cloud Messaging</a></li>
+              <li style="margin-bottom: 6px;">Scroll down to <strong>"Web configuration"</strong> section.</li>
+              <li style="margin-bottom: 6px;">Under <strong>"Web Push certificates"</strong>, click the white button: <strong>"Generate key pair"</strong>.</li>
+              <li style="margin-bottom: 6px;">That creates your live public key pair (VAPID key) so Chrome, Safari, and Edge can deliver push notifications directly!</li>
+            </ol>
           </div>
         </div>
       </section>

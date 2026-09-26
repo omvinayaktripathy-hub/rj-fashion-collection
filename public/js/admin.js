@@ -905,3 +905,70 @@ document.addEventListener('DOMContentLoaded', () => {
   const bannerForm = document.getElementById('banner-form');
   if (bannerForm) bannerForm.addEventListener('submit', handleBannerFormSubmit);
 });
+
+// ─────────────────────────────────────────────────────────────
+// Firebase Cloud Messaging Notification Handlers
+// ─────────────────────────────────────────────────────────────
+async function handleSendAdminNotification(e) {
+  e.preventDefault();
+  const title = document.getElementById('notif-title').value.trim();
+  const body = document.getElementById('notif-body').value.trim();
+  const url = document.getElementById('notif-url').value.trim();
+
+  try {
+    showToast('Sending Firebase push notification...', 'info');
+    const res = await fetch(`${API_BASE}/notifications/test-push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, body, url })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Push notification dispatched! 🚀', 'success');
+      triggerBrowserNotification(title, body, url);
+    } else {
+      showToast(data.message || 'Notification queued.', 'info');
+    }
+  } catch (err) {
+    showToast('Error triggering notification: ' + err.message, 'error');
+  }
+}
+
+async function triggerDeviceTestNotification() {
+  if (!('Notification' in window)) {
+    alert('This browser does not support desktop notifications.');
+    return;
+  }
+
+  const title = document.getElementById('notif-title')?.value || 'RJ Fashion Collection ✨';
+  const body = document.getElementById('notif-body')?.value || 'Your festive royal collection order has been dispatched!';
+  const url = document.getElementById('notif-url')?.value || '/orders.html';
+
+  if (Notification.permission === 'granted') {
+    triggerBrowserNotification(title, body, url);
+    showToast('Notification displayed on your device! 🔔', 'success');
+  } else if (Notification.permission !== 'denied') {
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      triggerBrowserNotification(title, body, url);
+      showToast('Notification displayed on your device! 🔔', 'success');
+    } else {
+      showToast('Notification permission was blocked in browser settings.', 'warning');
+    }
+  } else {
+    showToast('Please enable notifications in your browser address bar permissions.', 'warning');
+  }
+}
+
+function triggerBrowserNotification(title, body, url) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    const n = new Notification(title, {
+      body: body,
+      icon: '/images/favicon.png'
+    });
+    n.onclick = () => {
+      window.focus();
+      window.location.href = url || '/';
+    };
+  }
+}
