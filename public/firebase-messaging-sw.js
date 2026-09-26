@@ -1,12 +1,11 @@
 // Firebase Cloud Messaging Service Worker
-// Project: rj-fashion-app
+// Project: rj-fashion-collection
 
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  projectId: 'rj-fashion-app',
-  messagingSenderId: '1068297491024'
+  projectId: 'rj-fashion-collection'
 });
 
 const messaging = firebase.messaging();

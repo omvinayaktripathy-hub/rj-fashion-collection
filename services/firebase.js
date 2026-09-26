@@ -1,5 +1,5 @@
 // RJ FASHION COLLECTION - Firebase Integration Service
-// Project: rj-fashion-app
+// Project: rj-fashion-collection
 // Features: Firestore Database, Cloud Messaging (FCM Push Notifications), Cloud Storage
 
 const path = require('node:path');
@@ -9,7 +9,7 @@ let admin = null;
 let db = null;
 let messaging = null;
 
-const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'rj-fashion-app';
+const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID || 'rj-fashion-collection';
 const serviceAccountPath = path.join(__dirname, '..', 'serviceAccountKey.json');
 
 function initFirebase() {
