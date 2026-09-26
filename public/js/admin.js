@@ -49,6 +49,70 @@ function hideAdminLoginScreen() {
   if (screen) screen.style.display = 'none';
 }
 
+// 1-Click Google Sign In for Super Admin
+async function handleAdminGoogleLogin() {
+  const btn = document.getElementById('admin-google-btn');
+  const errEl = document.getElementById('admin-login-error');
+  if (errEl) errEl.style.display = 'none';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.75';
+    btn.innerHTML = 'Signing in with Google...';
+  }
+
+  try {
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+      throw new Error('Firebase Authentication is loading. Please try again.');
+    }
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await firebase.auth().signInWithPopup(provider);
+    const user = result.user;
+
+    if (user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
+      adminUser = {
+        id: 1,
+        name: 'RJ Fashion Admin (Om Vinayak)',
+        email: 'omvinayakwork@gmail.com',
+        role: 'admin',
+        uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1'
+      };
+      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+      hideAdminLoginScreen();
+      document.getElementById('admin-topbar-username').textContent = adminUser.name;
+      showToast('Admin access granted! Welcome Om Vinayak 👑', 'success');
+      loadDashboardStats();
+      loadAdminProducts();
+      return;
+    } else {
+      if (errEl) {
+        errEl.textContent = `Access denied for ${user.email}. Only the owner (omvinayakwork@gmail.com) has admin rights.`;
+        errEl.style.display = 'block';
+      }
+    }
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message || 'Google Admin sign-in failed.';
+      errEl.style.display = 'block';
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        <span>Sign In with Owner Google Account</span>
+      `;
+    }
+  }
+}
+
 // Admin Login Form Submit
 async function handleAdminLogin(e) {
   e.preventDefault();
