@@ -138,6 +138,17 @@
     margin-bottom: 18px;
   }
 
+  .theme-toggle-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    .theme-toggle-btn .theme-toggle-text {
+      display: none;
+    }
+  }
+
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;

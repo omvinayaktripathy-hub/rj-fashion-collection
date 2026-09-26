@@ -4,11 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RJ Fashion Collection - Premium Indian Sarees, Jewelry & Ethnic Wear</title>
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('rjfc_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      } catch(e){}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-2">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-2">
 </head>
 <body>
 
@@ -41,6 +49,12 @@
 
       <!-- Action Buttons -->
       <div class="header-actions">
+        <!-- Dark / Light Mode Toggle -->
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Light / Dark Mode" title="Toggle Theme">
+          <span class="theme-toggle-icon">🌙</span>
+          <span class="theme-toggle-text">Dark Mode</span>
+        </button>
+
         <!-- Account / Sign In Slot -->
         <div class="auth-nav-slot">
           <a href="/login.html" class="action-btn">
@@ -594,32 +608,6 @@
         <!-- Rendered dynamically -->
       </div>
     </section>
-
-    <!-- Brand Values Grid -->
-    <section class="section" style="border-top: 1px solid var(--border); padding-top: 40px;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; text-align: center;">
-        <div style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid var(--border);">
-          <div style="font-size: 2rem; margin-bottom: 8px;">✨</div>
-          <h4 style="font-weight: 700; margin-bottom: 6px;">Authentic Craftsmanship</h4>
-          <p style="font-size: 0.85rem; color: var(--muted);">Direct from skilled artisans with authentic certifications and pure fabrics.</p>
-        </div>
-        <div style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid var(--border);">
-          <div style="font-size: 2rem; margin-bottom: 8px;">🚚</div>
-          <h4 style="font-weight: 700; margin-bottom: 6px;">Fast Pan-India Delivery</h4>
-          <p style="font-size: 0.85rem; color: var(--muted);">Dispatched swiftly with live tracking on all orders across India.</p>
-        </div>
-        <div style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid var(--border);">
-          <div style="font-size: 2rem; margin-bottom: 8px;">💳</div>
-          <h4 style="font-weight: 700; margin-bottom: 6px;">Flexible Payment Options</h4>
-          <p style="font-size: 0.85rem; color: var(--muted);">Convenient Cash on Delivery and verified secure checkout flows.</p>
-        </div>
-        <div style="background: #fff; padding: 24px; border-radius: 8px; border: 1px solid var(--border);">
-          <div style="font-size: 2rem; margin-bottom: 8px;">💬</div>
-          <h4 style="font-weight: 700; margin-bottom: 6px;">Dedicated Support</h4>
-          <p style="font-size: 0.85rem; color: var(--muted);">Customer care team ready to assist with sizing and product advice.</p>
-        </div>
-      </div>
-    </section>
   </main>
 
   <!-- Site Footer -->
@@ -709,35 +697,49 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/firebase-config.js"></script>
-  <script src="/js/app.js"></script>
-  <script src="/js/products.js"></script>
+  <script src="/firebase-config.js?v=20260927-2"></script>
+  <script src="/js/app.js?v=20260927-2"></script>
+  <script src="/js/products.js?v=20260927-2"></script>
   <script>
-    // Load Homepage Dynamic Products
+    // Load Homepage Dynamic Products with robust direct static fallback
     async function loadHomepageSections() {
       try {
         let featProducts = [];
         let newProducts = [];
 
+        // 1. Direct Static Fetch (Fastest & Guaranteed on Firebase Hosting)
         try {
-          const featRes = await fetch(`${API_BASE}/products?featured=true&limit=4`);
-          if (featRes.ok) {
-            const featData = await featRes.json();
-            if (featData.success) featProducts = featData.products;
+          const res = await fetch('/data/products.json?v=20260927');
+          if (res.ok) {
+            const data = await res.json();
+            const list = data.products || [];
+            featProducts = list.filter(p => p.featured).slice(0, 4);
+            if (featProducts.length < 4) featProducts = list.slice(0, 4);
+            newProducts = list.filter(p => p.newArrival).slice(0, 4);
+            if (newProducts.length < 4) newProducts = list.slice(4, 8);
           }
-          const newRes = await fetch(`${API_BASE}/products?newArrival=true&limit=4`);
-          if (newRes.ok) {
-            const newData = await newRes.json();
-            if (newData.success) newProducts = newData.products;
-          }
-        } catch (e) {
-          // Netlify static fallback
+        } catch (e1) {
+          console.warn('Static data fetch fallback:', e1);
+        }
+
+        // 2. Node API Fallback (if server endpoints running)
+        if (featProducts.length === 0) {
           try {
-            const fb = await fetch('/data/products.json');
-            const d = await fb.json();
-            featProducts = (d.products || []).slice(0, 4);
-            newProducts = (d.products || []).slice(4, 8);
-          } catch(e2) {}
+            const fRes = await fetch(`${API_BASE}/products?featured=true&limit=4`);
+            if (fRes.ok) {
+              const fData = await fRes.json();
+              if (fData.success && Array.isArray(fData.products)) featProducts = fData.products;
+            }
+          } catch (e2) {}
+        }
+        if (newProducts.length === 0) {
+          try {
+            const nRes = await fetch(`${API_BASE}/products?newArrival=true&limit=4`);
+            if (nRes.ok) {
+              const nData = await nRes.json();
+              if (nData.success && Array.isArray(nData.products)) newProducts = nData.products;
+            }
+          } catch (e3) {}
         }
 
         const featGrid = document.getElementById('homepage-featured-grid');

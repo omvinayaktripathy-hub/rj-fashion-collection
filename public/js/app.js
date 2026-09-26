@@ -227,8 +227,53 @@ async function toggleWishlist(productId, btnElement) {
   }
 }
 
+// ================= THEME MANAGER (DARK / LIGHT MODE) =================
+function initTheme() {
+  const saved = localStorage.getItem('rjfc_theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const currentTheme = saved || (prefersDark ? 'dark' : 'light');
+  applyTheme(currentTheme);
+}
+
+function applyTheme(theme) {
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('rjfc_theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('rjfc_theme', 'light');
+  }
+  updateThemeToggleUI(theme);
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  applyTheme(isDark ? 'light' : 'dark');
+}
+
+function updateThemeToggleUI(theme) {
+  const btns = document.querySelectorAll('.theme-toggle-btn');
+  btns.forEach(btn => {
+    const iconSpan = btn.querySelector('.theme-toggle-icon');
+    const textSpan = btn.querySelector('.theme-toggle-text');
+    if (theme === 'dark') {
+      if (iconSpan) iconSpan.textContent = '☀️';
+      if (textSpan) textSpan.textContent = 'Light Mode';
+      btn.setAttribute('title', 'Switch to Light Mode');
+    } else {
+      if (iconSpan) iconSpan.textContent = '🌙';
+      if (textSpan) textSpan.textContent = 'Dark Mode';
+      btn.setAttribute('title', 'Switch to Dark Mode');
+    }
+  });
+}
+
+// Run immediately
+initTheme();
+
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   checkAuth().then(() => {
     updateCartCount();
     updateWishlistCount();
@@ -249,3 +294,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+

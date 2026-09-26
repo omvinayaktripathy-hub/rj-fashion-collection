@@ -4,11 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shop Ethnic Fashion & Sarees - RJ Fashion Collection</title>
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('rjfc_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      } catch(e){}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-2">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-2">
 </head>
 <body>
 
@@ -38,6 +46,12 @@
       </div>
 
       <div class="header-actions">
+        <!-- Dark / Light Mode Toggle -->
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Light / Dark Mode" title="Toggle Theme">
+          <span class="theme-toggle-icon">🌙</span>
+          <span class="theme-toggle-text">Dark Mode</span>
+        </button>
+
         <div class="auth-nav-slot">
           <a href="/login.html" class="action-btn">
             <span>👤 Login / Account</span>
