@@ -5,9 +5,32 @@ let currentProducts = [];
 let currentCategories = [];
 let currentOrders = [];
 
+// Ensure Firebase is initialized before ANY auth operation
+function ensureFirebaseInitialized() {
+  if (typeof firebase !== 'undefined') {
+    if (!firebase.apps || !firebase.apps.length) {
+      const config = window.firebaseConfig || {
+        apiKey: "AIzaSyBMkLwyXZINxOdq-hw7jFTVlnlFLdO_oTw",
+        authDomain: "rj-fashion-collection.firebaseapp.com",
+        projectId: "rj-fashion-collection",
+        storageBucket: "rj-fashion-collection.firebasestorage.app",
+        messagingSenderId: "136818820501",
+        appId: "1:136818820501:web:251f54494df4209854a29c",
+        measurementId: "G-LL5KRD9639"
+      };
+      firebase.initializeApp(config);
+      console.log('🔥 [Firebase] Client app initialized in Admin Portal');
+    }
+    return true;
+  }
+  return false;
+}
+
 // Initialize Admin
 async function initAdmin() {
-  // Check persistent session first
+  ensureFirebaseInitialized();
+
+  // 1. Check persistent sessionStorage first
   try {
     const saved = sessionStorage.getItem('rjfc_admin_session');
     if (saved) {
@@ -20,6 +43,31 @@ async function initAdmin() {
     }
   } catch (e) {}
 
+  // 2. Check if user is already signed in with Firebase Auth
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    try {
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user && user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
+          adminUser = {
+            id: 1,
+            name: 'RJ Fashion Admin (Om Vinayak)',
+            email: user.email,
+            role: 'admin',
+            uid: user.uid
+          };
+          sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+          hideAdminLoginScreen();
+          const topbarName = document.getElementById('admin-topbar-username');
+          if (topbarName) topbarName.textContent = adminUser.name;
+          loadDashboardStats();
+          loadCategoriesList();
+          loadAdminProducts();
+        }
+      });
+    } catch (_) {}
+  }
+
+  // 3. Check server session if running on node server
   try {
     const res = await fetch(`${API_BASE}/me`);
     if (res.ok) {
@@ -62,6 +110,8 @@ async function handleAdminGoogleLogin() {
   }
 
   try {
+    ensureFirebaseInitialized();
+
     if (typeof firebase === 'undefined' || !firebase.auth) {
       throw new Error('Firebase Authentication is loading. Please try again.');
     }
@@ -147,6 +197,7 @@ async function handleAdminLogin(e) {
   }
 
   // 2. Authenticate securely via Firebase Authentication (Zero client secrets)
+  ensureFirebaseInitialized();
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
