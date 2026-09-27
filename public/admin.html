@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RJ Fashion Collection - Private Admin Portal</title>
-  <link rel="stylesheet" href="/css/admin.css?v=20260927-8">
+  <link rel="stylesheet" href="/css/admin.css?v=20260927-12">
   <style>
     /* Admin layout explicit flex-direction & responsive styles */
     html, body {
@@ -138,91 +138,21 @@
       gap: 24px;
     }
 
-    /* 1024x500 COMPACT DESKTOP & LANDSCAPE VIEWPORT ADAPTATIONS */
+    /* MOBILE & TABLET RESPONSIVE ADMIN ADAPTATIONS (max-width: 1024px, body.admin-mobile-mode, html[data-admin-view="mobile"]) */
     @media (max-width: 1024px), (max-height: 560px) {
-      .admin-content {
-        padding: 12px 14px !important;
-      }
-      .admin-topbar {
-        padding: 6px 14px !important;
-      }
-      .admin-topbar h1 {
-        font-size: 1.15rem !important;
-      }
-      .topbar-right .admin-user-info {
-        display: none !important;
-      }
-      .quick-actions-bar {
-        padding: 6px 8px !important;
-        margin-bottom: 12px !important;
-        gap: 6px !important;
-        overflow-x: auto !important;
-        white-space: nowrap !important;
-        scrollbar-width: none !important;
-      }
-      .quick-action-btn {
-        padding: 6px 11px !important;
-        font-size: 0.78rem !important;
-        flex-shrink: 0 !important;
-      }
-      .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
-        gap: 8px !important;
-        margin-bottom: 12px !important;
-      }
-      .stat-card {
-        padding: 8px 10px !important;
-      }
-      .stat-icon {
-        width: 32px !important;
-        height: 32px !important;
-        font-size: 1rem !important;
-      }
-      .stat-label {
-        font-size: 0.7rem !important;
-      }
-      .stat-info .stat-value {
-        font-size: 1.15rem !important;
-      }
-      .stat-trend {
-        font-size: 0.65rem !important;
-      }
-      .analytics-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
-        margin-bottom: 12px !important;
-      }
-      .chart-bars-wrap {
-        height: 115px !important;
-      }
-      .dashboard-split-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px !important;
-      }
-      .table-responsive {
-        max-height: 220px !important;
-        overflow-y: auto !important;
-      }
-      .admin-table th, .admin-table td {
-        padding: 6px 8px !important;
-        font-size: 0.78rem !important;
-      }
-    }
-
-    /* MOBILE PHONES & PORTRAIT TABLETS (max-width: 768px) */
-    @media (max-width: 768px) {
       body.admin-body {
-        padding-bottom: 64px !important; /* Space for Mobile Admin Nav */
+        padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+        overflow-x: hidden !important;
       }
       .admin-sidebar {
         position: fixed !important;
-        left: -280px !important;
+        left: -300px !important;
         top: 0 !important;
         bottom: 0 !important;
-        width: 260px !important;
-        z-index: 1000 !important;
-        box-shadow: 4px 0 25px rgba(0, 0, 0, 0.35) !important;
-        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        width: 270px !important;
+        z-index: 10000 !important;
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.45) !important;
+        transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
       }
       .admin-sidebar.open {
         left: 0 !important;
@@ -231,9 +161,10 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(15, 23, 42, 0.65);
         backdrop-filter: blur(4px);
-        z-index: 999;
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 9999;
       }
       .sidebar-backdrop.active {
         display: block !important;
@@ -241,13 +172,66 @@
       .mobile-nav-toggle {
         display: inline-flex !important;
       }
+      .admin-topbar {
+        padding: 8px 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .admin-topbar h1 {
+        font-size: 1.05rem !important;
+      }
+      .topbar-right .admin-user-info {
+        display: none !important;
+      }
+      .admin-content {
+        padding: 12px !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+      }
+      .quick-actions-bar {
+        padding: 8px !important;
+        margin-bottom: 12px !important;
+        gap: 6px !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      .quick-action-btn {
+        padding: 6px 10px !important;
+        font-size: 0.76rem !important;
+        flex-shrink: 0 !important;
+      }
       .stats-grid {
-        grid-template-columns: 1fr 1fr !important;
+        grid-template-columns: repeat(2, 1fr) !important;
         gap: 8px !important;
+        margin-bottom: 12px !important;
+      }
+      .stat-card {
+        padding: 10px !important;
+      }
+      .stat-icon {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 1rem !important;
+      }
+      .stat-label {
+        font-size: 0.68rem !important;
+      }
+      .stat-info .stat-value {
+        font-size: 1.15rem !important;
+      }
+      .stat-trend {
+        font-size: 0.62rem !important;
       }
       .analytics-grid,
       .dashboard-split-grid {
         grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      .chart-bars-wrap {
+        height: 120px !important;
       }
       .admin-mobile-bottom-nav {
         display: flex !important;
@@ -255,6 +239,80 @@
       .cloud-status-pill #sync-status-sub {
         display: none !important;
       }
+      .table-responsive {
+        max-height: 360px !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      .admin-table th, .admin-table td {
+        padding: 8px 10px !important;
+        font-size: 0.8rem !important;
+        white-space: nowrap !important;
+      }
+    }
+
+    /* FORCED MOBILE MODE (Triggered on any device when admin-mobile-mode is active) */
+    body.admin-mobile-mode {
+      padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+      overflow-x: hidden !important;
+    }
+    body.admin-mobile-mode .admin-sidebar {
+      position: fixed !important;
+      left: -300px !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      width: 270px !important;
+      z-index: 10000 !important;
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.45) !important;
+      transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    body.admin-mobile-mode .admin-sidebar.open {
+      left: 0 !important;
+    }
+    body.admin-mobile-mode .sidebar-backdrop.active {
+      display: block !important;
+    }
+    body.admin-mobile-mode .mobile-nav-toggle {
+      display: inline-flex !important;
+    }
+    body.admin-mobile-mode .topbar-right .admin-user-info {
+      display: none !important;
+    }
+    body.admin-mobile-mode .admin-content {
+      padding: 12px !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+      box-sizing: border-box !important;
+    }
+    body.admin-mobile-mode .quick-actions-bar {
+      padding: 8px !important;
+      margin-bottom: 12px !important;
+      gap: 6px !important;
+      overflow-x: auto !important;
+      white-space: nowrap !important;
+      scrollbar-width: none !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    body.admin-mobile-mode .stats-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 8px !important;
+    }
+    body.admin-mobile-mode .analytics-grid,
+    body.admin-mobile-mode .dashboard-split-grid {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+    }
+    body.admin-mobile-mode .admin-mobile-bottom-nav {
+      display: flex !important;
+    }
+    body.admin-mobile-mode .table-responsive {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    body.admin-mobile-mode .admin-table th, 
+    body.admin-mobile-mode .admin-table td {
+      white-space: nowrap !important;
     }
 
     /* MOBILE ADMIN BOTTOM NAVIGATION BAR */
@@ -268,7 +326,7 @@
       background: #ffffff;
       border-top: 1px solid #e2e8f0;
       box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
-      z-index: 900;
+      z-index: 9999;
       justify-content: space-around;
       align-items: center;
       padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -434,6 +492,12 @@
           <span id="sync-status-text">Live Sync Active</span>
           <span id="sync-status-sub" style="font-size: 0.72rem; opacity: 0.85; margin-left: 5px;">• 3s pulse</span>
         </div>
+
+        <!-- Mode Switcher (Mobile / Desktop) -->
+        <button type="button" class="btn btn-outline" id="admin-view-toggle-btn" onclick="toggleAdminViewMode()" style="padding: 6px 10px; font-size: 0.78rem; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;" title="Switch between Mobile and Desktop Admin View">
+          <span id="admin-view-toggle-icon">📱</span>
+          <span id="admin-view-toggle-text">Mobile UI</span>
+        </button>
 
         <!-- Refresh Data Button -->
         <button type="button" class="topbar-refresh-btn" onclick="refreshAdminData()" title="Reload live store data">
@@ -1179,6 +1243,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="/firebase-config.js?v=20260927"></script>
   <script src="/js/app.js?v=20260927-11"></script>
-  <script src="/js/admin.js?v=20260927-9"></script>
+  <script src="/js/admin.js?v=20260927-12"></script>
 </body>
 </html>

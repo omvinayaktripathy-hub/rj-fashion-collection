@@ -1969,8 +1969,53 @@ function closeOrderDetailModal() {
   document.getElementById('order-detail-modal').classList.remove('active');
 }
 
+// ===================================================================
+// ADMIN ADAPTIVE VIEW MODE (MOBILE / TABLET / PC DETECTION & TOGGLE)
+// ===================================================================
+function initAdminMobileAdaptive() {
+  const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  const isSmallScreen = window.innerWidth <= 1024;
+  const savedPref = localStorage.getItem('rj_admin_view_preference');
+
+  // Default: mobile mode if touch or screen <= 1024px, unless user explicitly chose 'desktop'
+  const shouldBeMobile = savedPref ? (savedPref === 'mobile') : (isTouch || isSmallScreen);
+
+  applyAdminViewMode(shouldBeMobile);
+
+  window.addEventListener('resize', () => {
+    if (!localStorage.getItem('rj_admin_view_preference')) {
+      const isMobileNow = window.innerWidth <= 1024;
+      applyAdminViewMode(isMobileNow);
+    }
+  }, { passive: true });
+}
+
+function applyAdminViewMode(isMobile) {
+  if (document.body) {
+    document.body.classList.toggle('admin-mobile-mode', isMobile);
+  }
+  document.documentElement.setAttribute('data-admin-view', isMobile ? 'mobile' : 'desktop');
+  
+  const toggleBtnText = document.getElementById('admin-view-toggle-text');
+  const toggleBtnIcon = document.getElementById('admin-view-toggle-icon');
+  if (toggleBtnText) toggleBtnText.textContent = isMobile ? 'Mobile UI' : 'Desktop UI';
+  if (toggleBtnIcon) toggleBtnIcon.textContent = isMobile ? '📱' : '💻';
+}
+
+function toggleAdminViewMode() {
+  const currentlyMobile = document.body.classList.contains('admin-mobile-mode');
+  const newMode = !currentlyMobile;
+  localStorage.setItem('rj_admin_view_preference', newMode ? 'mobile' : 'desktop');
+  applyAdminViewMode(newMode);
+  showToast(`Switched to ${newMode ? 'Mobile' : 'Desktop'} Admin View`, 'info');
+}
+
+// Run immediately for instant zero delay
+initAdminMobileAdaptive();
+
 document.addEventListener('DOMContentLoaded', () => {
   initAdmin();
+  initAdminMobileAdaptive();
 
   const loginForm = document.getElementById('admin-login-form');
   if (loginForm) loginForm.addEventListener('submit', handleAdminLogin);
