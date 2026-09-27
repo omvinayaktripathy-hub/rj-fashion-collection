@@ -512,11 +512,13 @@ body.admin-body {
   background: #fff;
   border-radius: 12px;
   width: 100%;
-  max-width: 640px;
+  max-width: 720px;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 20px 40px rgba(0,0,0,0.25);
   animation: modalPop 0.25s ease-out;
+  box-sizing: border-box;
 }
 
 @keyframes modalPop {
@@ -530,6 +532,7 @@ body.admin-body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
 }
 
 .modal-header h3 {
@@ -548,16 +551,33 @@ body.admin-body {
 
 .modal-body {
   padding: 24px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .form-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .modal-body {
+    padding: 18px;
+  }
 }
 
 .form-group {
   margin-bottom: 16px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .form-group label {
@@ -574,6 +594,7 @@ body.admin-body {
 .form-group select,
 .form-group textarea {
   width: 100%;
+  box-sizing: border-box;
   padding: 10px 14px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -581,6 +602,12 @@ body.admin-body {
   color: #1e293b;
   outline: none;
   transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 72px;
 }
 
 .form-group input:focus,
