@@ -849,3 +849,93 @@ html, body {
 .dark-theme .drawer-close-btn {
   color: #94a3b8 !important;
 }
+
+/* ===================================================================
+   DYNAMIC ADAPTIVE ATTRIBUTE SELECTORS (REAL-TIME ENGINE)
+   =================================================================== */
+
+/* Touch-optimized interactions on any touch-enabled device */
+html[data-input="touch"] .btn,
+html[data-input="touch"] button,
+html[data-input="touch"] select,
+html[data-input="touch"] .action-btn,
+body.is-touch .btn,
+body.is-touch button {
+  min-height: 42px;
+  cursor: pointer;
+}
+
+/* Specific Mobile Device Mode (Regardless of DPR or screen zoom) */
+html[data-device="mobile"] .bottom-nav,
+body.is-mobile .bottom-nav {
+  display: flex !important;
+}
+
+html[data-device="mobile"] body,
+body.is-mobile {
+  padding-bottom: calc(72px + var(--safe-bottom)) !important;
+}
+
+html[data-device="mobile"] .product-grid,
+body.is-mobile .product-grid {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+}
+
+/* Specific Tablet Device Mode */
+html[data-device="tablet"] .product-grid,
+body.is-tablet .product-grid {
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 16px !important;
+}
+
+/* Landscape & Short Screen (e.g. 1024x500 or rotated phones) */
+html[data-short-screen="true"] .site-header,
+body.is-short-screen .site-header {
+  position: relative !important;
+}
+
+html[data-short-screen="true"] .header-main,
+body.is-short-screen .header-main {
+  padding: 6px 14px !important;
+}
+
+html[data-short-screen="true"] .hero-slider,
+body.is-short-screen .hero-slider {
+  min-height: 220px !important;
+  margin-top: 6px !important;
+}
+
+html[data-short-screen="true"] .hero-title,
+body.is-short-screen .hero-title {
+  font-size: 1.35rem !important;
+}
+
+html[data-short-screen="true"] .shop-filter-sidebar,
+body.is-short-screen .shop-filter-sidebar {
+  max-height: 92vh !important;
+}
+
+/* Desktop Mode */
+html[data-device="desktop"] .shop-catalog-layout,
+body.is-desktop .shop-catalog-layout {
+  display: grid !important;
+  grid-template-columns: 260px 1fr !important;
+  gap: 28px !important;
+}
+
+html[data-device="desktop"] .shop-filter-sidebar,
+body.is-desktop .shop-filter-sidebar {
+  position: sticky !important;
+  top: 90px !important;
+  display: block !important;
+  transform: none !important;
+  box-shadow: var(--shadow-card) !important;
+  max-height: none !important;
+}
+
+html[data-device="desktop"] .bottom-nav,
+body.is-desktop .bottom-nav {
+  display: none !important;
+}
+

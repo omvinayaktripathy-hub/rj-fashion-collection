@@ -308,9 +308,90 @@ function updateThemeToggleUI(theme) {
 // Run immediately
 initTheme();
 
+// ===================================================================
+// AUTOMATIC DEVICE & SCREEN ADAPTATION SYSTEM (MOBILE, TAB, PC)
+// Automatically senses device form factor, screen orientation, and input method
+// ===================================================================
+const AdaptiveDevice = {
+  detect() {
+    const width = window.innerWidth || document.documentElement.clientWidth || 360;
+    const height = window.innerHeight || document.documentElement.clientHeight || 640;
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+    const orientation = width >= height ? 'landscape' : 'portrait';
+    
+    let device = 'desktop';
+    if (width < 768) {
+      device = 'mobile';
+    } else if (width <= 1024) {
+      if (height <= 560 && isTouch) {
+        device = 'mobile-landscape';
+      } else {
+        device = 'tablet';
+      }
+    } else if (width <= 1180 && isTouch) {
+      device = 'tablet';
+    } else {
+      device = 'desktop';
+    }
+
+    const state = {
+      device,
+      orientation,
+      isTouch,
+      width,
+      height,
+      isShortScreen: height <= 560
+    };
+
+    this.applyState(state);
+    return state;
+  },
+
+  applyState(state) {
+    const root = document.documentElement;
+    const body = document.body;
+    if (root) {
+      root.setAttribute('data-device', state.device);
+      root.setAttribute('data-orientation', state.orientation);
+      root.setAttribute('data-input', state.isTouch ? 'touch' : 'mouse');
+      root.setAttribute('data-short-screen', state.isShortScreen ? 'true' : 'false');
+    }
+
+    if (body) {
+      body.classList.toggle('is-mobile', state.device === 'mobile' || state.device === 'mobile-landscape');
+      body.classList.toggle('is-tablet', state.device === 'tablet');
+      body.classList.toggle('is-desktop', state.device === 'desktop');
+      body.classList.toggle('is-touch', state.isTouch);
+      body.classList.toggle('is-landscape', state.orientation === 'landscape');
+      body.classList.toggle('is-short-screen', state.isShortScreen);
+    }
+
+    window.deviceState = state;
+  },
+
+  init() {
+    this.detect();
+    let resizeTimer = null;
+    const update = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const state = this.detect();
+        window.dispatchEvent(new CustomEvent('deviceStateChange', { detail: state }));
+      }, 80);
+    };
+
+    window.addEventListener('resize', update, { passive: true });
+    window.addEventListener('orientationchange', update, { passive: true });
+  }
+};
+
+// Run immediately for instant zero-flicker detection
+AdaptiveDevice.init();
+
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  AdaptiveDevice.detect();
   checkAuth().then(() => {
     updateCartCount();
     updateWishlistCount();
