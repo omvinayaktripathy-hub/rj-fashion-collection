@@ -722,6 +722,7 @@ async function loadDashboardStats() {
               <td>
                 <div style="display:flex; gap:6px;">
                   <button onclick="viewOrderModal('${o.id}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;">View</button>
+                  <button onclick="openPrintOrderInvoice('${o.id}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Download / Print Invoice">🖨️</button>
                   <a href="${waUrl}" target="_blank" rel="noopener" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; text-decoration:none;" title="Chat with Customer">💬</a>
                 </div>
               </td>
@@ -1456,8 +1457,8 @@ function viewOrderModal(orderId) {
         <a href="${waUrl}" target="_blank" rel="noopener" class="btn-whatsapp" style="padding:6px 12px; font-size:0.82rem;">
           <span>💬</span> WhatsApp Buyer
         </a>
-        <button onclick="openPrintOrderInvoice(${o.id})" class="btn btn-primary" style="padding:6px 12px; font-size:0.82rem;">
-          <span>🖨️</span> Print Invoice
+        <button onclick="openPrintOrderInvoice('${o.id}')" class="btn btn-primary" style="padding:6px 12px; font-size:0.82rem;">
+          <span>🖨️</span> Invoice (PDF / Print)
         </button>
       </div>
     </div>
@@ -2227,97 +2228,274 @@ function exportOrdersCSV() {
   showToast('Orders ledger exported to CSV! 📊', 'success');
 }
 
-// 7. Printable Packing Slip & Invoice
-function openPrintOrderInvoice(orderId) {
-  const o = currentOrders.find(ord => ord.id === orderId);
-  if (!o) return;
+// ─────────────────────────────────────────────────────────────
+// 7. Printable Packing Slip & Full Invoice Engine
+// ─────────────────────────────────────────────────────────────
+let currentInvoiceOrder = null;
 
-  const bodyEl = document.getElementById('invoice-modal-body');
-  if (!bodyEl) return;
+// Helper: Robust Order Lookup
+function findOrderById(orderId) {
+  if (!orderId) return null;
+  const idStr = String(orderId).trim();
+  const all = (currentOrders && currentOrders.length > 0) ? currentOrders : fetchAllOrdersRealtime();
+  
+  let found = all.find(o => 
+    String(o.id) === idStr || 
+    String(o.order_number) === idStr ||
+    (o.order_number && o.order_number.toLowerCase() === idStr.toLowerCase())
+  );
 
-  bodyEl.innerHTML = `
-    <div class="invoice-sheet">
-      <div class="invoice-header-row">
+  // If not found in current list, search directly in localStorage
+  if (!found) {
+    try {
+      const local = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+      found = local.find(o => 
+        String(o.id) === idStr || 
+        String(o.order_number) === idStr ||
+        (o.order_number && o.order_number.toLowerCase() === idStr.toLowerCase())
+      );
+    } catch (_) {}
+  }
+
+  return found || null;
+}
+
+// Generate Standalone, High-Res Luxury Tax Invoice HTML
+function buildInvoiceHTML(o, forDownload = false) {
+  const address = o.delivery_address || o.shipping_address || o.address || 'Standard Address on file';
+  const cleanPhone = o.customer_phone || 'N/A';
+  const cleanEmail = o.customer_email || 'N/A';
+  const orderDate = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Today';
+  const items = (o.items && o.items.length > 0) ? o.items : [{ name: 'Luxury Indian Ethnic Ensemble', quantity: 1, price: o.total, total: o.total, size: 'Free Size' }];
+
+  return `
+    <div class="invoice-sheet" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 28px; background: #ffffff; color: #0f172a; max-width: 760px; margin: 0 auto; box-sizing: border-box;">
+      <!-- Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #7a003c; padding-bottom: 18px; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
         <div>
-          <div style="font-size: 1.5rem; font-weight: 800; color: #7a003c; letter-spacing: 0.5px;">RJ FASHION COLLECTION</div>
-          <div style="font-size: 0.85rem; color: #c59b27; font-weight: 700;">Luxury Indian Ethnic Wear & Authentic Sarees</div>
-          <div style="font-size: 0.8rem; color: #64748b; margin-top: 6px;">WhatsApp Support: +91 78940 93586 | www.rj-fashion-collection.web.app</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: #7a003c; letter-spacing: 0.5px;">RJ FASHION COLLECTION</div>
+          <div style="font-size: 0.85rem; color: #b45309; font-weight: 700; margin-top: 2px;">Luxury Indian Ethnic Wear • Bridal Sarees • Royal Craft</div>
+          <div style="font-size: 0.78rem; color: #64748b; margin-top: 6px; line-height: 1.5;">
+            📍 Sarbhal Chowk, Jharsuguda, Odisha - 768201<br>
+            📞 +91 78940 93586 | ✉️ rjfashioncollection@gmail.com
+          </div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 1.1rem; font-weight: 800; color: #1e293b;">PACKING SLIP & INVOICE</div>
-          <div style="font-size: 0.85rem; font-weight: 700; color: #7a003c; margin-top: 4px;">#${o.order_number}</div>
-          <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Date: ${new Date(o.created_at).toLocaleDateString()}</div>
-          <div style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: #ecfdf5; color: #047857; font-size: 0.75rem; font-weight: 700; margin-top: 6px;">
-            ${o.payment_method || 'Online'} • ${o.status}
+          <div style="font-size: 1.25rem; font-weight: 900; color: #1e293b;">TAX INVOICE / RECEIPT</div>
+          <div style="font-size: 0.95rem; font-weight: 800; color: #7a003c; margin-top: 4px;">Order #${o.order_number}</div>
+          <div style="font-size: 0.82rem; color: #64748b; margin-top: 2px;">Date: <strong>${orderDate}</strong></div>
+          <div style="display: inline-block; padding: 3px 10px; border-radius: 4px; background: #ecfdf5; color: #065f46; font-size: 0.78rem; font-weight: 700; margin-top: 6px; border: 1px solid #a7f3d0;">
+            ${o.payment_method || 'Online'} • ${o.status || 'Confirmed'}
           </div>
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f8fafc; padding: 14px 18px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px;">
+      <!-- Customer / Delivery Info Cards -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 22px;">
         <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Ship To (Customer):</div>
-          <div style="font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${o.customer_name}</div>
-          <div style="font-size: 0.85rem; color: #475569; margin-top: 2px;">Phone: <strong>${o.customer_phone || 'N/A'}</strong></div>
-          <div style="font-size: 0.85rem; color: #475569;">Email: ${o.customer_email || 'N/A'}</div>
+          <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Billed To / Customer:</div>
+          <div style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-top: 4px;">${o.customer_name}</div>
+          <div style="font-size: 0.85rem; color: #475569; margin-top: 2px;">Phone: <strong>${cleanPhone}</strong></div>
+          <div style="font-size: 0.82rem; color: #475569;">Email: ${cleanEmail}</div>
         </div>
         <div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Delivery Address:</div>
-          <div style="font-size: 0.85rem; color: #334155; margin-top: 4px; line-height: 1.4;">${o.delivery_address || 'Standard Address on file'}</div>
+          <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Delivery Address:</div>
+          <div style="font-size: 0.88rem; color: #334155; margin-top: 4px; line-height: 1.5; font-weight: 500;">
+            ${address}
+          </div>
         </div>
       </div>
 
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.88rem;">
+      <!-- Items Table -->
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 22px; font-size: 0.88rem;">
         <thead>
           <tr style="border-bottom: 2px solid #cbd5e1; background: #f1f5f9; text-align: left;">
-            <th style="padding: 10px 12px; font-weight: 700; color: #334155;">#</th>
+            <th style="padding: 10px 12px; font-weight: 700; color: #334155; width: 36px;">#</th>
             <th style="padding: 10px 12px; font-weight: 700; color: #334155;">Product Description</th>
-            <th style="padding: 10px 12px; font-weight: 700; color: #334155;">Size</th>
-            <th style="padding: 10px 12px; font-weight: 700; color: #334155; text-align: center;">Qty</th>
-            <th style="padding: 10px 12px; font-weight: 700; color: #334155; text-align: right;">Unit Price</th>
-            <th style="padding: 10px 12px; font-weight: 700; color: #334155; text-align: right;">Total</th>
+            <th style="padding: 10px 12px; font-weight: 700; color: #334155; width: 90px;">Size</th>
+            <th style="padding: 10px 12px; font-weight: 700; color: #334155; text-align: center; width: 50px;">Qty</th>
+            <th style="padding: 10px 12px; font-weight: 700; color: #334155; text-align: right; width: 110px;">Price</th>
+            <th style="padding: 10px 12px; font-weight: 700; color: #334155; text-align: right; width: 110px;">Total</th>
           </tr>
         </thead>
         <tbody>
-          ${(o.items && o.items.length > 0 ? o.items : [{ product_name: 'Luxury Indian Ethnic Wear', quantity: 1, price: o.total, total: o.total }]).map((it, idx) => `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-              <td style="padding: 10px 12px; color: #64748b;">${idx + 1}</td>
-              <td style="padding: 10px 12px; font-weight: 600; color: #1e293b;">${it.product_name}</td>
-              <td style="padding: 10px 12px; color: #64748b;">${it.size || 'Free Size'}</td>
-              <td style="padding: 10px 12px; text-align: center; font-weight: 700;">${it.quantity || 1}</td>
-              <td style="padding: 10px 12px; text-align: right; color: #475569;">${formatPrice(it.price || it.total)}</td>
-              <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: #1e293b;">${formatPrice(it.total || it.price)}</td>
-            </tr>
-          `).join('')}
+          ${items.map((it, idx) => {
+            const title = it.name || it.product_name || it.title || 'Royal Ethnic Ensembles';
+            const price = Number(it.price || it.total || o.total);
+            const qty = Number(it.quantity || 1);
+            const lineTotal = price * qty;
+            return `
+              <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 12px; color: #64748b;">${idx + 1}</td>
+                <td style="padding: 12px; font-weight: 600; color: #1e293b;">
+                  <div>${title}</div>
+                  <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Authentic Artisan Handcrafted</div>
+                </td>
+                <td style="padding: 12px; color: #475569;">${it.size || 'Free Size'}</td>
+                <td style="padding: 12px; text-align: center; font-weight: 700;">${qty}</td>
+                <td style="padding: 12px; text-align: right; color: #475569;">${formatPrice(price)}</td>
+                <td style="padding: 12px; text-align: right; font-weight: 700; color: #1e293b;">${formatPrice(lineTotal)}</td>
+              </tr>
+            `;
+          }).join('')}
         </tbody>
       </table>
 
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 16px; border-top: 2px solid #e2e8f0;">
-        <div style="font-size: 0.8rem; color: #64748b; max-width: 340px;">
-          <strong>Thank you for choosing RJ Fashion Collection!</strong><br>
-          For exchange assistance or custom draping tips, WhatsApp our concierge anytime at +91 78940 93586.
+      <!-- Totals & Notes -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 18px; border-top: 2px solid #e2e8f0; flex-wrap: wrap; gap: 16px;">
+        <div style="font-size: 0.8rem; color: #64748b; max-width: 360px; line-height: 1.5;">
+          <strong style="color: #1e293b;">Thank you for shopping with RJ Fashion Collection! 👑</strong><br>
+          For personalized customer care, blouse tailoring queries, or delivery updates, message our VIP WhatsApp Concierge at <strong>+91 78940 93586</strong>.
         </div>
-        <div style="text-align: right; min-width: 220px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; color: #64748b;">
+        <div style="text-align: right; min-width: 240px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.88rem; color: #64748b;">
             <span>Subtotal:</span>
             <span>${formatPrice(o.total)}</span>
           </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; color: #64748b;">
-            <span>Shipping:</span>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.88rem; color: #64748b;">
+            <span>Express Delivery:</span>
             <span style="color: #15803d; font-weight: 700;">FREE</span>
           </div>
-          <div style="display: flex; justify-content: space-between; border-top: 2px solid #0f172a; padding-top: 8px; font-size: 1.15rem; font-weight: 800; color: #7a003c;">
+          <div style="display: flex; justify-content: space-between; border-top: 2px solid #0f172a; padding-top: 8px; font-size: 1.25rem; font-weight: 900; color: #7a003c;">
             <span>Grand Total:</span>
             <span>${formatPrice(o.total)}</span>
           </div>
+          <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">(Inclusive of all applicable taxes)</div>
         </div>
+      </div>
+
+      <!-- Footer / Auth Sign -->
+      <div style="margin-top: 28px; padding-top: 16px; border-top: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #94a3b8;">
+        <div>Computer generated invoice • 100% Genuine Handcrafted Ethnic Wear</div>
+        <div style="font-weight: 700; color: #7a003c;">RJ FASHION COLLECTION DIRECT</div>
       </div>
     </div>
   `;
-
-  document.getElementById('invoice-modal').classList.add('active');
 }
 
+// Open Invoice Modal
+function openPrintOrderInvoice(orderId) {
+  const o = findOrderById(orderId);
+  if (!o) {
+    showToast('Order details could not be found for invoice generation.', 'error');
+    return;
+  }
+
+  currentInvoiceOrder = o;
+  const bodyEl = document.getElementById('invoice-modal-body');
+  if (!bodyEl) return;
+
+  bodyEl.innerHTML = buildInvoiceHTML(o, false);
+  const modal = document.getElementById('invoice-modal');
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+// Close Invoice Modal
 function closeInvoiceModal() {
-  document.getElementById('invoice-modal').classList.remove('active');
+  const modal = document.getElementById('invoice-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
 }
+
+// 1-Click Direct Download of Invoice as File
+function downloadCurrentInvoice() {
+  if (!currentInvoiceOrder) {
+    showToast('No active invoice to download', 'error');
+    return;
+  }
+  downloadOrderInvoiceFile(currentInvoiceOrder.id);
+}
+
+function downloadOrderInvoiceFile(orderId) {
+  const o = findOrderById(orderId);
+  if (!o) {
+    showToast('Order not found for download', 'error');
+    return;
+  }
+
+  const invoiceContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice - ${o.order_number} - RJ Fashion Collection</title>
+  <style>
+    body { margin: 0; padding: 20px; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .invoice-sheet { box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 8px; border: 1px solid #e2e8f0; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .invoice-sheet { box-shadow: none; border: none; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="max-width: 760px; margin: 0 auto 16px; display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 18px; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <span style="font-weight: 700; color: #7a003c; font-size: 0.9rem;">RJ Fashion Collection Tax Invoice #${o.order_number}</span>
+    <button onclick="window.print()" style="padding: 8px 18px; background: #7a003c; color: #fff; font-weight: 700; border: none; border-radius: 6px; cursor: pointer;">
+      🖨️ Print / Save as PDF
+    </button>
+  </div>
+  ${buildInvoiceHTML(o, true)}
+</body>
+</html>`;
+
+  const blob = new Blob([invoiceContent], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `RJ_Fashion_Invoice_${o.order_number}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`📥 Invoice downloaded for #${o.order_number}!`, 'success');
+}
+
+// Dedicated Print / Save as PDF Popup Window
+function printCurrentInvoice() {
+  if (!currentInvoiceOrder) {
+    showToast('No active invoice to print', 'error');
+    return;
+  }
+
+  const o = currentInvoiceOrder;
+  const printWindow = window.open('', '_blank', 'width=840,height=900');
+  if (!printWindow) {
+    // Popup blocked: fallback to window.print()
+    window.print();
+    return;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice #${o.order_number} - RJ Fashion Collection</title>
+  <style>
+    body { margin: 0; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fff; }
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  ${buildInvoiceHTML(o, false)}
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 250);
+    };
+  </script>
+</body>
+</html>`);
+  printWindow.document.close();
+}
+
 
