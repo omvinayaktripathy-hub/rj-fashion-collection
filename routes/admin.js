@@ -397,6 +397,23 @@ router.get('/customers', (req, res) => {
   }
 });
 
+// Delete customer
+router.delete('/customers/:id', (req, res) => {
+  try {
+    const param = req.params.id;
+    if (isNaN(param)) {
+      // param is email
+      db.prepare(`DELETE FROM users WHERE email = ? AND role = 'customer'`).run(param);
+    } else {
+      db.prepare(`DELETE FROM users WHERE id = ? AND role = 'customer'`).run(Number(param));
+    }
+    res.json({ success: true, message: 'Customer record deleted' });
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete customer' });
+  }
+});
+
 // Categories Management
 router.get('/categories', (req, res) => {
   try {

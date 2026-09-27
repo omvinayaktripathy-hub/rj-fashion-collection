@@ -1146,9 +1146,11 @@ async function loadAdminCustomers() {
   const tbody = document.getElementById('admin-customers-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b;">Loading registered customers...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">Loading registered customers...</td></tr>`;
 
   try {
+    const deletedList = JSON.parse(localStorage.getItem('rj_deleted_customers') || '[]');
+
     let customers = [];
     try {
       const res = await fetch(`${API_BASE}/admin/customers`);
@@ -1177,11 +1179,16 @@ async function loadAdminCustomers() {
     const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
     const customerMap = new Map();
     
-    (customers || []).forEach(c => customerMap.set((c.email || '').toLowerCase(), { ...c }));
+    (customers || []).forEach(c => {
+      const em = (c.email || '').toLowerCase();
+      if (!deletedList.includes(em)) {
+        customerMap.set(em, { ...c });
+      }
+    });
 
     localOrders.forEach(o => {
       const email = (o.customer_email || o.email || '').toLowerCase();
-      if (!email) return;
+      if (!email || deletedList.includes(email)) return;
       if (customerMap.has(email)) {
         const existing = customerMap.get(email);
         existing.order_count = (existing.order_count || 1) + 1;
@@ -1202,7 +1209,7 @@ async function loadAdminCustomers() {
     const finalCustomers = Array.from(customerMap.values());
 
     if (finalCustomers.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#64748b;">No registered customers yet.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">No registered customers yet.</td></tr>`;
       return;
     }
 
@@ -1214,12 +1221,43 @@ async function loadAdminCustomers() {
         <td>${new Date(c.created_at).toLocaleDateString()}</td>
         <td><span style="font-weight:600; background:#f1f5f9; padding:2px 8px; border-radius:12px; font-size:0.8rem;">${c.order_count} orders</span></td>
         <td style="font-weight:700; color:#1e293b;">${formatPrice(c.total_spent)}</td>
+        <td>
+          <button onclick="deleteCustomer('${c.email}', ${c.id ? `'${c.id}'` : 'null'})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;" title="Remove this customer record">
+            Delete
+          </button>
+        </td>
       </tr>
     `).join('');
   } catch (err) {
     console.error('Error in loadAdminCustomers:', err);
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#64748b;">Customer records will automatically populate as orders are placed.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">Customer records will automatically populate as orders are placed.</td></tr>`;
   }
+}
+
+async function deleteCustomer(email, id) {
+  if (!confirm(`Are you sure you want to remove customer record (${email})?`)) return;
+
+  try {
+    await fetch(`${API_BASE}/admin/customers/${id || encodeURIComponent(email)}`, { method: 'DELETE' });
+  } catch (_) {}
+
+  // Track deleted customers in localStorage so they stay deleted on Firebase static hosting
+  const deletedList = JSON.parse(localStorage.getItem('rj_deleted_customers') || '[]');
+  const normEmail = (email || '').toLowerCase();
+  if (!deletedList.includes(normEmail)) {
+    deletedList.push(normEmail);
+    localStorage.setItem('rj_deleted_customers', JSON.stringify(deletedList));
+  }
+
+  // Remove corresponding orders from localStorage if any
+  try {
+    let orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+    orders = orders.filter(o => (o.customer_email || o.email || '').toLowerCase() !== normEmail);
+    localStorage.setItem('rj_orders', JSON.stringify(orders));
+  } catch (_) {}
+
+  showToast('Customer record deleted successfully', 'info');
+  loadAdminCustomers();
 }
 
 // 5. Admin Categories
