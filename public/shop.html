@@ -58,8 +58,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20260927-8">
-  <link rel="stylesheet" href="/css/responsive.css?v=20260927-8">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-10">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-10">
 </head>
 <body>
 
@@ -474,103 +474,149 @@
       </div>
     </div>
 
-    <!-- 2-Column Catalog Layout: Filter Sidebar + Products Grid -->
-    <div style="display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start;">
-      
+    <!-- Mobile Filter & Sort Action Bar (Visible only on mobile/tablets <= 992px) -->
+    <div class="mobile-filter-bar">
+      <button type="button" class="mobile-filter-trigger-btn" onclick="toggleMobileFilterDrawer(true)">
+        <span style="font-size: 1.1rem; line-height: 1;">⚡</span>
+        <span>Filters</span>
+        <span id="mobile-filter-badge" class="mobile-filter-count-badge" style="display: none;">0</span>
+      </button>
+      <div class="mobile-sort-select-wrapper">
+        <select id="filter-sort-mob" onchange="syncSortAndApply(this.value)">
+          <option value="relevance">⚡ Sort: Relevant</option>
+          <option value="price_asc">₹ Price: Low to High</option>
+          <option value="price_desc">₹ Price: High to Low</option>
+          <option value="newest">✨ Newest Arrivals</option>
+          <option value="rating">★ Customer Rating</option>
+          <option value="discount">🔥 Best Discount</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Quick Department Filter Pills on Mobile -->
+    <div class="mobile-dept-pills-scroll">
+      <button class="dept-filter-chip active" data-department="" onclick="setDepartmentFilter('')">All</button>
+      <button class="dept-filter-chip" data-department="women" onclick="setDepartmentFilter('women')">👗 Women</button>
+      <button class="dept-filter-chip" data-department="men" onclick="setDepartmentFilter('men')">👔 Men</button>
+      <button class="dept-filter-chip" data-department="kids" onclick="setDepartmentFilter('kids')">🧸 Kids</button>
+    </div>
+
+    <!-- Backdrop for Mobile Filter Drawer -->
+    <div id="filter-drawer-backdrop" class="filter-drawer-backdrop" onclick="toggleMobileFilterDrawer(false)"></div>
+
+    <!-- Catalog Layout (Desktop 2-Col Grid, Mobile 100% with Drawer) -->
+    <div class="shop-catalog-layout">
       <!-- Filter Sidebar -->
-      <aside style="background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 22px; box-shadow: var(--shadow-card); position: sticky; top: 90px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 18px;">
-          <h3 style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--dark);">Filters</h3>
-          <button onclick="resetFilters()" style="font-size: 0.78rem; color: var(--primary); font-weight: 700; cursor: pointer; text-transform: uppercase;">Reset All</button>
+      <aside class="shop-filter-sidebar" id="shop-filter-sidebar">
+        <!-- Mobile Drawer Header -->
+        <div class="mobile-filter-drawer-header">
+          <div style="font-weight: 800; font-size: 1.1rem; color: var(--dark); display: flex; align-items: center; gap: 8px;">
+            <span>⚡</span>
+            <span>Refine & Filter Catalog</span>
+          </div>
+          <button type="button" class="drawer-close-btn" onclick="toggleMobileFilterDrawer(false)" aria-label="Close filters">✕</button>
         </div>
 
-        <!-- Department Filter -->
-        <div style="margin-bottom: 22px;">
-          <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px;">Department</h4>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <button class="dept-filter-pill active" data-department="" onclick="setDepartmentFilter('')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
-              <span>All Departments</span>
-            </button>
-            <button class="dept-filter-pill" data-department="women" onclick="setDepartmentFilter('women')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
-              <span>👗 Women's Collection</span>
-            </button>
-            <button class="dept-filter-pill" data-department="men" onclick="setDepartmentFilter('men')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
-              <span>👔 Men's Collection</span>
-            </button>
-            <button class="dept-filter-pill" data-department="kids" onclick="setDepartmentFilter('kids')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
-              <span>🧸 Kids & Children</span>
-            </button>
+        <div class="filter-sidebar-content">
+          <div class="filter-sidebar-header-desktop">
+            <h3 style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--dark);">Filters</h3>
+            <button onclick="resetFilters()" style="font-size: 0.78rem; color: var(--primary); font-weight: 700; cursor: pointer; text-transform: uppercase; background: none; border: none;">Reset All</button>
+          </div>
+
+          <!-- Department Filter -->
+          <div style="margin-bottom: 22px;">
+            <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px;">Department</h4>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <button class="dept-filter-pill active" data-department="" onclick="setDepartmentFilter('')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
+                <span>All Departments</span>
+              </button>
+              <button class="dept-filter-pill" data-department="women" onclick="setDepartmentFilter('women')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
+                <span>👗 Women's Collection</span>
+              </button>
+              <button class="dept-filter-pill" data-department="men" onclick="setDepartmentFilter('men')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
+                <span>👔 Men's Collection</span>
+              </button>
+              <button class="dept-filter-pill" data-department="kids" onclick="setDepartmentFilter('kids')" style="display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-align: left; background: #fff; cursor: pointer; transition: all 0.2s;">
+                <span>🧸 Kids & Children</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Categories Filter -->
+          <div style="margin-bottom: 22px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+            <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px;">Categories</h4>
+            <ul id="sidebar-category-list" style="list-style: none; display: flex; flex-direction: column; gap: 6px;">
+              <!-- Populated via JS -->
+            </ul>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div style="margin-bottom: 22px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+            <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px;">Price (₹)</h4>
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+              <input type="number" id="filter-min-price" placeholder="Min" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+              <span style="color: var(--muted); font-weight: 600;">-</span>
+              <input type="number" id="filter-max-price" placeholder="Max" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
+            </div>
+            <button id="apply-price-filter" class="btn btn-outline-primary btn-block" style="padding: 7px; font-size: 0.78rem;">Apply Price</button>
+          </div>
+
+          <!-- Rating Filter -->
+          <div style="margin-bottom: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+            <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.5px;">Customer Rating</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
+                <input type="radio" name="rating-filter" value="" checked onchange="setRatingFilter('')">
+                <span>All Ratings</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
+                <input type="radio" name="rating-filter" value="4.5" onchange="setRatingFilter('4.5')">
+                <span>★ 4.5 & above</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
+                <input type="radio" name="rating-filter" value="4" onchange="setRatingFilter('4')">
+                <span>★ 4.0 & above</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Discount Filter -->
+          <div style="margin-bottom: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+            <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.5px;">Discount</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
+                <input type="radio" name="discount-filter" value="" checked onchange="setDiscountFilter('')">
+                <span>All Discounts</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
+                <input type="radio" name="discount-filter" value="50" onchange="setDiscountFilter('50')">
+                <span>50% or more</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
+                <input type="radio" name="discount-filter" value="40" onchange="setDiscountFilter('40')">
+                <span>40% or more</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Stock Availability Filter -->
+          <div style="margin-bottom: 8px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+              <input type="checkbox" id="filter-instock">
+              <span>In Stock Only</span>
+            </label>
           </div>
         </div>
 
-        <!-- Categories Filter -->
-        <div style="margin-bottom: 22px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px;">Categories</h4>
-          <ul id="sidebar-category-list" style="list-style: none; display: flex; flex-direction: column; gap: 6px;">
-            <!-- Populated via JS -->
-          </ul>
-        </div>
-
-        <!-- Price Range Filter -->
-        <div style="margin-bottom: 22px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px;">Price (₹)</h4>
-          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
-            <input type="number" id="filter-min-price" placeholder="Min" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
-            <span style="color: var(--muted); font-weight: 600;">-</span>
-            <input type="number" id="filter-max-price" placeholder="Max" style="width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem;">
-          </div>
-          <button id="apply-price-filter" class="btn btn-outline-primary btn-block" style="padding: 7px; font-size: 0.78rem;">Apply Price</button>
-        </div>
-
-        <!-- Rating Filter -->
-        <div style="margin-bottom: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.5px;">Customer Rating</h4>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
-              <input type="radio" name="rating-filter" value="" checked onchange="setRatingFilter('')">
-              <span>All Ratings</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
-              <input type="radio" name="rating-filter" value="4.5" onchange="setRatingFilter('4.5')">
-              <span>★ 4.5 & above</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
-              <input type="radio" name="rating-filter" value="4" onchange="setRatingFilter('4')">
-              <span>★ 4.0 & above</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Discount Filter -->
-        <div style="margin-bottom: 20px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <h4 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.5px;">Discount</h4>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
-              <input type="radio" name="discount-filter" value="" checked onchange="setDiscountFilter('')">
-              <span>All Discounts</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
-              <input type="radio" name="discount-filter" value="50" onchange="setDiscountFilter('50')">
-              <span>50% or more</span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; font-weight: 500;">
-              <input type="radio" name="discount-filter" value="40" onchange="setDiscountFilter('40')">
-              <span>40% or more</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Stock Availability Filter -->
-        <div style="margin-bottom: 8px; border-top: 1px solid var(--border-subtle); padding-top: 16px;">
-          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
-            <input type="checkbox" id="filter-instock">
-            <span>In Stock Only</span>
-          </label>
+        <!-- Mobile Drawer Apply Footer -->
+        <div class="mobile-filter-drawer-footer">
+          <button type="button" onclick="resetFilters(); toggleMobileFilterDrawer(false);" class="btn btn-outline" style="flex: 1; padding: 12px; font-weight: 600; border-radius: 8px;">Reset</button>
+          <button type="button" onclick="toggleMobileFilterDrawer(false)" class="btn btn-primary" style="flex: 2; padding: 12px; font-weight: 700; border-radius: 8px;">Apply Filters</button>
         </div>
       </aside>
 
       <!-- Products Grid & Pagination -->
-      <div>
+      <div class="shop-products-column">
         <div class="product-grid" id="shop-product-grid">
           <!-- Populated dynamically via products.js -->
         </div>
@@ -665,7 +711,7 @@
 
   <script src="/firebase-config.js?v=20260927"></script>
   <script src="/js/app.js?v=20260927-8"></script>
-  <script src="/js/products.js?v=20260927"></script>
+  <script src="/js/products.js?v=20260927-10"></script>
 
   <!-- Floating WhatsApp VIP Concierge Button -->
   <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20your%20luxury%20collection." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="Chat on WhatsApp with RJ Fashion Concierge">

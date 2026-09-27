@@ -369,9 +369,38 @@ function resetFilters() {
   loadSidebarCategories();
 }
 
+function toggleMobileFilterDrawer(forceState) {
+  const sidebar = document.getElementById('shop-filter-sidebar');
+  const backdrop = document.getElementById('filter-drawer-backdrop');
+  if (!sidebar) return;
+  const shouldOpen = (typeof forceState === 'boolean') ? forceState : !sidebar.classList.contains('active');
+  if (shouldOpen) {
+    sidebar.classList.add('active');
+    backdrop?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  } else {
+    sidebar.classList.remove('active');
+    backdrop?.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+function syncSortAndApply(sortVal) {
+  currentFilters.sort = sortVal;
+  currentFilters.page = 1;
+  const desktopSort = document.getElementById('filter-sort');
+  if (desktopSort && desktopSort.value !== sortVal) desktopSort.value = sortVal;
+  const mobSort = document.getElementById('filter-sort-mob');
+  if (mobSort && mobSort.value !== sortVal) mobSort.value = sortVal;
+  loadProducts();
+}
+
 function syncFilterInputs() {
   const sortSelect = document.getElementById('filter-sort');
   if (sortSelect) sortSelect.value = currentFilters.sort;
+
+  const mobSort = document.getElementById('filter-sort-mob');
+  if (mobSort) mobSort.value = currentFilters.sort;
 
   const inStockCheck = document.getElementById('filter-instock');
   if (inStockCheck) inStockCheck.checked = currentFilters.inStock;
@@ -396,6 +425,34 @@ function syncFilterInputs() {
       pill.classList.remove('active');
     }
   });
+
+  document.querySelectorAll('.dept-filter-chip').forEach(chip => {
+    const chipDept = chip.getAttribute('data-department') || '';
+    if (chipDept === (currentFilters.department || '')) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+
+  // Calculate active filters count for mobile badge
+  let activeCount = 0;
+  if (currentFilters.department) activeCount++;
+  if (currentFilters.category) activeCount++;
+  if (currentFilters.minPrice || currentFilters.maxPrice) activeCount++;
+  if (currentFilters.rating) activeCount++;
+  if (currentFilters.discount) activeCount++;
+  if (currentFilters.inStock) activeCount++;
+
+  const badge = document.getElementById('mobile-filter-badge');
+  if (badge) {
+    if (activeCount > 0) {
+      badge.textContent = activeCount;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
 }
 
 function setDepartmentFilter(dept) {
@@ -420,12 +477,14 @@ function setDepartmentFilter(dept) {
 function setRatingFilter(val) {
   currentFilters.rating = val;
   currentFilters.page = 1;
+  syncFilterInputs();
   loadProducts();
 }
 
 function setDiscountFilter(val) {
   currentFilters.discount = val;
   currentFilters.page = 1;
+  syncFilterInputs();
   loadProducts();
 }
 
