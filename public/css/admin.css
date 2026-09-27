@@ -1055,10 +1055,13 @@ body.admin-body {
   .stat-card {
     padding: 14px;
   }
-  .stat-info .stat-value {
-    font-size: 1.25rem;
-  }
   .topbar-right .cloud-status-pill {
+    display: inline-flex;
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+  .topbar-right .cloud-status-pill #sync-status-sub {
     display: none;
   }
 }
+

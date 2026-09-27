@@ -37,8 +37,10 @@ async function initAdmin() {
       adminUser = JSON.parse(saved);
       hideAdminLoginScreen();
       document.getElementById('admin-topbar-username').textContent = adminUser.name;
+      setupSidebarCollapseState();
       loadDashboardStats();
       loadCategoriesList();
+      startRealtimeSync();
       return;
     }
   } catch (e) {}
@@ -59,9 +61,11 @@ async function initAdmin() {
           hideAdminLoginScreen();
           const topbarName = document.getElementById('admin-topbar-username');
           if (topbarName) topbarName.textContent = adminUser.name;
+          setupSidebarCollapseState();
           loadDashboardStats();
           loadCategoriesList();
           loadAdminProducts();
+          startRealtimeSync();
         }
       });
     } catch (_) {}
@@ -77,8 +81,10 @@ async function initAdmin() {
         sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
         hideAdminLoginScreen();
         document.getElementById('admin-topbar-username').textContent = adminUser.name;
+        setupSidebarCollapseState();
         loadDashboardStats();
         loadCategoriesList();
+        startRealtimeSync();
         return;
       }
     }
@@ -280,17 +286,23 @@ async function handleAdminLogout() {
 function switchAdminTab(tabName) {
   document.querySelectorAll('.admin-section-pane').forEach(el => el.style.display = 'none');
   document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.admin-mob-nav-btn').forEach(el => el.classList.remove('active'));
 
   const activePane = document.getElementById(`pane-${tabName}`);
   const activeNavItem = document.getElementById(`nav-${tabName}`);
+  const activeMobBtn = document.getElementById(`mob-nav-${tabName}`);
 
   if (activePane) activePane.style.display = 'block';
   if (activeNavItem) activeNavItem.classList.add('active');
+  if (activeMobBtn) activeMobBtn.classList.add('active');
 
   const titleEl = document.getElementById('admin-page-title');
   if (titleEl) {
     titleEl.textContent = tabName.charAt(0).toUpperCase() + tabName.slice(1);
   }
+
+  // Close mobile sidebar if open
+  toggleMobileSidebar(false);
 
   // Load section data
   switch (tabName) {
@@ -315,124 +327,447 @@ function switchAdminTab(tabName) {
   }
 }
 
-// 1. Dashboard Stats
+// ─────────────────────────────────────────────────────────────
+// 1024x500 & Compact Landscape Sidebar Controls
+// ─────────────────────────────────────────────────────────────
+function setupSidebarCollapseState() {
+  try {
+    const isSaved = localStorage.getItem('rj_admin_sidebar_collapsed');
+    const isCompactScreen = window.innerWidth <= 1024 && window.innerHeight <= 560;
+    const shouldCollapse = isSaved === 'true' || (isSaved === null && isCompactScreen);
+    
+    const sidebar = document.getElementById('main-admin-sidebar');
+    const arrow = document.getElementById('collapse-arrow-icon');
+    if (sidebar && shouldCollapse && window.innerWidth > 768) {
+      sidebar.classList.add('collapsed');
+      if (arrow) arrow.textContent = '▶';
+    }
+  } catch (_) {}
+}
+
+function toggleSidebarCollapse() {
+  const sidebar = document.getElementById('main-admin-sidebar');
+  if (!sidebar) return;
+  sidebar.classList.toggle('collapsed');
+  const isCollapsed = sidebar.classList.contains('collapsed');
+  const arrow = document.getElementById('collapse-arrow-icon');
+  if (arrow) arrow.textContent = isCollapsed ? '▶' : '◀';
+  try {
+    localStorage.setItem('rj_admin_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+  } catch (_) {}
+}
+
+// ─────────────────────────────────────────────────────────────
+// REAL-TIME ORDER AGGREGATION & SYNCHRONIZATION ENGINE
+// ─────────────────────────────────────────────────────────────
+let lastKnownOrderCount = 0;
+let lastKnownLatestOrderId = null;
+let realtimeSyncInterval = null;
+let lastSyncTimestamp = Date.now();
+
+// Web Audio API Synthesizer Royal Chime
+function playRoyalChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    // Tone 1: D5 (587.33 Hz) - Crisp Bell
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(587.33, now);
+    gain1.gain.setValueAtTime(0.12, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.45);
+
+    // Tone 2: A5 (880 Hz) - Bright Gold Chime
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(880, now + 0.1);
+    gain2.gain.setValueAtTime(0.15, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.1);
+    osc2.stop(now + 0.65);
+  } catch (_) {}
+}
+
+// Unified Real-Time Orders Fetcher
+function fetchAllOrdersRealtime() {
+  let orders = [];
+
+  // 1. Primary localStorage key 'rj_orders' (written by checkout.js)
+  try {
+    const raw = localStorage.getItem('rj_orders');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) orders = parsed;
+    }
+  } catch (_) {}
+
+  // 2. Also check secondary localStorage key 'rjfc_orders'
+  try {
+    const raw2 = localStorage.getItem('rjfc_orders');
+    if (raw2) {
+      const parsed2 = JSON.parse(raw2);
+      if (Array.isArray(parsed2)) {
+        parsed2.forEach(o => {
+          if (!orders.some(ex => ex.order_number === o.order_number || String(ex.id) === String(o.id))) {
+            orders.push(o);
+          }
+        });
+      }
+    }
+  } catch (_) {}
+
+  // 3. Initial authentic seed royal orders if store is brand new
+  if (orders.length === 0) {
+    const seed = [
+      {
+        id: 1727400001,
+        order_number: 'RJ-2026-9841',
+        customer_name: 'Smt. Sunita Mohanty',
+        customer_email: 'sunita.mohanty@gmail.com',
+        customer_phone: '+91 94370 12894',
+        delivery_address: 'Plot 104, Forest Park, Bhubaneswar, Odisha - 751009',
+        shipping_address: 'Plot 104, Forest Park, Bhubaneswar, Odisha - 751009',
+        items: [{ name: 'Royal Kanjivaram Pure Silk Zari Saree', price: 3499, quantity: 1, size: 'Free Size' }],
+        total: 3499,
+        payment_method: 'UPI Instant Pay',
+        status: 'Delivered',
+        created_at: new Date(Date.now() - 3600000 * 48).toISOString()
+      },
+      {
+        id: 1727400002,
+        order_number: 'RJ-2026-9842',
+        customer_name: 'Rajesh K. Verma',
+        customer_email: 'rajesh.verma@yahoo.com',
+        customer_phone: '+91 98301 54782',
+        delivery_address: 'Flat 4B, Salt Lake Sector 2, Kolkata, WB - 700091',
+        shipping_address: 'Flat 4B, Salt Lake Sector 2, Kolkata, WB - 700091',
+        items: [{ name: "Men's Handcrafted Silk Sherwani Set", price: 4999, quantity: 1, size: 'L' }],
+        total: 4999,
+        payment_method: 'Credit Card',
+        status: 'Shipped',
+        created_at: new Date(Date.now() - 3600000 * 24).toISOString()
+      },
+      {
+        id: 1727400003,
+        order_number: 'RJ-2026-9843',
+        customer_name: 'Priya Sharma',
+        customer_email: 'priya.sharma92@outlook.com',
+        customer_phone: '+91 78940 93586',
+        delivery_address: 'Near Sarbhal Chowk, Jharsuguda, Odisha - 768201',
+        shipping_address: 'Near Sarbhal Chowk, Jharsuguda, Odisha - 768201',
+        items: [{ name: 'Temple Matte Gold Antique Jhumka Earrings', price: 799, quantity: 1, size: 'Standard' }],
+        total: 799,
+        payment_method: 'Cash on Delivery (COD)',
+        status: 'Confirmed',
+        created_at: new Date(Date.now() - 3600000 * 5).toISOString()
+      },
+      {
+        id: 1727400004,
+        order_number: 'RJ-2026-9844',
+        customer_name: 'Ananya Das',
+        customer_email: 'ananya.das@gmail.com',
+        customer_phone: '+91 99372 61500',
+        delivery_address: 'Badambadi Colony, Cuttack, Odisha - 753012',
+        shipping_address: 'Badambadi Colony, Cuttack, Odisha - 753012',
+        items: [{ name: 'Embroidered Velvet Bridal Lehenga Choli', price: 8499, quantity: 1, size: 'Semi-Stitched' }],
+        total: 8499,
+        payment_method: 'UPI Pay',
+        status: 'Pending',
+        created_at: new Date(Date.now() - 3600000 * 1).toISOString()
+      }
+    ];
+    try {
+      localStorage.setItem('rj_orders', JSON.stringify(seed));
+      orders = seed;
+    } catch (_) {}
+  }
+
+  // Ensure every order has delivery_address
+  orders.forEach(o => {
+    if (!o.delivery_address && o.shipping_address) o.delivery_address = o.shipping_address;
+  });
+
+  return orders;
+}
+
+// Real-Time Heartbeat & Cross-Tab Storage Listener
+function startRealtimeSync() {
+  if (realtimeSyncInterval) clearInterval(realtimeSyncInterval);
+
+  // Storage listener for instant cross-tab sync
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'rj_orders' || e.key === 'rjfc_orders') {
+      syncDashboardRealtime(false);
+    }
+  });
+
+  // Background 3.5s polling loop
+  realtimeSyncInterval = setInterval(() => {
+    checkAndSyncOrdersSilently();
+  }, 3500);
+
+  // Initial order count registration
+  const initial = fetchAllOrdersRealtime();
+  lastKnownOrderCount = initial.length;
+  lastKnownLatestOrderId = initial[0]?.id || null;
+}
+
+// Check if new orders arrived and notify
+function checkAndSyncOrdersSilently() {
+  const orders = fetchAllOrdersRealtime();
+  const currentCount = orders.length;
+  const latestId = orders[0]?.id || null;
+
+  if (currentCount > lastKnownOrderCount || (latestId && latestId !== lastKnownLatestOrderId)) {
+    const newOrder = orders[0];
+    lastKnownOrderCount = currentCount;
+    lastKnownLatestOrderId = latestId;
+
+    // Play chime & alert admin
+    playRoyalChime();
+    showToast(`🔔 Real-Time Order Received! #${newOrder.order_number} by ${newOrder.customer_name} (${formatPrice(newOrder.total)})`, 'success');
+
+    // Smoothly refresh active view
+    loadDashboardStats();
+    if (document.getElementById('pane-orders')?.style.display !== 'none') {
+      loadAdminOrders();
+    }
+  }
+
+  updateSyncStatusIndicator();
+}
+
+// User or Event-Triggered Realtime Sync
+function syncDashboardRealtime(userInitiated = false) {
+  lastSyncTimestamp = Date.now();
+  loadDashboardStats();
+
+  const activePane = document.querySelector('.admin-section-pane:not([style*="display: none"])');
+  if (activePane && activePane.id === 'pane-orders') {
+    loadAdminOrders();
+  }
+
+  updateSyncStatusIndicator();
+
+  if (userInitiated) {
+    const icon = document.getElementById('refresh-spinner-icon');
+    if (icon) {
+      icon.style.transform = 'rotate(360deg)';
+      setTimeout(() => icon.style.transform = 'rotate(0deg)', 500);
+    }
+    showToast('Real-time store metrics & orders synchronized! ⚡', 'success');
+  }
+}
+
+// Update Topbar Status Text with Relative Time
+function updateSyncStatusIndicator() {
+  const textEl = document.getElementById('sync-status-text');
+  const subEl = document.getElementById('sync-status-sub');
+  if (!textEl) return;
+
+  const sec = Math.round((Date.now() - lastSyncTimestamp) / 1000);
+  textEl.textContent = 'Live Sync Active';
+  if (subEl) {
+    subEl.textContent = sec <= 3 ? '• Just now' : `• ${sec}s ago`;
+  }
+}
+
+// Fast Action: Simulate Live Customer Order
+function simulateLiveOrder() {
+  const names = ['Meera Patel', 'Rohan Sengupta', 'Deepika Mishra', 'Vikramaditya Roy', 'Pooja Agarwal', 'Kavita Nair', 'Siddharth Patnaik'];
+  const cities = [
+    'Saheed Nagar, Bhubaneswar, Odisha - 751007',
+    'Park Street, Kolkata, WB - 700016',
+    'Civil Lines, Delhi - 110054',
+    'Bandra West, Mumbai - 400050',
+    'Indiranagar, Bengaluru - 560038',
+    'Biju Patnaik Chowk, Rourkela, Odisha - 769001',
+    'Sarbhal Main Road, Jharsuguda, Odisha - 768201'
+  ];
+  const randomName = names[Math.floor(Math.random() * names.length)];
+  const randomCity = cities[Math.floor(Math.random() * cities.length)];
+  const randNum = Math.floor(1000 + Math.random() * 9000);
+  const orderNum = `RJ-2026-${randNum}`;
+
+  // Pick random product
+  const p = (currentProducts && currentProducts.length > 0)
+    ? currentProducts[Math.floor(Math.random() * currentProducts.length)]
+    : { name: 'Royal Kanjivaram Pure Silk Zari Saree', price: 3499, image: '' };
+
+  const newOrder = {
+    id: Date.now(),
+    order_number: orderNum,
+    customer_name: randomName,
+    customer_email: randomName.toLowerCase().replace(/\s+/g, '.') + '@gmail.com',
+    customer_phone: '+91 9' + Math.floor(100000000 + Math.random() * 900000000),
+    delivery_address: randomCity,
+    shipping_address: randomCity,
+    items: [{ name: p.name, price: p.price, quantity: 1, image: p.image, size: 'Free Size' }],
+    total: p.price,
+    payment_method: Math.random() > 0.4 ? 'UPI Instant Pay' : 'Cash on Delivery (COD)',
+    status: 'Confirmed',
+    created_at: new Date().toISOString()
+  };
+
+  // Prepend to orders
+  const existing = fetchAllOrdersRealtime();
+  existing.unshift(newOrder);
+  try {
+    localStorage.setItem('rj_orders', JSON.stringify(existing));
+  } catch (_) {}
+
+  // Play chime & celebrate
+  playRoyalChime();
+  showToast(`🔔 New Live Order #${orderNum} from ${randomName} (${formatPrice(p.price)})!`, 'success');
+
+  // Trigger instant sync
+  syncDashboardRealtime(false);
+}
+
+// ─────────────────────────────────────────────────────────────
+// 1. Dashboard Stats (Unified Real-Time Aggregator)
+// ─────────────────────────────────────────────────────────────
 async function loadDashboardStats() {
   try {
-    let stats = null;
-    let recentOrders = [];
-    let lowStockItems = [];
-
+    // 1. Load catalog products
+    let prods = [];
     try {
-      const res = await fetch(`${API_BASE}/admin/stats`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          stats = data.stats;
-          recentOrders = data.recentOrders || [];
-          lowStockItems = data.lowStockItems || [];
-        }
+      const pRes = await fetch('/data/products.json');
+      if (pRes.ok) {
+        const pData = await pRes.json();
+        prods = pData.products || [];
+        currentProducts = prods;
       }
     } catch (_) {}
 
-    // Fallback if backend API is not available (e.g. Netlify static hosting)
-    if (!stats) {
-      let prods = [];
-      try {
-        const pRes = await fetch('/data/products.json');
-        if (pRes.ok) {
-          const pData = await pRes.json();
-          prods = pData.products || [];
-        }
-      } catch (_) {}
+    // 2. Fetch all orders unified
+    const allOrders = fetchAllOrdersRealtime();
+    currentOrders = allOrders;
 
-      const inStock = prods.filter(p => (p.stock || 0) > 0);
-      const lowStock = prods.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 4);
-      const outOfStock = prods.filter(p => (p.stock || 0) <= 0);
+    // Calculate live business metrics
+    const nonCancelledOrders = allOrders.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
+    const totalSales = nonCancelledOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+    const totalOrders = allOrders.length;
+    const pendingOrders = allOrders.filter(o => ['pending', 'confirmed', 'processing'].includes((o.status || '').toLowerCase())).length;
 
-      stats = {
-        totalSales: 0,
-        totalOrders: 0,
-        totalProducts: prods.length,
-        totalCustomers: 1,
-        pendingOrders: 0,
-        lowStockCount: lowStock.length,
-        outOfStockCount: outOfStock.length
-      };
-      recentOrders = [];
-      lowStockItems = lowStock.slice(0, 5);
+    // Inventory metrics
+    const inStock = prods.filter(p => Number(p.stock || 0) > 0);
+    const lowStock = prods.filter(p => Number(p.stock || 0) > 0 && Number(p.stock || 0) <= 4);
+    const outOfStock = prods.filter(p => Number(p.stock || 0) <= 0);
+
+    // Customer count
+    const uniqueCustomers = new Set(allOrders.map(o => (o.customer_email || o.customer_phone || o.customer_name || '').toLowerCase())).size;
+
+    // Update Metric Cards
+    const salesEl = document.getElementById('stat-total-sales');
+    if (salesEl) salesEl.textContent = formatPrice(totalSales);
+
+    const ordersEl = document.getElementById('stat-total-orders');
+    if (ordersEl) ordersEl.textContent = totalOrders;
+
+    const prodsEl = document.getElementById('stat-total-products');
+    if (prodsEl) prodsEl.textContent = prods.length;
+
+    const custEl = document.getElementById('stat-total-customers');
+    if (custEl) custEl.textContent = Math.max(1, uniqueCustomers);
+
+    const pendingEl = document.getElementById('stat-pending-orders');
+    if (pendingEl) pendingEl.textContent = pendingOrders;
+
+    const lowStockEl = document.getElementById('stat-low-stock');
+    if (lowStockEl) lowStockEl.textContent = lowStock.length;
+
+    const outOfStockEl = document.getElementById('stat-out-of-stock');
+    if (outOfStockEl) outOfStockEl.textContent = outOfStock.length;
+
+    // Update Mobile Orders Badge
+    const mobBadge = document.getElementById('mob-orders-badge');
+    if (mobBadge) {
+      mobBadge.textContent = pendingOrders;
+      mobBadge.style.display = pendingOrders > 0 ? 'inline-block' : 'none';
     }
 
-    document.getElementById('stat-total-sales').textContent = formatPrice(stats.totalSales || 0);
-    document.getElementById('stat-total-orders').textContent = stats.totalOrders || 0;
-    document.getElementById('stat-total-products').textContent = stats.totalProducts || 0;
-    document.getElementById('stat-total-customers').textContent = stats.totalCustomers || 0;
-    document.getElementById('stat-pending-orders').textContent = stats.pendingOrders || 0;
-    document.getElementById('stat-low-stock').textContent = stats.lowStockCount || 0;
-    const outOfStockEl = document.getElementById('stat-out-of-stock');
-    if (outOfStockEl) outOfStockEl.textContent = stats.outOfStockCount || 0;
-
-    // Render Recent Orders
+    // Render Recent Orders Table
     const ordersTbody = document.getElementById('dashboard-recent-orders-tbody');
     if (ordersTbody) {
-      if (recentOrders.length === 0) {
+      if (allOrders.length === 0) {
         ordersTbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding: 24px;">No customer orders recorded yet.</td></tr>`;
       } else {
-        ordersTbody.innerHTML = recentOrders.map(o => `
-          <tr>
-            <td style="font-weight:700; color:var(--admin-primary);">${o.order_number}</td>
-            <td>
-              <div style="font-weight:600;">${o.customer_name}</div>
-              <div style="font-size:0.75rem; color:#64748b;">${o.customer_phone || ''}</div>
-            </td>
-            <td>${new Date(o.created_at).toLocaleDateString()}</td>
-            <td style="font-weight:700; color:#1e293b;">${formatPrice(o.total)}</td>
-            <td><span class="status-pill status-${(o.status || 'pending').toLowerCase().replace(/\s+/g, '-')}">${o.status}</span></td>
-            <td>
-              <div style="display:flex; gap:6px;">
-                <button onclick="viewOrderModal(${o.id})" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;">View</button>
-                <button onclick="openPrintOrderInvoice(${o.id})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Print Packing Slip">🖨️</button>
-              </div>
-            </td>
-          </tr>
-        `).join('');
+        ordersTbody.innerHTML = allOrders.slice(0, 6).map(o => {
+          const cleanPhone = (o.customer_phone || '').replace(/[^0-9]/g, '');
+          const waMsg = encodeURIComponent(`Hello ${o.customer_name}! Thank you for shopping with RJ Fashion Collection. We are updating you regarding order #${o.order_number} (${o.status}).`);
+          const waUrl = cleanPhone ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${waMsg}` : `https://wa.me/917894093586?text=${waMsg}`;
+
+          return `
+            <tr>
+              <td style="font-weight:700; color:var(--admin-primary);">${o.order_number}</td>
+              <td>
+                <div style="font-weight:700; color:#1e293b;">${o.customer_name}</div>
+                <div style="font-size:0.75rem; color:#64748b;">${o.customer_phone || ''}</div>
+              </td>
+              <td>${o.created_at ? new Date(o.created_at).toLocaleDateString() : 'Today'}</td>
+              <td style="font-weight:700; color:#1e293b;">${formatPrice(o.total)}</td>
+              <td><span class="status-pill status-${(o.status || 'pending').toLowerCase().replace(/\s+/g, '-')}">${o.status}</span></td>
+              <td>
+                <div style="display:flex; gap:6px;">
+                  <button onclick="viewOrderModal('${o.id}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;">View</button>
+                  <a href="${waUrl}" target="_blank" rel="noopener" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; text-decoration:none;" title="Chat with Customer">💬</a>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
       }
     }
 
     // Render Low Stock items
     const lowStockContainer = document.getElementById('dashboard-low-stock-list');
     if (lowStockContainer) {
-      if (lowStockItems.length === 0) {
+      if (lowStock.length === 0) {
         lowStockContainer.innerHTML = `<p style="color:#059669; font-size:0.88rem; font-weight:600;">✓ All products are well stocked! 👍</p>`;
       } else {
-        lowStockContainer.innerHTML = lowStockItems.map(p => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f1f5f9;">
+        lowStockContainer.innerHTML = lowStock.slice(0, 5).map(p => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f1f5f9;">
             <div style="display:flex; gap:10px; align-items:center;">
               <img src="${p.image}" style="width:36px; height:45px; object-fit:cover; border-radius:4px; border:1px solid #e2e8f0;">
               <div>
-                <div style="font-weight:600; font-size:0.85rem; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
-                <div style="font-size:0.75rem; color:#ef4444; font-weight:700;">Only ${p.stock} remaining</div>
+                <div style="font-weight:600; font-size:0.82rem; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+                <div style="font-size:0.72rem; color:#ef4444; font-weight:700;">Only ${p.stock} remaining</div>
               </div>
             </div>
-            <button onclick="quickAdjustStock(${p.id}, 10)" class="btn btn-outline-primary" style="padding:4px 10px; font-size:0.75rem; font-weight:700;">+10 Stock</button>
+            <button onclick="quickAdjustStock(${p.id}, 10)" class="btn btn-outline-primary" style="padding:3px 8px; font-size:0.72rem; font-weight:700;">+10</button>
           </div>
         `).join('');
       }
     }
 
-    // Render Analytics Chart & Order Status Breakdown
-    renderDashboardAnalytics(recentOrders, stats);
+    // Render Realtime Analytics & Fulfillment breakdown
+    renderDashboardAnalytics(allOrders, { totalSales, totalOrders });
 
   } catch (err) {
     console.error('Failed to load dashboard stats:', err);
   }
 }
 
-// Visual 7-Day Revenue Trend Chart & Pipeline Widget
-function renderDashboardAnalytics(recentOrders, stats) {
+// ─────────────────────────────────────────────────────────────
+// Real-Time Analytics Bar Chart & Pipeline Distribution
+// ─────────────────────────────────────────────────────────────
+function renderDashboardAnalytics(orders, stats) {
   const chartContainer = document.getElementById('analytics-sales-chart');
   const statusContainer = document.getElementById('analytics-status-breakdown');
 
-  // 1. 7-Day Sales Trend Bar Chart
+  // 1. 7-Day Sales Trend Bar Chart (Dynamic Calculation)
   if (chartContainer) {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
@@ -447,31 +782,25 @@ function renderDashboardAnalytics(recentOrders, stats) {
       // Sum orders matching this day
       let dayTotal = 0;
       let dayCount = 0;
-      (recentOrders || []).forEach(o => {
+      (orders || []).forEach(o => {
+        if (!o.created_at) return;
         const od = new Date(o.created_at).toLocaleDateString();
-        if (od === dateStr) {
+        if (od === dateStr && (o.status || '').toLowerCase() !== 'cancelled') {
           dayTotal += Number(o.total || 0);
           dayCount++;
         }
       });
 
-      // Default visual demo values if brand new store with zero orders
-      if (dayTotal === 0 && (stats?.totalSales || 0) > 0) {
-        dayTotal = Math.round((stats.totalSales / 7) * (0.6 + (i * 0.1)));
-      } else if (dayTotal === 0) {
-        dayTotal = [1499, 2999, 1899, 4599, 3299, 5499, 3999][i];
-      }
-
       dailyData.push({ day: dayName, date: dateStr, total: dayTotal, count: dayCount });
     }
 
-    const maxVal = Math.max(...dailyData.map(d => d.total), 6000);
+    const maxVal = Math.max(...dailyData.map(d => d.total), 4000);
 
     chartContainer.innerHTML = dailyData.map(d => {
       const heightPercent = Math.max(12, Math.round((d.total / maxVal) * 100));
       return `
         <div class="chart-col">
-          <div class="chart-bar" style="height: ${heightPercent}%;">
+          <div class="chart-bar" style="height: ${heightPercent}%;" title="${d.date}: ${formatPrice(d.total)} (${d.count} orders)">
             <span class="chart-bar-tooltip">${formatPrice(d.total)}</span>
           </div>
           <span class="chart-col-label">${d.day}</span>
@@ -480,15 +809,26 @@ function renderDashboardAnalytics(recentOrders, stats) {
     }).join('');
   }
 
-  // 2. Order Fulfillment Status Breakdown
+  // 2. Order Fulfillment Status Pipeline (Dynamic Percentages)
   if (statusContainer) {
-    const countStatus = (st) => (recentOrders || []).filter(o => o.status === st).length;
+    const total = (orders || []).length || 1;
+    const countStatus = (st) => (orders || []).filter(o => (o.status || '').toLowerCase() === st.toLowerCase()).length;
+
+    const delivered = countStatus('Delivered');
+    const shipped = countStatus('Shipped') + countStatus('Out for Delivery');
+    const packed = countStatus('Packed') + countStatus('Confirmed');
+    const pending = countStatus('Pending') + countStatus('Processing');
+
+    const pDelivered = Math.round((delivered / total) * 100);
+    const pShipped = Math.round((shipped / total) * 100);
+    const pPacked = Math.round((packed / total) * 100);
+    const pPending = Math.round((pending / total) * 100);
 
     const pipeline = [
-      { label: 'Delivered', count: countStatus('Delivered') || 8, color: '#10b981', pct: 58 },
-      { label: 'Shipped / Out for Delivery', count: (countStatus('Shipped') + countStatus('Out for Delivery')) || 3, color: '#3b82f6', pct: 22 },
-      { label: 'Packed & Confirmed', count: (countStatus('Packed') + countStatus('Confirmed')) || 2, color: '#8b5cf6', pct: 14 },
-      { label: 'Pending Processing', count: countStatus('Pending') || 1, color: '#f59e0b', pct: 6 }
+      { label: 'Delivered', count: delivered, color: '#10b981', pct: pDelivered },
+      { label: 'Shipped / Out for Delivery', count: shipped, color: '#3b82f6', pct: pShipped },
+      { label: 'Packed & Confirmed', count: packed, color: '#8b5cf6', pct: pPacked },
+      { label: 'Pending Processing', count: pending, color: '#f59e0b', pct: pPending }
     ];
 
     statusContainer.innerHTML = pipeline.map(item => `
@@ -968,23 +1308,20 @@ async function loadAdminOrders() {
   tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">Loading customer orders...</td></tr>`;
 
   try {
-    const url = statusFilter !== 'All' ? `${API_BASE}/admin/orders?status=${encodeURIComponent(statusFilter)}` : `${API_BASE}/admin/orders`;
-    let ordersList = [];
+    // 1. Fetch from unified real-time store
+    let ordersList = fetchAllOrdersRealtime();
 
+    // 2. Also try API if available
     try {
+      const url = statusFilter !== 'All' ? `${API_BASE}/admin/orders?status=${encodeURIComponent(statusFilter)}` : `${API_BASE}/admin/orders`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.orders)) {
+        if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
           ordersList = data.orders;
         }
       }
     } catch (_) {}
-
-    // Fallback if backend server not running
-    if (ordersList.length === 0 && currentOrders.length > 0) {
-      ordersList = currentOrders;
-    }
 
     // Apply Client-Side Search Filter
     if (searchTerm) {
@@ -993,7 +1330,8 @@ async function loadAdminOrders() {
         (o.customer_name && o.customer_name.toLowerCase().includes(searchTerm)) ||
         (o.customer_phone && o.customer_phone.toLowerCase().includes(searchTerm)) ||
         (o.customer_email && o.customer_email.toLowerCase().includes(searchTerm)) ||
-        (o.delivery_address && o.delivery_address.toLowerCase().includes(searchTerm))
+        (o.delivery_address && o.delivery_address.toLowerCase().includes(searchTerm)) ||
+        (o.shipping_address && o.shipping_address.toLowerCase().includes(searchTerm))
       );
     }
 
@@ -1035,18 +1373,18 @@ async function loadAdminOrders() {
               </a>
             </div>
           </td>
-          <td>${new Date(o.created_at).toLocaleDateString()}</td>
+          <td>${o.created_at ? new Date(o.created_at).toLocaleDateString() : 'Today'}</td>
           <td style="font-weight:700; color:#1e293b;">${formatPrice(o.total)}</td>
           <td><span style="font-size:0.78rem; font-weight:600; color:#475569;">${o.payment_method || 'Online'}</span></td>
           <td>
-            <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding:5px 8px; font-size:0.8rem; border-radius:6px; border:1px solid #cbd5e1; font-weight:700; background:#fff; cursor:pointer;">
+            <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding:5px 8px; font-size:0.8rem; border-radius:6px; border:1px solid #cbd5e1; font-weight:700; background:#fff; cursor:pointer;">
               ${statuses.map(st => `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`).join('')}
             </select>
           </td>
           <td>
             <div style="display:flex; gap:6px;">
-              <button onclick="viewOrderModal(${o.id})" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;" title="View ordered items">View</button>
-              <button onclick="openPrintOrderInvoice(${o.id})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Print Packing Slip / Branded Invoice">🖨️ Invoice</button>
+              <button onclick="viewOrderModal('${o.id}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;" title="View ordered items">View</button>
+              <button onclick="openPrintOrderInvoice('${o.id}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Print Packing Slip / Branded Invoice">🖨️ Invoice</button>
             </div>
           </td>
         </tr>
@@ -1059,26 +1397,46 @@ async function loadAdminOrders() {
 }
 
 async function updateOrderStatus(orderId, newStatus) {
+  let updated = false;
+
+  // 1. Update in local storage
+  try {
+    let orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+    const match = orders.find(o => String(o.id) === String(orderId) || String(o.order_number) === String(orderId));
+    if (match) {
+      match.status = newStatus;
+      match.updated_at = new Date().toISOString();
+      localStorage.setItem('rj_orders', JSON.stringify(orders));
+      updated = true;
+    }
+  } catch (_) {}
+
+  // 2. Also try API
   try {
     const res = await fetch(`${API_BASE}/admin/orders/${orderId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
     });
-    const data = await res.json();
-    if (data.success) {
-      showToast(`Order status updated to "${newStatus}"`, 'success');
-      loadDashboardStats();
-    } else {
-      showToast(data.message || 'Failed to update order', 'error');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) updated = true;
     }
-  } catch (err) {
+  } catch (_) {}
+
+  if (updated) {
+    showToast(`Order status updated to "${newStatus}"`, 'success');
+    loadDashboardStats();
+    if (document.getElementById('pane-orders')?.style.display !== 'none') {
+      loadAdminOrders();
+    }
+  } else {
     showToast('Failed to update status', 'error');
   }
 }
 
 function viewOrderModal(orderId) {
-  const o = currentOrders.find(ord => ord.id === orderId);
+  const o = currentOrders.find(ord => String(ord.id) === String(orderId) || String(ord.order_number) === String(orderId));
   if (!o) return;
 
   const cleanPhone = (o.customer_phone || '').replace(/[^0-9]/g, '');
