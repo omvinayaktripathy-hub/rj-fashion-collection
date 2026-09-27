@@ -633,6 +633,65 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* Modal Backdrop & Window Styling (Ensures 100% Contrast in Dark and Light Themes) */
+    #order-success-modal {
+      display: none !important;
+      position: fixed !important;
+      inset: 0 !important;
+      background: rgba(0, 0, 0, 0.85) !important;
+      backdrop-filter: blur(8px) !important;
+      z-index: 99999 !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    #order-success-modal.active {
+      display: flex !important;
+    }
+
+    [data-theme="dark"] #order-success-modal .modal-window,
+    .dark-theme #order-success-modal .modal-window {
+      background: #14141e !important;
+      border: 1.5px solid #c59b27 !important;
+      color: #f8fafc !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 25px rgba(197, 155, 39, 0.25) !important;
+    }
+    [data-theme="dark"] #order-success-modal h2,
+    .dark-theme #order-success-modal h2 {
+      color: #e2be67 !important;
+    }
+    [data-theme="dark"] #order-success-modal p,
+    .dark-theme #order-success-modal p {
+      color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] #order-success-modal .modal-order-box,
+    .dark-theme #order-success-modal .modal-order-box {
+      background: #1e1625 !important;
+      border: 1px dashed #c59b27 !important;
+      color: #f8fafc !important;
+    }
+
+    [data-theme="light"] #order-success-modal .modal-window,
+    html:not(.dark-theme):not([data-theme="dark"]) #order-success-modal .modal-window {
+      background: #ffffff !important;
+      border: 1.5px solid #700037 !important;
+      color: #18181b !important;
+      box-shadow: 0 20px 60px rgba(112, 0, 55, 0.2) !important;
+    }
+    [data-theme="light"] #order-success-modal h2,
+    html:not(.dark-theme):not([data-theme="dark"]) #order-success-modal h2 {
+      color: #700037 !important;
+    }
+    [data-theme="light"] #order-success-modal p,
+    html:not(.dark-theme):not([data-theme="dark"]) #order-success-modal p {
+      color: #52525b !important;
+    }
+    [data-theme="light"] #order-success-modal .modal-order-box,
+    html:not(.dark-theme):not([data-theme="dark"]) #order-success-modal .modal-order-box {
+      background: #fdfaf6 !important;
+      border: 1px dashed #700037 !important;
+      color: #18181b !important;
+    }
   </style>
 </head>
 <body>
@@ -938,9 +997,9 @@
         Thank you for choosing RJ Fashion Collection. Your royal handcrafted ethnic wear is being carefully prepared for priority dispatch.
       </p>
 
-      <div style="background: var(--deliv-selected-bg); border: 1px dashed var(--gold); border-radius: 8px; padding: 18px; margin-bottom: 24px;">
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--deliv-text-muted); font-weight: 800; letter-spacing: 0.8px;">Order Reference Number</div>
-        <div id="modal-order-number" style="font-weight: 800; font-size: 1.35rem; color: var(--primary); margin: 6px 0; letter-spacing: 1px;">RJFC-XXXX</div>
+      <div class="modal-order-box" style="border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+        <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px;">Order Reference Number</div>
+        <div id="modal-order-number" style="font-weight: 800; font-size: 1.35rem; margin: 6px 0; letter-spacing: 1px;">RJFC-XXXX</div>
         <div style="font-size: 0.92rem; color: var(--deliv-text-primary);">Total Amount Payable: <strong id="modal-order-total" style="color: #10b981; font-size: 1.1rem;">₹0</strong></div>
       </div>
 

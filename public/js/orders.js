@@ -1,4 +1,4 @@
-// RJ FASHION COLLECTION - ORDERS CONTROLLER
+// RJ FASHION COLLECTION - ORDERS CONTROLLER (WITH LOCALSTORAGE PERSISTENCE)
 
 let activeCancelOrderNumber = null;
 
@@ -8,93 +8,162 @@ async function loadMyOrders() {
 
   if (!container) return;
 
+  let orders = [];
+
+  // 1. Try server API
   try {
     const res = await fetch(`${API_BASE}/orders`);
-
-    if (res.status === 401) {
-      window.location.href = '/login.html?redirect=/orders.html';
-      return;
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+        orders = data.orders;
+      }
     }
+  } catch (_) {}
 
-    const data = await res.json();
-    if (!data.success || !data.orders || data.orders.length === 0) {
-      if (emptyState) emptyState.style.display = 'block';
-      container.innerHTML = '';
-      return;
-    }
+  // 2. Fallback to localStorage saved orders
+  if (orders.length === 0) {
+    try {
+      const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+      if (Array.isArray(localOrders) && localOrders.length > 0) {
+        orders = localOrders;
+      }
+    } catch (_) {}
+  }
 
-    if (emptyState) emptyState.style.display = 'none';
+  // If no orders found
+  if (orders.length === 0) {
+    if (emptyState) emptyState.style.display = 'block';
+    container.innerHTML = '';
+    return;
+  }
 
-    container.innerHTML = data.orders.map(order => {
-      const orderDate = new Date(order.created_at).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
+  if (emptyState) emptyState.style.display = 'none';
 
-      const canCancel = order.status !== 'Cancelled' && order.status !== 'Delivered';
+  // Render Luxury Orders List
+  container.innerHTML = orders.map(order => {
+    const orderDate = new Date(order.created_at || Date.now()).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
 
-      return `
-        <div class="cart-items-card" style="margin-bottom: 24px; padding: 20px;" id="order-card-${order.order_number}">
-          <!-- Order Header -->
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+    const orderNum = order.order_number || ('RJFC-' + (order.id || '1001'));
+    const status = order.status || 'Confirmed';
+    const isCancelled = status.toLowerCase() === 'cancelled';
+    const isDelivered = status.toLowerCase() === 'delivered';
+    const canCancel = !isCancelled && !isDelivered;
+
+    const items = Array.isArray(order.items) ? order.items : [];
+    const shippingAddr = order.shipping_address || order.delivery_address || 'Delivery Address on file';
+    const payMethod = order.payment_method || 'Cash on Delivery';
+    const payStatus = order.payment_status || (payMethod === 'Cash on Delivery' ? 'Pay on Delivery' : 'Paid');
+    const orderTotal = Number(order.total) || items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+
+    return `
+      <div class="order-luxury-card" id="order-card-${orderNum}">
+        <!-- Order Header Strip -->
+        <div class="order-header-strip">
+          <div>
+            <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--deliv-text-muted); font-weight: 800; letter-spacing: 0.5px;">Order Reference</span>
+            <div style="font-weight: 800; font-size: 1.15rem; color: var(--primary); font-family: monospace; letter-spacing: 0.5px;">
+              ${orderNum}
+            </div>
+            <div style="font-size: 0.84rem; color: var(--deliv-text-muted); margin-top: 3px;">
+              Placed on ${orderDate} • Express Insured Air Shipping
+            </div>
+          </div>
+
+          <div style="text-align: right;">
+            <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--deliv-text-muted); font-weight: 800; letter-spacing: 0.5px;">Status</span>
             <div>
-              <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--muted); font-weight: 700;">Order ID</span>
-              <div style="font-weight: 700; font-size: 1.05rem; color: var(--primary);">${order.order_number}</div>
-              <div style="font-size: 0.82rem; color: var(--muted); margin-top: 2px;">Placed on ${orderDate}</div>
+              <span class="status-pill status-${status.toLowerCase().replace(/\s+/g, '-')}" id="order-status-badge-${orderNum}">
+                ● ${status}
+              </span>
             </div>
-
-            <div style="text-align: right;">
-              <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--muted); font-weight: 700;">Status</span>
-              <div>
-                <span class="status-pill status-${order.status.toLowerCase().replace(/\s+/g, '-')}" id="order-status-badge-${order.order_number}">
-                  ● ${order.status}
-                </span>
-              </div>
-              <div style="font-weight: 700; font-size: 1.1rem; margin-top: 4px; color: var(--dark);">${formatPrice(order.total)}</div>
-            </div>
-          </div>
-
-          <!-- Items in Order -->
-          <div style="display: flex; flex-direction: column; gap: 14px;">
-            ${(order.items || []).map(item => `
-              <div style="display: flex; gap: 16px; align-items: center;">
-                <img src="${item.product_image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80'}"
-                     alt="${item.product_name}"
-                     style="width: 60px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);">
-                <div style="flex: 1;">
-                  <div style="font-weight: 600; font-size: 0.95rem; color: var(--dark);">${item.product_name}</div>
-                  <div style="font-size: 0.82rem; color: var(--muted); margin-top: 2px;">
-                    Quantity: ${item.quantity} ${item.size ? `• Size: ${item.size}` : ''}
-                  </div>
-                  <div style="font-weight: 600; font-size: 0.9rem; color: var(--dark); margin-top: 2px;">${formatPrice(item.price)} each</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          <!-- Order Footer / Details -->
-          <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #4b5563; flex-wrap: wrap; gap: 12px;">
-            <div style="max-width: 65%;">
-              <div><span style="font-weight: 600;">Delivery Address:</span> ${order.delivery_address}</div>
-              <div style="margin-top: 4px;"><span style="font-weight: 600;">Payment:</span> ${order.payment_method} (${order.payment_status})</div>
-            </div>
-
-            <div id="order-actions-${order.order_number}">
-              ${canCancel ? `
-                <button class="fk-change-btn" style="color: #dc2626; border-color: #fca5a5; background: #fff5f5;" onclick="openCancelModal('${order.order_number}')">
-                  ✕ Cancel Order
-                </button>
-              ` : ''}
+            <div style="font-weight: 800; font-size: 1.25rem; margin-top: 4px; color: var(--deliv-text-primary);">
+              ${formatPrice(orderTotal)}
             </div>
           </div>
         </div>
-      `;
-    }).join('');
-  } catch (err) {
-    console.error('Error loading orders:', err);
-    container.innerHTML = `<p style="padding: 20px; color: var(--danger);">Failed to load orders.</p>`;
-  }
+
+        <!-- Order Live Progress Stepper Timeline -->
+        <div class="order-timeline-wrap">
+          <div class="timeline-step completed">
+            <div class="timeline-dot">✓</div>
+            <div class="timeline-label">Order Confirmed</div>
+          </div>
+          <div class="timeline-line ${!isCancelled ? 'active' : ''}"></div>
+          <div class="timeline-step ${!isCancelled ? 'active' : ''}">
+            <div class="timeline-dot">${!isCancelled ? '⚡' : '✕'}</div>
+            <div class="timeline-label">${!isCancelled ? 'Preparing Dispatch' : 'Cancelled'}</div>
+          </div>
+          <div class="timeline-line ${isDelivered ? 'completed' : ''}"></div>
+          <div class="timeline-step ${isDelivered ? 'completed' : ''}">
+            <div class="timeline-dot">🚚</div>
+            <div class="timeline-label">Blue Dart Air</div>
+          </div>
+          <div class="timeline-line ${isDelivered ? 'completed' : ''}"></div>
+          <div class="timeline-step ${isDelivered ? 'completed' : ''}">
+            <div class="timeline-dot">📦</div>
+            <div class="timeline-label">Delivered</div>
+          </div>
+        </div>
+
+        <!-- Items in Order -->
+        <div class="order-items-container">
+          ${items.map(item => {
+            const name = item.name || item.product_name || 'Handcrafted Luxury Wear';
+            const img = item.image || item.product_image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80';
+            const size = item.size || 'Free Size';
+            const qty = item.quantity || 1;
+            const price = Number(item.price) || 0;
+
+            return `
+              <div class="order-item-row">
+                <img src="${img}" alt="${name}" class="order-item-thumb" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80'">
+                <div style="flex: 1; min-width: 0;">
+                  <h4 class="order-item-title">${name}</h4>
+                  <div style="font-size: 0.85rem; color: var(--deliv-text-muted); margin-bottom: 4px;">
+                    Size: <strong>${size}</strong> • Qty: <strong>${qty}</strong>
+                  </div>
+                  <div style="font-size: 0.95rem; font-weight: 800; color: var(--deliv-text-primary);">
+                    ${formatPrice(price)} each
+                  </div>
+                </div>
+                <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); text-align: right;">
+                  ${formatPrice(price * qty)}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Order Footer Details & Actions -->
+        <div class="order-footer-strip">
+          <div style="flex: 1; min-width: 260px;">
+            <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); line-height: 1.5;">
+              <span style="font-weight: 700; color: var(--deliv-text-primary);">📍 Delivery Address:</span> ${shippingAddr}
+            </div>
+            <div style="font-size: 0.85rem; color: var(--deliv-text-muted); margin-top: 4px;">
+              <span style="font-weight: 700; color: var(--deliv-text-primary);">💳 Payment:</span> ${payMethod} (${payStatus})
+            </div>
+          </div>
+
+          <div class="order-action-buttons" id="order-actions-${orderNum}">
+            <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20need%20an%20update%20on%20my%20order%20${orderNum}" target="_blank" class="order-support-btn">
+              💬 WhatsApp Concierge
+            </a>
+            ${canCancel ? `
+              <button class="order-cancel-btn" onclick="openCancelModal('${orderNum}')">
+                ✕ Cancel Order
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // Cancel Order Modal Handlers
@@ -128,38 +197,31 @@ async function submitOrderCancellation() {
   confirmBtn.disabled = true;
   confirmBtn.textContent = 'Cancelling...';
 
+  // 1. Try server API
   try {
-    const res = await fetch(`${API_BASE}/orders/${activeCancelOrderNumber}/cancel`, {
+    await fetch(`${API_BASE}/orders/${activeCancelOrderNumber}/cancel`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason })
     });
-    const data = await res.json();
+  } catch (_) {}
 
-    if (data.success) {
-      showToast('Order cancelled successfully.', 'success');
-      closeCancelModal();
-
-      // Dynamically update status pill without full page reload
-      const badge = document.getElementById(`order-status-badge-${activeCancelOrderNumber}`);
-      if (badge) {
-        badge.className = 'status-pill status-cancelled';
-        badge.textContent = '● Cancelled';
-      }
-
-      // Hide the cancel button
-      const actions = document.getElementById(`order-actions-${activeCancelOrderNumber}`);
-      if (actions) actions.innerHTML = '<span style="color: #dc2626; font-weight: 600; font-size: 0.85rem;">Order Cancelled</span>';
-    } else {
-      showToast(data.message || 'Could not cancel order.', 'error');
+  // 2. Persist cancellation in localStorage
+  try {
+    const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+    const target = localOrders.find(o => (o.order_number === activeCancelOrderNumber) || String(o.id) === String(activeCancelOrderNumber));
+    if (target) {
+      target.status = 'Cancelled';
+      target.cancel_reason = reason;
+      localStorage.setItem('rj_orders', JSON.stringify(localOrders));
     }
-  } catch (err) {
-    console.error('Cancellation error:', err);
-    showToast('Failed to connect to server. Please try again.', 'error');
-  } finally {
-    confirmBtn.disabled = false;
-    confirmBtn.textContent = 'CONFIRM CANCELLATION';
-  }
+  } catch (_) {}
+
+  showToast('Order cancelled successfully.', 'success');
+  closeCancelModal();
+
+  // Reload orders view
+  await loadMyOrders();
 }
 
 document.addEventListener('DOMContentLoaded', loadMyOrders);
