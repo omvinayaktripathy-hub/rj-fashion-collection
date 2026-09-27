@@ -1,22 +1,46 @@
 /* ===================================================================
-   RJ FASHION COLLECTION - RESPONSIVE STYLES
-   Breakpoints: Desktop (1200px), Tablet (992px, 768px), Mobile (576px)
+   RJ FASHION COLLECTION - LUXURY RESPONSIVE & MOBILE / IPHONE DESIGN
+   Breakpoints: Desktop (1200px+), Laptop (992px-1199px), Tablet (768px-991px), Mobile & iPhone (<768px)
    =================================================================== */
 
-/* Bottom Navigation for Mobile */
+/* Safe Area Inset Support for iPhone Notch & Gesture Bar */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* Touch Action Optimization: Zero tap delay */
+a, button, input, select, textarea, .product-card, .bottom-nav-item {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Bottom Navigation for Mobile & iPhone */
 .bottom-nav {
   display: none;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: #ffffff;
+  height: calc(62px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
-  z-index: 990;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  z-index: 999;
   justify-content: space-around;
   align-items: center;
+}
+
+[data-theme="dark"] .bottom-nav,
+.dark-theme .bottom-nav {
+  background: rgba(18, 18, 26, 0.95) !important;
+  border-top-color: #28283c !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
 .bottom-nav-item {
@@ -25,23 +49,33 @@
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
-  font-weight: 500;
-  color: #64748b;
+  font-weight: 600;
+  color: var(--muted);
   position: relative;
   text-decoration: none;
   flex: 1;
   height: 100%;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 48px;
 }
 
 .bottom-nav-item.active,
 .bottom-nav-item:hover {
   color: var(--primary);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .bottom-nav-item.active,
+.dark-theme .bottom-nav-item.active {
+  color: var(--gold) !important;
 }
 
 .bottom-nav-icon {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   margin-bottom: 2px;
   position: relative;
+  display: inline-block;
+  line-height: 1;
 }
 
 .bottom-badge {
@@ -51,27 +85,60 @@
   background: var(--primary);
   color: #fff;
   font-size: 0.65rem;
-  font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
+  font-weight: 800;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 3px;
+  padding: 0 4px;
+  box-shadow: 0 2px 6px rgba(112, 0, 55, 0.35);
 }
 
-/* Tablet Breakpoint (max-width: 992px) */
+/* ===================================================================
+   LAPTOPS & TABLETS (max-width: 1199px)
+   =================================================================== */
+@media (max-width: 1199px) {
+  .container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .header-main {
+    gap: 20px;
+  }
+
+  .hero-title {
+    font-size: 2.6rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .fk-checkout-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ===================================================================
+   TABLET BREAKPOINT (max-width: 992px)
+   =================================================================== */
 @media (max-width: 992px) {
   .header-main {
     flex-wrap: wrap;
-    gap: 14px;
+    gap: 12px;
+    padding: 12px 16px;
   }
 
   .header-search {
     order: 3;
     max-width: 100%;
     width: 100%;
+    margin-top: 4px;
   }
 
   .cart-layout {
@@ -79,12 +146,12 @@
   }
 
   .footer-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
   }
 
   .hero-slider {
-    min-height: 350px;
+    min-height: 360px;
   }
 
   .hero-title {
@@ -92,10 +159,12 @@
   }
 }
 
-/* Mobile Breakpoint (max-width: 768px) */
+/* ===================================================================
+   MOBILE & IPHONE BREAKPOINT (max-width: 768px)
+   =================================================================== */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 70px; /* Space for bottom nav */
+    padding-bottom: calc(72px + var(--safe-bottom)) !important;
   }
 
   .bottom-nav {
@@ -104,106 +173,178 @@
 
   .top-bar {
     font-size: 0.75rem;
-    padding: 6px 10px;
+    padding: 6px 12px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 900;
   }
 
   .brand-logo .logo-title {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
   }
 
   .brand-logo .logo-subtitle {
     font-size: 0.6rem;
+    letter-spacing: 2px;
   }
 
+  /* Nav Links bar: Smooth Horizontal Swipe */
+  .main-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 8px 0;
+  }
+  .main-nav::-webkit-scrollbar {
+    display: none;
+  }
   .nav-links {
-    gap: 16px;
-    font-size: 0.82rem;
+    display: flex;
+    gap: 18px;
+    padding: 0 16px;
+    font-size: 0.85rem;
+    white-space: nowrap;
   }
 
+  /* Mobile Hero Slider */
   .hero-slider {
-    min-height: 300px;
-    margin-top: 10px;
+    min-height: 310px;
+    margin-top: 8px;
+    border-radius: 10px;
   }
-
   .hero-content {
-    padding: 30px 20px;
+    padding: 28px 18px;
   }
-
   .hero-title {
-    font-size: 1.65rem;
+    font-size: 1.7rem;
+    line-height: 1.2;
   }
-
   .hero-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     margin-bottom: 18px;
   }
 
-  .theme-toggle-btn {
-    padding: 6px 10px;
-    font-size: 0.75rem;
-  }
-
-  @media (max-width: 480px) {
-    .theme-toggle-btn .theme-toggle-text {
-      display: none;
-    }
-  }
-
+  /* Product Grid: 2-Column Responsive Luxe Layout */
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    padding: 0 4px;
   }
 
+  .product-card {
+    border-radius: 8px;
+  }
   .product-card .product-details {
-    padding: 10px;
+    padding: 12px;
   }
-
   .product-title {
-    font-size: 0.85rem;
-    height: 2.4em;
+    font-size: 0.88rem;
+    height: 2.6em;
+    line-height: 1.35;
   }
-
   .price-current {
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-weight: 800;
   }
-
   .price-original {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
-
   .product-actions {
     grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .btn-card {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Stepper on Checkout & Delivery: Clean & Compact */
+  .stepper-nav {
+    gap: 8px;
+  }
+  .stepper-nav-step {
+    font-size: 0.8rem;
     gap: 6px;
   }
-
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  .stepper-nav-circle {
+    width: 24px;
+    height: 24px;
+    font-size: 0.75rem;
+  }
+  .stepper-nav-line {
+    max-width: 30px;
   }
 
+  /* Footer on Mobile */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
   .footer-bottom {
     flex-direction: column;
     text-align: center;
-    gap: 10px;
+    gap: 12px;
+    padding-bottom: 20px;
   }
 
-  .cart-item {
-    grid-template-columns: 80px 1fr;
+  /* WhatsApp Float Position for Mobile & iPhone */
+  .whatsapp-float-btn {
+    bottom: calc(76px + var(--safe-bottom)) !important;
+    right: 16px !important;
+    padding: 10px 14px;
   }
-
-  .cart-item-actions {
-    grid-column: 1 / -1;
+  .whatsapp-label {
+    display: none;
   }
 }
 
+/* ===================================================================
+   SMALL IPHONE & COMPACT MOBILE (max-width: 480px)
+   =================================================================== */
 @media (max-width: 480px) {
   .product-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
-  .btn-card {
-    padding: 6px 4px;
-    font-size: 0.74rem;
+  .brand-logo .logo-title {
+    font-size: 1.15rem;
+  }
+
+  .brand-logo .logo-subtitle {
+    font-size: 0.55rem;
+  }
+
+  .theme-mode-text {
+    display: none !important;
+  }
+
+  .deliv-guarantee-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .fk-cart-bottom-bar {
+    padding: 12px 16px;
+  }
+
+  .fk-place-order-btn {
+    width: 100%;
+    text-align: center;
+    padding: 14px 20px;
+  }
+
+  .confirm-order-btn {
+    font-size: 0.98rem;
+    padding: 16px 20px;
   }
 }

@@ -315,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     updateWishlistCount();
   });
+  init3DAnimations();
 
   // Global search form listener
   const searchForms = document.querySelectorAll('.header-search-form');
@@ -331,4 +332,59 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+// ===================================================================
+// 3D LUXURY PERSPECTIVE & TILT CONTROLLER
+// ===================================================================
+function init3DAnimations() {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+  function bindTiltEffect(card) {
+    if (card._has3DTilt) return;
+    card._has3DTilt = true;
+
+    if (!isTouchDevice) {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translate3d(0, -6px, 12px)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)';
+      });
+    } else {
+      // Touch-based 3D response for Mobile & iPhone
+      card.addEventListener('touchstart', () => {
+        card.style.transform = 'perspective(1000px) scale3d(0.985, 0.985, 0.985) translateZ(-4px)';
+      }, { passive: true });
+
+      card.addEventListener('touchend', () => {
+        card.style.transform = 'perspective(1000px) scale3d(1, 1, 1) translateZ(0)';
+      }, { passive: true });
+    }
+  }
+
+  // Initial attach to cards
+  document.querySelectorAll('.product-card, .category-card, .feature-box, .fk-price-card, .order-luxury-card, .delivery-page-card, .checkout-section-card').forEach(bindTiltEffect);
+
+  // Automatically attach to dynamically loaded elements
+  try {
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('.product-card, .category-card, .feature-box, .fk-price-card, .order-luxury-card, .delivery-page-card, .checkout-section-card').forEach(bindTiltEffect);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  } catch (_) {}
+}
 

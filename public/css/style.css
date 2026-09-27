@@ -2669,3 +2669,131 @@ body.dark-theme {
   border-color: #2d2d42 !important;
 }
 
+/* ===================================================================
+   RJ FASHION COLLECTION - 3D LUXURY PERSPECTIVE & ANIMATION SYSTEM
+   =================================================================== */
+
+/* 3D Global Perspective Context */
+.product-grid,
+.featured-grid,
+.categories-grid,
+.features-grid,
+.hero-slider,
+.fk-checkout-layout {
+  perspective: 1200px;
+}
+
+/* 3D Luxury Card Styling with Ambient Lighting */
+.product-card,
+.category-card,
+.feature-box,
+.cart-items-card,
+.order-luxury-card,
+.delivery-page-card,
+.checkout-section-card {
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  will-change: transform;
+  position: relative;
+}
+
+/* 3D Hover Elevation for Desktop & Laptops */
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover {
+    transform: perspective(1000px) translate3d(0, -8px, 16px) rotateX(1.5deg);
+    box-shadow: 0 20px 40px -10px rgba(112, 0, 55, 0.16), 0 0 22px rgba(197, 155, 39, 0.22);
+    border-color: rgba(197, 155, 39, 0.5) !important;
+  }
+
+  .category-card:hover {
+    transform: perspective(1000px) translate3d(0, -6px, 14px) rotateX(1.2deg);
+    box-shadow: 0 18px 36px -8px rgba(112, 0, 55, 0.2), 0 0 18px rgba(197, 155, 39, 0.25);
+  }
+
+  .feature-box:hover {
+    transform: perspective(1000px) translate3d(0, -5px, 10px);
+    box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.12), 0 0 15px rgba(197, 155, 39, 0.2);
+  }
+}
+
+/* 3D Specular Light Sweep on Product Cards */
+.product-card::before,
+.category-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 100%
+  );
+  transform: skewX(-25deg);
+  transition: left 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 5;
+}
+
+[data-theme="dark"] .product-card::before,
+.dark-theme .product-card::before,
+[data-theme="dark"] .category-card::before,
+.dark-theme .category-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(226, 190, 103, 0.14) 50%,
+    transparent 100%
+  );
+}
+
+.product-card:hover::before,
+.category-card:hover::before {
+  left: 150%;
+}
+
+/* 3D Parallax Image Depth */
+.product-card .product-image img,
+.category-card img {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card:hover .product-image img {
+  transform: scale3d(1.06, 1.06, 1.06) translateZ(10px);
+}
+
+/* 3D Floating Animations */
+@keyframes float3D {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -8px, 12px) rotate(1.2deg);
+  }
+}
+
+@keyframes pulseGlow3D {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(197, 155, 39, 0.5), 0 4px 14px rgba(112, 0, 55, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(197, 155, 39, 0), 0 8px 24px rgba(112, 0, 55, 0.35);
+  }
+}
+
+/* WhatsApp Floating Button with 3D Float */
+.whatsapp-float-btn {
+  transform-style: preserve-3d;
+  animation: float3D 4s ease-in-out infinite;
+  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4), 0 0 14px rgba(37, 211, 102, 0.25);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.whatsapp-float-btn:hover {
+  transform: scale3d(1.08, 1.08, 1.08) translateZ(12px) !important;
+  box-shadow: 0 14px 32px rgba(37, 211, 102, 0.55), 0 0 22px rgba(37, 211, 102, 0.35);
+}
+
+
