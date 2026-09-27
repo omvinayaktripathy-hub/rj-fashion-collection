@@ -315,26 +315,139 @@
       color: #3b82f6;
     }
 
-    /* Modal */
+    /* Cancel Order Modal Luxury Styling & Scale Animation */
+    @keyframes modalScaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.92) translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
     #cancel-order-modal {
       display: none;
       align-items: center;
       justify-content: center;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.82) !important;
       z-index: 99999;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
     }
-    #cancel-order-modal .modal-window {
-      background: var(--deliv-card-bg);
-      border: 1.5px solid var(--deliv-card-border);
-      border-radius: 10px;
-      color: var(--deliv-text-primary);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+
+    /* Dark Mode Cancel Modal */
+    [data-theme="dark"] #cancel-order-modal .modal-window,
+    .dark-theme #cancel-order-modal .modal-window {
+      background: #14141e !important;
+      border: 1.5px solid #c59b27 !important;
+      border-radius: 12px;
+      color: #f8fafc !important;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.85), 0 0 30px rgba(197, 155, 39, 0.25) !important;
+      animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       width: 90%;
       max-width: 480px;
       padding: 28px;
+    }
+    [data-theme="dark"] #cancel-order-modal h3,
+    .dark-theme #cancel-order-modal h3 {
+      color: #e2be67 !important;
+      font-family: var(--font-cinzel) !important;
+      font-weight: 800 !important;
+    }
+    [data-theme="dark"] #cancel-order-modal .cancel-notice-box,
+    .dark-theme #cancel-order-modal .cancel-notice-box {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border: 1px dashed rgba(239, 68, 68, 0.35) !important;
+      color: #cbd5e1 !important;
+    }
+    [data-theme="dark"] #cancel-order-modal label,
+    .dark-theme #cancel-order-modal label {
+      color: #e2be67 !important;
+    }
+    [data-theme="dark"] #cancel-order-modal select,
+    .dark-theme #cancel-order-modal select {
+      background: #1a1a27 !important;
+      border: 1.5px solid #333348 !important;
+      color: #f8fafc !important;
+    }
+    [data-theme="dark"] #cancel-order-modal .cancel-keep-btn,
+    .dark-theme #cancel-order-modal .cancel-keep-btn {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1.5px solid #4b5563 !important;
+      color: #f8fafc !important;
+    }
+
+    /* Light Mode Cancel Modal */
+    [data-theme="light"] #cancel-order-modal .modal-window,
+    html:not(.dark-theme):not([data-theme="dark"]) #cancel-order-modal .modal-window {
+      background: #ffffff !important;
+      border: 1.5px solid #700037 !important;
+      border-radius: 12px;
+      color: #18181b !important;
+      box-shadow: 0 24px 64px rgba(112, 0, 55, 0.2) !important;
+      animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      width: 90%;
+      max-width: 480px;
+      padding: 28px;
+    }
+    [data-theme="light"] #cancel-order-modal h3,
+    html:not(.dark-theme):not([data-theme="dark"]) #cancel-order-modal h3 {
+      color: #700037 !important;
+      font-family: var(--font-cinzel) !important;
+      font-weight: 800 !important;
+    }
+    [data-theme="light"] #cancel-order-modal .cancel-notice-box,
+    html:not(.dark-theme):not([data-theme="dark"]) #cancel-order-modal .cancel-notice-box {
+      background: #fef2f2 !important;
+      border: 1px dashed #fca5a5 !important;
+      color: #374151 !important;
+    }
+    [data-theme="light"] #cancel-order-modal label,
+    html:not(.dark-theme):not([data-theme="dark"]) #cancel-order-modal label {
+      color: #4b5563 !important;
+    }
+    [data-theme="light"] #cancel-order-modal select,
+    html:not(.dark-theme):not([data-theme="dark"]) #cancel-order-modal select {
+      background: #ffffff !important;
+      border: 1.5px solid #d1d5db !important;
+      color: #111827 !important;
+    }
+    [data-theme="light"] #cancel-order-modal .cancel-keep-btn,
+    html:not(.dark-theme):not([data-theme="dark"]) #cancel-order-modal .cancel-keep-btn {
+      background: #ffffff !important;
+      border: 1.5px solid #cbd5e1 !important;
+      color: #374151 !important;
+    }
+
+    .cancel-keep-btn {
+      padding: 12px 22px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cancel-keep-btn:hover {
+      transform: translateY(-1px);
+    }
+    .cancel-confirm-btn {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+      color: #ffffff !important;
+      border: none;
+      padding: 12px 26px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+    .cancel-confirm-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(220, 38, 38, 0.5);
     }
   </style>
 </head>
@@ -437,20 +550,24 @@
     </div>
   </main>
 
-  <!-- Cancel Order Modal -->
+  <!-- Cancel Order Modal with High-Contrast Luxury Design -->
   <div id="cancel-order-modal">
     <div class="modal-window">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0; color: var(--deliv-text-primary);">Cancel Order</h3>
-        <button onclick="closeCancelModal()" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--deliv-text-muted);">✕</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 style="font-size: 1.45rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <span>✕</span>
+          <span>Cancel Order</span>
+        </h3>
+        <button onclick="closeCancelModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; line-height: 1;" title="Close">✕</button>
       </div>
-      <p style="font-size: 0.92rem; color: var(--deliv-text-secondary); margin-bottom: 18px; line-height: 1.5;">
-        Are you sure you want to cancel order <strong id="cancel-modal-order-num" style="color: var(--primary);"></strong>? The items will be returned to store stock.
-      </p>
 
-      <div style="margin-bottom: 22px;">
-        <label style="display: block; font-size: 0.82rem; font-weight: 700; color: var(--deliv-text-secondary); text-transform: uppercase; margin-bottom: 8px;">Reason for Cancellation</label>
-        <select id="cancel-reason-select" style="width: 100%; padding: 12px 14px; border: 1.5px solid var(--deliv-card-border); border-radius: 6px; font-size: 0.92rem; background: var(--deliv-selected-bg); color: var(--deliv-text-primary); outline: none;">
+      <div class="cancel-notice-box">
+        <span>⚠️ Are you sure you want to cancel order <strong id="cancel-modal-order-num" style="font-family: monospace; font-size: 1.05rem;">RJFC-XXXX</strong>? The artisan ethnic wear items will be released back into inventory.</span>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 0.82rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Reason for Cancellation</label>
+        <select id="cancel-reason-select">
           <option value="Changed my mind">Changed my mind</option>
           <option value="Ordered by mistake">Ordered by mistake</option>
           <option value="Need to change delivery address or phone">Need to change delivery address or phone</option>
@@ -459,9 +576,9 @@
         </select>
       </div>
 
-      <div style="display: flex; gap: 12px; justify-content: flex-end;">
-        <button type="button" onclick="closeCancelModal()" style="background: none; border: 1px solid var(--deliv-card-border); padding: 11px 20px; border-radius: 4px; font-weight: 700; cursor: pointer; color: var(--deliv-text-secondary);">Keep Order</button>
-        <button type="button" id="confirm-cancel-order-btn" class="btn btn-danger" style="padding: 11px 24px; font-size: 0.9rem; font-weight: 800; background: #dc2626; color: #fff; border: none; border-radius: 4px; cursor: pointer;" onclick="submitOrderCancellation()">
+      <div style="display: flex; gap: 14px; justify-content: flex-end;">
+        <button type="button" class="cancel-keep-btn" onclick="closeCancelModal()">Keep Order</button>
+        <button type="button" id="confirm-cancel-order-btn" class="cancel-confirm-btn" onclick="submitOrderCancellation()">
           CONFIRM CANCELLATION
         </button>
       </div>
