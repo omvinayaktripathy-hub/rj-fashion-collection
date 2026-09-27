@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Payment & Review - RJ Fashion Collection</title>
   <script>
     // Instant Theme Controller - zero delay, zero external dependencies
@@ -57,18 +60,18 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20260927-6">
-  <link rel="stylesheet" href="/css/responsive.css?v=20260927-6">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-7">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-7">
   <style>
     /* ==============================================================
-       LUXURY PAYMENT & REVIEW THEME SYSTEM
+       ROYAL LUXURY CHECKOUT & PAYMENT DESIGN SYSTEM
        ============================================================== */
     :root {
       --deliv-bg: #f8f6f2;
       --deliv-card-bg: #ffffff;
       --deliv-card-border: #ede7df;
-      --deliv-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      --deliv-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
       --deliv-text-primary: #18181b;
       --deliv-text-secondary: #52525b;
       --deliv-text-muted: #71717a;
@@ -80,10 +83,10 @@
 
     [data-theme="dark"],
     .dark-theme {
-      --deliv-bg: #0b0b10;
+      --deliv-bg: #09090e;
       --deliv-card-bg: #14141e;
       --deliv-card-border: #262638;
-      --deliv-card-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+      --deliv-card-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
       --deliv-text-primary: #f8fafc;
       --deliv-text-secondary: #cbd5e1;
       --deliv-text-muted: #94a3b8;
@@ -99,14 +102,82 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* Checkout Stepper Bar */
+    /* Keyframe Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(197, 155, 39, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(197, 155, 39, 0);
+      }
+    }
+
+    @keyframes shimmerSweep {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(105vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* Animated Card Entry */
+    .anim-fade-in {
+      animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .anim-delay-1 { animation-delay: 0.08s; opacity: 0; }
+    .anim-delay-2 { animation-delay: 0.16s; opacity: 0; }
+    .anim-delay-3 { animation-delay: 0.24s; opacity: 0; }
+    .anim-delay-4 { animation-delay: 0.32s; opacity: 0; }
+
+    /* Top Announcement Bar */
+    .top-bar {
+      background: #700037;
+      color: #ffffff;
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    [data-theme="dark"] .top-bar,
+    .dark-theme .top-bar {
+      background: #060609;
+      border-bottom: 1px solid #1f1f2e;
+      color: #e2be67;
+    }
+
+    /* Stepper Bar */
     .checkout-stepper-wrap {
       background: var(--deliv-card-bg);
       border-bottom: 1px solid var(--deliv-card-border);
       padding: 16px 0;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
     .stepper-nav {
@@ -147,7 +218,7 @@
       align-items: center;
       justify-content: center;
       font-size: 0.82rem;
-      font-weight: 700;
+      font-weight: 800;
       border: 2px solid var(--deliv-card-border);
       background: var(--deliv-card-bg);
       color: var(--deliv-text-muted);
@@ -157,14 +228,14 @@
       background: var(--primary-gradient);
       color: #ffffff;
       border-color: var(--primary);
-      box-shadow: 0 0 12px rgba(112, 0, 55, 0.4);
+      animation: pulseGlow 2s infinite;
     }
     [data-theme="dark"] .stepper-nav-step.active .stepper-nav-circle,
     .dark-theme .stepper-nav-step.active .stepper-nav-circle {
       background: var(--gold-gradient);
       color: #121214;
       border-color: var(--gold);
-      box-shadow: 0 0 12px rgba(197, 155, 39, 0.4);
+      animation: pulseGlow 2s infinite;
     }
     .stepper-nav-step.completed .stepper-nav-circle {
       background: #10b981;
@@ -181,6 +252,39 @@
       background: #10b981;
     }
 
+    /* Live Dispatch Countdown Banner */
+    .dispatch-timer-strip {
+      background: linear-gradient(135deg, rgba(197, 155, 39, 0.15) 0%, rgba(112, 0, 55, 0.12) 100%);
+      border: 1px solid rgba(197, 155, 39, 0.35);
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .dispatch-timer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--deliv-text-primary);
+    }
+    .dispatch-timer-badge {
+      background: var(--gold-gradient);
+      color: #121214;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      font-family: monospace;
+      box-shadow: 0 2px 8px rgba(197, 155, 39, 0.3);
+    }
+
     /* Cards */
     .checkout-section-card {
       background: var(--deliv-card-bg);
@@ -189,7 +293,10 @@
       box-shadow: var(--deliv-card-shadow);
       margin-bottom: 24px;
       overflow: hidden;
-      transition: border-color 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .checkout-section-card:hover {
+      border-color: rgba(197, 155, 39, 0.4);
     }
     .checkout-card-header {
       padding: 18px 24px;
@@ -215,15 +322,67 @@
     .change-link-btn {
       color: var(--gold);
       text-decoration: none;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 0.85rem;
       padding: 6px 14px;
       border: 1.5px solid var(--gold);
       border-radius: 4px;
       transition: all 0.2s;
+      letter-spacing: 0.4px;
     }
     .change-link-btn:hover {
       background: var(--deliv-selected-bg);
+      transform: translateY(-1px);
+    }
+
+    /* Checkout Item Rows */
+    .checkout-item-row {
+      display: flex;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--deliv-card-border);
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .checkout-item-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .checkout-item-thumb {
+      width: 64px;
+      height: 78px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--deliv-card-border);
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    .checkout-item-row:hover .checkout-item-thumb {
+      transform: scale(1.04);
+    }
+    .checkout-item-title {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--deliv-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .checkout-item-meta {
+      font-size: 0.85rem;
+      color: var(--deliv-text-muted);
+      display: flex;
+      gap: 14px;
+    }
+    .checkout-item-meta strong {
+      color: var(--deliv-text-primary);
+    }
+    .checkout-item-price {
+      font-weight: 800;
+      color: var(--deliv-text-primary);
+      font-size: 1.05rem;
+      text-align: right;
     }
 
     /* Payment Options */
@@ -236,6 +395,7 @@
       transition: all 0.25s ease;
       background: var(--deliv-card-bg);
       display: block;
+      position: relative;
     }
     .payment-option-box:hover {
       border-color: var(--gold);
@@ -244,39 +404,114 @@
       border-color: var(--deliv-selected-border);
       background: var(--deliv-selected-bg);
       border-left: 5px solid var(--deliv-selected-border);
-      box-shadow: 0 4px 16px rgba(112, 0, 55, 0.1);
+      box-shadow: 0 6px 20px rgba(112, 0, 55, 0.12);
     }
     [data-theme="dark"] .payment-option-box.selected,
     .dark-theme .payment-option-box.selected {
-      box-shadow: 0 4px 20px rgba(197, 155, 39, 0.15);
+      box-shadow: 0 6px 24px rgba(197, 155, 39, 0.18);
+    }
+    .payment-extra-detail {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--deliv-card-border);
+      font-size: 0.88rem;
+      color: var(--deliv-text-secondary);
     }
 
+    /* Coupon Box */
+    .coupon-card-section {
+      background: var(--deliv-selected-bg);
+      border: 1px dashed var(--gold);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+    .coupon-input-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .coupon-input-group input {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 6px;
+      border: 1.5px solid var(--deliv-card-border);
+      background: var(--deliv-input-bg);
+      color: var(--deliv-text-primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      outline: none;
+    }
+    .coupon-apply-btn {
+      background: var(--gold-gradient);
+      color: #121214;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .coupon-apply-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(197, 155, 39, 0.3);
+    }
+    .coupon-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .coupon-chip {
+      background: var(--deliv-card-bg);
+      border: 1px solid var(--deliv-card-border);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .coupon-chip:hover {
+      border-color: var(--gold);
+      background: var(--deliv-selected-bg);
+    }
+
+    /* Big Confirm Button with Shimmer Sweep */
     .confirm-order-btn {
-      background: var(--primary-gradient);
+      background: linear-gradient(90deg, #700037 0%, #910047 30%, #b8005b 50%, #910047 70%, #700037 100%);
+      background-size: 200% 100%;
+      animation: shimmerSweep 3.5s infinite linear;
       color: #ffffff;
       border: none;
-      border-radius: 4px;
-      padding: 16px 36px;
+      border-radius: 6px;
+      padding: 18px 36px;
       font-weight: 800;
-      font-size: 1.05rem;
-      letter-spacing: 0.5px;
+      font-size: 1.1rem;
+      letter-spacing: 0.8px;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(112, 0, 55, 0.35);
+      box-shadow: 0 6px 20px rgba(112, 0, 55, 0.4);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 14px;
       width: 100%;
       transition: all 0.25s ease;
       text-transform: uppercase;
+      position: relative;
     }
     .confirm-order-btn:hover {
-      background: #8b0044;
       transform: translateY(-2px);
-      box-shadow: 0 6px 22px rgba(112, 0, 55, 0.45);
+      box-shadow: 0 8px 28px rgba(112, 0, 55, 0.55);
+    }
+    .confirm-order-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
     }
 
-    /* Price Details Card Aside */
+    /* Sticky Price Details Card Aside */
     .fk-price-card {
       background: var(--deliv-card-bg);
       border: 1px solid var(--deliv-card-border);
@@ -302,7 +537,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 14px;
-      font-size: 0.95rem;
+      font-size: 0.96rem;
       color: var(--deliv-text-primary);
     }
     .fk-price-row.savings {
@@ -329,7 +564,7 @@
       color: var(--deliv-text-primary);
     }
     .fk-price-total-row .total-highlight {
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       color: var(--primary);
     }
     [data-theme="dark"] .fk-price-total-row .total-highlight,
@@ -347,6 +582,56 @@
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    /* Trust Guarantee Strip */
+    .trust-guarantee-box {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--deliv-selected-bg);
+      border-radius: 6px;
+      border: 1px solid var(--deliv-card-border);
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.86rem;
+      color: var(--deliv-text-secondary);
+      margin-bottom: 10px;
+    }
+    .trust-item:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Address tags */
+    .addr-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(113, 113, 122, 0.12);
+      color: var(--deliv-text-secondary);
+    }
+    .addr-tag.default-tag {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+
+    /* Inline Loading Spinner */
+    .spinner-inline {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s infinite linear;
+      display: inline-block;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -407,12 +692,26 @@
   <!-- Main Container -->
   <main class="container" style="padding-bottom: 70px; max-width: 1200px; flex: 1;">
     
+    <!-- Live Dispatch Countdown Banner -->
+    <div class="dispatch-timer-strip anim-fade-in">
+      <div class="dispatch-timer-left">
+        <span style="font-size: 1.4rem;">⚡</span>
+        <div>
+          <span>Order before midnight for <strong>Guaranteed Free Express Air Dispatch</strong> tomorrow!</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.82rem; font-weight: 700; color: var(--deliv-text-muted); text-transform: uppercase;">Time Left:</span>
+        <span class="dispatch-timer-badge" id="dispatch-countdown-timer">02h : 38m : 45s</span>
+      </div>
+    </div>
+
     <div class="fk-checkout-layout">
-      <!-- Left Column: Confirmed Address, Order Items & Payment -->
+      <!-- Left Column: Confirmed Address, Order Items, Coupon & Payment -->
       <div>
 
         <!-- CARD 1: CONFIRMED DELIVERY ADDRESS -->
-        <div class="checkout-section-card">
+        <div class="checkout-section-card anim-fade-in anim-delay-1">
           <div class="checkout-card-header">
             <h2>
               <span>📍</span> Delivery Address
@@ -428,7 +727,7 @@
         </div>
 
         <!-- CARD 2: ORDER ITEMS SUMMARY -->
-        <div class="checkout-section-card">
+        <div class="checkout-section-card anim-fade-in anim-delay-2">
           <div class="checkout-card-header">
             <h2>
               <span>🛍️</span> Order Summary (<span id="checkout-items-count">0</span> items)
@@ -450,8 +749,29 @@
           </div>
         </div>
 
-        <!-- CARD 3: PAYMENT OPTIONS -->
-        <div class="checkout-section-card">
+        <!-- CARD 3: FESTIVE COUPON & PROMO CODE -->
+        <div class="coupon-card-section anim-fade-in anim-delay-3">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.96rem; font-weight: 800; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px;">
+              <span>🏷️</span>
+              <span>Have a Festive Coupon or Promo Code?</span>
+            </div>
+            <span style="font-size: 0.78rem; font-weight: 700; color: #10b981;">UP TO 10% EXTRA DISCOUNT</span>
+          </div>
+
+          <div class="coupon-input-group">
+            <input type="text" id="coupon-input" placeholder="ENTER CODE (e.g. ROYAL10)">
+            <button type="button" class="coupon-apply-btn" onclick="applyPromoCode()">APPLY</button>
+          </div>
+
+          <div class="coupon-chips">
+            <span class="coupon-chip" onclick="applyPromoCode('ROYAL10')">✨ Apply ROYAL10 (Save 10% Extra)</span>
+            <span class="coupon-chip" onclick="applyPromoCode('WELCOME500')">🎁 Apply WELCOME500 (Save ₹500)</span>
+          </div>
+        </div>
+
+        <!-- CARD 4: PAYMENT OPTIONS -->
+        <div class="checkout-section-card anim-fade-in anim-delay-4">
           <div class="checkout-card-header">
             <h2>
               <span>💳</span> Payment Options
@@ -461,45 +781,56 @@
 
           <div class="checkout-card-body">
             <!-- Cash on Delivery Option -->
-            <label class="payment-option-box selected" id="cod-box" style="display: flex; gap: 16px; align-items: flex-start;">
-              <input type="radio" name="checkout_payment_method" value="Cash on Delivery" checked style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
-              <div style="flex: 1;">
-                <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary);">
-                  💵 Cash on Delivery (Pay on Delivery)
+            <label class="payment-option-box selected" id="cod-box">
+              <div style="display: flex; gap: 16px; align-items: flex-start;">
+                <input type="radio" name="checkout_payment_method" value="Cash on Delivery" checked style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px;">
+                    <span>💵 Cash on Delivery (Pay on Delivery)</span>
+                    <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: 800;">MOST POPULAR</span>
+                  </div>
+                  <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
+                    Pay easily with Cash or UPI (Google Pay, PhonePe, Paytm QR) directly to the delivery executive upon arrival at your doorstep.
+                  </div>
                 </div>
-                <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
-                  Pay easily with Cash or UPI (Google Pay, PhonePe, Paytm QR) directly to the delivery executive upon arrival at your doorstep.
-                </div>
+              </div>
+              <div class="payment-extra-detail" style="display: block;">
+                ✓ No advance online payment needed. Inspect package on arrival and pay securely.
               </div>
             </label>
 
-            <!-- Direct UPI / Online Payment Option -->
-            <label class="payment-option-box" id="upi-box" style="display: flex; gap: 16px; align-items: flex-start;">
-              <input type="radio" name="checkout_payment_method" value="UPI" style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
-              <div style="flex: 1;">
-                <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 10px;">
-                  <span>⚡ Direct Instant UPI</span>
-                  <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: 800;">0-FEE CHECKOUT</span>
+            <!-- Direct Instant UPI Option -->
+            <label class="payment-option-box" id="upi-box">
+              <div style="display: flex; gap: 16px; align-items: flex-start;">
+                <input type="radio" name="checkout_payment_method" value="UPI" style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 10px;">
+                    <span>⚡ Direct Instant UPI / Online Payment</span>
+                    <span style="font-size: 0.72rem; background: rgba(197, 155, 39, 0.2); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: 800;">ZERO FEES</span>
+                  </div>
+                  <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
+                    Pay instantly via Google Pay, PhonePe, Paytm, BHIM, Debit/Credit Card or Net Banking.
+                  </div>
                 </div>
-                <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
-                  Google Pay, PhonePe, Paytm, BHIM & Net Banking with instant payment confirmation.
-                </div>
+              </div>
+              <div class="payment-extra-detail" style="display: none;">
+                ✓ Fast 1-click confirmation with bank-grade 256-bit SSL encryption.
               </div>
             </label>
 
-            <!-- Delivery Notes Input -->
-            <div style="margin-top: 20px;">
+            <!-- Delivery Instructions Input -->
+            <div style="margin-top: 22px;">
               <label style="display: block; font-size: 0.84rem; font-weight: 700; color: var(--deliv-text-secondary); margin-bottom: 6px; text-transform: uppercase;">
                 Delivery Instructions (Optional)
               </label>
               <input type="text" id="order-delivery-notes" placeholder="e.g. Please deliver after 4 PM or call before arrival" style="width: 100%; padding: 12px 14px; background: var(--deliv-input-bg); border: 1.5px solid var(--deliv-input-border); border-radius: 6px; font-size: 0.92rem; color: var(--deliv-text-primary); outline: none;">
             </div>
 
-            <!-- Big Final Confirm Button -->
+            <!-- Big Final Confirm Button with Shimmer Sweep -->
             <div style="margin-top: 26px;">
               <button type="button" class="confirm-order-btn" id="confirm-order-btn" onclick="executePlaceOrder()">
                 <span>CONFIRM &amp; PLACE ORDER</span>
-                <span>➔</span>
+                <span style="font-size: 1.2rem; line-height: 1;">➔</span>
               </button>
             </div>
           </div>
@@ -507,15 +838,33 @@
 
       </div>
 
-      <!-- Right Column: Sticky Price Details -->
+      <!-- Right Column: Sticky Price Details Aside -->
       <aside>
-        <div class="fk-price-card" id="fk-summary-card">
+        <div class="fk-price-card anim-fade-in anim-delay-2" id="fk-summary-card">
           <div class="fk-price-header">PRICE DETAILS</div>
           <div class="fk-price-body" id="checkout-price-body">
             <p style="color: var(--deliv-text-muted); margin: 0;">Calculating summary...</p>
           </div>
-          <div style="padding: 16px 22px; background: var(--deliv-selected-bg); border-top: 1px solid var(--deliv-card-border); border-radius: 0 0 8px 8px; font-size: 0.85rem; color: var(--deliv-text-muted); line-height: 1.5;">
-            🛡️ Safe and Secure Payments. 100% Authentic Handcrafted Wear. Free Pan-India Delivery.
+          
+          <div style="padding: 18px 22px; background: var(--deliv-selected-bg); border-top: 1px solid var(--deliv-card-border); border-radius: 0 0 8px 8px;">
+            <div class="trust-guarantee-box">
+              <div class="trust-item">
+                <span>🛡️</span>
+                <span><strong>100% Genuine Handloom</strong> with Silk Mark Certification</span>
+              </div>
+              <div class="trust-item">
+                <span>⚡</span>
+                <span><strong>Priority Air Dispatch</strong> via Blue Dart / Delhivery</span>
+              </div>
+              <div class="trust-item">
+                <span>🔒</span>
+                <span><strong>256-Bit SSL Encryption</strong> for bank-level security</span>
+              </div>
+              <div class="trust-item">
+                <span>📞</span>
+                <span><strong>Live VIP Support:</strong> +91 7894093586</span>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
@@ -578,26 +927,26 @@
     </div>
   </footer>
 
-  <!-- Order Success Modal -->
+  <!-- Order Success Modal with Grand Celebration -->
   <div id="order-success-modal" class="modal-backdrop">
-    <div class="modal-window" style="text-align: center; padding: 36px 28px; max-width: 480px; background: var(--deliv-card-bg); border: 1px solid var(--deliv-card-border); color: var(--deliv-text-primary);">
-      <div style="width: 64px; height: 64px; background: #dcfce7; color: #15803d; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 16px;">
+    <div class="modal-window" style="text-align: center; padding: 40px 32px; max-width: 500px; background: var(--deliv-card-bg); border: 1.5px solid var(--gold); color: var(--deliv-text-primary); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.6);">
+      <div style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 2px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 18px; animation: pulseGlow 1.8s infinite;">
         ✓
       </div>
-      <h2 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--deliv-text-primary); margin-bottom: 8px;">Order Placed Successfully!</h2>
-      <p style="color: var(--deliv-text-muted); font-size: 0.92rem; margin-bottom: 20px;">
-        Thank you for shopping with RJ Fashion Collection. We are preparing your royal ethnic wear for dispatch.
+      <h2 style="font-family: var(--font-serif); font-size: 1.75rem; color: var(--deliv-text-primary); margin-bottom: 8px;">Order Placed Successfully! 👑</h2>
+      <p style="color: var(--deliv-text-muted); font-size: 0.94rem; margin-bottom: 22px; line-height: 1.5;">
+        Thank you for choosing RJ Fashion Collection. Your royal handcrafted ethnic wear is being carefully prepared for priority dispatch.
       </p>
 
-      <div style="background: var(--deliv-selected-bg); border: 1px solid var(--deliv-card-border); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--deliv-text-muted); font-weight: 700;">Order Reference ID</div>
-        <div id="modal-order-number" style="font-weight: 800; font-size: 1.25rem; color: var(--primary); margin: 4px 0;">RJFC-XXXX</div>
-        <div style="font-size: 0.88rem; color: var(--deliv-text-primary);">Total Amount: <strong id="modal-order-total">₹0</strong></div>
+      <div style="background: var(--deliv-selected-bg); border: 1px dashed var(--gold); border-radius: 8px; padding: 18px; margin-bottom: 24px;">
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--deliv-text-muted); font-weight: 800; letter-spacing: 0.8px;">Order Reference Number</div>
+        <div id="modal-order-number" style="font-weight: 800; font-size: 1.35rem; color: var(--primary); margin: 6px 0; letter-spacing: 1px;">RJFC-XXXX</div>
+        <div style="font-size: 0.92rem; color: var(--deliv-text-primary);">Total Amount Payable: <strong id="modal-order-total" style="color: #10b981; font-size: 1.1rem;">₹0</strong></div>
       </div>
 
       <div style="display: flex; gap: 12px;">
-        <a href="/orders.html" class="btn btn-primary btn-block" style="padding: 12px;">VIEW MY ORDERS</a>
-        <a href="/shop.html" class="btn btn-outline-primary btn-block" style="padding: 12px;">CONTINUE SHOPPING</a>
+        <a href="/orders.html" class="btn btn-primary btn-block" style="padding: 13px; font-weight: 800;">VIEW MY ORDERS</a>
+        <a href="/shop.html" class="btn btn-outline-primary btn-block" style="padding: 13px; font-weight: 800;">CONTINUE SHOPPING</a>
       </div>
     </div>
   </div>
@@ -610,8 +959,8 @@
     <span class="whatsapp-label">WhatsApp Concierge</span>
   </a>
 
-  <script src="/firebase-config.js?v=20260927-6"></script>
-  <script src="/js/app.js?v=20260927-6"></script>
-  <script src="/js/checkout.js?v=20260927-6"></script>
+  <script src="/firebase-config.js?v=20260927-7"></script>
+  <script src="/js/app.js?v=20260927-7"></script>
+  <script src="/js/checkout.js?v=20260927-7"></script>
 </body>
 </html>
