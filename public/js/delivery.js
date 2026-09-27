@@ -1,8 +1,9 @@
-// RJ FASHION COLLECTION - DEDICATED DELIVERY ADDRESS CONTROLLER (STEP 2)
+// RJ FASHION COLLECTION - DEDICATED LUXURY DELIVERY ADDRESS CONTROLLER (STEP 2)
 
 let savedAddresses = [];
 let selectedAddressId = null;
 let currentCartData = null;
+let editingAddressId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initDeliveryPage();
@@ -30,7 +31,6 @@ async function initDeliveryPage() {
     }
 
     if (!user) {
-      // User requested: "i want login different page"
       window.location.href = '/login.html?redirect=/delivery.html';
       return;
     }
@@ -43,7 +43,7 @@ async function initDeliveryPage() {
     if (nameEl) nameEl.textContent = currentUser.name || 'Valued Customer';
     if (emailEl) emailEl.textContent = `(${currentUser.email || currentUser.phone || ''})`;
 
-    // 2. Load Cart & Price Details
+    // 2. Load Cart & Price Details + Order Items Preview
     await loadDeliveryCartSummary();
 
     // 3. Load Saved Delivery Addresses
@@ -54,11 +54,12 @@ async function initDeliveryPage() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Cart & Price Summary
+// Cart & Price Summary + Order Items Preview
 // ─────────────────────────────────────────────────────────────
 async function loadDeliveryCartSummary() {
   const priceBody = document.getElementById('fk-price-body');
-  if (!priceBody) return;
+  const itemsPreview = document.getElementById('delivery-order-items-preview');
+  const itemsCountBadge = document.getElementById('deliv-items-count-badge');
 
   let cart = null;
   try {
@@ -75,52 +76,89 @@ async function loadDeliveryCartSummary() {
     try {
       const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
       if (local.length > 0) {
-        const count = local.reduce((s, i) => s + (i.quantity || 1), 0);
-        const subtotal = local.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
+        const count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
+        const subtotal = local.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+        const origSubtotal = local.reduce((s, i) => s + ((Number(i.original_price) || Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+        const savings = Math.max(0, origSubtotal - subtotal);
         cart = {
           items: local,
           itemCount: count,
           subtotal: subtotal,
+          originalSubtotal: origSubtotal,
           total: subtotal,
-          discount: Math.round(subtotal * 0.1) // 10% festive savings
+          discount: savings
         };
       }
     } catch (_) {}
   }
 
   if (!cart || !cart.items || cart.items.length === 0) {
-    alert('Your shopping bag is empty. Please add items before choosing delivery.');
-    window.location.href = '/shop.html';
+    showToast('Your shopping bag is empty. Redirecting to collections...', 'info');
+    setTimeout(() => { window.location.href = '/shop.html'; }, 1000);
     return;
   }
 
   currentCartData = cart;
 
-  const itemsTotal = cart.subtotal || cart.total || 0;
-  const discount = cart.discount || Math.round(itemsTotal * 0.08);
-  const finalTotal = Math.max(0, itemsTotal - discount);
+  const items = cart.items || [];
+  const itemCount = cart.itemCount || items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
+  const itemsTotal = cart.subtotal || items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+  const originalTotal = cart.originalSubtotal || items.reduce((s, i) => s + ((Number(i.original_price) || Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+  const discount = Math.max(0, originalTotal - itemsTotal);
+  const finalTotal = itemsTotal;
 
-  priceBody.innerHTML = `
-    <div class="fk-price-row">
-      <span>Price (${cart.itemCount || cart.items.length} items)</span>
-      <span>${formatPrice(itemsTotal)}</span>
-    </div>
-    <div class="fk-price-row">
-      <span>Special Festive Discount</span>
-      <span class="fk-discount-val">− ${formatPrice(discount)}</span>
-    </div>
-    <div class="fk-price-row">
-      <span>Express Pan-India Delivery</span>
-      <span class="fk-free-val">FREE</span>
-    </div>
-    <div class="fk-price-total-row">
-      <span>Total Amount Payable</span>
-      <span>${formatPrice(finalTotal)}</span>
-    </div>
-    <div class="fk-savings-banner">
-      ✨ You will save ${formatPrice(discount)} on this royal festive order!
-    </div>
-  `;
+  if (itemsCountBadge) itemsCountBadge.textContent = itemCount;
+
+  // Render Order Items Bag Preview
+  if (itemsPreview) {
+    itemsPreview.innerHTML = items.map(item => `
+      <div class="deliv-item-card">
+        <img src="${item.image || '/images/placeholder.jpg'}" alt="${item.name}" class="deliv-item-thumb">
+        <div style="flex: 1; min-width: 0;">
+          <h4 class="deliv-item-title">${item.name}</h4>
+          <div class="deliv-item-meta">
+            <span>Size: <strong>${item.size || 'Free Size'}</strong></span>
+            <span>Qty: <strong>${item.quantity || 1}</strong></span>
+          </div>
+          <div class="deliv-item-price-row">
+            <span class="deliv-item-price">${formatPrice(item.price)}</span>
+            ${(item.original_price && item.original_price > item.price) ? `
+              <span class="deliv-item-orig-price">${formatPrice(item.original_price)}</span>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Render Price Details
+  if (priceBody) {
+    priceBody.innerHTML = `
+      <div class="fk-price-row">
+        <span>Price (${itemCount} item${itemCount > 1 ? 's' : ''})</span>
+        <span>${formatPrice(originalTotal > itemsTotal ? originalTotal : itemsTotal)}</span>
+      </div>
+      ${discount > 0 ? `
+        <div class="fk-price-row savings">
+          <span>Special Festive Discount</span>
+          <span class="fk-discount-val">− ${formatPrice(discount)}</span>
+        </div>
+      ` : ''}
+      <div class="fk-price-row">
+        <span>Express Pan-India Delivery</span>
+        <span class="fk-free-val"><span style="text-decoration: line-through; color: var(--muted); font-size: 0.85rem; margin-right: 4px;">₹49</span> FREE</span>
+      </div>
+      <div class="fk-price-total-row">
+        <span>Total Amount Payable</span>
+        <span class="total-highlight">${formatPrice(finalTotal)}</span>
+      </div>
+      ${discount > 0 ? `
+        <div class="fk-savings-banner">
+          ✨ You will save ${formatPrice(discount)} on this royal festive order!
+        </div>
+      ` : ''}
+    `;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -155,7 +193,7 @@ async function loadDeliveryAddresses() {
     } catch (_) {}
   }
 
-  // Pre-fill default sample address if completely brand new customer
+  // Pre-fill sample address if completely brand new customer
   if (addresses.length === 0 && currentUser) {
     addresses = [
       {
@@ -186,8 +224,8 @@ async function loadDeliveryAddresses() {
   } else {
     selectedAddressId = null;
     container.innerHTML = `
-      <div style="background: #fdfaf6; border: 1.5px dashed var(--primary); padding: 18px; border-radius: 6px; font-size: 0.92rem; color: #475569; margin-bottom: 16px;">
-        📍 <strong>No delivery address found.</strong> Please enter your address below to proceed to checkout.
+      <div class="empty-addr-banner">
+        📍 <strong>No delivery address found.</strong> Please enter your delivery address below to proceed.
       </div>
     `;
     if (newFormBox) newFormBox.style.display = 'block';
@@ -203,26 +241,43 @@ function renderAddressesList() {
 
   container.innerHTML = savedAddresses.map(addr => {
     const isSelected = addr.id === selectedAddressId;
+    const typeLabel = (addr.address_type || 'HOME').toUpperCase();
+
     return `
       <div class="addr-select-item ${isSelected ? 'selected' : ''}" onclick="selectAddress(${addr.id})" id="addr-card-${addr.id}">
-        <div style="display: flex; gap: 14px; align-items: flex-start;">
-          <input type="radio" name="delivery_address_radio" value="${addr.id}" ${isSelected ? 'checked' : ''} style="margin-top: 4px; accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer;">
+        <div style="display: flex; gap: 16px; align-items: flex-start;">
+          <div class="custom-radio-wrap" style="margin-top: 2px;">
+            <input type="radio" name="delivery_address_radio" value="${addr.id}" ${isSelected ? 'checked' : ''} style="display: none;">
+            <div class="radio-indicator ${isSelected ? 'checked' : ''}"></div>
+          </div>
           
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px;">
-              <span style="font-weight: 700; font-size: 1rem; color: #1e293b;">${addr.full_name}</span>
-              <span class="addr-tag ${addr.is_default ? 'default-tag' : ''}">${addr.is_default ? 'DEFAULT' : (addr.address_type || 'HOME')}</span>
-              <span style="color: #64748b; font-size: 0.88rem; font-weight: 600; margin-left: auto;">📞 ${addr.phone}</span>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+              <span class="addr-person-name">${addr.full_name}</span>
+              <span class="addr-tag ${addr.is_default ? 'default-tag' : ''}">${addr.is_default ? 'DEFAULT' : typeLabel}</span>
+              <span class="addr-phone-chip">📞 ${addr.phone}</span>
+              
+              <div class="addr-item-actions">
+                <button type="button" class="addr-action-btn edit-btn" onclick="openEditAddress(event, ${addr.id})" title="Edit Address">
+                  ✏️ Edit
+                </button>
+                ${savedAddresses.length > 1 ? `
+                  <button type="button" class="addr-action-btn delete-btn" onclick="handleDeleteAddress(event, ${addr.id})" title="Delete Address">
+                    🗑️ Delete
+                  </button>
+                ` : ''}
+              </div>
             </div>
 
-            <div style="color: #475569; font-size: 0.92rem; line-height: 1.5; margin-bottom: 12px;">
-              ${addr.house_flat}, ${addr.street}, ${addr.city}, ${addr.state} - <strong>${addr.pin_code}</strong>
+            <div class="addr-full-text">
+              ${addr.house_flat || ''}, ${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''} - <strong>${addr.pin_code || ''}</strong>
             </div>
 
             ${isSelected ? `
-              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+              <div class="addr-proceed-dock">
                 <button type="button" class="proceed-btn" onclick="confirmAddressAndProceed(event, ${addr.id})">
-                  DELIVER TO THIS ADDRESS & PROCEED TO PAYMENT ➔
+                  <span>DELIVER TO THIS ADDRESS & PROCEED TO PAYMENT</span>
+                  <span style="font-size: 1.1rem; line-height: 1;">➔</span>
                 </button>
               </div>
             ` : ''}
@@ -235,6 +290,54 @@ function renderAddressesList() {
 
 function selectAddress(id) {
   selectedAddressId = id;
+  renderAddressesList();
+}
+
+function openEditAddress(e, id) {
+  if (e) e.stopPropagation();
+  const addr = savedAddresses.find(a => a.id === id);
+  if (!addr) return;
+
+  editingAddressId = id;
+  const formBox = document.getElementById('new-address-form-box');
+  const formTitle = document.getElementById('address-form-title');
+  const submitBtn = document.getElementById('deliv-save-btn');
+
+  if (formTitle) formTitle.textContent = 'Edit Delivery Address';
+  if (submitBtn) submitBtn.textContent = 'UPDATE & DELIVER TO THIS ADDRESS ➔';
+
+  document.getElementById('deliv-name').value = addr.full_name || '';
+  document.getElementById('deliv-phone').value = addr.phone || '';
+  document.getElementById('deliv-pincode').value = addr.pin_code || '';
+  document.getElementById('deliv-street').value = addr.street || '';
+  document.getElementById('deliv-house').value = addr.house_flat || '';
+  document.getElementById('deliv-city').value = addr.city || '';
+  document.getElementById('deliv-state').value = addr.state || '';
+
+  const typeRadio = document.querySelector(`input[name="address_type"][value="${addr.address_type || 'Home'}"]`);
+  if (typeRadio) typeRadio.checked = true;
+
+  if (formBox) {
+    formBox.style.display = 'block';
+    formBox.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function handleDeleteAddress(e, id) {
+  if (e) e.stopPropagation();
+  if (savedAddresses.length <= 1) {
+    showToast('At least one delivery address is required', 'warning');
+    return;
+  }
+  if (!confirm('Are you sure you want to delete this address?')) return;
+
+  savedAddresses = savedAddresses.filter(a => a.id !== id);
+  localStorage.setItem('rjfc_saved_addresses', JSON.stringify(savedAddresses));
+
+  if (selectedAddressId === id) {
+    selectedAddressId = savedAddresses[0].id;
+  }
+  showToast('Address removed', 'info');
   renderAddressesList();
 }
 
@@ -251,7 +354,7 @@ function confirmAddressAndProceed(e, id) {
     id: chosen.id,
     name: chosen.full_name,
     phone: chosen.phone,
-    text: `${chosen.house_flat}, ${chosen.street}, ${chosen.city}, ${chosen.state} - ${chosen.pin_code}`,
+    text: `${chosen.house_flat || ''}, ${chosen.street || ''}, ${chosen.city || ''}, ${chosen.state || ''} - ${chosen.pin_code || ''}`,
     house_flat: chosen.house_flat,
     street: chosen.street,
     city: chosen.city,
@@ -263,10 +366,11 @@ function confirmAddressAndProceed(e, id) {
   sessionStorage.setItem('checkout_address_id', chosen.id);
   sessionStorage.setItem('checkout_address_summary', JSON.stringify(summaryObj));
   localStorage.setItem('rjfc_selected_address', JSON.stringify(summaryObj));
+  localStorage.setItem('rjfc_selected_address_id', chosen.id);
 
-  showToast('Delivery address confirmed! Proceeding to Payment & Order Review...', 'success');
+  showToast('Delivery address confirmed! Proceeding to Payment...', 'success');
 
-  // Navigate to dedicated Order Summary & Payment page
+  // Navigate to Step 3: Order Summary & Payment
   setTimeout(() => {
     window.location.href = '/checkout.html';
   }, 350);
@@ -274,13 +378,20 @@ function confirmAddressAndProceed(e, id) {
 
 function toggleNewAddressForm() {
   const formBox = document.getElementById('new-address-form-box');
+  const formTitle = document.getElementById('address-form-title');
+  const submitBtn = document.getElementById('deliv-save-btn');
   if (!formBox) return;
 
   const isClosed = formBox.style.display === 'none';
-  formBox.style.display = isClosed ? 'block' : 'none';
   if (isClosed) {
-    formBox.scrollIntoView({ behavior: 'smooth' });
+    editingAddressId = null;
+    if (formTitle) formTitle.textContent = 'Add New Delivery Address';
+    if (submitBtn) submitBtn.textContent = 'SAVE & DELIVER TO THIS ADDRESS ➔';
     prefillNewAddressForm();
+    formBox.style.display = 'block';
+    formBox.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    formBox.style.display = 'none';
   }
 }
 
@@ -317,6 +428,25 @@ async function handleSaveNewAddress(e) {
   saveBtn.disabled = true;
   saveBtn.textContent = 'Saving Address...';
 
+  if (editingAddressId) {
+    // Update existing address
+    const existing = savedAddresses.find(a => a.id === editingAddressId);
+    if (existing) {
+      existing.full_name = fullName;
+      existing.phone = phone;
+      existing.pin_code = pinCode;
+      existing.street = street;
+      existing.house_flat = houseFlat;
+      existing.city = city;
+      existing.state = state;
+      existing.address_type = addressType;
+    }
+    localStorage.setItem('rjfc_saved_addresses', JSON.stringify(savedAddresses));
+    confirmAddressAndProceed(null, editingAddressId);
+    return;
+  }
+
+  // Create new address
   const newAddress = {
     id: Date.now(),
     full_name: fullName,

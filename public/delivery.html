@@ -4,189 +4,603 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Select Delivery Address - RJ Fashion Collection</title>
+  <script>
+    // Instant Theme Controller - zero delay, zero external dependencies
+    window.applyTheme = function(theme) {
+      var isDark = theme === 'dark';
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+        if (document.body) document.body.classList.add('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'dark'); } catch(e){}
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.documentElement.classList.remove('dark-theme');
+        if (document.body) document.body.classList.remove('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'light'); } catch(e){}
+      }
+      window.updateAllThemeToggles(theme);
+    };
+
+    window.toggleTheme = function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      window.applyTheme(isDark ? 'light' : 'dark');
+    };
+
+    window.updateAllThemeToggles = function(theme) {
+      var isDark = theme === 'dark';
+      document.querySelectorAll('.theme-mode-text').forEach(function(el) {
+        el.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+      });
+      document.querySelectorAll('.theme-switch-container').forEach(function(el) {
+        el.setAttribute('aria-checked', isDark ? 'true' : 'false');
+        el.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+      });
+    };
+
+    // Run immediately on parse to prevent flash
+    try {
+      var saved = localStorage.getItem('rjfc_theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var activeTheme = saved ? saved : (prefersDark ? 'dark' : 'light');
+      if (activeTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+      }
+    } catch(e){}
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      if (isDark && document.body) document.body.classList.add('dark-theme');
+      window.updateAllThemeToggles(isDark ? 'dark' : 'light');
+    });
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20260927-5">
-  <link rel="stylesheet" href="/css/responsive.css?v=20260927-5">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=20260927-6">
+  <link rel="stylesheet" href="/css/responsive.css?v=20260927-6">
   <style>
-    body {
-      background: #f1f3f6;
-      color: #212121;
+    /* ==============================================================
+       LUXURY CHECKOUT & DELIVERY ADDRESS THEME SYSTEM
+       ============================================================== */
+    :root {
+      --deliv-bg: #f8f6f2;
+      --deliv-card-bg: #ffffff;
+      --deliv-card-border: #ede7df;
+      --deliv-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      --deliv-text-primary: #18181b;
+      --deliv-text-secondary: #52525b;
+      --deliv-text-muted: #71717a;
+      --deliv-selected-bg: #fdfaf6;
+      --deliv-selected-border: #700037;
+      --deliv-input-bg: #ffffff;
+      --deliv-input-border: #d4d4d8;
     }
+
+    [data-theme="dark"],
+    .dark-theme {
+      --deliv-bg: #0b0b10;
+      --deliv-card-bg: #14141e;
+      --deliv-card-border: #262638;
+      --deliv-card-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+      --deliv-text-primary: #f8fafc;
+      --deliv-text-secondary: #cbd5e1;
+      --deliv-text-muted: #94a3b8;
+      --deliv-selected-bg: #1e1624;
+      --deliv-selected-border: #c59b27;
+      --deliv-input-bg: #1a1a27;
+      --deliv-input-border: #333348;
+    }
+
+    body {
+      background-color: var(--deliv-bg) !important;
+      color: var(--deliv-text-primary) !important;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Checkout Stepper Bar */
     .checkout-stepper-wrap {
-      background: #ffffff;
-      border-bottom: 1px solid #e0e0e0;
-      padding: 14px 0;
-      margin-bottom: 24px;
+      background: var(--deliv-card-bg);
+      border-bottom: 1px solid var(--deliv-card-border);
+      padding: 16px 0;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
     .stepper-nav {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 16px;
-      max-width: 800px;
+      max-width: 760px;
       margin: 0 auto;
       padding: 0 16px;
     }
     .stepper-nav-step {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.88rem;
+      gap: 10px;
+      font-size: 0.92rem;
       font-weight: 600;
-      color: #878787;
+      color: var(--deliv-text-muted);
       text-decoration: none;
+      transition: all 0.2s;
     }
     .stepper-nav-step.active {
       color: var(--primary);
-      font-weight: 700;
+      font-weight: 800;
+    }
+    [data-theme="dark"] .stepper-nav-step.active,
+    .dark-theme .stepper-nav-step.active {
+      color: var(--gold);
     }
     .stepper-nav-step.completed {
       color: #10b981;
     }
     .stepper-nav-circle {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      border: 2px solid #cbd5e1;
-      background: #fff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 2px solid var(--deliv-card-border);
+      background: var(--deliv-card-bg);
+      color: var(--deliv-text-muted);
+      transition: all 0.3s;
     }
     .stepper-nav-step.active .stepper-nav-circle {
-      background: var(--primary);
-      color: #fff;
+      background: var(--primary-gradient);
+      color: #ffffff;
       border-color: var(--primary);
-      box-shadow: 0 2px 6px rgba(112, 0, 55, 0.25);
+      box-shadow: 0 0 12px rgba(112, 0, 55, 0.4);
+    }
+    [data-theme="dark"] .stepper-nav-step.active .stepper-nav-circle,
+    .dark-theme .stepper-nav-step.active .stepper-nav-circle {
+      background: var(--gold-gradient);
+      color: #121214;
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(197, 155, 39, 0.4);
     }
     .stepper-nav-step.completed .stepper-nav-circle {
       background: #10b981;
-      color: #fff;
+      color: #ffffff;
       border-color: #10b981;
     }
     .stepper-nav-line {
       flex: 1;
       max-width: 60px;
       height: 2px;
-      background: #e2e8f0;
+      background: var(--deliv-card-border);
     }
     .stepper-nav-line.completed {
       background: #10b981;
     }
+
+    /* Cards */
     .delivery-page-card {
-      background: #ffffff;
-      border-radius: 6px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-      margin-bottom: 20px;
+      background: var(--deliv-card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--deliv-card-border);
+      box-shadow: var(--deliv-card-shadow);
+      margin-bottom: 24px;
       overflow: hidden;
+      transition: border-color 0.3s ease;
     }
     .delivery-card-header {
-      padding: 16px 22px;
-      border-bottom: 1px solid #f1f5f9;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--deliv-card-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #ffffff;
+      background: var(--deliv-card-bg);
     }
     .delivery-card-header h2 {
       margin: 0;
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      color: #1e293b;
+      color: var(--deliv-text-primary);
       display: flex;
       align-items: center;
       gap: 10px;
+      letter-spacing: 0.3px;
     }
     .delivery-card-body {
-      padding: 22px;
+      padding: 24px;
     }
-    .addr-select-item {
-      border: 1.5px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 16px 18px;
-      margin-bottom: 14px;
-      background: #ffffff;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-    .addr-select-item:hover {
-      border-color: #cbd5e1;
-    }
-    .addr-select-item.selected {
-      border-color: var(--primary);
-      background: #fdfaf6;
-      box-shadow: 0 2px 8px rgba(122, 0, 60, 0.08);
-    }
-    .addr-tag {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 12px;
-      text-transform: uppercase;
-      margin-left: 8px;
-      background: #f1f5f9;
-      color: #475569;
-    }
-    .addr-tag.default-tag {
-      background: #ecfdf5;
-      color: #047857;
-    }
-    .proceed-btn {
-      background: var(--primary);
-      color: #ffffff;
-      border: none;
-      border-radius: 4px;
-      padding: 14px 28px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(122, 0, 60, 0.3);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .proceed-btn:hover {
-      background: #60002f;
-      transform: translateY(-1px);
-    }
-    .toggle-add-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 18px;
-      border: 1px dashed var(--primary);
-      border-radius: 6px;
-      background: #fdfaf6;
-      color: var(--primary);
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-      width: 100%;
-      justify-content: center;
-      transition: background 0.2s;
-      margin-top: 10px;
-    }
-    .toggle-add-btn:hover {
-      background: #fbf3e8;
-    }
+
+    /* User Status Bar */
     .user-chip-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+      background: var(--deliv-card-bg);
+      border: 1px solid var(--deliv-card-border);
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      font-size: 0.92rem;
+      color: var(--deliv-text-secondary);
+      box-shadow: var(--deliv-card-shadow);
+    }
+
+    /* Address Selection Items */
+    .addr-select-item {
+      border: 1.5px solid var(--deliv-card-border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+      background: var(--deliv-card-bg);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .addr-select-item:hover {
+      border-color: var(--gold);
+      transform: translateY(-1px);
+    }
+    .addr-select-item.selected {
+      border-color: var(--deliv-selected-border);
+      background: var(--deliv-selected-bg);
+      border-left: 5px solid var(--deliv-selected-border);
+      box-shadow: 0 4px 16px rgba(112, 0, 55, 0.1);
+    }
+    [data-theme="dark"] .addr-select-item.selected,
+    .dark-theme .addr-select-item.selected {
+      box-shadow: 0 4px 20px rgba(197, 155, 39, 0.15);
+    }
+
+    /* Radio Indicator */
+    .custom-radio-wrap {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .radio-indicator {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--deliv-card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .radio-indicator.checked {
+      border-color: var(--primary);
+    }
+    [data-theme="dark"] .radio-indicator.checked,
+    .dark-theme .radio-indicator.checked {
+      border-color: var(--gold);
+    }
+    .radio-indicator.checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+    [data-theme="dark"] .radio-indicator.checked::after,
+    .dark-theme .radio-indicator.checked::after {
+      background: var(--gold);
+    }
+
+    /* Address Typography & Tags */
+    .addr-person-name {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--deliv-text-primary);
+    }
+    .addr-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(113, 113, 122, 0.12);
+      color: var(--deliv-text-secondary);
+    }
+    .addr-tag.default-tag {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+    .addr-phone-chip {
+      color: var(--deliv-text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .addr-item-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .addr-action-btn {
+      background: none;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--deliv-text-muted);
+      transition: color 0.2s;
+      padding: 4px 6px;
+    }
+    .addr-action-btn.edit-btn:hover {
+      color: var(--gold);
+    }
+    .addr-action-btn.delete-btn:hover {
+      color: var(--danger);
+    }
+    .addr-full-text {
+      color: var(--deliv-text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 6px 0 14px;
+    }
+    .addr-proceed-dock {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--deliv-card-border);
+    }
+
+    /* Action Buttons */
+    .proceed-btn {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 15px 32px;
+      font-weight: 800;
+      font-size: 0.96rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(112, 0, 55, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      text-transform: uppercase;
+    }
+    .proceed-btn:hover {
+      background: #8b0044;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(112, 0, 55, 0.45);
+    }
+    .toggle-add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border: 1.5px dashed var(--gold);
+      border-radius: 8px;
+      background: var(--deliv-card-bg);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      width: 100%;
+      justify-content: center;
+      transition: all 0.2s ease;
+      margin-top: 10px;
+    }
+    .toggle-add-btn:hover {
+      background: var(--deliv-selected-bg);
+      transform: translateY(-1px);
+    }
+
+    /* Order Items Shipment Preview */
+    .deliv-item-card {
+      display: flex;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--deliv-card-border);
+      align-items: center;
+    }
+    .deliv-item-card:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .deliv-item-thumb {
+      width: 70px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--deliv-card-border);
+      flex-shrink: 0;
+    }
+    .deliv-item-title {
+      font-size: 0.96rem;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+      color: var(--deliv-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .deliv-item-meta {
+      font-size: 0.85rem;
+      color: var(--deliv-text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      gap: 14px;
+    }
+    .deliv-item-meta strong {
+      color: var(--deliv-text-primary);
+    }
+    .deliv-item-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .deliv-item-price {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--deliv-text-primary);
+    }
+    .deliv-item-orig-price {
+      font-size: 0.85rem;
+      color: var(--deliv-text-muted);
+      text-decoration: line-through;
+    }
+
+    /* Express Courier Guarantee Box */
+    .deliv-guarantee-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
+    @media (max-width: 640px) {
+      .deliv-guarantee-grid { grid-template-columns: 1fr; }
+    }
+    .deliv-guarantee-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
       border-radius: 6px;
-      padding: 12px 18px;
-      margin-bottom: 20px;
+      background: var(--deliv-selected-bg);
+      border: 1px solid var(--deliv-card-border);
+    }
+    .deliv-guarantee-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .deliv-guarantee-title {
       font-size: 0.88rem;
-      color: #475569;
+      font-weight: 700;
+      color: var(--deliv-text-primary);
+      margin-bottom: 2px;
+    }
+    .deliv-guarantee-desc {
+      font-size: 0.8rem;
+      color: var(--deliv-text-muted);
+      line-height: 1.4;
+    }
+
+    /* Form Inputs */
+    .form-group-auth label {
+      display: block;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--deliv-text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .form-group-auth input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--deliv-input-bg);
+      border: 1.5px solid var(--deliv-input-border);
+      border-radius: 6px;
+      font-size: 0.94rem;
+      color: var(--deliv-text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-group-auth input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(197, 155, 39, 0.15);
+    }
+
+    /* Price Details Card Aside */
+    .fk-price-card {
+      background: var(--deliv-card-bg);
+      border: 1px solid var(--deliv-card-border);
+      border-radius: 8px;
+      box-shadow: var(--deliv-card-shadow);
+      position: sticky;
+      top: 90px;
+    }
+    .fk-price-header {
+      padding: 16px 22px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--deliv-text-muted);
+      border-bottom: 1px solid var(--deliv-card-border);
+    }
+    .fk-price-body {
+      padding: 22px;
+    }
+    .fk-price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 0.95rem;
+      color: var(--deliv-text-primary);
+    }
+    .fk-price-row.savings {
+      color: #10b981;
+      font-weight: 700;
+    }
+    .fk-discount-val {
+      color: #10b981;
+      font-weight: 800;
+    }
+    .fk-free-val {
+      color: #10b981;
+      font-weight: 800;
+    }
+    .fk-price-total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--deliv-card-border);
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--deliv-text-primary);
+    }
+    .fk-price-total-row .total-highlight {
+      font-size: 1.35rem;
+      color: var(--primary);
+    }
+    [data-theme="dark"] .fk-price-total-row .total-highlight,
+    .dark-theme .fk-price-total-row .total-highlight {
+      color: var(--gold);
+    }
+    .fk-savings-banner {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .deliv-payment-strip {
+      padding: 16px 22px;
+      background: var(--deliv-selected-bg);
+      border-top: 1px solid var(--deliv-card-border);
+      border-radius: 0 0 8px 8px;
+    }
+    .deliv-payment-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .deliv-pay-chip {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--deliv-card-bg);
+      border: 1px solid var(--deliv-card-border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--deliv-text-secondary);
     }
   </style>
 </head>
@@ -194,19 +608,32 @@
 
   <!-- Top Announcement Bar -->
   <div class="top-bar">
-    <span>🔒 100% SECURE & ENCRYPTED CHECKOUT</span> | Authentic Indian Festive Wear
+    <span>🔒 100% SECURE & ENCRYPTED CHECKOUT</span> | Authentic Indian Festive Wear | Express Pan-India Delivery
   </div>
 
-  <!-- Minimal Header -->
-  <header style="background: #ffffff; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100;">
+  <!-- Luxury Checkout Header -->
+  <header style="background: var(--deliv-card-bg); border-bottom: 1px solid var(--deliv-card-border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
     <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px;">
       <a href="/" class="brand-logo" style="text-decoration: none;">
-        <span class="logo-title" style="font-size: 1.4rem;">RJ Fashion Collection</span>
+        <span class="logo-title" style="font-size: 1.45rem;">RJ Fashion Collection</span>
         <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
       </a>
 
-      <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #388e3c; font-weight: 700;">
-        <span>🛡️ 100% Safe and Secure Checkout</span>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <!-- Luxury Interactive Theme Switcher Slider -->
+        <div class="theme-switch-container" onclick="toggleTheme()" role="button" tabindex="0" title="Switch Theme">
+          <span class="theme-label-icon">☀️</span>
+          <div class="theme-switch-track">
+            <div class="theme-switch-thumb"></div>
+          </div>
+          <span class="theme-label-icon">🌙</span>
+          <span class="theme-mode-text">Dark Mode</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #10b981; font-weight: 700;">
+          <span style="font-size: 1.1rem;">🛡️</span>
+          <span>100% Safe & Secure</span>
+        </div>
       </div>
     </div>
   </header>
@@ -232,21 +659,22 @@
   </div>
 
   <!-- Main Container -->
-  <main class="container" style="padding-bottom: 60px; max-width: 1200px;">
+  <main class="container" style="padding-bottom: 70px; max-width: 1200px; flex: 1;">
     
     <!-- User Login Status Chip -->
     <div class="user-chip-bar" id="user-status-chip">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 1.2rem;">👤</span>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.4rem;">👤</span>
         <div>
-          <span>Delivering order for: </span>
-          <strong id="deliv-user-name" style="color: #1e293b;">Loading account...</strong>
-          <span id="deliv-user-email" style="color: #64748b; font-size: 0.82rem; margin-left: 6px;"></span>
+          <span style="color: var(--deliv-text-muted);">Delivering order for: </span>
+          <strong id="deliv-user-name" style="color: var(--deliv-text-primary); font-size: 0.98rem;">Loading account...</strong>
+          <span id="deliv-user-email" style="color: var(--deliv-text-muted); font-size: 0.85rem; margin-left: 6px;"></span>
         </div>
       </div>
       <div>
-        <a href="/login.html?redirect=/delivery.html" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.82rem;">
-          Switch Account →
+        <a href="/login.html?redirect=/delivery.html" style="color: var(--primary); text-decoration: none; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">
+          <span>Switch Account</span>
+          <span>→</span>
         </a>
       </div>
     </div>
@@ -255,40 +683,41 @@
       <!-- Left Column: Delivery Address Selection & Form -->
       <div>
         
+        <!-- CARD 1: ADDRESS SELECTION -->
         <div class="delivery-page-card">
           <div class="delivery-card-header">
             <h2>
               <span>📍</span> Select Delivery Address
             </h2>
-            <span style="font-size: 0.82rem; color: #64748b;">Step 2 of 3</span>
+            <span style="font-size: 0.82rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px;">Step 2 of 3</span>
           </div>
 
           <div class="delivery-card-body">
             <!-- Saved Addresses List Container -->
             <div id="saved-addresses-list">
-              <p style="color: var(--muted); margin: 0; font-size: 0.9rem;">Checking your saved addresses...</p>
+              <p style="color: var(--deliv-text-muted); margin: 0; font-size: 0.92rem;">Checking your saved addresses...</p>
             </div>
 
             <!-- Add New Address Toggle Button -->
             <button type="button" class="toggle-add-btn" id="toggle-new-addr-btn" onclick="toggleNewAddressForm()">
-              <span style="font-size: 1.1rem; font-weight: 800;">+</span>
+              <span style="font-size: 1.2rem; font-weight: 800; line-height: 1;">+</span>
               <span>ADD A NEW DELIVERY ADDRESS</span>
             </button>
 
             <!-- New Address Form Box -->
-            <div id="new-address-form-box" style="display: none; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 6px; padding: 22px; margin-top: 18px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-                <h4 style="font-size: 1rem; font-weight: 700; margin: 0; color: #1e293b; text-transform: uppercase;">
+            <div id="new-address-form-box" style="display: none; background: var(--deliv-selected-bg); border: 1.5px solid var(--deliv-card-border); border-radius: 8px; padding: 24px; margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h4 id="address-form-title" style="font-size: 1.05rem; font-weight: 800; margin: 0; color: var(--deliv-text-primary); text-transform: uppercase; letter-spacing: 0.5px;">
                   Add New Delivery Address
                 </h4>
-                <button type="button" onclick="toggleNewAddressForm()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">✕</button>
+                <button type="button" onclick="toggleNewAddressForm()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--deliv-text-muted);">✕</button>
               </div>
 
               <form onsubmit="handleSaveNewAddress(event)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                   <div class="form-group-auth">
-                    <label>Full Name *</label>
-                    <input type="text" id="deliv-name" placeholder="Receiver Full Name" required>
+                    <label>Receiver Full Name *</label>
+                    <input type="text" id="deliv-name" placeholder="Full Name" required>
                   </div>
                   <div class="form-group-auth">
                     <label>10-digit Mobile Number *</label>
@@ -296,26 +725,26 @@
                   </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                   <div class="form-group-auth">
-                    <label>Pincode *</label>
-                    <input type="text" id="deliv-pincode" placeholder="6-digit PIN code" maxlength="6" required>
+                    <label>6-digit Pincode *</label>
+                    <input type="text" id="deliv-pincode" placeholder="e.g. 768201" maxlength="6" required>
                   </div>
                   <div class="form-group-auth">
                     <label>Locality / Colony / Area *</label>
-                    <input type="text" id="deliv-street" placeholder="Locality, Colony, or Area" required>
+                    <input type="text" id="deliv-street" placeholder="Locality or Area" required>
                   </div>
                 </div>
 
-                <div class="form-group-auth" style="margin-bottom: 14px;">
-                  <label>Address (Flat, House No., Building) *</label>
-                  <input type="text" id="deliv-house" placeholder="Flat No. 402, Royal Residency, Street 4" required>
+                <div class="form-group-auth" style="margin-bottom: 16px;">
+                  <label>House / Flat / Building / Floor *</label>
+                  <input type="text" id="deliv-house" placeholder="Flat No., House No., Building Name" required>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                   <div class="form-group-auth">
-                    <label>City / District / Town *</label>
-                    <input type="text" id="deliv-city" placeholder="City" required>
+                    <label>City / District *</label>
+                    <input type="text" id="deliv-city" placeholder="City or Town" required>
                   </div>
                   <div class="form-group-auth">
                     <label>State *</label>
@@ -323,25 +752,25 @@
                   </div>
                 </div>
 
-                <div style="margin-bottom: 18px;">
-                  <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 6px; text-transform: uppercase;">Address Type</label>
-                  <div style="display: flex; gap: 20px;">
-                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
-                      <input type="radio" name="address_type" value="Home" checked style="accent-color: var(--primary);">
-                      <span>Home (All day delivery)</span>
+                <div style="margin-bottom: 22px;">
+                  <label style="display: block; font-size: 0.84rem; font-weight: 700; color: var(--deliv-text-secondary); margin-bottom: 8px; text-transform: uppercase;">Address Type</label>
+                  <div style="display: flex; gap: 24px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.92rem; font-weight: 600; color: var(--deliv-text-primary);">
+                      <input type="radio" name="address_type" value="Home" checked style="accent-color: var(--primary); width: 18px; height: 18px;">
+                      <span>Home (All Day Delivery)</span>
                     </label>
-                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem;">
-                      <input type="radio" name="address_type" value="Work" style="accent-color: var(--primary);">
-                      <span>Work (Delivery between 10 AM - 5 PM)</span>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.92rem; font-weight: 600; color: var(--deliv-text-primary);">
+                      <input type="radio" name="address_type" value="Work" style="accent-color: var(--primary); width: 18px; height: 18px;">
+                      <span>Work (10 AM – 5 PM Delivery)</span>
                     </label>
                   </div>
                 </div>
 
-                <div style="display: flex; gap: 14px; align-items: center;">
+                <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
                   <button type="submit" class="proceed-btn" id="deliv-save-btn">
                     SAVE & DELIVER TO THIS ADDRESS ➔
                   </button>
-                  <button type="button" onclick="toggleNewAddressForm()" style="background: none; border: 1px solid #cbd5e1; padding: 12px 20px; border-radius: 4px; font-weight: 600; cursor: pointer; color: #475569;">
+                  <button type="button" onclick="toggleNewAddressForm()" style="background: none; border: 1.5px solid var(--deliv-card-border); padding: 13px 24px; border-radius: 4px; font-weight: 700; cursor: pointer; color: var(--deliv-text-secondary);">
                     Cancel
                   </button>
                 </div>
@@ -351,18 +780,84 @@
           </div>
         </div>
 
+        <!-- CARD 2: ITEMS IN THIS SHIPMENT PREVIEW -->
+        <div class="delivery-page-card">
+          <div class="delivery-card-header">
+            <h2>
+              <span>🛍️</span> Items in this Shipment (<span id="deliv-items-count-badge">0</span>)
+            </h2>
+            <a href="/cart.html" style="font-size: 0.85rem; font-weight: 700; color: var(--gold); text-decoration: none;">
+              ✏️ Modify Bag
+            </a>
+          </div>
+          <div class="delivery-card-body">
+            <div id="delivery-order-items-preview">
+              <p style="color: var(--deliv-text-muted); margin: 0;">Loading items in your bag...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD 3: EXPRESS COURIER & TRANSIT GUARANTEE -->
+        <div class="delivery-page-card">
+          <div class="delivery-card-header">
+            <h2>
+              <span>✨</span> Delivery Guarantee & Trust
+            </h2>
+            <span style="font-size: 0.82rem; color: #10b981; font-weight: 700;">Pan-India Priority</span>
+          </div>
+          <div class="delivery-card-body">
+            <div class="deliv-guarantee-grid">
+              <div class="deliv-guarantee-item">
+                <span class="deliv-guarantee-icon">⚡</span>
+                <div>
+                  <div class="deliv-guarantee-title">Express Air Shipping</div>
+                  <div class="deliv-guarantee-desc">Dispatched via Blue Dart & Delhivery Priority Air. 3-4 days doorstep delivery.</div>
+                </div>
+              </div>
+              <div class="deliv-guarantee-item">
+                <span class="deliv-guarantee-icon">🛡️</span>
+                <div>
+                  <div class="deliv-guarantee-title">100% Transit Insured</div>
+                  <div class="deliv-guarantee-desc">Every luxury saree and jewelry piece is fully insured against damage or loss.</div>
+                </div>
+              </div>
+              <div class="deliv-guarantee-item">
+                <span class="deliv-guarantee-icon">🎁</span>
+                <div>
+                  <div class="deliv-guarantee-title">Royal Gift Packaging</div>
+                  <div class="deliv-guarantee-desc">Arrives in tamper-evident heritage keepsake box wrapped in protective muslin.</div>
+                </div>
+              </div>
+              <div class="deliv-guarantee-item">
+                <span class="deliv-guarantee-icon">📞</span>
+                <div>
+                  <div class="deliv-guarantee-title">VIP Concierge Support</div>
+                  <div class="deliv-guarantee-desc">Live dispatch assistance via WhatsApp or Call: +91 7894093586.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Right Column: Sticky Price Details -->
+      <!-- Right Column: Sticky Price Details Aside -->
       <aside>
         <div class="fk-price-card" id="fk-summary-card">
           <div class="fk-price-header">PRICE DETAILS</div>
           <div class="fk-price-body" id="fk-price-body">
-            <p style="color: var(--muted); margin: 0;">Calculating summary...</p>
+            <p style="color: var(--deliv-text-muted); margin: 0;">Calculating summary...</p>
           </div>
-          <div class="fk-trust-badge">
-            <span style="font-size: 1.4rem;">🛡️</span>
-            <div>Safe and Secure Payments. 100% Authentic Handcrafted Wear. Free Pan-India Delivery.</div>
+          <div class="deliv-payment-strip">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--deliv-text-muted); text-transform: uppercase;">
+              Accepted Payment Methods
+            </div>
+            <div class="deliv-payment-badges">
+              <span class="deliv-pay-chip">UPI (GPay / PhonePe)</span>
+              <span class="deliv-pay-chip">Credit & Debit Cards</span>
+              <span class="deliv-pay-chip">Net Banking</span>
+              <span class="deliv-pay-chip">Cash on Delivery</span>
+            </div>
           </div>
         </div>
       </aside>
@@ -370,8 +865,71 @@
 
   </main>
 
-  <script src="/firebase-config.js?v=20260927-5"></script>
-  <script src="/js/app.js?v=20260927-5"></script>
-  <script src="/js/delivery.js?v=20260927-5"></script>
+  <!-- Complete Site Footer -->
+  <footer class="site-footer" style="margin-top: auto;">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="brand-logo" style="margin-bottom: 12px;">
+            <span class="logo-title" style="font-size: 1.5rem;">RJ Fashion Collection</span>
+            <span class="logo-subtitle">Luxury Indian Ethnic Wear</span>
+          </div>
+          <p style="color: #cbd5e1; font-size: 0.9rem; line-height: 1.6;">
+            Curating India's most exquisite handwoven silk sarees, bridal lehengas, and royal heritage jewelry for timeless celebrations.
+          </p>
+          <div style="margin-top: 14px; font-size: 0.82rem; color: #94a3b8; line-height: 1.6;">
+            <p style="margin-bottom: 4px;">📍 <strong>Store Address:</strong> RJ FASHION COLLECTION, ODISHA, Jharsuguda, Sarbhal, Zipcode - 768201</p>
+            <p style="margin-bottom: 4px;">📞 <strong>Phone:</strong> <a href="tel:7894093586" style="color: #e2e8f0; font-weight: 600; text-decoration: none;">+91 7894093586</a></p>
+            <p style="margin-bottom: 4px;">✉️ <strong>Email:</strong> <a href="mailto:rjfashioncollection@gmail.com" style="color: #e2e8f0; text-decoration: none;">rjfashioncollection@gmail.com</a></p>
+            <p style="margin-bottom: 0;">🕒 <strong>Available:</strong> Mon to Sat (10:00 AM – 5:00 PM)</p>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+            <li><a href="/shop.html?offer=true">Festive Offers</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/account.html">My Account</a></li>
+            <li><a href="/orders.html">My Orders</a></li>
+            <li><a href="/wishlist.html">Wishlist</a></li>
+            <li><a href="/contact.html">Customer Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company & Policies</h4>
+          <ul class="footer-links">
+            <li><a href="/about.html">About RJ Fashion</a></li>
+            <li><a href="/contact.html">Contact Us</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/about.html#terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Handcrafted Products</div>
+    </div>
+  </footer>
+
+  <!-- Floating WhatsApp VIP Concierge Button -->
+  <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20my%20delivery%20address%20and%20order." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="Chat on WhatsApp with RJ Fashion Concierge">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.34 7.03 9.03 7.1 8.77 7.38C8.52 7.66 7.8 8.33 7.8 9.71C7.8 11.08 8.8 12.41 8.94 12.6C9.08 12.79 10.9 15.6 13.69 16.8C16.01 17.8 16.49 17.6 17.02 17.55C17.55 17.5 18.73 16.85 18.97 16.16C19.22 15.48 19.22 14.89 19.14 14.77C19.07 14.65 18.89 14.58 18.61 14.44C18.33 14.3 16.98 13.63 16.73 13.54C16.48 13.45 16.3 13.4 16.11 13.68C15.93 13.96 15.4 14.58 15.24 14.77C15.08 14.96 14.92 14.98 14.64 14.84C14.36 14.7 13.47 14.41 12.41 13.47C11.59 12.74 11.03 11.83 10.87 11.55C10.71 11.27 10.85 11.12 10.99 10.98C11.12 10.85 11.28 10.64 11.42 10.47C11.56 10.3 11.61 10.18 11.7 10C11.8 9.81 11.75 9.65 11.68 9.51C11.61 9.37 11.05 8.01 10.82 7.45C10.6 6.91 10.37 6.99 10.2 6.98C10.04 6.97 9.85 6.97 9.67 6.97L9.53 7.03Z"/>
+    </svg>
+    <span class="whatsapp-label">WhatsApp Concierge</span>
+  </a>
+
+  <script src="/firebase-config.js?v=20260927-6"></script>
+  <script src="/js/app.js?v=20260927-6"></script>
+  <script src="/js/delivery.js?v=20260927-6"></script>
 </body>
 </html>
