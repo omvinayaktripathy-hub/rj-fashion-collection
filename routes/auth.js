@@ -122,11 +122,31 @@ router.post('/admin-login', (req, res) => {
     const user = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email.trim());
 
     if (!user || user.role !== 'admin') {
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminEmail: email.trim(),
+          action: 'ADMIN_LOGIN_FAILED',
+          entityType: 'auth',
+          details: { reason: 'Account does not exist or lacks admin role' },
+          req
+        });
+      }
       return res.status(401).json({ success: false, message: 'Invalid administrator credentials.' });
     }
 
     const passwordMatch = bcrypt.compareSync(password, user.password_hash);
     if (!passwordMatch) {
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email,
+          action: 'ADMIN_LOGIN_FAILED',
+          entityType: 'auth',
+          entityId: user.id,
+          details: { reason: 'Incorrect password entered' },
+          req
+        });
+      }
       return res.status(401).json({ success: false, message: 'Invalid administrator credentials.' });
     }
 
@@ -143,6 +163,19 @@ router.post('/admin-login', (req, res) => {
       if (err) {
         return res.status(500).json({ success: false, message: 'Session error' });
       }
+
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email,
+          action: 'ADMIN_LOGIN_SUCCESS',
+          entityType: 'auth',
+          entityId: user.id,
+          details: { method: 'password', ip: req.ip },
+          req
+        });
+      }
+
       res.json({
         success: true,
         message: 'Admin authentication successful.',
@@ -157,10 +190,25 @@ router.post('/admin-login', (req, res) => {
 
 // Logout
 router.post('/logout', (req, res) => {
+  const currentAdmin = (req.session && req.session.user && req.session.user.role === 'admin') ? req.session.user : null;
+
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Failed to logout' });
     }
+
+    if (currentAdmin && typeof db.logAdminAction === 'function') {
+      db.logAdminAction({
+        adminId: currentAdmin.id,
+        adminEmail: currentAdmin.email,
+        action: 'ADMIN_LOGOUT',
+        entityType: 'auth',
+        entityId: currentAdmin.id,
+        details: 'Admin logged out successfully',
+        req
+      });
+    }
+
     res.clearCookie('connect.sid');
     res.json({ success: true, message: 'Logged out successfully.' });
   });

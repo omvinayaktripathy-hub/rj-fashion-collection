@@ -163,6 +163,7 @@ app.use(express.static(publicDir, {
 // Apply Rate Limits & Mount API Routes
 app.use('/api', apiLimiter);
 app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/admin-login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/orders', orderLimiter);
 app.use('/api/payment', orderLimiter);

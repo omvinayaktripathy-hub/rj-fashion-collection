@@ -5,6 +5,24 @@ let currentProducts = [];
 let currentCategories = [];
 let currentOrders = [];
 
+// Global Session Guard & Expiry Interceptor
+const _origFetch = window.fetch;
+window.fetch = async function(...args) {
+  const response = await _origFetch.apply(this, args);
+  const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url ? args[0].url : '');
+  if ((response.status === 401 || response.status === 403) && url.includes('/api/admin/')) {
+    sessionStorage.removeItem('rjfc_admin_session');
+    adminUser = null;
+    if (typeof showAdminLoginScreen === 'function') showAdminLoginScreen();
+    const errEl = document.getElementById('admin-login-error');
+    if (errEl) {
+      errEl.textContent = 'Session expired or administrator authorization required. Please sign in.';
+      errEl.style.display = 'block';
+    }
+  }
+  return response;
+};
+
 // Ensure Firebase is initialized before ANY auth operation
 function ensureFirebaseInitialized() {
   if (typeof firebase !== 'undefined') {
@@ -182,29 +200,7 @@ async function handleAdminLogin(e) {
   const email = (document.getElementById('admin-email').value || '').trim();
   const password = document.getElementById('admin-password').value || '';
 
-  // 1. Instant Owner Access Bypass for omvinayakwork@gmail.com
-  if (email.toLowerCase() === 'omvinayakwork@gmail.com') {
-    adminUser = {
-      id: 1,
-      name: 'RJ Fashion Admin (Om Vinayak)',
-      email: 'omvinayakwork@gmail.com',
-      role: 'admin',
-      uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1'
-    };
-    sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-    hideAdminLoginScreen();
-    const topbarName = document.getElementById('admin-topbar-username');
-    if (topbarName) topbarName.textContent = adminUser.name;
-    showToast('Admin access granted! Welcome Om Vinayak 👑', 'success');
-    btn.disabled = false;
-    btn.textContent = 'Sign In to Admin Portal';
-    loadDashboardStats();
-    loadAdminProducts();
-    loadCategoriesList();
-    return;
-  }
-
-  // 2. Try server API login (if node server.js is running)
+  // 1. Authenticate via Server API (validates password hash and sets secure session cookie)
   try {
     const res = await fetch(`${API_BASE}/auth/admin-login`, {
       method: 'POST',
