@@ -24,14 +24,18 @@ const storage = multer.diskStorage({
     cb(null, 'product-' + uniqueSuffix + ext);
   }
 });
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'];
+const ALLOWED_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.svg'];
+
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ALLOWED_MIMES.includes(file.mimetype) && ALLOWED_EXTS.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are permitted.'));
+      cb(new Error('Invalid file format. Only JPEG, PNG, WebP, AVIF, and SVG images are permitted.'));
     }
   }
 });
@@ -189,8 +193,18 @@ router.post('/products', (req, res) => {
       available_sizes ? (typeof available_sizes === 'string' ? available_sizes : JSON.stringify(available_sizes)) : '["Free Size"]',
       available_colors ? (typeof available_colors === 'string' ? available_colors : JSON.stringify(available_colors)) : '["Maroon"]'
     );
+    const newId = Number(result.lastInsertRowid);
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'CREATE_PRODUCT',
+      entityType: 'product',
+      entityId: newId,
+      details: { name: name.trim(), price: salePrice, stock },
+      req
+    });
 
-    res.status(201).json({ success: true, message: 'Product created successfully', id: Number(result.lastInsertRowid) });
+    res.status(201).json({ success: true, message: 'Product created successfully', id: newId });
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ success: false, message: 'Failed to create product' });
@@ -247,6 +261,16 @@ router.put('/products/:id', (req, res) => {
       Number(id)
     );
 
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'UPDATE_PRODUCT',
+      entityType: 'product',
+      entityId: id,
+      details: { name: name.trim(), price: salePrice, stock },
+      req
+    });
+
     res.json({ success: true, message: 'Product updated successfully' });
   } catch (error) {
     console.error('Error updating product:', error);
@@ -267,6 +291,16 @@ router.patch('/products/:id/stock', (req, res) => {
 
     db.prepare('UPDATE products SET stock = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
       .run(numStock, Number(id));
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'UPDATE_STOCK',
+      entityType: 'product',
+      entityId: id,
+      details: { stock: numStock },
+      req
+    });
 
     res.json({
       success: true,
@@ -293,6 +327,16 @@ router.patch('/products/:id/toggle-stock', (req, res) => {
     db.prepare('UPDATE products SET stock = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
       .run(newStock, Number(id));
 
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'TOGGLE_STOCK',
+      entityType: 'product',
+      entityId: id,
+      details: { stock: newStock },
+      req
+    });
+
     res.json({
       success: true,
       message: newStock > 0 ? 'Product marked In Stock (15 units)' : 'Product marked Out of Stock (0 units)',
@@ -309,6 +353,17 @@ router.delete('/products/:id', (req, res) => {
   try {
     const { id } = req.params;
     db.prepare('DELETE FROM products WHERE id = ?').run(Number(id));
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'DELETE_PRODUCT',
+      entityType: 'product',
+      entityId: id,
+      details: { id },
+      req
+    });
+
     res.json({ success: true, message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);
@@ -369,6 +424,16 @@ router.patch('/orders/:id', (req, res) => {
     db.prepare('UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
       .run(status, Number(id));
 
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'UPDATE_ORDER_STATUS',
+      entityType: 'order',
+      entityId: id,
+      details: { status },
+      req
+    });
+
     res.json({ success: true, message: `Order status changed to "${status}"` });
   } catch (error) {
     console.error('Error updating order status:', error);
@@ -407,6 +472,17 @@ router.delete('/customers/:id', (req, res) => {
     } else {
       db.prepare(`DELETE FROM users WHERE id = ? AND role = 'customer'`).run(Number(param));
     }
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'DELETE_CUSTOMER',
+      entityType: 'customer',
+      entityId: param,
+      details: { identifier: param },
+      req
+    });
+
     res.json({ success: true, message: 'Customer record deleted' });
   } catch (error) {
     console.error('Error deleting customer:', error);
@@ -437,10 +513,21 @@ router.post('/categories', (req, res) => {
       return res.status(400).json({ success: false, message: 'Category name is required' });
     }
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    db.prepare(`
+    const result = db.prepare(`
       INSERT INTO categories (name, slug, description, image, active, display_order)
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(name.trim(), slug, description || '', image || '', active ? 1 : 0, Number(display_order) || 0);
+
+    const catId = Number(result.lastInsertRowid);
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'CREATE_CATEGORY',
+      entityType: 'category',
+      entityId: catId,
+      details: { name: name.trim() },
+      req
+    });
 
     res.status(201).json({ success: true, message: 'Category created' });
   } catch (error) {
@@ -459,6 +546,16 @@ router.put('/categories/:id', (req, res) => {
       WHERE id = ?
     `).run(name.trim(), description || '', image || '', active ? 1 : 0, Number(display_order) || 0, Number(id));
 
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'UPDATE_CATEGORY',
+      entityType: 'category',
+      entityId: id,
+      details: { name: name.trim() },
+      req
+    });
+
     res.json({ success: true, message: 'Category updated' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update category' });
@@ -469,6 +566,17 @@ router.delete('/categories/:id', (req, res) => {
   try {
     const { id } = req.params;
     db.prepare('DELETE FROM categories WHERE id = ?').run(Number(id));
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'DELETE_CATEGORY',
+      entityType: 'category',
+      entityId: id,
+      details: { id },
+      req
+    });
+
     res.json({ success: true, message: 'Category deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to delete category' });
@@ -488,10 +596,22 @@ router.get('/banners', (req, res) => {
 router.post('/banners', (req, res) => {
   try {
     const { title, subtitle, image, link, button_text, active, display_order } = req.body;
-    db.prepare(`
+    const result = db.prepare(`
       INSERT INTO banners (title, subtitle, image, link, button_text, active, display_order)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(title, subtitle || '', image, link || '/shop.html', button_text || 'SHOP NOW', active ? 1 : 0, Number(display_order) || 0);
+
+    const bannerId = Number(result.lastInsertRowid);
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'CREATE_BANNER',
+      entityType: 'banner',
+      entityId: bannerId,
+      details: { title },
+      req
+    });
+
     res.status(201).json({ success: true, message: 'Banner created' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create banner' });
@@ -507,6 +627,17 @@ router.put('/banners/:id', (req, res) => {
       SET title = ?, subtitle = ?, image = ?, link = ?, button_text = ?, active = ?, display_order = ?
       WHERE id = ?
     `).run(title, subtitle || '', image, link || '/shop.html', button_text || 'SHOP NOW', active ? 1 : 0, Number(display_order) || 0, Number(id));
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'UPDATE_BANNER',
+      entityType: 'banner',
+      entityId: id,
+      details: { title },
+      req
+    });
+
     res.json({ success: true, message: 'Banner updated' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update banner' });
@@ -517,9 +648,37 @@ router.delete('/banners/:id', (req, res) => {
   try {
     const { id } = req.params;
     db.prepare('DELETE FROM banners WHERE id = ?').run(Number(id));
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'DELETE_BANNER',
+      entityType: 'banner',
+      entityId: id,
+      details: { id },
+      req
+    });
+
     res.json({ success: true, message: 'Banner deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to delete banner' });
+  }
+});
+
+// Audit Logs: Retrieve tamper-evident admin action log
+router.get('/audit-logs', (req, res) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 100, 500);
+    const logs = db.prepare(`
+      SELECT * FROM admin_audit_logs
+      ORDER BY id DESC
+      LIMIT ?
+    `).all(limit);
+
+    res.json({ success: true, logs });
+  } catch (error) {
+    console.error('Error fetching audit logs:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch audit logs' });
   }
 });
 

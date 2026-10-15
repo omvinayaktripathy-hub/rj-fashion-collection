@@ -167,6 +167,36 @@ function initSchema() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS admin_audit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      admin_id INTEGER,
+      admin_email TEXT,
+      action TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT,
+      details TEXT,
+      ip_address TEXT,
+      user_agent TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- High-Performance Database Indexes
+    CREATE INDEX IF NOT EXISTS idx_products_category ON products (category_id, active);
+    CREATE INDEX IF NOT EXISTS idx_products_slug ON products (slug);
+    CREATE INDEX IF NOT EXISTS idx_products_featured ON products (featured, active);
+    CREATE INDEX IF NOT EXISTS idx_products_new_arrival ON products (new_arrival, active);
+    CREATE INDEX IF NOT EXISTS idx_orders_user ON orders (user_id);
+    CREATE INDEX IF NOT EXISTS idx_orders_number ON orders (order_number);
+    CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status);
+    CREATE INDEX IF NOT EXISTS idx_orders_created ON orders (created_at);
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+    CREATE INDEX IF NOT EXISTS idx_cart_user ON cart_items (user_id);
+    CREATE INDEX IF NOT EXISTS idx_cart_session ON cart_items (session_id);
+    CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses (user_id);
+    CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items (order_id);
+    CREATE INDEX IF NOT EXISTS idx_audit_created ON admin_audit_logs (created_at);
+    CREATE INDEX IF NOT EXISTS idx_audit_action ON admin_audit_logs (action);
   `);
 }
 
@@ -608,5 +638,22 @@ function seedInitialData() {
 // Initialize tables and seed
 initSchema();
 seedInitialData();
+
+// Admin Action Audit Logger
+db.logAdminAction = function({ adminId = null, adminEmail = 'admin', action, entityType = 'general', entityId = null, details = '', req = null }) {
+  try {
+    const ip = req ? (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '') : '';
+    const ua = req ? (req.headers['user-agent'] || '') : '';
+    const detailsStr = typeof details === 'object' ? JSON.stringify(details) : String(details);
+    
+    const stmt = db.prepare(`
+      INSERT INTO admin_audit_logs (admin_id, admin_email, action, entity_type, entity_id, details, ip_address, user_agent)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(adminId, adminEmail, action, entityType, entityId ? String(entityId) : null, detailsStr, ip, ua);
+  } catch (err) {
+    console.error('Failed to write admin audit log:', err);
+  }
+};
 
 module.exports = db;

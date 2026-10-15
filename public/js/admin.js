@@ -324,6 +324,71 @@ function switchAdminTab(tabName) {
     case 'banners':
       loadAdminBanners();
       break;
+    case 'audit':
+      loadAdminAuditLogs();
+      break;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Tamper-Evident Admin Action Audit Trail Loader
+// ─────────────────────────────────────────────────────────────
+async function loadAdminAuditLogs() {
+  const tbody = document.getElementById('admin-audit-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">Loading tamper-evident audit logs...</td></tr>';
+
+  try {
+    const res = await fetch('/api/admin/audit-logs?limit=150', {
+      headers: { 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    if (!data.success || !data.logs || data.logs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">No admin audit logs recorded yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.logs.map(log => {
+      let badgeColor = '#64748b';
+      let badgeBg = '#f1f5f9';
+      if (log.action.includes('CREATE')) {
+        badgeColor = '#15803d'; badgeBg = '#dcfce7';
+      } else if (log.action.includes('UPDATE')) {
+        badgeColor = '#0369a1'; badgeBg = '#e0f2fe';
+      } else if (log.action.includes('DELETE')) {
+        badgeColor = '#b91c1c'; badgeBg = '#fee2e2';
+      }
+
+      let parsedDetails = '';
+      try {
+        const d = JSON.parse(log.details);
+        parsedDetails = Object.entries(d).map(([k, v]) => `<strong>${k}:</strong> ${v}`).join(', ');
+      } catch (e) {
+        parsedDetails = log.details || '—';
+      }
+
+      return `
+        <tr>
+          <td><span style="font-family: monospace; font-size: 0.8rem; font-weight: 700;">#${log.id}</span></td>
+          <td style="white-space: nowrap; font-size: 0.82rem; color: #64748b;">${new Date(log.created_at).toLocaleString('en-IN')}</td>
+          <td>
+            <div style="font-weight: 600; font-size: 0.84rem;">${log.admin_email || 'Super Admin'}</div>
+            <div style="font-size: 0.72rem; color: #94a3b8;">ID: ${log.admin_id || 1}</div>
+          </td>
+          <td>
+            <span style="display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; background: ${badgeBg}; color: ${badgeColor};">
+              ${log.action}
+            </span>
+          </td>
+          <td><span style="font-weight: 600; text-transform: uppercase; font-size: 0.78rem;">${log.entity_type || '—'}</span> #${log.entity_id || '—'}</td>
+          <td style="font-family: monospace; font-size: 0.78rem; color: #64748b;">${log.ip_address || '—'}</td>
+          <td style="font-size: 0.82rem; max-width: 260px; word-break: break-word;">${parsedDetails}</td>
+        </tr>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Error loading audit logs:', err);
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #dc2626;">Failed to load audit logs.</td></tr>';
   }
 }
 

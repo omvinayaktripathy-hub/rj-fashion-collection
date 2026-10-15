@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RJ Fashion Collection - Private Admin Portal</title>
+  <meta name="description" content="RJ Fashion Collection Private Boutique Administration Portal.">
   <link rel="stylesheet" href="/css/admin.css?v=20260927-12">
   <style>
     /* Admin layout explicit flex-direction & responsive styles */
@@ -457,6 +459,11 @@
       <li class="admin-nav-item" id="nav-notifications">
         <button onclick="switchAdminTab('notifications')">
           <span>🔔</span> <span>Cloud Messaging</span>
+        </button>
+      </li>
+      <li class="admin-nav-item" id="nav-audit">
+        <button onclick="switchAdminTab('audit')">
+          <span>🛡️</span> <span>Audit Logs</span>
         </button>
       </li>
     </ul>
@@ -966,6 +973,39 @@
               <li style="margin-bottom: 6px;">Under <strong>"Web Push certificates"</strong>, click the white button: <strong>"Generate key pair"</strong>.</li>
               <li style="margin-bottom: 6px;">That creates your live public key pair (VAPID key) so Chrome, Safari, and Edge can deliver push notifications directly!</li>
             </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 9: SECURITY AUDIT LOGS -->
+      <section id="pane-audit" class="admin-section-pane" style="display: none;">
+        <div class="admin-card">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">🛡️ Tamper-Evident Admin Audit Trail</h3>
+              <p style="font-size: 0.8rem; color: #64748b; margin: 4px 0 0 0;">Immutable record of all administrative actions, stock changes, order status updates, and deletions.</p>
+            </div>
+            <button onclick="loadAdminAuditLogs()" class="btn btn-outline" style="padding: 7px 14px; font-size: 0.85rem; border-color: #cbd5e1; color: var(--admin-primary); cursor: pointer;">
+              🔄 Refresh Logs
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Log ID</th>
+                  <th>Timestamp</th>
+                  <th>Admin</th>
+                  <th>Action</th>
+                  <th>Target Entity</th>
+                  <th>IP Address</th>
+                  <th>Change Details</th>
+                </tr>
+              </thead>
+              <tbody id="admin-audit-tbody">
+                <tr><td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">Click "Audit Logs" to view recorded security events.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
