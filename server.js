@@ -44,6 +44,7 @@ app.use((req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://*.firebaseio.com https://*.googleapis.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://api.razorpay.com https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://api.razorpay.com;");
   if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
@@ -85,6 +86,7 @@ function createRateLimiter({ windowMs = 60000, max = 60, message = 'Too many req
 const authLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 15 : 60, message: 'Too many authentication attempts. Please try again in a minute.' });
 const orderLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 25 : 100, message: 'Too many order requests. Please try again shortly.' });
 const apiLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 300 : 1000, message: 'Too many API requests. Please slow down.' });
+const searchLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 60 : 200, message: 'Too many search queries. Please wait a moment.' });
 
 // CORS Lockdown
 const allowedOrigins = [
@@ -98,7 +100,7 @@ app.use(cors({
     if (!origin || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1') || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, true);
+      callback(new Error('Blocked by CORS policy: unauthorized origin.'));
     }
   },
   credentials: true
@@ -178,7 +180,12 @@ app.get('/api/me', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
+app.use('/api/products', (req, res, next) => {
+  if (req.query && req.query.search) {
+    return searchLimiter(req, res, next);
+  }
+  next();
+}, productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);

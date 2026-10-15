@@ -1373,8 +1373,3 @@ body.is-desktop .bottom-nav {
   display: none !important;
 }
 
-
-/* Ensure logo-subtitle is permanently hidden */
-.logo-subtitle {
-  display: none !important;
-}
