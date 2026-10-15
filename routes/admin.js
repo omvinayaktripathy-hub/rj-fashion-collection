@@ -682,4 +682,28 @@ router.get('/audit-logs', (req, res) => {
   }
 });
 
+// Database Backups: Trigger manual backup snapshot
+router.post('/backup', (req, res) => {
+  try {
+    const { performBackup } = require('../scripts/backup-db');
+    const backup = performBackup();
+    if (backup) {
+      db.logAdminAction({
+        adminId: req.session?.user?.id,
+        adminEmail: req.session?.user?.email,
+        action: 'TRIGGER_DATABASE_BACKUP',
+        entityType: 'database',
+        entityId: backup.fileName,
+        details: { fileName: backup.fileName, sizeBytes: backup.sizeBytes },
+        req
+      });
+      return res.json({ success: true, message: 'Database backup created successfully', backup });
+    }
+    res.status(500).json({ success: false, message: 'Failed to create database backup' });
+  } catch (error) {
+    console.error('Error triggering backup:', error);
+    res.status(500).json({ success: false, message: 'Backup error occurred' });
+  }
+});
+
 module.exports = router;

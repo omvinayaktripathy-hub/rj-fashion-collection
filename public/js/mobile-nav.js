@@ -241,6 +241,31 @@
     syncBadges();
     document.addEventListener('cartUpdated', syncBadges);
     document.addEventListener('wishlistUpdated', syncBadges);
+
+    // 6. Inject Floating WhatsApp Concierge Button
+    injectFloatingWhatsAppButton();
+  }
+
+  function injectFloatingWhatsAppButton() {
+    if (document.getElementById('rj-floating-wa-btn')) return;
+
+    const wa = document.createElement('a');
+    wa.id = 'rj-floating-wa-btn';
+    wa.className = 'rj-floating-wa-btn';
+    wa.href = 'https://wa.me/917894093586?text=Hello%20RJ%20Fashion%2C%20I%20am%20interested%20in%20your%20luxury%20collection.';
+    wa.target = '_blank';
+    wa.rel = 'noopener noreferrer';
+    wa.setAttribute('aria-label', 'Chat with RJ Fashion on WhatsApp');
+    wa.title = 'Chat with Boutique Concierge on WhatsApp';
+    wa.innerHTML = `
+      <div class="rj-wa-pulse"></div>
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="#ffffff">
+        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19.01L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67ZM8.53 7.33C8.37 7.33 8.1 7.39 7.87 7.64C7.65 7.89 7.02 8.48 7.02 9.69C7.02 10.9 7.9 12.07 8.02 12.23C8.14 12.39 9.73 14.85 12.18 15.91C12.76 16.16 13.22 16.31 13.57 16.42C14.16 16.61 14.7 16.58 15.12 16.52C15.6 16.45 16.58 15.92 16.79 15.34C17 14.76 17 14.26 16.93 14.16C16.86 14.05 16.69 13.99 16.44 13.87C16.19 13.74 14.96 13.14 14.73 13.06C14.5 12.97 14.34 12.93 14.17 13.18C14.01 13.42 13.54 13.99 13.39 14.16C13.25 14.32 13.1 14.34 12.86 14.22C12.61 14.09 11.81 13.83 10.86 12.99C10.12 12.33 9.62 11.51 9.47 11.26C9.33 11.02 9.45 10.88 9.58 10.76C9.69 10.65 9.83 10.47 9.95 10.32C10.08 10.18 10.12 10.07 10.2 9.91C10.28 9.74 10.24 9.6 10.18 9.48C10.12 9.35 9.65 8.21 9.46 7.74C9.27 7.28 9.07 7.34 8.92 7.34C8.78 7.33 8.61 7.33 8.53 7.33Z"/>
+      </svg>
+      <span class="rj-wa-badge">WhatsApp</span>
+    `;
+
+    document.body.appendChild(wa);
   }
 
   function injectHamburgerButton() {

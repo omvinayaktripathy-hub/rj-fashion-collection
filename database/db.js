@@ -181,6 +181,18 @@ function initSchema() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS contact_inquiries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT,
+      subject TEXT,
+      message TEXT NOT NULL,
+      ip_address TEXT,
+      status TEXT DEFAULT 'new',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- High-Performance Database Indexes
     CREATE INDEX IF NOT EXISTS idx_products_category ON products (category_id, active);
     CREATE INDEX IF NOT EXISTS idx_products_slug ON products (slug);

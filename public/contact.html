@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -6,6 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customer Support & Contact - RJ Fashion Collection</title>
   <meta name="description" content="Contact RJ Fashion Collection concierge team via WhatsApp, phone (+91 78940 93586), or email (rjfashioncollection@gmail.com).">
+  <!-- Open Graph / WhatsApp / Facebook Preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="RJ Fashion Collection">
+  <meta property="og:title" content="Customer Support & Contact - RJ Fashion Collection">
+  <meta property="og:description" content="Contact RJ Fashion Collection concierge team via WhatsApp, phone (+91 78940 93586), or email (rjfashioncollection@gmail.com).">
+  <meta property="og:image" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
+  <meta property="og:image:secure_url" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://rj-fashion-collection.web.app/contact.html">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Customer Support & Contact - RJ Fashion Collection">
+  <meta name="twitter:description" content="Contact RJ Fashion Collection concierge team via WhatsApp, phone (+91 78940 93586), or email (rjfashioncollection@gmail.com).">
+  <meta name="twitter:image" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -118,25 +136,100 @@
       </div>
 
       <div style="border-top: 1px solid var(--border); padding-top: 30px;">
-        <h3 style="font-family: var(--font-serif); font-size: 1.35rem; margin-bottom: 16px;">Send Us an Inquiry</h3>
-        <form onsubmit="event.preventDefault(); showToast('Thank you! Your message has been received.', 'success'); this.reset();" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.35rem; margin: 0;">Send Us an Inquiry</h3>
+          <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%2C%20I%20have%20an%20inquiry%20regarding%20your%20collection." target="_blank" rel="noopener" class="btn" style="background: #25D366; color: #fff; padding: 9px 18px; border-radius: 50px; font-weight: 700; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);">
+            <span>💬</span> Quick WhatsApp Chat
+          </a>
+        </div>
+
+        <div id="contact-alert-box" style="display: none; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.5;"></div>
+
+        <form id="contact-inquiry-form" onsubmit="handleContactSubmit(event)" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
           <div class="form-group-auth">
-            <label>Your Name *</label>
-            <input type="text" required placeholder="Enter full name">
+            <label>Your Full Name *</label>
+            <input type="text" id="contact-name" required placeholder="e.g. Ananya Sharma">
           </div>
           <div class="form-group-auth">
-            <label>Your Email *</label>
-            <input type="email" required placeholder="name@example.com">
+            <label>Your Email Address *</label>
+            <input type="email" id="contact-email" required placeholder="name@example.com">
+          </div>
+          <div class="form-group-auth">
+            <label>Mobile Number (with WhatsApp)</label>
+            <input type="tel" id="contact-phone" placeholder="e.g. 9876543210" maxlength="15">
+          </div>
+          <div class="form-group-auth">
+            <label>Subject / Topic</label>
+            <input type="text" id="contact-subject" placeholder="e.g. Saree Customization / Bulk Order">
           </div>
           <div class="form-group-auth" style="grid-column: 1 / -1;">
-            <label>Message / Question *</label>
-            <textarea rows="4" required placeholder="How can we assist you with your fashion selection?" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.92rem; outline: none;"></textarea>
+            <label>Your Message or Question *</label>
+            <textarea id="contact-message" rows="4" required placeholder="How can our boutique concierge assist you?" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.92rem; outline: none;"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="padding: 12px 28px; width: fit-content;">SEND INQUIRY</button>
+          <div style="grid-column: 1 / -1; display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+            <button type="submit" id="contact-submit-btn" class="btn btn-primary" style="padding: 12px 32px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px;">
+              SEND INQUIRY
+            </button>
+            <span style="font-size: 0.8rem; color: var(--muted);">We typically respond within 2–4 business hours.</span>
+          </div>
         </form>
       </div>
     </div>
   </main>
+
+  <script>
+    async function handleContactSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('contact-submit-btn');
+      const alertBox = document.getElementById('contact-alert-box');
+      const originalText = btn.textContent;
+
+      const payload = {
+        name: document.getElementById('contact-name').value.trim(),
+        email: document.getElementById('contact-email').value.trim(),
+        phone: document.getElementById('contact-phone').value.trim(),
+        subject: document.getElementById('contact-subject').value.trim(),
+        message: document.getElementById('contact-message').value.trim()
+      };
+
+      try {
+        btn.disabled = true;
+        btn.textContent = 'Sending Message...';
+        alertBox.style.display = 'none';
+
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = '#dcfce7';
+          alertBox.style.color = '#15803d';
+          alertBox.style.border = '1px solid #86efac';
+          alertBox.innerHTML = '<strong>✓ Success:</strong> ' + data.message;
+          document.getElementById('contact-inquiry-form').reset();
+        } else {
+          alertBox.style.display = 'block';
+          alertBox.style.background = '#fee2e2';
+          alertBox.style.color = '#b91c1c';
+          alertBox.style.border = '1px solid #fca5a5';
+          alertBox.innerHTML = '<strong>✕ Error:</strong> ' + (data.message || 'Unable to send inquiry.');
+        }
+      } catch (err) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = '#fee2e2';
+        alertBox.style.color = '#b91c1c';
+        alertBox.style.border = '1px solid #fca5a5';
+        alertBox.innerHTML = '<strong>✕ Network Error:</strong> Please check your connection or reach us directly on WhatsApp.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+  </script>
 
   <!-- Site Footer (NO returns, NO newsletter, NO admin login) -->
   <footer class="site-footer">
@@ -220,5 +313,6 @@
 
   <script src="/js/app.js?v=20260927-11"></script>
   <script src="/js/mobile-nav.js" defer></script>
+  <script src="/js/analytics.js" defer></script>
 </body>
 </html>

@@ -18,6 +18,7 @@ const bannerRoutes = require('./routes/banners');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payment');
 const notificationRoutes = require('./routes/notifications');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,16 @@ const isProd = process.env.NODE_ENV === 'production';
 
 // Disable fingerprinting header
 app.disable('x-powered-by');
+
+// Force HTTPS in production
+if (isProd) {
+  app.use((req, res, next) => {
+    if (!req.secure && req.headers['x-forwarded-proto'] !== 'https') {
+      return res.redirect(301, `https://${req.headers.host}${req.url}`);
+    }
+    next();
+  });
+}
 
 // Enhanced Security Headers Middleware
 app.use((req, res, next) => {
@@ -177,6 +188,7 @@ app.use('/api/banners', bannerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/contact', authLimiter, contactRoutes);
 
 // Private Admin URL route
 app.get('/admin', (req, res) => {
@@ -235,4 +247,10 @@ app.listen(PORT, () => {
   console.log(`🔒 Private Admin Portal: http://localhost:${PORT}/admin`);
   console.log(`🛡️  Environment: ${isProd ? 'Production (Debug OFF)' : 'Development (Debug ON)'}`);
   console.log('========================================================');
+
+  // Automated Daily Backup Schedule (24 hours)
+  try {
+    const { performBackup } = require('./scripts/backup-db');
+    setInterval(performBackup, 24 * 60 * 60 * 1000).unref();
+  } catch (e) {}
 });
