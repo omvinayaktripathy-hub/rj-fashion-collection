@@ -21,10 +21,11 @@ htmlFiles.forEach(file => {
     html = html.replace(/Shop luxury Indian ethnic wear at RJ Fashion Collection/g, 'Shop at RJ Fashion Collection');
   }
 
-  // Increment cache buster to ?v=20261015-04
-  html = html.replace(/mobile-nav\.js(\?v=[^"']*)?/g, 'mobile-nav.js?v=20261015-04');
-  html = html.replace(/responsive\.css(\?v=[^"']*)?/g, 'responsive.css?v=20261015-04');
-  html = html.replace(/style\.css(\?v=[^"']*)?/g, 'style.css?v=20261015-04');
+  // Increment cache buster to ?v=20261015-05
+  html = html.replace(/app\.js(\?v=[^"']*)?/g, 'app.js?v=20261015-05');
+  html = html.replace(/mobile-nav\.js(\?v=[^"']*)?/g, 'mobile-nav.js?v=20261015-05');
+  html = html.replace(/responsive\.css(\?v=[^"']*)?/g, 'responsive.css?v=20261015-05');
+  html = html.replace(/style\.css(\?v=[^"']*)?/g, 'style.css?v=20261015-05');
 
   fs.writeFileSync(filePath, html, 'utf8');
 });

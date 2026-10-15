@@ -6,6 +6,13 @@
 (function () {
   'use strict';
 
+  // Clean legacy subtitle elements from DOM
+  try {
+    document.querySelectorAll('.logo-subtitle').forEach(function(el) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    });
+  } catch (e) {}
+
   function initMobileNav() {
     // Avoid double initialization
     if (document.getElementById('rj-mobile-drawer')) return;

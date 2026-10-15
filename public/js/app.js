@@ -1,5 +1,12 @@
 // RJ FASHION COLLECTION - GLOBAL APP LOGIC
 
+// Ensure subtitle is removed from DOM immediately
+try {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.logo-subtitle').forEach(el => el.remove());
+  });
+} catch (e) {}
+
 const API_BASE = '/api';
 
 // Currency Formatter
