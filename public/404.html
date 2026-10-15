@@ -27,46 +27,96 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20261015-05">
+  
+  <script>
+    // Instant Theme Controller
+    window.applyTheme = function(theme) {
+      var isDark = theme === 'dark';
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+        if (document.body) document.body.classList.add('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'dark'); } catch(e){}
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.documentElement.classList.remove('dark-theme');
+        if (document.body) document.body.classList.remove('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'light'); } catch(e){}
+      }
+      window.updateAllThemeToggles(theme);
+    };
+
+    window.toggleTheme = function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
+      window.applyTheme(isDark ? 'light' : 'dark');
+    };
+
+    window.updateAllThemeToggles = function(theme) {
+      var isDark = theme === 'dark';
+      document.querySelectorAll('.theme-mode-text').forEach(function(el) {
+        el.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+      });
+      document.querySelectorAll('.theme-switch-container').forEach(function(el) {
+        el.setAttribute('aria-checked', isDark ? 'true' : 'false');
+        el.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+      });
+    };
+
+    try {
+      var saved = localStorage.getItem('rjfc_theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var activeTheme = saved ? saved : (prefersDark ? 'dark' : 'light');
+      if (activeTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+      }
+    } catch(e){}
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      window.updateAllThemeToggles(isDark ? 'dark' : 'light');
+    });
+  </script>
+
+  <link rel="stylesheet" href="/css/style.css?v=20261016-01">
+  <link rel="stylesheet" href="/css/responsive.css?v=20261016-01">
   <style>
     .error-hero {
-      min-height: 70vh;
+      min-height: 65vh;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 3rem 1.5rem;
-      background: radial-gradient(circle at 50% 30%, rgba(114, 19, 42, 0.05) 0%, transparent 70%);
+      padding: 4rem 1.5rem;
+      background: var(--bg, #FAF7F2);
     }
     .error-card {
       max-width: 680px;
       margin: 0 auto;
       background: var(--card-bg, #ffffff);
-      border: 1px solid var(--border-color, #f0e6dc);
-      border-radius: 20px;
+      border: 1px solid var(--border, #ede5dc);
+      border-radius: 12px;
       padding: 3.5rem 2.5rem;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.05);
     }
     .error-code {
-      font-family: 'Cinzel', serif;
-      font-size: clamp(5rem, 15vw, 8.5rem);
-      font-weight: 800;
+      font-family: var(--font-serif, 'Playfair Display', serif);
+      font-size: clamp(4.5rem, 12vw, 7.5rem);
+      font-weight: 700;
       line-height: 1;
-      background: linear-gradient(135deg, #72132A 0%, #D4AF37 60%, #AA771C 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--primary, #29231F);
       margin-bottom: 0.5rem;
-      letter-spacing: 4px;
+      letter-spacing: 2px;
     }
     .error-tagline {
-      font-family: 'Playfair Display', serif;
+      font-family: var(--font-serif, 'Playfair Display', serif);
       font-size: 1.6rem;
-      color: var(--text-color, #2b1f1d);
+      color: var(--primary, #29231F);
       margin-bottom: 1rem;
       font-weight: 600;
     }
     .error-desc {
-      color: var(--text-muted, #666);
+      color: var(--text-muted, #746B65);
       font-size: 1.05rem;
       line-height: 1.6;
       margin-bottom: 2rem;
@@ -76,89 +126,98 @@
       gap: 1rem;
       justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 2.5rem;
-    }
-    .btn-gold {
-      background: linear-gradient(135deg, #72132A, #931936);
-      color: #fff;
-      padding: 0.9rem 2rem;
-      border-radius: 50px;
-      font-weight: 600;
-      text-decoration: none;
-      box-shadow: 0 4px 15px rgba(114, 19, 42, 0.25);
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .btn-gold:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(114, 19, 42, 0.35);
-      background: linear-gradient(135deg, #871732, #A51D3D);
-    }
-    .btn-outline-gold {
-      border: 1.5px solid #D4AF37;
-      color: #72132A;
-      padding: 0.9rem 2rem;
-      border-radius: 50px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      background: transparent;
-    }
-    .btn-outline-gold:hover {
-      background: rgba(212, 175, 55, 0.12);
-      transform: translateY(-2px);
+      margin-bottom: 2rem;
     }
     .category-pills {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       justify-content: center;
-      margin-top: 1.5rem;
+      margin-top: 1rem;
     }
     .category-pills a {
       font-size: 0.85rem;
-      padding: 0.4rem 1rem;
+      padding: 0.45rem 1.1rem;
       border-radius: 30px;
-      background: var(--chip-bg, #f8f4f0);
-      color: var(--text-color, #333);
+      background: var(--bg, #FAF7F2);
+      color: var(--text, #29231F);
       text-decoration: none;
-      border: 1px solid var(--border-color, #e8dfd8);
+      border: 1px solid var(--border, #ede5dc);
       transition: all 0.2s ease;
     }
     .category-pills a:hover {
-      background: #72132A;
-      color: #fff;
-      border-color: #72132A;
+      background: var(--primary, #29231F);
+      color: #ffffff;
+      border-color: var(--primary, #29231F);
     }
   </style>
 </head>
 <body>
-  <!-- Header / Nav -->
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <span>COMPLIMENTARY EXPRESS SHIPPING</span> ON ORDERS ABOVE ₹999 | 100% HANDCRAFTED INDIAN HERITAGE
+  </div>
+
+  <!-- Site Header -->
   <header class="site-header">
-    <div class="top-announcement-bar">
-      ✨ Exclusive Festive Offer: Flat 20% OFF on Banarasi & Silk Sarees | Free Shipping Worldwide
-    </div>
-    <div class="header-main-container">
-      <a href="/" class="brand-logo" title="RJ Fashion Collection">
-        <span class="logo-crown">👑</span>
-        <span class="logo-text">RJ FASHION</span>
+    <div class="container header-main">
+      <a href="/" class="brand-logo">
+        <span class="logo-title">RJ Fashion Collection</span>
       </a>
-      <nav class="main-nav">
-        <a href="/">Home</a>
-        <a href="/shop.html">Shop</a>
-        <a href="/categories.html">Categories</a>
-        <a href="/sale.html">Sale</a>
-        <a href="/about.html">About</a>
-        <a href="/contact.html">Contact</a>
-      </nav>
-      <div class="header-right-actions">
-        <a href="/wishlist.html" class="header-icon-btn" title="Wishlist">❤️</a>
-        <a href="/cart.html" class="header-icon-btn" title="Cart">🛍️</a>
-        <a href="/account.html" class="header-icon-btn" title="Account">👤</a>
+
+      <div class="header-search">
+        <form class="header-search-form" action="/shop.html" method="GET">
+          <input type="text" name="search" placeholder="Search for sarees, jewelry, lehengas..." autocomplete="off">
+          <button type="submit" title="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div class="header-actions">
+        <!-- Theme Switcher -->
+        <div class="theme-switch-container" onclick="toggleTheme()" role="button" tabindex="0" title="Switch Theme">
+          <span class="theme-label-icon">☀️</span>
+          <div class="theme-switch-track">
+            <div class="theme-switch-thumb"></div>
+          </div>
+          <span class="theme-label-icon">🌙</span>
+          <span class="theme-mode-text">Dark Mode</span>
+        </div>
+
+        <div class="auth-nav-slot">
+          <a href="/login.html" class="action-btn">
+            <span>👤 Login</span>
+          </a>
+        </div>
+
+        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
+          <span>♡ Wishlist</span>
+        </a>
+
+        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+          <span>🛒 Cart</span>
+        </a>
       </div>
     </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/categories.html">Categories</a></li>
+          <li><a href="/shop.html?category=sarees">Sarees</a></li>
+          <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
   </header>
 
   <main class="error-hero">
@@ -166,23 +225,23 @@
       <div class="error-code">404</div>
       <h1 class="error-tagline">Royal Piece Not Found</h1>
       <p class="error-desc">
-        The exquisite outfit or boutique showcase you are looking for has been moved, renamed, or retired from our current runway collection.
+        The exquisite outfit or boutique showcase you are looking for has been moved, renamed, or retired from our current collection.
       </p>
 
       <div class="error-actions">
-        <a href="/" class="btn-gold">
-          <span>🏛️</span> Return to Boutique Home
+        <a href="/" class="btn btn-primary" style="padding: 12px 28px; border-radius: 4px; text-decoration: none;">
+          Return to Boutique Home
         </a>
-        <a href="/shop.html" class="btn-outline-gold">
-          <span>✨</span> Explore Full Collection
+        <a href="/shop.html" class="btn btn-outline" style="padding: 12px 28px; border-radius: 4px; text-decoration: none;">
+          Explore Full Collection
         </a>
-        <a href="/contact.html" class="btn-outline-gold">
-          <span>📞</span> Contact Concierge
+        <a href="/contact.html" class="btn btn-outline" style="padding: 12px 28px; border-radius: 4px; text-decoration: none;">
+          Contact Concierge
         </a>
       </div>
 
       <div style="margin-top: 2rem;">
-        <p style="font-size: 0.9rem; color: #888; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 1px;">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">
           Popular Boutique Departments
         </p>
         <div class="category-pills">
@@ -191,27 +250,54 @@
           <a href="/shop.html?category=kurtis">Designer Kurtis</a>
           <a href="/shop.html?category=suits">Anarkali Suits</a>
           <a href="/shop.html?category=jewelry">Kundan Jewelry</a>
-          <a href="/sale.html">Festive Deals</a>
         </div>
       </div>
     </div>
   </main>
 
+  <!-- Site Footer -->
   <footer class="site-footer">
-    <div class="footer-container" style="max-width: 1200px; margin: 0 auto; padding: 2.5rem 1.5rem; text-align: center;">
-      <p style="color: #888; font-size: 0.95rem;">
-        © <span id="currentYear">2026</span> RJ Fashion Collection. All Rights Reserved. Luxury Indian Couture & Handloom Heritage.
-      </p>
-      <p style="margin-top: 0.6rem; font-size: 0.85rem; color: #aaa;">
-        Assistance: <a href="tel:+917894093586" style="color: #D4AF37; text-decoration: none;">+91 78940 93586</a> | 
-        <a href="mailto:rjfashioncollection@gmail.com" style="color: #D4AF37; text-decoration: none;">rjfashioncollection@gmail.com</a>
-      </p>
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3 class="logo-title">RJ Fashion Collection</h3>
+          <p>India's premier online boutique for royal bridal sarees, intricate Kundan jewelry, and contemporary festive ethnic ensembles designed for celebrations.</p>
+          <div style="margin-top: 14px; font-size: 0.82rem; color: #94a3b8; line-height: 1.6;">
+            <p style="margin-bottom: 4px;">📍 <strong>Store Address:</strong> RJ FASHION COLLECTION, ODISHA, Jharsuguda, Sarbhal, Zipcode - 768201</p>
+            <p style="margin-bottom: 4px;">📞 <strong>Phone:</strong> <a href="tel:+917894093586" style="color: #e2e8f0; font-weight: 600; text-decoration: none;">+91 7894093586</a></p>
+            <p style="margin-bottom: 4px;">✉️ <strong>Email:</strong> <a href="mailto:rjfashioncollection@gmail.com" style="color: #e2e8f0; text-decoration: none;">rjfashioncollection@gmail.com</a></p>
+            <p style="margin-bottom: 0;">🕒 <strong>Available:</strong> Mon to Sat (10:00 AM – 5:00 PM)</p>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="/shop.html">Shop All</a></li>
+            <li><a href="/categories.html">Categories</a></li>
+            <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
+            <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul class="footer-links">
+            <li><a href="/contact.html">Customer Support</a></li>
+            <li><a href="/about.html#shipping">Shipping Policy</a></li>
+            <li><a href="/about.html#terms">Terms of Service</a></li>
+            <li><a href="/about.html#privacy">Privacy Policy</a></li>
+            <li><a href="/size-guide.html">Size Guide</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <p>&copy; <span id="currentYear">2026</span> RJ Fashion Collection. All rights reserved. Handcrafted with pride in India.</p>
+      </div>
     </div>
   </footer>
 
-  <script>
-    document.getElementById('currentYear').textContent = new Date().getFullYear();
-  </script>
+  <script src="/js/app.js?v=20261016-01"></script>
   <script src="/js/analytics.js" defer></script>
 </body>
 </html>

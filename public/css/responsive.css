@@ -1373,3 +1373,33 @@ body.is-desktop .bottom-nav {
   display: none !important;
 }
 
+/* Brand Storytelling Pillars Mobile & Tablet Reflow */
+@media (max-width: 991px) {
+  .brand-story-pillars {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-story-section {
+    padding: 44px 0 !important;
+    margin: 28px 0 !important;
+  }
+  .brand-story-title {
+    font-size: 1.65rem !important;
+    line-height: 1.3 !important;
+  }
+  .brand-story-lead {
+    font-size: 0.95rem !important;
+    margin-bottom: 32px !important;
+  }
+  .brand-story-pillars {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .brand-pillar {
+    padding: 22px 18px !important;
+  }
+}
+

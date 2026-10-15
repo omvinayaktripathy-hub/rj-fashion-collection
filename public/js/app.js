@@ -4,6 +4,8 @@
 try {
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.logo-subtitle').forEach(el => el.remove());
+    const curYear = new Date().getFullYear();
+    document.querySelectorAll('.current-year, #copyright-year').forEach(el => el.textContent = curYear);
   });
 } catch (e) {}
 
