@@ -1350,3 +1350,19 @@ body.is-desktop .bottom-nav {
   }
 }
 
+/* Eradicate any legacy or duplicate floating button elements */
+#rj-floating-wa-btn,
+.rj-floating-wa-btn,
+.rj-wa-badge,
+.rj-wa-pulse {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
