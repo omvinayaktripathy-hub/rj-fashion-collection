@@ -1539,7 +1539,7 @@ function viewOrderModal(orderId) {
         </tr>
       </thead>
       <tbody>
-        ${(o.items && o.items.length > 0 ? o.items : [{ product_name: 'Luxury Indian Ethnic Wear', quantity: 1, price: o.total, total: o.total }]).map(it => `
+        ${(o.items && o.items.length > 0 ? o.items : [{ product_name: 'RJ Fashion Collection', quantity: 1, price: o.total, total: o.total }]).map(it => `
           <tr style="border-bottom:1px solid #f1f5f9;">
             <td style="padding:8px 10px; font-weight:600;">${it.product_name}</td>
             <td style="padding:8px 10px;">${it.size || '-'}</td>
@@ -2384,7 +2384,7 @@ function buildInvoiceHTML(o, forDownload = false) {
       <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #7a003c; padding-bottom: 18px; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
         <div>
           <div style="font-size: 1.6rem; font-weight: 900; color: #7a003c; letter-spacing: 0.5px;">RJ FASHION COLLECTION</div>
-          <div style="font-size: 0.85rem; color: #b45309; font-weight: 700; margin-top: 2px;">Luxury Indian Ethnic Wear • Bridal Sarees • Royal Craft</div>
+          <div style="font-size: 0.85rem; color: #b45309; font-weight: 700; margin-top: 2px;">Bridal Sarees • Royal Craft</div>
           <div style="font-size: 0.78rem; color: #64748b; margin-top: 6px; line-height: 1.5;">
             📍 Sarbhal Chowk, Jharsuguda, Odisha - 768201<br>
             📞 +91 78940 93586 | ✉️ rjfashioncollection@gmail.com

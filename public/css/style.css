@@ -2828,3 +2828,9 @@ body.dark-theme {
 
 
 
+
+
+/* Ensure logo-subtitle is permanently hidden */
+.logo-subtitle {
+  display: none !important;
+}

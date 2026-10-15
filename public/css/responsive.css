@@ -1366,3 +1366,9 @@ body.is-desktop .bottom-nav {
   border: none !important;
 }
 
+
+
+/* Ensure logo-subtitle is permanently hidden */
+.logo-subtitle {
+  display: none !important;
+}
