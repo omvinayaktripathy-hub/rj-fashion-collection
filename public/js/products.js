@@ -85,12 +85,12 @@ function createProductCard(p) {
         <div class="product-actions">
           <button class="btn btn-card btn-outline-primary"
             onclick="addToCart(${p.id})"
-            ${isOutOfStock ? 'disabled style="opacity:0.55; cursor:not-allowed; background:#f8fafc; color:#94a3b8; border-color:#cbd5e1;"' : ''}>
+            ${isOutOfStock ? 'disabled' : ''}>
             ${isOutOfStock ? 'Out of Stock' : '🛒 Add'}
           </button>
           <button class="btn btn-card btn-primary"
             onclick="quickBuy(${p.id})"
-            ${isOutOfStock ? 'disabled style="opacity:0.55; cursor:not-allowed; background:#cbd5e1; color:#64748b; border-color:#cbd5e1;"' : ''}>
+            ${isOutOfStock ? 'disabled' : ''}>
             ${isOutOfStock ? 'Sold Out' : '⚡ Buy Now'}
           </button>
         </div>

@@ -76,7 +76,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20261016-01">
+  <link rel="stylesheet" href="/css/style.css?v=20261017-02">
   <link rel="stylesheet" href="/css/responsive.css?v=20261016-01">
 
   <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets -->
@@ -791,7 +791,7 @@
   <!-- Scripts -->
   <script src="/firebase-config.js?v=20260927-2"></script>
   <script src="/js/app.js?v=20261016-01"></script>
-  <script src="/js/products.js?v=20260927-2"></script>
+  <script src="/js/products.js?v=20261017-02"></script>
   <script>
     // Load Homepage Dynamic Products with robust direct static fallback
     async function loadHomepageSections() {
@@ -801,7 +801,7 @@
 
         // 1. Direct Static Fetch (Fastest & Guaranteed on Firebase Hosting)
         try {
-          const res = await fetch('/data/products.json?v=20260927');
+          const res = await fetch('/data/products.js?v=20261017-02on?v=20260927');
           if (res.ok) {
             const data = await res.json();
             const list = data.products || [];

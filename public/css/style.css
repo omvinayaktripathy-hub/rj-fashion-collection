@@ -2707,6 +2707,155 @@ body.dark-theme {
   color: var(--gold) !important;
 }
 
+/* ================= DARK MODE BUTTONS & PRODUCT BADGES ================= */
+
+/* Primary Action Buttons (Buy Now, Shop Now, Main CTAs) in Dark Mode */
+[data-theme="dark"] .btn-primary,
+.dark-theme .btn-primary {
+  background: linear-gradient(135deg, #c59b27 0%, #e2be67 100%) !important;
+  color: #0b0b10 !important;
+  border: 1px solid #e2be67 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(226, 190, 103, 0.32) !important;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+.dark-theme .btn-primary:hover {
+  background: linear-gradient(135deg, #d4a832 0%, #f3d489 100%) !important;
+  color: #000000 !important;
+  border-color: #f3d489 !important;
+  box-shadow: 0 6px 20px rgba(226, 190, 103, 0.48) !important;
+  transform: translateY(-2px);
+}
+
+/* Outline Buttons (Add to Cart, Secondary Actions) in Dark Mode */
+[data-theme="dark"] .btn-outline-primary,
+.dark-theme .btn-outline-primary {
+  border: 1.5px solid #ff4d88 !important;
+  color: #ffffff !important;
+  background: rgba(216, 27, 96, 0.22) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover,
+.dark-theme .btn-outline-primary:hover {
+  background: linear-gradient(135deg, #ad1457 0%, #d81b60 100%) !important;
+  color: #ffffff !important;
+  border-color: #d81b60 !important;
+  box-shadow: 0 4px 14px rgba(216, 27, 96, 0.42) !important;
+  transform: translateY(-2px);
+}
+
+/* Card Button Specific Enhancements */
+[data-theme="dark"] .btn-card,
+.dark-theme .btn-card {
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  padding: 9px 12px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Discount Badge on Image in Dark Mode */
+[data-theme="dark"] .badge-discount,
+.dark-theme .badge-discount {
+  background: #700037 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(226, 190, 103, 0.55) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px;
+}
+
+/* Price Row Discount Pill in Dark Mode */
+[data-theme="dark"] .price-discount,
+.dark-theme .price-discount {
+  background: rgba(16, 185, 129, 0.22) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(52, 211, 153, 0.35) !important;
+}
+
+[data-theme="dark"] .price-original,
+.dark-theme .price-original {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .product-actions,
+.dark-theme .product-actions {
+  border-top-color: #27273a !important;
+}
+
+/* Wishlist Toggle Heart in Dark Mode */
+[data-theme="dark"] .wishlist-toggle-btn,
+.dark-theme .wishlist-toggle-btn {
+  background: rgba(18, 18, 28, 0.88) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55) !important;
+}
+
+[data-theme="dark"] .wishlist-toggle-btn:hover,
+.dark-theme .wishlist-toggle-btn:hover,
+[data-theme="dark"] .wishlist-toggle-btn.active,
+.dark-theme .wishlist-toggle-btn.active {
+  background: #25162a !important;
+  color: #ff4d88 !important;
+  border-color: #ff4d88 !important;
+  transform: scale(1.12);
+  box-shadow: 0 4px 14px rgba(255, 77, 136, 0.35) !important;
+}
+
+/* Stock status pills in Dark Mode */
+[data-theme="dark"] .stock-status-pill,
+.dark-theme .stock-status-pill {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .stock-pill-in,
+.dark-theme .stock-pill-in {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+[data-theme="dark"] .stock-pill-low,
+.dark-theme .stock-pill-low {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(251, 191, 36, 0.3) !important;
+}
+
+[data-theme="dark"] .stock-pill-out,
+.dark-theme .stock-pill-out {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.3) !important;
+}
+
+/* Rating badge in Dark Mode */
+[data-theme="dark"] .rating-badge,
+.dark-theme .rating-badge {
+  background: #0f0f18 !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.28) !important;
+}
+
+/* Disabled Buttons in Dark Mode */
+[data-theme="dark"] .btn:disabled,
+[data-theme="dark"] .btn.disabled,
+.dark-theme .btn:disabled,
+.dark-theme .btn.disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  background: #1e1e2c !important;
+  color: #64748b !important;
+  border-color: #333348 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 [data-theme="dark"] .site-footer,
 .dark-theme .site-footer {
   background-color: #060609 !important;
