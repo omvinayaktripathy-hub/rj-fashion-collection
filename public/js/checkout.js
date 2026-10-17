@@ -55,6 +55,20 @@ async function initCheckoutPage() {
 
     currentUser = user;
 
+    // Check Stripe return query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const stripeSessionId = urlParams.get('session_id');
+    const stripeOrderNumber = urlParams.get('order_number');
+    const stripeCancelled = urlParams.get('cancelled');
+
+    if (stripeCancelled) {
+      showToast('Stripe checkout was cancelled. You can review your bag and choose another payment method.', 'warning');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (stripeSessionId && stripeOrderNumber) {
+      const verified = await handleStripeCallback(stripeSessionId, stripeOrderNumber);
+      if (verified) return;
+    }
+
     // 2. Resolve Delivery Address - If no address selected, redirect to dedicated delivery.html
     const addressOk = resolveDeliveryAddress();
     if (!addressOk) return;
@@ -357,6 +371,42 @@ async function executePlaceOrder() {
     created_at: new Date().toISOString()
   };
 
+  // STRIPE CHECKOUT FLOW
+  if (paymentMethod === 'Stripe') {
+    btn.disabled = true;
+    btn.innerHTML = `
+      <span class="spinner-inline"></span>
+      <span>REDIRECTING TO STRIPE CHECKOUT...</span>
+    `;
+
+    try {
+      const res = await fetch(`${API_BASE}/payment/stripe/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        showToast('Redirecting to Stripe secure checkout...', 'info');
+        // Redirect browser to Stripe Checkout hosted page
+        window.location.href = data.url;
+        return;
+      } else {
+        throw new Error(data.message || 'Failed to initialize Stripe checkout session');
+      }
+    } catch (err) {
+      console.error('Stripe Checkout Error:', err);
+      showToast(err.message || 'Unable to connect to Stripe. Please try again or select another payment option.', 'error');
+      btn.disabled = false;
+      btn.innerHTML = `
+        <span>CONFIRM &amp; PLACE ORDER</span>
+        <span style="font-size: 1.2rem; line-height: 1;">➔</span>
+      `;
+      return;
+    }
+  }
+
+  // STANDARD OFFLINE / DIRECT UPI ORDER FLOW
   let placedOrderNumber = `RJFC-${Date.now().toString().slice(-6)}`;
 
   // 1. Try server API
@@ -441,4 +491,46 @@ function triggerConfetti(count = 80) {
 
     setTimeout(() => p.remove(), (animDuration + delay) * 1000 + 500);
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+// Handle Stripe Callback Verification
+// ─────────────────────────────────────────────────────────────
+async function handleStripeCallback(sessionId, orderNumber) {
+  showToast('Verifying Stripe payment confirmation...', 'info');
+  try {
+    const res = await fetch(`${API_BASE}/payment/stripe/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, orderNumber })
+    });
+    const data = await res.json();
+    if (data.success) {
+      // Clear cart
+      localStorage.removeItem('rjfc_local_cart');
+      try { await fetch(`${API_BASE}/cart/clear`, { method: 'POST' }); } catch (_) {}
+      if (typeof updateCartCount === 'function') updateCartCount();
+
+      // Clean URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      // Trigger Celebration
+      triggerConfetti(140);
+      const modal = document.getElementById('order-success-modal');
+      const numEl = document.getElementById('modal-order-number');
+      if (numEl) numEl.textContent = orderNumber;
+      if (modal) {
+        modal.classList.add('active');
+        modal.style.display = 'flex';
+      }
+      showToast('Stripe payment verified! Your order is confirmed 👑', 'success');
+      return true;
+    } else {
+      showToast(data.message || 'Payment verification failed', 'error');
+    }
+  } catch (err) {
+    console.error('Error verifying Stripe session:', err);
+    showToast('Failed to verify Stripe payment confirmation.', 'error');
+  }
+  return false;
 }

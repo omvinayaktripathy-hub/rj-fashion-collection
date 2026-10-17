@@ -115,7 +115,7 @@ async function runFullCheckoutTests() {
   console.log('\n--- Phase 4: Cart Operations & Inventory Availability ---');
   const productsRes = await request('GET', '/api/products');
   assert(productsRes.json.success && productsRes.json.products.length > 0, 'Products catalog must have items');
-  const testProduct = productsRes.json.products[0];
+  const testProduct = productsRes.json.products.find(p => p.stock >= 10) || productsRes.json.products[0];
   const initialStock = testProduct.stock;
   console.log(`  ✓ Selected test product: "${testProduct.name}" (Price: ₹${testProduct.price}, Current Stock: ${initialStock})`);
 
@@ -203,6 +203,52 @@ async function runFullCheckoutTests() {
   assert.strictEqual(orderDetails.discount, expectedDiscount, `10% promo discount must be applied (Expected: ₹${expectedDiscount}, Actual: ₹${orderDetails.discount})`);
   console.log(`  ✓ PASS: Promo code "ROYAL10" applied server-side! Subtotal: ₹${orderDetails.subtotal}, Discount: -₹${orderDetails.discount}, Total: ₹${orderDetails.total}`);
   console.log(`  ✓ PASS: UPI Payment status automatically set to "${orderDetails.payment_status}"`);
+
+  // STEP 6B: Full Checkout Scenario 3 — Stripe Checkout Session & Verification
+  console.log('\n--- Phase 6B: Checkout Flow 3 — Stripe Checkout Session & Verification ---');
+  // Add item back to cart for Stripe checkout
+  await request('POST', '/api/cart', {
+    productId: testProduct.id,
+    quantity: 1,
+    size: 'Standard'
+  }, { Cookie: customerCookie });
+
+  // 1. Check Stripe configuration endpoint
+  const stripeConfigRes = await request('GET', '/api/payment/stripe/config');
+  assert(stripeConfigRes.json.success, 'Stripe config must return 200');
+  assert(stripeConfigRes.json.publishableKey, 'Stripe config must return publishableKey');
+  console.log(`  ✓ PASS: Stripe config verified: Enabled=${stripeConfigRes.json.enabled}, Key=${stripeConfigRes.json.publishableKey}`);
+
+  // 2. Create Stripe Checkout Session
+  const stripeSessionRes = await request('POST', '/api/payment/stripe/create-checkout-session', {
+    addressId: savedAddressId,
+    notes: 'Stripe order test'
+  }, { Cookie: customerCookie });
+  assert.strictEqual(stripeSessionRes.statusCode, 200, 'Stripe session creation must return 200');
+  assert(stripeSessionRes.json.success, 'Stripe session must succeed');
+  assert(stripeSessionRes.json.url, 'Stripe session must provide hosted checkout URL');
+  assert(stripeSessionRes.json.sessionId, 'Stripe session must provide sessionId');
+  const stripeOrderNumber = stripeSessionRes.json.orderNumber;
+  const stripeSessionId = stripeSessionRes.json.sessionId;
+  console.log(`  ✓ PASS: Stripe Checkout Session created! Order: ${stripeOrderNumber}, SessionId: ${stripeSessionId}`);
+  console.log(`  ✓ PASS: Stripe hosted checkout redirect URL: ${stripeSessionRes.json.url}`);
+
+  // 3. Verify Stripe Payment Callback
+  const stripeVerifyRes = await request('POST', '/api/payment/stripe/verify', {
+    sessionId: stripeSessionId,
+    orderNumber: stripeOrderNumber
+  }, { Cookie: customerCookie });
+  assert(stripeVerifyRes.json.success, 'Stripe payment verification must succeed');
+  console.log(`  ✓ PASS: Stripe payment verified and order status confirmed!`);
+
+  // 4. Verify order in customer order history
+  const stripeOrderHistoryRes = await request('GET', `/api/orders/${stripeOrderNumber}`, null, { Cookie: customerCookie });
+  assert(stripeOrderHistoryRes.json.success, 'Get Stripe order must succeed');
+  const stripeOrderData = stripeOrderHistoryRes.json.order;
+  assert.strictEqual(stripeOrderData.payment_method, 'Stripe');
+  assert.strictEqual(stripeOrderData.payment_status, 'Paid');
+  assert.strictEqual(stripeOrderData.status, 'Confirmed');
+  console.log(`  ✓ PASS: Customer orders verified: Payment Method="Stripe", Payment Status="Paid", Status="Confirmed"`);
 
   // STEP 7: Payment Gateway API (Razorpay Config & Orders)
   console.log('\n--- Phase 7: Payment Gateway Configuration & Razorpay Handlers ---');

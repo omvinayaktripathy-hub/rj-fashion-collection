@@ -28,6 +28,7 @@
     "firebase-admin": "^14.5.0",
     "multer": "^2.0.2",
     "nodemailer": "^10.0.10",
-    "razorpay": "^2.9.8"
+    "razorpay": "^2.9.8",
+    "stripe": "^23.0.0"
   }
 }

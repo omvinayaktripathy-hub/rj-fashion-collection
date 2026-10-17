@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -877,22 +877,42 @@
               </div>
             </label>
 
+            <!-- Stripe Checkout Option -->
+            <label class="payment-option-box" id="stripe-box">
+              <div style="display: flex; gap: 16px; align-items: flex-start;">
+                <input type="radio" name="checkout_payment_method" value="Stripe" style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
+                <div style="flex: 1;">
+                  <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span>💳 Stripe Checkout</span>
+                    <span style="font-size: 0.72rem; background: rgba(99, 91, 255, 0.15); color: #635bff; padding: 2px 8px; border-radius: 4px; font-weight: 800;">GLOBAL &amp; DOMESTIC</span>
+                    <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: 800;">CARDS / APPLE PAY / GPAY</span>
+                  </div>
+                  <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
+                    Pay securely using Credit/Debit Card (Visa, MasterCard, RuPay, Amex), Apple Pay, or Google Pay via Stripe's encrypted checkout portal.
+                  </div>
+                </div>
+              </div>
+              <div class="payment-extra-detail" style="display: none;">
+                ✓ Bank-grade 256-bit encryption powered by Stripe. You will be redirected to complete your payment and returned with instant confirmation.
+              </div>
+            </label>
+
             <!-- Direct Instant UPI Option -->
             <label class="payment-option-box" id="upi-box">
               <div style="display: flex; gap: 16px; align-items: flex-start;">
                 <input type="radio" name="checkout_payment_method" value="UPI" style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
                 <div style="flex: 1;">
                   <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 10px;">
-                    <span>⚡ Direct Instant UPI / Online Payment</span>
+                    <span>⚡ Direct Instant UPI (PhonePe, GPay, Paytm)</span>
                     <span style="font-size: 0.72rem; background: rgba(197, 155, 39, 0.2); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: 800;">ZERO FEES</span>
                   </div>
                   <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
-                    Pay instantly via Google Pay, PhonePe, Paytm, BHIM, Debit/Credit Card or Net Banking.
+                    Scan UPI QR or pay directly via PhonePe, Google Pay, Paytm, or BHIM.
                   </div>
                 </div>
               </div>
               <div class="payment-extra-detail" style="display: none;">
-                ✓ Fast 1-click confirmation with bank-grade 256-bit SSL encryption.
+                ✓ Fast 1-click confirmation with official merchant UPI verified receipt.
               </div>
             </label>
 
