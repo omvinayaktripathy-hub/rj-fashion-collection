@@ -3,7 +3,13 @@ function requireAdmin(req, res, next) {
     return next();
   }
 
-  if (req.xhr || req.headers.accept?.includes('json') || req.path.startsWith('/api/')) {
+  const isApi = (req.baseUrl && req.baseUrl.startsWith('/api')) ||
+                (req.originalUrl && req.originalUrl.startsWith('/api')) ||
+                req.path.startsWith('/api/') ||
+                req.xhr ||
+                req.headers.accept?.includes('json');
+
+  if (isApi) {
     return res.status(403).json({
       success: false,
       message: '403 Forbidden: Administrator privileges required.'

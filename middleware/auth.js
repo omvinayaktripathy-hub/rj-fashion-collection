@@ -3,7 +3,13 @@ function requireAuth(req, res, next) {
     return next();
   }
   
-  if (req.xhr || req.headers.accept?.includes('json') || req.path.startsWith('/api/')) {
+  const isApi = (req.baseUrl && req.baseUrl.startsWith('/api')) ||
+                (req.originalUrl && req.originalUrl.startsWith('/api')) ||
+                req.path.startsWith('/api/') ||
+                req.xhr ||
+                req.headers.accept?.includes('json');
+
+  if (isApi) {
     return res.status(401).json({
       success: false,
       message: 'Authentication required. Please login to continue.'

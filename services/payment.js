@@ -70,17 +70,29 @@ async function createRazorpayOrder(amountInPaise, receiptId, currency = 'INR') {
 }
 
 function verifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature) {
-  if (!RAZORPAY_ENABLED || isTestKey() || (razorpayOrderId && razorpayOrderId.startsWith('order_test_'))) {
-    return true; // Test mode always succeeds
+  if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+    return false;
   }
+
+  const secret = process.env.RAZORPAY_KEY_SECRET || 'demo_secret_replace_with_real';
   try {
     const crypto = require('node:crypto');
     const body = razorpayOrderId + '|' + razorpayPaymentId;
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .createHmac('sha256', secret)
       .update(body)
       .digest('hex');
-    return expectedSignature === razorpaySignature;
+    
+    if (expectedSignature === razorpaySignature) {
+      return true;
+    }
+
+    // In demo mode without Razorpay credentials, allow explicit simulator token
+    if ((!RAZORPAY_ENABLED || isTestKey()) && razorpaySignature === 'demo_verified_signature') {
+      return true;
+    }
+
+    return false;
   } catch (err) {
     console.error('Signature verification error:', err);
     return false;

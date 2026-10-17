@@ -340,12 +340,16 @@ async function executePlaceOrder() {
   const notes = document.getElementById('order-delivery-notes')?.value.trim() || '';
 
   const orderPayload = {
-    customer_name: activeAddressData.name || currentUser.name || 'Valued Customer',
-    customer_email: currentUser.email || 'customer@example.com',
-    customer_phone: activeAddressData.phone || currentUser.phone || '',
+    addressId: activeAddressData.id || null,
+    address_id: activeAddressData.id || null,
+    customer_name: activeAddressData.name || (currentUser && currentUser.name) || 'Valued Customer',
+    customer_email: (currentUser && currentUser.email) || 'customer@example.com',
+    customer_phone: activeAddressData.phone || (currentUser && currentUser.phone) || '',
     shipping_address: activeAddressData.text || `${activeAddressData.house_flat || ''}, ${activeAddressData.street || ''}, ${activeAddressData.city || ''}, ${activeAddressData.state || ''} - ${activeAddressData.pin_code || ''}`,
+    delivery_address: activeAddressData.text || `${activeAddressData.house_flat || ''}, ${activeAddressData.street || ''}, ${activeAddressData.city || ''}, ${activeAddressData.state || ''} - ${activeAddressData.pin_code || ''}`,
     items: currentCartItems,
     total: currentCartTotal,
+    paymentMethod: paymentMethod,
     payment_method: paymentMethod,
     coupon: couponCodeApplied,
     notes: notes,

@@ -18,7 +18,11 @@ function generateOrderNumber() {
 router.post('/', requireAuth, (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { addressId, newAddress, paymentMethod = 'Cash on Delivery', notes = '' } = req.body;
+    const addressId = req.body.addressId || req.body.address_id;
+    const newAddress = req.body.newAddress;
+    const paymentMethod = req.body.paymentMethod || req.body.payment_method || 'Cash on Delivery';
+    const notes = req.body.notes || '';
+    const couponCode = (req.body.coupon || req.body.couponCode || '').trim().toUpperCase();
 
     // 1. Get user cart items
     const cartItems = db.prepare(`
@@ -44,8 +48,8 @@ router.post('/', requireAuth, (req, res) => {
 
     // 3. Resolve address
     let deliveryAddress = '';
-    let customerName = req.session.user.name;
-    let customerPhone = req.session.user.phone || '';
+    let customerName = req.body.customer_name || req.session.user.name;
+    let customerPhone = req.body.customer_phone || req.session.user.phone || '';
     let finalAddressId = null;
 
     if (addressId) {
@@ -77,6 +81,24 @@ router.post('/', requireAuth, (req, res) => {
       }
     }
 
+    // Direct address string fallback (e.g. shipping_address or delivery_address from frontend)
+    if (!deliveryAddress && (req.body.shipping_address || req.body.delivery_address || req.body.address)) {
+      deliveryAddress = String(req.body.shipping_address || req.body.delivery_address || req.body.address).trim();
+      if (req.body.customer_name) customerName = String(req.body.customer_name).trim();
+      if (req.body.customer_phone) customerPhone = String(req.body.customer_phone).trim();
+    }
+
+    // Default address from database fallback
+    if (!deliveryAddress) {
+      const defaultAddr = db.prepare('SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, id DESC LIMIT 1').get(userId);
+      if (defaultAddr) {
+        finalAddressId = defaultAddr.id;
+        customerName = defaultAddr.full_name;
+        customerPhone = defaultAddr.phone;
+        deliveryAddress = `${defaultAddr.house_flat}, ${defaultAddr.street}, ${defaultAddr.city}, ${defaultAddr.state} - ${defaultAddr.pin_code}. Phone: ${defaultAddr.phone}`;
+      }
+    }
+
     if (!deliveryAddress) {
       return res.status(400).json({ success: false, message: 'Please provide or select a delivery address.' });
     }
@@ -84,8 +106,18 @@ router.post('/', requireAuth, (req, res) => {
     // 4. Calculate financial totals
     const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const shipping = subtotal > 999 ? 0 : 49;
-    const discount = 0; // Can be coupon or promo
-    const total = subtotal + shipping - discount;
+    
+    // Server-side coupon discount calculation
+    let discount = 0;
+    if (couponCode === 'ROYAL10' || couponCode === 'FESTIVE10' || couponCode === 'RJFESTIVE') {
+      discount = Math.round(subtotal * 0.10);
+    } else if (couponCode === 'WELCOME500' && subtotal >= 2999) {
+      discount = 500;
+    } else if (Number(req.body.discount) > 0 && Number(req.body.discount) <= subtotal * 0.5) {
+      discount = Math.min(Number(req.body.discount), subtotal);
+    }
+
+    const total = Math.max(0, subtotal + shipping - discount);
 
     const orderNumber = generateOrderNumber();
 
