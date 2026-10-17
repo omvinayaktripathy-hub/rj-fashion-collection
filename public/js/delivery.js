@@ -241,28 +241,28 @@ function renderAddressesList() {
 
   container.innerHTML = savedAddresses.map(addr => {
     const isSelected = addr.id === selectedAddressId;
-    const typeLabel = (addr.address_type || 'HOME').toUpperCase();
+    const typeLabel = escapeHtml((addr.address_type || 'HOME').toUpperCase());
 
     return `
-      <div class="addr-select-item ${isSelected ? 'selected' : ''}" onclick="selectAddress(${addr.id})" id="addr-card-${addr.id}">
+      <div class="addr-select-item ${isSelected ? 'selected' : ''}" onclick="selectAddress(${Number(addr.id)})" id="addr-card-${Number(addr.id)}">
         <div style="display: flex; gap: 16px; align-items: flex-start;">
           <div class="custom-radio-wrap" style="margin-top: 2px;">
-            <input type="radio" name="delivery_address_radio" value="${addr.id}" ${isSelected ? 'checked' : ''} style="display: none;">
+            <input type="radio" name="delivery_address_radio" value="${Number(addr.id)}" ${isSelected ? 'checked' : ''} style="display: none;">
             <div class="radio-indicator ${isSelected ? 'checked' : ''}"></div>
           </div>
           
           <div style="flex: 1; min-width: 0;">
             <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
-              <span class="addr-person-name">${addr.full_name}</span>
+              <span class="addr-person-name">${escapeHtml(addr.full_name)}</span>
               <span class="addr-tag ${addr.is_default ? 'default-tag' : ''}">${addr.is_default ? 'DEFAULT' : typeLabel}</span>
-              <span class="addr-phone-chip">📞 ${addr.phone}</span>
+              <span class="addr-phone-chip">📞 ${escapeHtml(addr.phone)}</span>
               
               <div class="addr-item-actions">
-                <button type="button" class="addr-action-btn edit-btn" onclick="openEditAddress(event, ${addr.id})" title="Edit Address">
+                <button type="button" class="addr-action-btn edit-btn" onclick="openEditAddress(event, ${Number(addr.id)})" title="Edit Address">
                   ✏️ Edit
                 </button>
                 ${savedAddresses.length > 1 ? `
-                  <button type="button" class="addr-action-btn delete-btn" onclick="handleDeleteAddress(event, ${addr.id})" title="Delete Address">
+                  <button type="button" class="addr-action-btn delete-btn" onclick="handleDeleteAddress(event, ${Number(addr.id)})" title="Delete Address">
                     🗑️ Delete
                   </button>
                 ` : ''}
@@ -270,12 +270,12 @@ function renderAddressesList() {
             </div>
 
             <div class="addr-full-text">
-              ${addr.house_flat || ''}, ${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''} - <strong>${addr.pin_code || ''}</strong>
+              ${escapeHtml(addr.house_flat || '')}, ${escapeHtml(addr.street || '')}, ${escapeHtml(addr.city || '')}, ${escapeHtml(addr.state || '')} - <strong>${escapeHtml(addr.pin_code || '')}</strong>
             </div>
 
             ${isSelected ? `
               <div class="addr-proceed-dock">
-                <button type="button" class="proceed-btn" onclick="confirmAddressAndProceed(event, ${addr.id})">
+                <button type="button" class="proceed-btn" onclick="confirmAddressAndProceed(event, ${Number(addr.id)})">
                   <span>DELIVER TO THIS ADDRESS & PROCEED TO PAYMENT</span>
                   <span style="font-size: 1.1rem; line-height: 1;">➔</span>
                 </button>

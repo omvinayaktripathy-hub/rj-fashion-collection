@@ -113,72 +113,84 @@ router.post('/', requireAuth, (req, res) => {
 
     const orderNumber = generateOrderNumber();
 
-    // 5. Insert into orders table
-    const orderInsert = db.prepare(`
-      INSERT INTO orders (
-        order_number, user_id, address_id, customer_name, customer_email, customer_phone,
-        delivery_address, subtotal, discount, shipping, total, payment_method, payment_status,
-        status, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', ?)
-    `);
+    // 5. Atomic Order Placement Transaction
+    const placeOrderTx = db.transaction(() => {
+      // Re-verify stock inside transaction to prevent race conditions
+      for (const item of cartItems) {
+        const pCurrent = db.prepare('SELECT stock, name FROM products WHERE id = ?').get(item.product_id);
+        if (!pCurrent || pCurrent.stock < item.quantity) {
+          throw new Error(`Insufficient stock for "${item.name}". Only ${pCurrent ? pCurrent.stock : 0} available.`);
+        }
+      }
 
-    const orderResult = orderInsert.run(
-      orderNumber,
-      userId,
-      finalAddressId,
-      customerName,
-      req.session.user.email,
-      customerPhone,
-      deliveryAddress,
-      subtotal,
-      discount,
-      shipping,
-      total,
-      paymentMethod,
-      paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Paid',
-      notes
-    );
+      const orderInsert = db.prepare(`
+        INSERT INTO orders (
+          order_number, user_id, address_id, customer_name, customer_email, customer_phone,
+          delivery_address, subtotal, discount, shipping, total, payment_method, payment_status,
+          status, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', ?)
+      `);
 
-    const orderId = Number(orderResult.lastInsertRowid);
-
-    // 6. Insert order items & reduce stock
-    const itemInsert = db.prepare(`
-      INSERT INTO order_items (order_id, product_id, product_name, product_image, size, color, quantity, price, total)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const stockUpdate = db.prepare(`
-      UPDATE products SET stock = stock - ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-    `);
-
-    const orderItemsForEmail = [];
-    for (const item of cartItems) {
-      itemInsert.run(
-        orderId,
-        item.product_id,
-        item.name,
-        item.image,
-        item.size || 'Free Size',
-        item.color || '',
-        item.quantity,
-        item.price,
-        item.price * item.quantity
+      const orderResult = orderInsert.run(
+        orderNumber,
+        userId,
+        finalAddressId,
+        customerName,
+        req.session.user.email,
+        customerPhone,
+        deliveryAddress,
+        subtotal,
+        discount,
+        shipping,
+        total,
+        paymentMethod,
+        paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Paid',
+        notes
       );
 
-      stockUpdate.run(item.quantity, item.product_id);
+      const orderId = Number(orderResult.lastInsertRowid);
 
-      // Collect for confirmation email
-      orderItemsForEmail.push({
-        product_name: item.name,
-        size: item.size || 'Free Size',
-        quantity: item.quantity,
-        price: item.price,
-        total: item.price * item.quantity
-      });
-    }
+      const itemInsert = db.prepare(`
+        INSERT INTO order_items (order_id, product_id, product_name, product_image, size, color, quantity, price, total)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
 
-    // 7. Clear customer cart
-    db.prepare('DELETE FROM cart_items WHERE user_id = ?').run(userId);
+      const stockUpdate = db.prepare(`
+        UPDATE products SET stock = stock - ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+      `);
+
+      const orderItemsForEmail = [];
+      for (const item of cartItems) {
+        itemInsert.run(
+          orderId,
+          item.product_id,
+          item.name,
+          item.image,
+          item.size || 'Free Size',
+          item.color || '',
+          item.quantity,
+          item.price,
+          item.price * item.quantity
+        );
+
+        stockUpdate.run(item.quantity, item.product_id);
+
+        orderItemsForEmail.push({
+          product_name: item.name,
+          size: item.size || 'Free Size',
+          quantity: item.quantity,
+          price: item.price,
+          total: item.price * item.quantity
+        });
+      }
+
+      // Clear customer cart
+      db.prepare('DELETE FROM cart_items WHERE user_id = ?').run(userId);
+
+      return { orderId, orderItemsForEmail };
+    });
+
+    const { orderId, orderItemsForEmail } = placeOrderTx();
 
     // 8. Send order confirmation email (non-blocking — never delays response)
     sendOrderConfirmation({
@@ -202,7 +214,7 @@ router.post('/', requireAuth, (req, res) => {
     });
   } catch (error) {
     console.error('Error placing order:', error);
-    res.status(500).json({ success: false, message: 'Failed to place order. Please try again.' });
+    res.status(400).json({ success: false, message: error.message || 'Failed to place order. Please try again.' });
   }
 });
 
@@ -277,24 +289,29 @@ router.post('/:id/cancel', requireAuth, (req, res) => {
       return res.status(400).json({ success: false, message: 'This order has already been cancelled.' });
     }
 
-    if (order.status === 'Delivered') {
-      return res.status(400).json({ success: false, message: 'Delivered orders cannot be cancelled.' });
+    if (['Delivered', 'Shipped', 'Out for Delivery'].includes(order.status)) {
+      return res.status(400).json({ success: false, message: `Orders that are ${order.status.toLowerCase()} cannot be cancelled online. Please contact boutique support.` });
     }
 
-    // Update status to Cancelled
-    const cancelNote = ` [Cancelled by customer: ${reason}]`;
-    db.prepare(`
-      UPDATE orders
-      SET status = 'Cancelled', notes = COALESCE(notes, '') || ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(cancelNote, order.id);
+    const cleanReason = String(reason || 'Cancelled by customer').replace(/<[^>]*>?/gm, '').replace(/[\r\n]/g, ' ').trim().slice(0, 200);
+    const cancelNote = ` [Cancelled by customer: ${cleanReason}]`;
 
-    // Restock order items
-    const items = db.prepare('SELECT product_id, quantity FROM order_items WHERE order_id = ?').all(order.id);
-    const restockStmt = db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?');
-    for (const item of items) {
-      restockStmt.run(item.quantity, item.product_id);
-    }
+    const cancelTx = db.transaction(() => {
+      db.prepare(`
+        UPDATE orders
+        SET status = 'Cancelled', notes = COALESCE(notes, '') || ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(cancelNote, order.id);
+
+      // Restock order items
+      const items = db.prepare('SELECT product_id, quantity FROM order_items WHERE order_id = ?').all(order.id);
+      const restockStmt = db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?');
+      for (const item of items) {
+        restockStmt.run(item.quantity, item.product_id);
+      }
+    });
+
+    cancelTx();
 
     res.json({
       success: true,

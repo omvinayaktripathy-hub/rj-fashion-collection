@@ -1416,18 +1416,22 @@ async function loadAdminOrders() {
     const statuses = ['Pending', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
     tbody.innerHTML = currentOrders.map(o => {
+      const safeOrderNum = escapeHtml(o.order_number || '');
+      const safeName = escapeHtml(o.customer_name || 'Customer');
+      const safePhone = escapeHtml(o.customer_phone || '');
+      const safeEmail = escapeHtml(o.customer_email || '');
       const cleanPhone = (o.customer_phone || '').replace(/[^0-9]/g, '');
       const waMsg = encodeURIComponent(`Hello ${o.customer_name}! Thank you for shopping with RJ Fashion Collection. We are updating you regarding your order #${o.order_number} (Status: ${o.status}). Total: ${formatPrice(o.total)}. Let us know if you need assistance!`);
       const waUrl = cleanPhone ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${waMsg}` : `https://wa.me/917894093586?text=${waMsg}`;
 
       return `
         <tr>
-          <td style="font-weight:700; color:var(--admin-primary);">${o.order_number}</td>
+          <td style="font-weight:700; color:var(--admin-primary);">${safeOrderNum}</td>
           <td>
-            <div style="font-weight:700; color:#1e293b;">${o.customer_name}</div>
+            <div style="font-weight:700; color:#1e293b;">${safeName}</div>
             <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
-              ${o.customer_phone ? `📞 ${o.customer_phone}` : ''}
-              ${o.customer_email ? ` • ${o.customer_email}` : ''}
+              ${safePhone ? `📞 ${safePhone}` : ''}
+              ${safeEmail ? ` • ${safeEmail}` : ''}
             </div>
             <div style="margin-top: 4px;">
               <a href="${waUrl}" target="_blank" rel="noopener" class="btn-whatsapp" title="Send WhatsApp order update to customer">
@@ -1435,18 +1439,18 @@ async function loadAdminOrders() {
               </a>
             </div>
           </td>
-          <td>${o.created_at ? new Date(o.created_at).toLocaleDateString() : 'Today'}</td>
+          <td>${o.created_at ? escapeHtml(new Date(o.created_at).toLocaleDateString()) : 'Today'}</td>
           <td style="font-weight:700; color:#1e293b;">${formatPrice(o.total)}</td>
-          <td><span style="font-size:0.78rem; font-weight:600; color:#475569;">${o.payment_method || 'Online'}</span></td>
+          <td><span style="font-size:0.78rem; font-weight:600; color:#475569;">${escapeHtml(o.payment_method || 'Online')}</span></td>
           <td>
-            <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding:5px 8px; font-size:0.8rem; border-radius:6px; border:1px solid #cbd5e1; font-weight:700; background:#fff; cursor:pointer;">
+            <select onchange="updateOrderStatus('${escapeHtml(String(o.id))}', this.value)" style="padding:5px 8px; font-size:0.8rem; border-radius:6px; border:1px solid #cbd5e1; font-weight:700; background:#fff; cursor:pointer;">
               ${statuses.map(st => `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`).join('')}
             </select>
           </td>
           <td>
             <div style="display:flex; gap:6px;">
-              <button onclick="viewOrderModal('${o.id}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;" title="View ordered items">View</button>
-              <button onclick="openPrintOrderInvoice('${o.id}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Print Packing Slip / Branded Invoice">🖨️ Invoice</button>
+              <button onclick="viewOrderModal('${escapeHtml(String(o.id))}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;" title="View ordered items">View</button>
+              <button onclick="openPrintOrderInvoice('${escapeHtml(String(o.id))}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Print Packing Slip / Branded Invoice">🖨️ Invoice</button>
             </div>
           </td>
         </tr>

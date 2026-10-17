@@ -24,29 +24,75 @@ const storage = multer.diskStorage({
     cb(null, 'product-' + uniqueSuffix + ext);
   }
 });
-const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/svg+xml'];
-const ALLOWED_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.svg'];
+const ALLOWED_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+const ALLOWED_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
+
+// Magic Byte Signature Verification for Images
+function verifyImageMagicBytes(filePath) {
+  try {
+    const fd = fs.openSync(filePath, 'r');
+    const buffer = Buffer.alloc(16);
+    fs.readSync(fd, buffer, 0, 16, 0);
+    fs.closeSync(fd);
+
+    // JPEG: FF D8 FF
+    if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return true;
+    // PNG: 89 50 4E 47
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return true;
+    // WebP: RIFF .... WEBP
+    if (buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP') return true;
+    // AVIF: ftyp
+    if (buffer.toString('ascii', 4, 12).includes('ftyp')) return true;
+
+    return false;
+  } catch (_) {
+    return false;
+  }
+}
 
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
+    // Strictly disallow SVG and executable extensions
+    if (ext === '.svg' || file.mimetype === 'image/svg+xml') {
+      return cb(new Error('SVG uploads are prohibited for security reasons. Please upload JPEG, PNG, WebP, or AVIF.'));
+    }
     if (ALLOWED_MIMES.includes(file.mimetype) && ALLOWED_EXTS.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file format. Only JPEG, PNG, WebP, AVIF, and SVG images are permitted.'));
+      cb(new Error('Invalid file format. Only authentic JPEG, PNG, WebP, and AVIF images are permitted.'));
     }
   }
 });
 
-// Image upload endpoint
-router.post('/upload', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'No image uploaded' });
-  }
-  const relativePath = `/images/uploads/${req.file.filename}`;
-  res.json({ success: true, url: relativePath });
+// Image upload endpoint with cryptographic signature inspection
+router.post('/upload', (req, res) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'File upload rejected: Only standard static image files (JPEG, PNG, WebP, AVIF) under 5MB are permitted.'
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image uploaded' });
+    }
+
+    // Validate magic bytes to prevent renamed binaries / web shells
+    if (!verifyImageMagicBytes(req.file.path)) {
+      try { fs.unlinkSync(req.file.path); } catch (_) {}
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid file signature: file contents do not match authentic image standards.'
+      });
+    }
+
+    const relativePath = `/images/uploads/${path.basename(req.file.filename)}`;
+    res.json({ success: true, url: relativePath });
+  });
 });
 
 // Dashboard Statistics

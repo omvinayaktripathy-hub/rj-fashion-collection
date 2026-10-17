@@ -28,10 +28,13 @@ async function request(method, path, body = null, headers = {}) {
     json = JSON.parse(text);
   } catch (_) {}
 
+  const setCookieHeaders = res.headers.getSetCookie ? res.headers.getSetCookie() : [res.headers.get('set-cookie')].filter(Boolean);
+  const cookie = setCookieHeaders.map(c => c.split(';')[0]).join('; ');
+
   return {
     statusCode: res.status,
     headers: res.headers,
-    cookie: res.headers.get('set-cookie'),
+    cookie,
     json,
     text
   };

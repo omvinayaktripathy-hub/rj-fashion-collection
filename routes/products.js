@@ -253,11 +253,16 @@ router.post('/:id/reviews', (req, res) => {
     if (!user) {
       return res.status(401).json({ success: false, message: 'Please login to submit a review.' });
     }
-    if (!rating || !comment || comment.trim().length < 10) {
+    if (!rating || !comment || typeof comment !== 'string') {
       return res.status(400).json({ success: false, message: 'Rating and a comment of at least 10 characters are required.' });
     }
+    const cleanComment = comment.replace(/<[^>]*>?/gm, '').trim().slice(0, 1000);
+    if (cleanComment.length < 10) {
+      return res.status(400).json({ success: false, message: 'Rating and a comment of at least 10 characters are required.' });
+    }
+
     const ratingNum = Number(rating);
-    if (ratingNum < 1 || ratingNum > 5) {
+    if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
       return res.status(400).json({ success: false, message: 'Rating must be between 1 and 5.' });
     }
 
@@ -273,15 +278,21 @@ router.post('/:id/reviews', (req, res) => {
       return res.status(409).json({ success: false, message: 'You have already reviewed this product.' });
     }
 
-    db.prepare('INSERT INTO reviews (product_id, user_id, user_name, rating, comment) VALUES (?, ?, ?, ?, ?)').run(
-      Number(id), user.id, user.name, ratingNum, comment.trim()
-    );
+    const cleanUserName = String(user.name || 'Verified Buyer').replace(/<[^>]*>?/gm, '').trim().slice(0, 100);
 
-    // Update product average rating and reviews_count
-    const stats = db.prepare('SELECT COUNT(*) as cnt, AVG(rating) as avg FROM reviews WHERE product_id = ?').get(Number(id));
-    db.prepare('UPDATE products SET rating = ?, reviews_count = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(
-      Math.round(stats.avg * 10) / 10, stats.cnt, Number(id)
-    );
+    const submitTx = db.transaction(() => {
+      db.prepare('INSERT INTO reviews (product_id, user_id, user_name, rating, comment) VALUES (?, ?, ?, ?, ?)').run(
+        Number(id), user.id, cleanUserName, ratingNum, cleanComment
+      );
+
+      // Update product average rating and reviews_count
+      const stats = db.prepare('SELECT COUNT(*) as cnt, AVG(rating) as avg FROM reviews WHERE product_id = ?').get(Number(id));
+      db.prepare('UPDATE products SET rating = ?, reviews_count = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(
+        Math.round((stats.avg || 5) * 10) / 10, stats.cnt || 1, Number(id)
+      );
+    });
+
+    submitTx();
 
     res.status(201).json({ success: true, message: 'Review submitted successfully. Thank you!' });
   } catch (error) {

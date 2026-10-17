@@ -25,6 +25,21 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_PASS !
   transporter = nodemailer.createTransport(transportConfig);
 }
 
+function escapeEmailHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function sanitizeHeader(str) {
+  if (!str) return '';
+  return String(str).replace(/[\r\n]/g, ' ').trim();
+}
+
 // POST /api/contact - Public inquiry submission
 router.post('/', async (req, res) => {
   try {
@@ -59,25 +74,37 @@ router.post('/', async (req, res) => {
       ip
     );
 
+    const cleanName = sanitizeHeader(name);
+    const cleanEmail = sanitizeHeader(email).toLowerCase();
+    const cleanPhone = phone ? sanitizeHeader(phone) : null;
+    const cleanSubject = subject ? sanitizeHeader(subject) : 'Customer Boutique Inquiry';
+    const cleanMessage = message.trim().slice(0, 5000);
+
     // If SMTP configured, send notification email to boutique owner
     if (transporter) {
       try {
+        const safeName = escapeEmailHtml(cleanName);
+        const safeEmail = escapeEmailHtml(cleanEmail);
+        const safePhone = escapeEmailHtml(cleanPhone || 'Not provided');
+        const safeSubject = escapeEmailHtml(cleanSubject);
+        const safeMessage = escapeEmailHtml(cleanMessage).replace(/\n/g, '<br>');
+
         await transporter.sendMail({
           from: `"RJ Fashion Concierge" <${process.env.EMAIL_USER}>`,
           to: process.env.ADMIN_NOTIFY_EMAIL || 'rjfashioncollection@gmail.com',
-          replyTo: email.trim(),
-          subject: `✨ New Inquiry from ${name.trim()} - RJ Fashion Collection`,
+          replyTo: cleanEmail,
+          subject: `✨ New Inquiry from ${cleanName.slice(0, 50)} - RJ Fashion Collection`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
               <h2 style="color: #72132A; margin-top: 0;">👑 New Customer Inquiry</h2>
-              <p><strong>Name:</strong> ${name.trim()}</p>
-              <p><strong>Email:</strong> <a href="mailto:${email.trim()}">${email.trim()}</a></p>
-              <p><strong>Phone:</strong> ${phone ? phone.trim() : 'Not provided'}</p>
-              <p><strong>Subject:</strong> ${subject ? subject.trim() : 'General Inquiry'}</p>
+              <p><strong>Name:</strong> ${safeName}</p>
+              <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+              <p><strong>Phone:</strong> ${safePhone}</p>
+              <p><strong>Subject:</strong> ${safeSubject}</p>
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
               <p><strong>Message:</strong></p>
               <div style="background: #f8fafc; padding: 14px; border-radius: 6px; font-style: italic;">
-                ${message.trim().replace(/\n/g, '<br>')}
+                ${safeMessage}
               </div>
             </div>
           `

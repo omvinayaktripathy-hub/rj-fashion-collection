@@ -11,12 +11,79 @@ try {
 
 const API_BASE = '/api';
 
+// HTML Escape Sanitizer (Defensive against XSS)
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+window.escapeHtml = escapeHtml;
+
+// CSRF Token Helper & Fetch Interceptor
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+  return null;
+}
+
+let cachedCsrfToken = null;
+async function getCsrfToken() {
+  const cookieVal = getCookie('XSRF-TOKEN');
+  if (cookieVal) return cookieVal;
+  if (cachedCsrfToken) return cachedCsrfToken;
+  try {
+    const res = await originalFetch('/api/csrf-token');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.csrfToken) {
+        cachedCsrfToken = data.csrfToken;
+        return cachedCsrfToken;
+      }
+    }
+  } catch (_) {}
+  return '';
+}
+
+const originalFetch = window.fetch;
+window.fetch = async function(resource, init) {
+  init = init || {};
+  const method = (init.method || 'GET').toUpperCase();
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+    const token = await getCsrfToken();
+    if (token) {
+      if (init.headers instanceof Headers) {
+        if (!init.headers.has('X-CSRF-Token')) {
+          init.headers.set('X-CSRF-Token', token);
+        }
+      } else if (Array.isArray(init.headers)) {
+        if (!init.headers.some(([k]) => k.toLowerCase() === 'x-csrf-token')) {
+          init.headers.push(['X-CSRF-Token', token]);
+        }
+      } else {
+        init.headers = init.headers || {};
+        if (!init.headers['X-CSRF-Token'] && !init.headers['x-csrf-token']) {
+          init.headers['X-CSRF-Token'] = token;
+        }
+      }
+    }
+    if (!init.credentials) {
+      init.credentials = 'same-origin';
+    }
+  }
+  return originalFetch(resource, init);
+};
+
 // Currency Formatter
 function formatPrice(amount) {
   return '₹' + Number(amount || 0).toLocaleString('en-IN');
 }
 
-// Toast Notification
+// Toast Notification (XSS-safe textContent)
 function showToast(message, type = 'info') {
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -27,7 +94,9 @@ function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.innerHTML = `<span>${message}</span>`;
+  const span = document.createElement('span');
+  span.textContent = String(message || '');
+  toast.appendChild(span);
 
   container.appendChild(toast);
 
@@ -70,10 +139,11 @@ function renderAuthNav(user) {
   const accountNavContainers = document.querySelectorAll('.auth-nav-slot');
   accountNavContainers.forEach(container => {
     if (user) {
+      const safeFirstName = escapeHtml((user.name || '').split(' ')[0] || 'User');
       container.innerHTML = `
         <div class="user-dropdown-wrap" style="position: relative; display: inline-block;">
           <a href="/account.html" class="action-btn" title="My Account">
-            <span>👤 ${user.name.split(' ')[0]}</span>
+            <span>👤 ${safeFirstName}</span>
           </a>
         </div>
       `;

@@ -16,6 +16,21 @@ const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA foreign_keys = ON;');
 db.exec('PRAGMA journal_mode = WAL;');
 
+// Atomic Transaction helper for node:sqlite
+db.transaction = function(fn) {
+  return function(...args) {
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      const result = fn(...args);
+      db.exec('COMMIT');
+      return result;
+    } catch (err) {
+      try { db.exec('ROLLBACK'); } catch (_) {}
+      throw err;
+    }
+  };
+};
+
 function initSchema() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -222,12 +237,33 @@ function initSchema() {
     db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_stripe_session ON orders (stripe_session_id)`);
     db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_payment_intent ON orders (payment_intent_id)`);
   } catch (_) {}
+
+  // Migrations for MFA and Password Reset in users table
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN mfa_enabled INTEGER DEFAULT 0`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN mfa_secret TEXT DEFAULT NULL`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN mfa_recovery_codes TEXT DEFAULT NULL`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN password_reset_token TEXT DEFAULT NULL`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN password_reset_expires TEXT DEFAULT NULL`);
+  } catch (_) {}
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users (password_reset_token)`);
+  } catch (_) {}
 }
 
 function seedInitialData() {
   const usersCount = db.prepare('SELECT COUNT(*) as count FROM users').get().count;
   if (usersCount === 0) {
-    const adminHash = bcrypt.hashSync('OMvinayak@01092003', 10);
+    const defaultAdminPass = process.env.ADMIN_INITIAL_PASSWORD || 'OMvinayak@01092003';
+    const adminHash = bcrypt.hashSync(defaultAdminPass, 10);
     const customerHash = bcrypt.hashSync('Customer@123', 10);
 
     const insertUser = db.prepare(`
@@ -235,7 +271,8 @@ function seedInitialData() {
       VALUES (?, ?, ?, ?, ?)
     `);
 
-    insertUser.run('RJ Fashion Admin (Om Vinayak)', 'omvinayakwork@gmail.com', '7894093586', adminHash, 'admin');
+    const adminEmail = process.env.ADMIN_EMAIL || 'omvinayakwork@gmail.com';
+    insertUser.run('RJ Fashion Admin (Om Vinayak)', adminEmail, '7894093586', adminHash, 'admin');
     insertUser.run('Priya Sharma', 'priya@example.com', '+91 98765 12345', customerHash, 'customer');
     console.log('Seeded default Admin and Demo Customer accounts.');
   }

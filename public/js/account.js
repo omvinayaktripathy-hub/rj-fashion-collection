@@ -101,10 +101,10 @@ async function loadAccountAddresses() {
       container.innerHTML = data.addresses.map(addr => `
         <div style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start;">
           <div>
-            <div style="font-weight: 700;">${addr.full_name} <span style="font-weight: 500; font-size: 0.85rem; color: var(--muted); margin-left: 8px;">${addr.phone}</span></div>
-            <div style="font-size: 0.88rem; color: #4b5563; margin-top: 4px;">${addr.house_flat}, ${addr.street}, ${addr.city}, ${addr.state} - ${addr.pin_code}</div>
+            <div style="font-weight: 700;">${escapeHtml(addr.full_name)} <span style="font-weight: 500; font-size: 0.85rem; color: var(--muted); margin-left: 8px;">${escapeHtml(addr.phone)}</span></div>
+            <div style="font-size: 0.88rem; color: #4b5563; margin-top: 4px;">${escapeHtml(addr.house_flat)}, ${escapeHtml(addr.street)}, ${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pin_code)}</div>
           </div>
-          <button onclick="deleteAccountAddress(${addr.id})" style="color: var(--danger); font-size: 0.82rem; font-weight: 600; cursor: pointer;">
+          <button onclick="deleteAccountAddress(${Number(addr.id)})" style="color: var(--danger); font-size: 0.82rem; font-weight: 600; cursor: pointer;">
             Delete
           </button>
         </div>

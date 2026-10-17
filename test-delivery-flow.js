@@ -27,7 +27,7 @@ async function testDelivery() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: 'Delivery Test User', email: testEmail, password: 'Password@123', confirmPassword: 'Password@123', phone: '9876543210' })
   });
-  const regCookie = regRes.headers.get('set-cookie');
+  const regCookie = (regRes.headers.getSetCookie ? regRes.headers.getSetCookie() : [regRes.headers.get('set-cookie')]).map(c => c.split(';')[0]).join('; ');
   const regData = await regRes.json();
   assert(regData.success, 'Registration must succeed');
 

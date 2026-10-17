@@ -587,12 +587,12 @@ function renderProduct(p) {
             ${(p.reviews && p.reviews.length > 0) ? p.reviews.map(r => `
               <div class="fk-review-card">
                 <div class="fk-review-top">
-                  <span class="fk-star-pill sm">${r.rating || 5} ★</span>
-                  <span class="fk-review-user">${r.user_name || 'Verified Buyer'}</span>
+                  <span class="fk-star-pill sm">${Number(r.rating) || 5} ★</span>
+                  <span class="fk-review-user">${escapeHtml(r.user_name || 'Verified Buyer')}</span>
                   <span class="fk-verified-tag">✔ Certified Buyer</span>
                 </div>
-                <p class="fk-review-comment">${r.comment || 'The quality, zari finish, and color vibrancy exceeded my expectations. Truly royal!'}</p>
-                <div class="fk-review-date">Reviewed in India • ${r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN') : 'Recent purchase'}</div>
+                <p class="fk-review-comment">${escapeHtml(r.comment || 'The quality, zari finish, and color vibrancy exceeded my expectations. Truly royal!')}</p>
+                <div class="fk-review-date">Reviewed in India • ${r.created_at ? escapeHtml(new Date(r.created_at).toLocaleDateString('en-IN')) : 'Recent purchase'}</div>
               </div>
             `).join('') : `
               <div class="fk-review-card">
