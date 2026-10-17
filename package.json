@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node test-e2e.js && node test-delivery-flow.js && node test-full-checkout.js"
+    "test": "node test-e2e.js && node test-delivery-flow.js && node test-full-checkout.js && node test-lightbox-gallery.js"
   },
   "keywords": [
     "ecommerce",

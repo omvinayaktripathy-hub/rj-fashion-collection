@@ -210,18 +210,72 @@
       color: #dc2626 !important;
     }
 
-    /* Thumbnails */
+    /* Clothing Angles Switcher */
+    .fk-angle-switcher-row {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .fk-angle-row-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .fk-angle-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .fk-angle-chip {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-card);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .fk-angle-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .fk-angle-chip.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(184, 134, 11, 0.35);
+    }
+    .fk-angle-chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Thumbnails with Angle Badges */
     .fk-thumbnails-strip {
       display: flex;
       gap: 10px;
-      margin-top: 14px;
+      margin-top: 10px;
       overflow-x: auto;
       padding-bottom: 4px;
       scrollbar-width: thin;
     }
     .fk-thumb-card {
-      width: 72px;
-      height: 86px;
+      width: 76px;
+      height: 94px;
       border-radius: 8px;
       border: 2px solid var(--border);
       overflow: hidden;
@@ -229,17 +283,41 @@
       flex-shrink: 0;
       background: var(--bg-card);
       transition: all 0.2s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
     }
     .fk-thumb-card img {
       width: 100%;
-      height: 100%;
+      height: 72px;
       object-fit: cover;
+      display: block;
     }
-    .fk-thumb-card.active,
-    .fk-thumb-card:hover {
+    .fk-thumb-angle-tag {
+      height: 20px;
+      line-height: 20px;
+      background: rgba(15, 23, 42, 0.88);
+      color: #f8fafc;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.2s, color 0.2s;
+    }
+    .fk-thumb-card.active {
       border-color: var(--primary);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      box-shadow: 0 4px 14px rgba(184, 134, 11, 0.25);
+    }
+    .fk-thumb-card.active .fk-thumb-angle-tag {
+      background: var(--primary);
+      color: #ffffff;
+    }
+    .fk-thumb-card:hover:not(.active) {
+      border-color: var(--primary);
+      transform: translateY(-1px);
     }
 
     /* Flipkart Dual CTA Buttons */
@@ -1047,6 +1125,315 @@
         padding-bottom: 70px;
       }
     }
+
+    /* LUXURY FULLSCREEN LIGHTBOX MODAL STYLES */
+    .rjfc-lightbox-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      touch-action: pan-y;
+    }
+    .rjfc-lightbox-modal.active {
+      display: flex;
+      opacity: 1;
+    }
+    body.lightbox-open {
+      overflow: hidden !important;
+    }
+    .rjfc-lightbox-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 8, 12, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .rjfc-lightbox-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px 24px;
+      box-sizing: border-box;
+      pointer-events: auto;
+    }
+    .rjfc-lightbox-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    .rjfc-lightbox-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+    .rjfc-lightbox-title {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 480px;
+    }
+    .rjfc-lightbox-angle-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(184, 134, 11, 0.25);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+    .rjfc-lightbox-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .rjfc-lightbox-counter {
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 0 6px;
+    }
+    .rjfc-lightbox-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .rjfc-lightbox-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: #ffffff;
+    }
+    .rjfc-lightbox-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+    .rjfc-close-btn {
+      padding: 8px 12px;
+      background: rgba(220, 38, 38, 0.25);
+      border-color: rgba(220, 38, 38, 0.5);
+      color: #fca5a5;
+    }
+    .rjfc-close-btn:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+      color: #ffffff;
+    }
+
+    /* Lightbox Stage */
+    .rjfc-lightbox-stage {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+      min-height: 0;
+      user-select: none;
+    }
+    .rjfc-lightbox-viewport {
+      width: 100%;
+      height: 100%;
+      max-height: 68vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+    .rjfc-lightbox-viewport.zoomed {
+      cursor: zoom-out;
+      overflow: auto;
+    }
+    .rjfc-lightbox-img {
+      max-width: 90vw;
+      max-height: 68vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .rjfc-lightbox-viewport.zoomed .rjfc-lightbox-img {
+      transform: scale(1.85);
+      max-height: none;
+      max-width: none;
+    }
+    .rjfc-nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .rjfc-nav-arrow:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-50%) scale(1.08);
+    }
+    .rjfc-prev-arrow {
+      left: 16px;
+    }
+    .rjfc-next-arrow {
+      right: 16px;
+    }
+
+    /* Lightbox Footer & Filmstrip */
+    .rjfc-lightbox-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    .rjfc-angle-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .rjfc-angle-pill-btn {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.08);
+      color: #f1f5f9;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rjfc-angle-pill-btn:hover {
+      background: rgba(255,255,255,0.18);
+      border-color: #ffffff;
+    }
+    .rjfc-angle-pill-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(184, 134, 11, 0.4);
+    }
+    .rjfc-lightbox-filmstrip {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      max-width: 100%;
+      padding: 4px 6px;
+    }
+    .rjfc-lightbox-thumb {
+      width: 58px;
+      height: 72px;
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,0.25);
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+      opacity: 0.65;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .rjfc-lightbox-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .rjfc-lightbox-thumb:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    .rjfc-lightbox-thumb.active {
+      opacity: 1;
+      border-color: #fbbf24;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .rjfc-lightbox-content {
+        padding: 10px;
+      }
+      .rjfc-lightbox-title {
+        max-width: 160px;
+        font-size: 0.95rem;
+      }
+      .rjfc-lightbox-angle-badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+      }
+      .rjfc-nav-arrow {
+        width: 40px;
+        height: 40px;
+      }
+      .rjfc-prev-arrow { left: 6px; }
+      .rjfc-next-arrow { right: 6px; }
+      .rjfc-lightbox-viewport {
+        max-height: 56vh;
+      }
+      .rjfc-lightbox-img {
+        max-height: 56vh;
+        max-width: 95vw;
+      }
+      .rjfc-btn-label {
+        display: none;
+      }
+      .fk-expand-pill {
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        bottom: 10px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1440,6 +1827,52 @@
     </section>
   </main>
 
+
+  <!-- RJFC LUXURY MULTI-ANGLE PRODUCT LIGHTBOX MODAL -->
+  <div id="rjfc-lightbox-modal" class="rjfc-lightbox-modal" aria-hidden="true" role="dialog" aria-label="Product Image Gallery">
+    <div class="rjfc-lightbox-backdrop" onclick="closeProductLightbox()"></div>
+    <div class="rjfc-lightbox-content">
+      <!-- Header -->
+      <div class="rjfc-lightbox-header">
+        <div class="rjfc-lightbox-title-area">
+          <h3 id="rjfc-lightbox-title" class="rjfc-lightbox-title">Product View</h3>
+          <div class="rjfc-lightbox-angle-badge" id="rjfc-lightbox-angle-badge">âœ¦ Front View</div>
+        </div>
+        <div class="rjfc-lightbox-controls">
+          <span class="rjfc-lightbox-counter" id="rjfc-lightbox-counter">1 / 1</span>
+          <button type="button" class="rjfc-lightbox-btn" id="rjfc-zoom-toggle-btn" onclick="toggleLightboxZoom()" title="Zoom In / Out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            <span class="rjfc-btn-label">Zoom</span>
+          </button>
+          <button type="button" class="rjfc-lightbox-btn rjfc-close-btn" onclick="closeProductLightbox()" title="Close (Esc)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Stage with Navigation Arrows -->
+      <div class="rjfc-lightbox-stage" id="rjfc-lightbox-stage">
+        <button type="button" class="rjfc-nav-arrow rjfc-prev-arrow" onclick="lightboxPrev()" aria-label="Previous side (Arrow Left)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+
+        <div class="rjfc-lightbox-viewport" id="rjfc-lightbox-viewport" onclick="toggleLightboxZoom()">
+          <img id="rjfc-lightbox-main-img" src="" alt="Enlarged clothing side preview" class="rjfc-lightbox-img">
+        </div>
+
+        <button type="button" class="rjfc-nav-arrow rjfc-next-arrow" onclick="lightboxNext()" aria-label="Next side (Arrow Right)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+
+      <!-- Footer Filmstrip & Angle Buttons -->
+      <div class="rjfc-lightbox-footer">
+        <div class="rjfc-angle-pills" id="rjfc-lightbox-pills"></div>
+        <div class="rjfc-lightbox-filmstrip" id="rjfc-lightbox-filmstrip"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Site Footer -->
   <footer class="site-footer">
     <div class="container footer-top">
@@ -1451,7 +1884,7 @@
             <p style="margin-bottom: 4px;">?? <strong>Store Address:</strong> RJ FASHION COLLECTION, ODISHA, Jharsuguda, Sarbhal, Zipcode - 768201</p>
             <p style="margin-bottom: 4px;">?? <strong>Phone:</strong> <a href="tel:+917894093586" style="color: #e2e8f0; font-weight: 600; text-decoration: none;">+91 7894093586</a></p>
             <p style="margin-bottom: 4px;">?? <strong>Email:</strong> <a href="mailto:rjfashioncollection@gmail.com" style="color: #e2e8f0; text-decoration: none;">rjfashioncollection@gmail.com</a></p>
-            <p style="margin-bottom: 0;">?? <strong>Available:</strong> Mon to Sat (10:00 AM – 5:00 PM)</p>
+            <p style="margin-bottom: 0;">?? <strong>Available:</strong> Mon to Sat (10:00 AM ï¿½ 5:00 PM)</p>
           </div>
         </div>
         <div class="footer-col">
@@ -1485,8 +1918,8 @@
       </div>
     </div>
     <div class="container footer-bottom">
-      <div>© 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
-      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
+      <div>ï¿½ 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
+      <div style="color: #64748b;">100% Secure Checkout ï¿½ Authentic Products</div>
     </div>
   </footer>
 
@@ -1523,7 +1956,7 @@
   <script src="/firebase-config.js?v=20260927"></script>
   <script src="/js/app.js?v=20261017-03"></script>
   <script src="/js/products.js?v=20261017-02"></script>
-  <script src="/js/product-detail.js?v=20260927-9"></script>
+  <script src="/js/product-detail.js?v=20261017-angles-01"></script>
 
   <!-- Floating WhatsApp VIP Concierge Button -->
   <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20your%20luxury%20collection." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="Chat on WhatsApp with RJ Fashion Concierge">

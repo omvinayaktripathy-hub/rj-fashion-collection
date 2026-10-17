@@ -6,6 +6,21 @@ let selectedSize = 'Free Size';
 let selectedColor = '';
 let currentQty = 1;
 let currentMainImage = '';
+let currentGalleryImages = [];
+let currentGalleryIndex = 0;
+let isLightboxZoomed = false;
+
+const ANGLE_CONFIG = [
+  { short: 'Front', label: 'Front Drape & View' },
+  { short: 'Back', label: 'Back View & Blouse Design' },
+  { short: 'Side', label: 'Side Silhouette & Flare' },
+  { short: 'Detail', label: 'Fabric & Work Close-up' },
+  { short: 'Extra', label: 'Alternative Angle' }
+];
+
+function getAngleInfo(index) {
+  return ANGLE_CONFIG[index] || { short: `Angle ${index + 1}`, label: `View ${index + 1}` };
+}
 
 // Extract Product ID from URL parameters or path
 function getProductId() {
@@ -187,6 +202,8 @@ function renderProduct(p) {
       if (img && !allImages.includes(img)) allImages.push(img);
     });
   }
+  currentGalleryImages = allImages;
+  currentGalleryIndex = 0;
   currentMainImage = allImages[0];
 
   // Wishlist state check
@@ -210,14 +227,14 @@ function renderProduct(p) {
       <div class="fk-gallery-wrapper">
         <div class="fk-gallery-sticky">
           <!-- Main Hero Image Box -->
-          <div class="fk-main-image-container" id="main-image-zoom-box">
+          <div class="fk-main-image-container" id="main-image-zoom-box" onclick="openProductLightbox(currentGalleryIndex)" role="button" tabindex="0" title="Click to view large & see all sides of clothing">
             <img id="main-product-img" src="${currentMainImage}" alt="${p.name}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'">
             
             <!-- Badges -->
             ${p.discount > 0 ? `<div class="fk-discount-ribbon">↓ ${p.discount}% OFF</div>` : ''}
             
             <!-- Floating Heart / Wishlist & Share buttons -->
-            <div class="fk-img-floating-actions">
+            <div class="fk-img-floating-actions" onclick="event.stopPropagation()">
               <button class="fk-float-btn fk-wishlist-toggle ${isWishlisted ? 'active' : ''}" onclick="toggleDetailWishlist(${p.id}, this)" title="Add to Wishlist" id="fk-wishlist-btn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="${isWishlisted ? '#dc2626' : 'none'}" stroke="${isWishlisted ? '#dc2626' : 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -233,16 +250,44 @@ function renderProduct(p) {
                 </svg>
               </button>
             </div>
+
+            <!-- View Big & Change Side Pill -->
+            <div class="fk-expand-pill">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+              <span>Click image to view large & all angles (${allImages.length} views)</span>
+            </div>
           </div>
 
-          <!-- Thumbnails Strip -->
+          <!-- Multi-Angle View Selector & Thumbnails Strip -->
           ${allImages.length > 1 ? `
+            <div class="fk-angle-switcher-row">
+              <div class="fk-angle-row-header">
+                <span>Clothing Views & Angles</span>
+                <span style="color: var(--primary); cursor: pointer;" onclick="openProductLightbox(currentGalleryIndex)">🔍 View Fullscreen</span>
+              </div>
+              <div class="fk-angle-chips">
+                ${allImages.map((img, idx) => {
+                  const info = getAngleInfo(idx);
+                  return `
+                    <button type="button" class="fk-angle-chip ${idx === 0 ? 'active' : ''}" onclick="switchClothingAngle(${idx})" title="View ${info.label}">
+                      <span class="fk-angle-chip-dot"></span>
+                      ${info.short} View
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
             <div class="fk-thumbnails-strip">
-              ${allImages.map((img, idx) => `
-                <div class="fk-thumb-card ${idx === 0 ? 'active' : ''}" onclick="switchMainImage('${img}', this)">
-                  <img src="${img}" alt="${p.name} preview ${idx + 1}" loading="lazy">
-                </div>
-              `).join('')}
+              ${allImages.map((img, idx) => {
+                const info = getAngleInfo(idx);
+                return `
+                  <div class="fk-thumb-card ${idx === 0 ? 'active' : ''}" onclick="switchClothingAngle(${idx})" title="Switch to ${info.label}">
+                    <img src="${img}" alt="${p.name} ${info.short} side" loading="lazy">
+                    <span class="fk-thumb-angle-tag">${info.short}</span>
+                  </div>
+                `;
+              }).join('')}
             </div>
           ` : ''}
 
@@ -639,23 +684,256 @@ function renderProduct(p) {
 }
 
 // Switch main hero image
-function switchMainImage(url, thumbCard) {
-  currentMainImage = url;
+
+// Switch Clothing View Angle (Front, Back, Side, Detail)
+function switchClothingAngle(index) {
+  if (!currentGalleryImages || !currentGalleryImages[index]) return;
+  currentGalleryIndex = index;
+  currentMainImage = currentGalleryImages[index];
+
   const mainImg = document.getElementById('main-product-img');
   if (mainImg) {
-    mainImg.style.opacity = '0.5';
-    mainImg.src = url;
+    mainImg.style.opacity = '0.4';
+    mainImg.src = currentMainImage;
     setTimeout(() => {
       mainImg.style.opacity = '1';
-    }, 150);
+    }, 120);
   }
 
-  // Update active thumb ring
-  document.querySelectorAll('.fk-thumb-card').forEach(c => c.classList.remove('active'));
-  if (thumbCard) {
-    thumbCard.classList.add('active');
+  // Update active state on angle chips
+  const angleChips = document.querySelectorAll('.fk-angle-chip');
+  angleChips.forEach((chip, i) => {
+    chip.classList.toggle('active', i === index);
+  });
+
+  // Update active state on thumbnails
+  const thumbCards = document.querySelectorAll('.fk-thumb-card');
+  thumbCards.forEach((card, i) => {
+    card.classList.toggle('active', i === index);
+  });
+
+  // If lightbox is currently open, sync it immediately
+  const modal = document.getElementById('rjfc-lightbox-modal');
+  if (modal && modal.classList.contains('active')) {
+    updateLightboxUI();
   }
 }
+
+// Backward-compatible switchMainImage
+function switchMainImage(url, thumbCard) {
+  const idx = currentGalleryImages.indexOf(url);
+  if (idx !== -1) {
+    switchClothingAngle(idx);
+  } else {
+    currentMainImage = url;
+    const mainImg = document.getElementById('main-product-img');
+    if (mainImg) mainImg.src = url;
+  }
+}
+
+// Open Fullscreen Luxury Lightbox
+function openProductLightbox(startIndex) {
+  if (!currentGalleryImages || currentGalleryImages.length === 0) {
+    if (currentMainImage) currentGalleryImages = [currentMainImage];
+    else return;
+  }
+
+  currentGalleryIndex = (typeof startIndex === 'number' && startIndex >= 0 && startIndex < currentGalleryImages.length)
+    ? startIndex
+    : 0;
+  isLightboxZoomed = false;
+
+  const modal = document.getElementById('rjfc-lightbox-modal');
+  if (!modal) return;
+
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('lightbox-open');
+
+  // Render bottom angle pills
+  const pillsContainer = document.getElementById('rjfc-lightbox-pills');
+  if (pillsContainer) {
+    pillsContainer.innerHTML = currentGalleryImages.map((img, idx) => {
+      const info = getAngleInfo(idx);
+      return `
+        <button type="button" class="rjfc-angle-pill-btn ${idx === currentGalleryIndex ? 'active' : ''}" onclick="switchClothingAngle(${idx})">
+          <span>✦</span>
+          <span>${info.label}</span>
+        </button>
+      `;
+    }).join('');
+  }
+
+  // Render bottom filmstrip
+  const filmstrip = document.getElementById('rjfc-lightbox-filmstrip');
+  if (filmstrip) {
+    filmstrip.innerHTML = currentGalleryImages.map((img, idx) => {
+      const info = getAngleInfo(idx);
+      return `
+        <div class="rjfc-lightbox-thumb ${idx === currentGalleryIndex ? 'active' : ''}" onclick="switchClothingAngle(${idx})" title="View ${info.label}">
+          <img src="${img}" alt="${info.label}">
+        </div>
+      `;
+    }).join('');
+  }
+
+  updateLightboxUI();
+}
+
+// Close Lightbox
+function closeProductLightbox() {
+  const modal = document.getElementById('rjfc-lightbox-modal');
+  if (!modal) return;
+
+  modal.classList.remove('active');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('lightbox-open');
+
+  // Reset zoom
+  isLightboxZoomed = false;
+  const viewport = document.getElementById('rjfc-lightbox-viewport');
+  if (viewport) viewport.classList.remove('zoomed');
+
+  // Sync main page view with whatever side was active when closed
+  switchClothingAngle(currentGalleryIndex);
+}
+
+// Next Side
+function lightboxNext() {
+  if (!currentGalleryImages || currentGalleryImages.length <= 1) return;
+  isLightboxZoomed = false;
+  const nextIdx = (currentGalleryIndex + 1) % currentGalleryImages.length;
+  switchClothingAngle(nextIdx);
+}
+
+// Previous Side
+function lightboxPrev() {
+  if (!currentGalleryImages || currentGalleryImages.length <= 1) return;
+  isLightboxZoomed = false;
+  const prevIdx = (currentGalleryIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+  switchClothingAngle(prevIdx);
+}
+
+// Toggle Zoom in Lightbox
+function toggleLightboxZoom() {
+  isLightboxZoomed = !isLightboxZoomed;
+  const viewport = document.getElementById('rjfc-lightbox-viewport');
+  const btn = document.getElementById('rjfc-zoom-toggle-btn');
+
+  if (viewport) {
+    viewport.classList.toggle('zoomed', isLightboxZoomed);
+  }
+  if (btn) {
+    btn.classList.toggle('active', isLightboxZoomed);
+    const label = btn.querySelector('.rjfc-btn-label');
+    if (label) label.textContent = isLightboxZoomed ? 'Reset' : 'Zoom';
+  }
+}
+
+// Update Lightbox UI elements
+function updateLightboxUI() {
+  const imgEl = document.getElementById('rjfc-lightbox-main-img');
+  const counterEl = document.getElementById('rjfc-lightbox-counter');
+  const angleBadge = document.getElementById('rjfc-lightbox-angle-badge');
+  const titleEl = document.getElementById('rjfc-lightbox-title');
+  const viewport = document.getElementById('rjfc-lightbox-viewport');
+  const zoomBtn = document.getElementById('rjfc-zoom-toggle-btn');
+
+  const src = currentGalleryImages[currentGalleryIndex] || currentMainImage;
+  const info = getAngleInfo(currentGalleryIndex);
+
+  if (imgEl && src) {
+    imgEl.src = src;
+    imgEl.alt = (currentProduct ? currentProduct.name : 'Clothing') + ' - ' + info.label;
+  }
+
+  if (counterEl) {
+    counterEl.textContent = `${currentGalleryIndex + 1} / ${currentGalleryImages.length}`;
+  }
+
+  if (angleBadge) {
+    angleBadge.textContent = '✦ ' + info.label;
+  }
+
+  if (titleEl && currentProduct) {
+    titleEl.textContent = currentProduct.name;
+  }
+
+  // Reset zoom on slide change
+  if (viewport) viewport.classList.remove('zoomed');
+  if (zoomBtn) {
+    zoomBtn.classList.remove('active');
+    const label = zoomBtn.querySelector('.rjfc-btn-label');
+    if (label) label.textContent = 'Zoom';
+  }
+  isLightboxZoomed = false;
+
+  // Update pills
+  const pillBtns = document.querySelectorAll('.rjfc-angle-pill-btn');
+  pillBtns.forEach((btn, i) => {
+    btn.classList.toggle('active', i === currentGalleryIndex);
+  });
+
+  // Update filmstrip
+  const thumbs = document.querySelectorAll('.rjfc-lightbox-thumb');
+  thumbs.forEach((th, i) => {
+    th.classList.toggle('active', i === currentGalleryIndex);
+    if (i === currentGalleryIndex) {
+      th.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  });
+}
+
+// Global Keyboard Navigation & Swipe Handlers
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('rjfc-lightbox-modal');
+  if (!modal || !modal.classList.contains('active')) return;
+
+  if (e.key === 'Escape') {
+    closeProductLightbox();
+  } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    lightboxNext();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    lightboxPrev();
+  }
+});
+
+// Mobile Touch Swipe Handling on Lightbox
+(function initLightboxSwipe() {
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    const modal = document.getElementById('rjfc-lightbox-modal');
+    if (!modal || !modal.classList.contains('active') || isLightboxZoomed) return;
+    const touch = e.changedTouches[0];
+    touchStartX = touch.screenX;
+    touchStartY = touch.screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const modal = document.getElementById('rjfc-lightbox-modal');
+    if (!modal || !modal.classList.contains('active') || isLightboxZoomed) return;
+    const touch = e.changedTouches[0];
+    touchEndX = touch.screenX;
+    touchEndY = touch.screenY;
+
+    const diffX = touchEndX - touchStartX;
+    const diffY = touchEndY - touchStartY;
+
+    // Minimum swipe threshold 45px and mostly horizontal
+    if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX < 0) {
+        lightboxNext();
+      } else {
+        lightboxPrev();
+      }
+    }
+  }, { passive: true });
+})();
+
 
 // Select size chip
 function selectSize(size, chip) {
