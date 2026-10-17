@@ -108,7 +108,8 @@ async function runTests() {
     const searchRes = await request('GET', '/api/products?search=saree');
     assert(searchRes.json.products.length > 0, 'Database search for "saree" finds matching products');
 
-    const singleProdId = prodsRes.json.products[0].id;
+    const testProd = prodsRes.json.products.find(p => p.stock >= 2) || prodsRes.json.products[0];
+    const singleProdId = testProd.id;
     const detailRes = await request('GET', `/api/products/${singleProdId}`);
     assert(detailRes.statusCode === 200 && detailRes.json.product.name, `Product detail API works for ID #${singleProdId} (${detailRes.json.product.name})`);
 
