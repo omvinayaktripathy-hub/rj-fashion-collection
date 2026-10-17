@@ -210,6 +210,18 @@ function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_audit_created ON admin_audit_logs (created_at);
     CREATE INDEX IF NOT EXISTS idx_audit_action ON admin_audit_logs (action);
   `);
+
+  // Migrations for orders table payment identifiers
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN stripe_session_id TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN payment_intent_id TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_stripe_session ON orders (stripe_session_id)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_payment_intent ON orders (payment_intent_id)`);
+  } catch (_) {}
 }
 
 function seedInitialData() {

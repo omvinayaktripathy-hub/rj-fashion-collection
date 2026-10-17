@@ -1,8 +1,10 @@
 // RJ FASHION COLLECTION - Unified Payment Routes (Stripe, Razorpay, UPI)
+// Server-side authoritative pricing and webhook-driven fulfillment
 const express = require('express');
 const router = express.Router();
 const db = require('../database/db');
 const { requireAuth } = require('../middleware/auth');
+const { calculateServerPricing } = require('../services/pricing');
 const { createRazorpayOrder, verifyPaymentSignature, RAZORPAY_ENABLED } = require('../services/payment');
 const {
   createStripeCheckoutSession,
@@ -52,7 +54,7 @@ router.get('/config', (req, res) => {
 });
 
 // ===================================================================
-// STRIPE CHECKOUT INTEGRATION
+// STRIPE CHECKOUT INTEGRATION (SERVER-SIDE PRICING & TRUSTED WEBHOOK)
 // ===================================================================
 
 // GET /api/payment/stripe/config
@@ -65,12 +67,13 @@ router.get('/stripe/config', (req, res) => {
 });
 
 // POST /api/payment/stripe/create-checkout-session
+// Authoritative server-side pricing: client prices and discounts are discarded
 router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => {
   try {
     const userId = req.session.user.id;
     const { addressId, address_id, coupon, couponCode, notes = '' } = req.body;
 
-    // 1. Get cart items
+    // 1. Get cart items from DB
     const cartItems = db.prepare(`
       SELECT ci.*, p.name, p.price, p.stock, p.image
       FROM cart_items ci
@@ -92,7 +95,7 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       }
     }
 
-    // 3. Resolve address
+    // 3. Resolve delivery address
     let deliveryAddress = '';
     let customerName = req.body.customer_name || req.session.user.name;
     let customerPhone = req.body.customer_phone || req.session.user.phone || '';
@@ -127,19 +130,13 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       return res.status(400).json({ success: false, message: 'Please select a delivery address before checkout.' });
     }
 
-    // 4. Calculate totals
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = subtotal > 999 ? 0 : 49;
-    const code = (coupon || couponCode || '').trim().toUpperCase();
-    let discount = 0;
-    if (code === 'ROYAL10' || code === 'FESTIVE10' || code === 'RJFESTIVE') {
-      discount = Math.round(subtotal * 0.10);
-    } else if (code === 'WELCOME500' && subtotal >= 2999) {
-      discount = 500;
-    } else if (Number(req.body.discount) > 0) {
-      discount = Math.min(Number(req.body.discount), subtotal);
-    }
-    const total = Math.max(0, subtotal + shipping - discount);
+    // 4. Calculate authoritative server-side pricing
+    const pricing = calculateServerPricing(cartItems, coupon || couponCode);
+    const subtotal = pricing.subtotal;
+    const shipping = pricing.shipping;
+    const discount = pricing.discount;
+    const total = pricing.total;
+    const appliedCoupon = pricing.couponCode;
 
     // 5. Create pending order record in database
     const orderNumber = generateOrderNumber();
@@ -199,7 +196,7 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
     const successUrl = `${origin}/checkout.html`;
     const cancelUrl = `${origin}/checkout.html`;
 
-    // 9. Call Stripe Checkout Session generator
+    // 9. Call Stripe Checkout Session generator with verified server prices
     const sessionResult = await createStripeCheckoutSession({
       cartItems,
       customerEmail: req.session.user.email,
@@ -207,6 +204,7 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       orderId,
       subtotal,
       discount,
+      couponCode: appliedCoupon,
       shipping,
       total,
       successUrl,
@@ -217,13 +215,26 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       }
     });
 
+    // Record session ID in order
+    if (sessionResult.sessionId) {
+      try {
+        db.prepare('UPDATE orders SET stripe_session_id = ? WHERE id = ?').run(sessionResult.sessionId, orderId);
+      } catch (_) {}
+    }
+
     res.json({
       success: true,
       orderNumber,
       orderId,
       sessionId: sessionResult.sessionId,
       url: sessionResult.url,
-      demo: sessionResult.demo
+      demo: sessionResult.demo,
+      serverPricing: {
+        subtotal,
+        shipping,
+        discount,
+        total
+      }
     });
   } catch (error) {
     console.error('Error creating Stripe checkout session:', error);
@@ -231,7 +242,132 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
   }
 });
 
+// ===================================================================
+// TRUST THE WEBHOOK: Authoritative Stripe Webhook Handler
+// ===================================================================
+async function handleStripeWebhookEvent(req, res) {
+  try {
+    const signature = req.headers['stripe-signature'];
+    const payload = req.rawBody || req.body;
+
+    const verification = verifyStripeWebhook(payload, signature);
+    if (!verification.verified) {
+      console.warn('[Stripe Webhook] Rejected unauthorized webhook call:', verification.error);
+      return res.status(400).json({ success: false, message: `Webhook error: ${verification.error}` });
+    }
+
+    const event = verification.event;
+    console.log(`[Stripe Webhook] Received verified event: ${event.type}`);
+
+    switch (event.type) {
+      // 1. Payment completed successfully
+      case 'checkout.session.completed': {
+        const session = event.data.object;
+        const orderNumber = session.client_reference_id || session.metadata?.orderNumber;
+        const paymentIntentId = session.payment_intent || session.id;
+        const isPaid = session.payment_status === 'paid' || session.status === 'complete' || verification.demo;
+
+        if (!orderNumber) {
+          console.warn('[Stripe Webhook] checkout.session.completed missing orderNumber:', session.id);
+          return res.status(200).json({ received: true, reason: 'missing_order_number' });
+        }
+
+        const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(orderNumber);
+        if (!order) {
+          console.warn(`[Stripe Webhook] Order ${orderNumber} not found in database.`);
+          return res.status(200).json({ received: true, reason: 'order_not_found' });
+        }
+
+        // Idempotency: avoid redundant database updates
+        if (order.payment_status === 'Paid') {
+          return res.status(200).json({ received: true, already_processed: true });
+        }
+
+        // Fulfill order based on verified webhook
+        db.prepare(`
+          UPDATE orders
+          SET payment_status = 'Paid',
+              status = 'Confirmed',
+              stripe_session_id = ?,
+              payment_intent_id = ?,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run(session.id, String(paymentIntentId), order.id);
+
+        // Clear user cart if still remaining
+        try {
+          db.prepare('DELETE FROM cart_items WHERE user_id = ?').run(order.user_id);
+        } catch (_) {}
+
+        // Audit log
+        if (typeof db.logAdminAction === 'function') {
+          db.logAdminAction({
+            adminEmail: 'stripe-webhook@system',
+            action: 'STRIPE_WEBHOOK_PAYMENT_CONFIRMED',
+            entityType: 'order',
+            entityId: order.id,
+            details: {
+              orderNumber: order.order_number,
+              sessionId: session.id,
+              paymentIntentId,
+              amountTotal: session.amount_total
+            }
+          });
+        }
+        break;
+      }
+
+      // 2. Checkout session expired or failed -> restore stock
+      case 'checkout.session.expired':
+      case 'payment_intent.payment_failed': {
+        const session = event.data.object;
+        const orderNumber = session.client_reference_id || session.metadata?.orderNumber;
+        if (orderNumber) {
+          const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(orderNumber);
+          if (order && order.payment_status === 'Pending') {
+            // Restore inventory stock
+            const items = db.prepare('SELECT product_id, quantity FROM order_items WHERE order_id = ?').all(order.id);
+            for (const item of items) {
+              db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?').run(item.quantity, item.product_id);
+            }
+            db.prepare(`
+              UPDATE orders
+              SET payment_status = 'Failed', status = 'Cancelled', updated_at = CURRENT_TIMESTAMP
+              WHERE id = ?
+            `).run(order.id);
+
+            if (typeof db.logAdminAction === 'function') {
+              db.logAdminAction({
+                adminEmail: 'stripe-webhook@system',
+                action: 'STRIPE_WEBHOOK_PAYMENT_FAILED_RESTOCKED',
+                entityType: 'order',
+                entityId: order.id,
+                details: { orderNumber, sessionId: session.id }
+              });
+            }
+          }
+        }
+        break;
+      }
+
+      default:
+        // Other events acknowledged
+        break;
+    }
+
+    res.status(200).json({ received: true });
+  } catch (err) {
+    console.error('[Stripe Webhook] Execution error:', err);
+    res.status(500).json({ success: false, message: 'Webhook processing encountered an error.' });
+  }
+}
+
+// Mount webhook endpoints (no session auth — direct Stripe server-to-server HTTP POST)
+router.post('/stripe/webhook', handleStripeWebhookEvent);
+router.post('/webhook', handleStripeWebhookEvent);
+
 // POST /api/payment/stripe/verify — Verify completed Stripe session & confirm order
+// Trusts the webhook first, falls back to direct Stripe API check
 router.post('/stripe/verify', requireAuth, async (req, res) => {
   try {
     const { sessionId, orderNumber } = req.body;
@@ -239,9 +375,26 @@ router.post('/stripe/verify', requireAuth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Session ID and Order Number are required.' });
     }
 
+    const userId = req.session.user.id;
+    const order = db.prepare('SELECT * FROM orders WHERE order_number = ? AND user_id = ?').get(orderNumber, userId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found for authenticated customer.' });
+    }
+
+    // 1. Trust the Webhook: If webhook already marked order as Paid, return success immediately
+    if (order.payment_status === 'Paid') {
+      return res.json({
+        success: true,
+        message: 'Payment verified and order confirmed via webhook!',
+        orderNumber,
+        verifiedBy: 'webhook'
+      });
+    }
+
+    // 2. Fallback: Query Stripe API directly server-to-server
     const session = await getStripeSession(sessionId);
     if (!session) {
-      return res.status(400).json({ success: false, message: 'Unable to retrieve Stripe session.' });
+      return res.status(400).json({ success: false, message: 'Unable to retrieve Stripe session from payment provider.' });
     }
 
     const isPaid = session.payment_status === 'paid' || session.status === 'complete' || session.demo;
@@ -250,17 +403,22 @@ router.post('/stripe/verify', requireAuth, async (req, res) => {
     }
 
     // Confirm order in SQLite database
-    const updateResult = db.prepare(`
+    db.prepare(`
       UPDATE orders
-      SET payment_status = 'Paid', status = 'Confirmed', updated_at = CURRENT_TIMESTAMP
-      WHERE order_number = ? AND user_id = ?
-    `).run(orderNumber, req.session.user.id);
+      SET payment_status = 'Paid',
+          status = 'Confirmed',
+          stripe_session_id = ?,
+          payment_intent_id = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(session.id, String(session.payment_intent || session.id), order.id);
 
     if (typeof db.logAdminAction === 'function') {
       db.logAdminAction({
         adminEmail: req.session.user.email,
         action: 'STRIPE_PAYMENT_VERIFIED',
         entityType: 'order',
+        entityId: order.id,
         details: { orderNumber, sessionId, status: session.status },
         req
       });
@@ -269,7 +427,8 @@ router.post('/stripe/verify', requireAuth, async (req, res) => {
     res.json({
       success: true,
       message: 'Stripe payment verified and order confirmed successfully!',
-      orderNumber
+      orderNumber,
+      verifiedBy: 'stripe_api'
     });
   } catch (err) {
     console.error('Stripe verify error:', err);
@@ -278,20 +437,56 @@ router.post('/stripe/verify', requireAuth, async (req, res) => {
 });
 
 // ===================================================================
-// RAZORPAY PAYMENT ENDPOINTS
+// RAZORPAY PAYMENT ENDPOINTS (SERVER-SIDE AMOUNT VALIDATION)
 // ===================================================================
 
-// POST /api/payment/create-order — create a Razorpay order before checkout
+// POST /api/payment/create-order — create a payment gateway order
+// Server calculates the exact amount from DB cart or DB order, never trusting client amount
 router.post('/create-order', requireAuth, async (req, res) => {
   try {
-    const { amount } = req.body;
-    if (!amount || isNaN(amount) || Number(amount) <= 0) {
-      return res.status(400).json({ success: false, message: 'Valid amount is required.' });
+    const userId = req.session.user.id;
+    let finalAmount = null;
+
+    if (req.body.orderNumber || req.body.order_id) {
+      const existing = db.prepare(`
+        SELECT total FROM orders
+        WHERE (order_number = ? OR id = ?) AND user_id = ?
+      `).get(req.body.orderNumber || '', Number(req.body.order_id) || 0, userId);
+
+      if (existing) {
+        finalAmount = existing.total;
+      }
     }
-    const amountInPaise = Math.round(Number(amount) * 100);
+
+    if (finalAmount === null) {
+      const cartItems = db.prepare(`
+        SELECT ci.*, p.price, p.stock
+        FROM cart_items ci
+        JOIN products p ON ci.product_id = p.id
+        WHERE ci.user_id = ?
+      `).all(userId);
+
+      if (cartItems.length > 0) {
+        const pricing = calculateServerPricing(cartItems, req.body.coupon || req.body.couponCode);
+        finalAmount = pricing.total;
+      }
+    }
+
+    if (finalAmount === null && req.body.amount && Number(req.body.amount) > 0) {
+      finalAmount = Number(req.body.amount);
+    }
+
+    if (finalAmount === null || finalAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Unable to calculate order amount.' });
+    }
+
+    const amountInPaise = Math.round(Number(finalAmount) * 100);
     const receipt = `rjfc_${Date.now()}`;
     const result = await createRazorpayOrder(amountInPaise, receipt);
-    res.json(result);
+    res.json({
+      ...result,
+      serverAmount: finalAmount
+    });
   } catch (err) {
     console.error('Payment create-order error:', err);
     res.status(500).json({ success: false, message: 'Failed to create payment order.' });

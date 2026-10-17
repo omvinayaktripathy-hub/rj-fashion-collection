@@ -1,6 +1,7 @@
 // ===================================================================
 // RJ FASHION COLLECTION - STRIPE CHECKOUT SERVICE
 // Handles Stripe Checkout Sessions, Webhooks, and Simulator Fallbacks
+// Trust the Webhook: Cryptographic signature verification and fulfillment
 // ===================================================================
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
@@ -28,6 +29,7 @@ function getStripe() {
 
 /**
  * Creates a Stripe Checkout Session for order payment.
+ * Prices and amounts are calculated on the server.
  */
 async function createStripeCheckoutSession({
   cartItems = [],
@@ -36,6 +38,7 @@ async function createStripeCheckoutSession({
   orderId,
   subtotal,
   discount = 0,
+  couponCode = null,
   shipping = 0,
   total,
   successUrl,
@@ -47,7 +50,7 @@ async function createStripeCheckoutSession({
   // If real Stripe keys are configured and available
   if (stripe && isLiveOrTestStripe()) {
     try {
-      // Build line items for Stripe
+      // Build line items for Stripe from verified server prices
       const lineItems = cartItems.map(item => {
         const itemImage = item.image || item.product_image;
         const images = [];
@@ -84,12 +87,6 @@ async function createStripeCheckoutSession({
         });
       }
 
-      // Add discount line if applicable
-      if (discount > 0) {
-        // Stripe allows discounts via coupons or line items; negative line items aren't standard,
-        // so we can use a Stripe coupon or attach as metadata
-      }
-
       const sessionParams = {
         payment_method_types: ['card'],
         mode: 'payment',
@@ -105,6 +102,21 @@ async function createStripeCheckoutSession({
           ...metadata
         }
       };
+
+      // Add verified server discount coupon in Stripe
+      if (discount > 0) {
+        try {
+          const stripeCoupon = await stripe.coupons.create({
+            amount_off: Math.round(discount * 100),
+            currency: 'inr',
+            duration: 'once',
+            name: couponCode ? `Coupon ${couponCode}` : 'Promotional Discount'
+          });
+          sessionParams.discounts = [{ coupon: stripeCoupon.id }];
+        } catch (couponErr) {
+          console.warn('[Stripe Service] Could not attach coupon to Stripe session:', couponErr.message);
+        }
+      }
 
       const session = await stripe.checkout.sessions.create(sessionParams);
 
@@ -132,26 +144,58 @@ async function createStripeCheckoutSession({
 }
 
 /**
- * Validates Stripe Webhook signature cryptographically
+ * Validates Stripe Webhook signature cryptographically.
+ * "Trust the Webhook": verifies payload buffer with Stripe HMAC signature.
+ *
+ * @param {Buffer|string} payload - Raw request body
+ * @param {string} signature - Value of 'stripe-signature' header
  */
 function verifyStripeWebhook(payload, signature) {
-  if (!STRIPE_WEBHOOK_SECRET) {
-    // If webhook secret not configured, verify structure
-    return { verified: false, reason: 'STRIPE_WEBHOOK_SECRET is not configured' };
-  }
-
   const stripe = getStripe();
-  if (!stripe) {
-    return { verified: false, reason: 'Stripe is not initialized' };
+
+  // If signature has timestamp header and secret is available, verify cryptographically
+  if (stripe && STRIPE_WEBHOOK_SECRET && signature && signature.startsWith('t=')) {
+    try {
+      const event = stripe.webhooks.constructEvent(payload, signature, STRIPE_WEBHOOK_SECRET);
+      return { verified: true, event };
+    } catch (err) {
+      console.error('[Stripe Webhook] Cryptographic signature check failed:', err.message);
+      return { verified: false, error: err.message };
+    }
   }
 
-  try {
-    const event = stripe.webhooks.constructEvent(payload, signature, STRIPE_WEBHOOK_SECRET);
-    return { verified: true, event };
-  } catch (err) {
-    console.error('[Stripe Webhook] Verification failed:', err.message);
-    return { verified: false, error: err.message };
+  // Development / Test Simulator fallback
+  if (process.env.NODE_ENV !== 'production' && signature === 'test_webhook_signature') {
+    try {
+      let parsed = payload;
+      if (Buffer.isBuffer(payload)) {
+        parsed = JSON.parse(payload.toString('utf8'));
+      } else if (typeof payload === 'string') {
+        parsed = JSON.parse(payload);
+      }
+
+      if (parsed && parsed.type) {
+        return { verified: true, event: parsed, demo: true };
+      }
+      return { verified: false, error: 'Invalid webhook payload structure' };
+    } catch (err) {
+      return { verified: false, error: err.message };
+    }
   }
+
+  return { verified: false, error: 'Stripe webhook verification failed or invalid signature header' };
+}
+
+/**
+ * Generates an authentic cryptographic Stripe test webhook signature header
+ */
+function generateStripeTestWebhookHeader(payload, secret = STRIPE_WEBHOOK_SECRET || 'whsec_demo_secret') {
+  const stripe = getStripe() || new (require('stripe'))('sk_test_mock', { apiVersion: '2023-10-16' });
+  const payloadStr = typeof payload === 'string' ? payload : (Buffer.isBuffer(payload) ? payload.toString('utf8') : JSON.stringify(payload));
+  return stripe.webhooks.generateTestHeaderString({
+    payload: payloadStr,
+    secret
+  });
 }
 
 /**
@@ -184,6 +228,7 @@ async function getStripeSession(sessionId) {
 module.exports = {
   createStripeCheckoutSession,
   verifyStripeWebhook,
+  generateStripeTestWebhookHeader,
   getStripeSession,
   STRIPE_ENABLED,
   STRIPE_PUBLISHABLE_KEY: STRIPE_PUBLISHABLE_KEY || 'pk_test_demo_rjfashion',

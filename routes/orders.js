@@ -103,21 +103,13 @@ router.post('/', requireAuth, (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide or select a delivery address.' });
     }
 
-    // 4. Calculate financial totals
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shipping = subtotal > 999 ? 0 : 49;
-    
-    // Server-side coupon discount calculation
-    let discount = 0;
-    if (couponCode === 'ROYAL10' || couponCode === 'FESTIVE10' || couponCode === 'RJFESTIVE') {
-      discount = Math.round(subtotal * 0.10);
-    } else if (couponCode === 'WELCOME500' && subtotal >= 2999) {
-      discount = 500;
-    } else if (Number(req.body.discount) > 0 && Number(req.body.discount) <= subtotal * 0.5) {
-      discount = Math.min(Number(req.body.discount), subtotal);
-    }
-
-    const total = Math.max(0, subtotal + shipping - discount);
+    // 4. Calculate authoritative server-side totals (client-supplied prices & discounts strictly ignored)
+    const { calculateServerPricing } = require('../services/pricing');
+    const pricing = calculateServerPricing(cartItems, couponCode);
+    const subtotal = pricing.subtotal;
+    const shipping = pricing.shipping;
+    const discount = pricing.discount;
+    const total = pricing.total;
 
     const orderNumber = generateOrderNumber();
 

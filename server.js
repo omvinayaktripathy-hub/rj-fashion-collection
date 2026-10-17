@@ -106,8 +106,13 @@ app.use(cors({
   credentials: true
 }));
 
-// Body parsing & Input Sanitization
-app.use(express.json({ limit: '10mb' }));
+// Body parsing & Input Sanitization (captures rawBody for Stripe Webhook signature verification)
+app.use(express.json({
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use((req, res, next) => {

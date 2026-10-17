@@ -6,6 +6,7 @@
 // ===================================================================
 
 const assert = require('assert');
+const { generateStripeTestWebhookHeader } = require('./services/stripe');
 
 const BASE_URL = 'http://localhost:3000';
 
@@ -204,8 +205,8 @@ async function runFullCheckoutTests() {
   console.log(`  ✓ PASS: Promo code "ROYAL10" applied server-side! Subtotal: ₹${orderDetails.subtotal}, Discount: -₹${orderDetails.discount}, Total: ₹${orderDetails.total}`);
   console.log(`  ✓ PASS: UPI Payment status automatically set to "${orderDetails.payment_status}"`);
 
-  // STEP 6B: Full Checkout Scenario 3 — Stripe Checkout Session & Verification
-  console.log('\n--- Phase 6B: Checkout Flow 3 — Stripe Checkout Session & Verification ---');
+  // STEP 6B: Full Checkout Scenario 3 — Stripe Checkout Session & Webhook Fulfillment
+  console.log('\n--- Phase 6B: Checkout Flow 3 — Stripe Checkout, Server-Side Pricing & Webhook Fulfillment ---');
   // Add item back to cart for Stripe checkout
   await request('POST', '/api/cart', {
     productId: testProduct.id,
@@ -219,36 +220,126 @@ async function runFullCheckoutTests() {
   assert(stripeConfigRes.json.publishableKey, 'Stripe config must return publishableKey');
   console.log(`  ✓ PASS: Stripe config verified: Enabled=${stripeConfigRes.json.enabled}, Key=${stripeConfigRes.json.publishableKey}`);
 
-  // 2. Create Stripe Checkout Session
+  // 2. Test Server-Side Pricing Integrity: Attempt to pass forged discount to create-checkout-session
   const stripeSessionRes = await request('POST', '/api/payment/stripe/create-checkout-session', {
     addressId: savedAddressId,
-    notes: 'Stripe order test'
+    discount: 99999, // Forged client discount attempt
+    total: 1,        // Forged client total attempt
+    coupon: 'ROYAL10',
+    notes: 'Stripe order test with coupon ROYAL10'
   }, { Cookie: customerCookie });
   assert.strictEqual(stripeSessionRes.statusCode, 200, 'Stripe session creation must return 200');
   assert(stripeSessionRes.json.success, 'Stripe session must succeed');
   assert(stripeSessionRes.json.url, 'Stripe session must provide hosted checkout URL');
   assert(stripeSessionRes.json.sessionId, 'Stripe session must provide sessionId');
+
   const stripeOrderNumber = stripeSessionRes.json.orderNumber;
   const stripeSessionId = stripeSessionRes.json.sessionId;
+  const serverPricing = stripeSessionRes.json.serverPricing;
+  
+  // Verify server-side pricing strictly computed the 10% coupon and ignored forged discount
+  const expectedServerDiscount = Math.round(testProduct.price * 0.10);
+  const expectedServerTotal = Math.max(0, testProduct.price + (testProduct.price > 999 ? 0 : 49) - expectedServerDiscount);
+  assert.strictEqual(serverPricing.discount, expectedServerDiscount, 'Server must enforce calculated coupon discount, not client forged discount');
+  assert.strictEqual(serverPricing.total, expectedServerTotal, 'Server total must match authoritative calculated price');
+  console.log(`  ✓ PASS: Server-side pricing verified: Subtotal=₹${serverPricing.subtotal}, Discount=₹${serverPricing.discount}, Total=₹${serverPricing.total}`);
   console.log(`  ✓ PASS: Stripe Checkout Session created! Order: ${stripeOrderNumber}, SessionId: ${stripeSessionId}`);
-  console.log(`  ✓ PASS: Stripe hosted checkout redirect URL: ${stripeSessionRes.json.url}`);
 
-  // 3. Verify Stripe Payment Callback
+  // 3. Trust the Webhook: Deliver checkout.session.completed event directly to the webhook endpoint
+  const webhookPayload = {
+    id: `evt_test_${Date.now()}`,
+    type: 'checkout.session.completed',
+    data: {
+      object: {
+        id: stripeSessionId,
+        client_reference_id: stripeOrderNumber,
+        payment_intent: `pi_test_${Date.now()}`,
+        payment_status: 'paid',
+        status: 'complete',
+        amount_total: serverPricing.total * 100,
+        currency: 'inr'
+      }
+    }
+  };
+
+  const stripeWebhookSig = generateStripeTestWebhookHeader(webhookPayload);
+  const webhookRes = await request('POST', '/api/payment/stripe/webhook', webhookPayload, {
+    'Content-Type': 'application/json',
+    'stripe-signature': stripeWebhookSig
+  });
+  assert.strictEqual(webhookRes.statusCode, 200, 'Webhook must return 200');
+  assert(webhookRes.json.received, 'Webhook must acknowledge receipt');
+  console.log(`  ✓ PASS: Stripe Webhook received and verified checkout.session.completed event`);
+
+  // 4. Verify Order fulfillment by Webhook in Database
+  const stripeOrderAfterWebhook = await request('GET', `/api/orders/${stripeOrderNumber}`, null, { Cookie: customerCookie });
+  assert(stripeOrderAfterWebhook.json.success, 'Get Stripe order must succeed');
+  assert.strictEqual(stripeOrderAfterWebhook.json.order.payment_status, 'Paid', 'Order payment_status must be Paid via Webhook');
+  assert.strictEqual(stripeOrderAfterWebhook.json.order.status, 'Confirmed', 'Order status must be Confirmed via Webhook');
+  console.log(`  ✓ PASS: Order ${stripeOrderNumber} fulfilled via Webhook: Status="Confirmed", Payment="Paid"`);
+
+  // 5. Test Webhook Idempotency: Re-deliver the same webhook event
+  const duplicateWebhookRes = await request('POST', '/api/payment/stripe/webhook', webhookPayload, {
+    'Content-Type': 'application/json',
+    'stripe-signature': stripeWebhookSig
+  });
+  assert.strictEqual(duplicateWebhookRes.statusCode, 200, 'Duplicate webhook must return 200');
+  assert(duplicateWebhookRes.json.already_processed, 'Duplicate webhook must detect idempotent event');
+  console.log(`  ✓ PASS: Webhook idempotency verified (duplicate events handled gracefully)`);
+
+  // 6. Test Client Return Callback (/api/payment/stripe/verify) — trusts the webhook
   const stripeVerifyRes = await request('POST', '/api/payment/stripe/verify', {
     sessionId: stripeSessionId,
     orderNumber: stripeOrderNumber
   }, { Cookie: customerCookie });
-  assert(stripeVerifyRes.json.success, 'Stripe payment verification must succeed');
-  console.log(`  ✓ PASS: Stripe payment verified and order status confirmed!`);
+  assert(stripeVerifyRes.json.success, 'Stripe verify must return success');
+  assert.strictEqual(stripeVerifyRes.json.verifiedBy, 'webhook', 'Verify endpoint must acknowledge webhook as authoritative source');
+  console.log(`  ✓ PASS: Client verify callback confirmed: verifiedBy="${stripeVerifyRes.json.verifiedBy}"`);
 
-  // 4. Verify order in customer order history
-  const stripeOrderHistoryRes = await request('GET', `/api/orders/${stripeOrderNumber}`, null, { Cookie: customerCookie });
-  assert(stripeOrderHistoryRes.json.success, 'Get Stripe order must succeed');
-  const stripeOrderData = stripeOrderHistoryRes.json.order;
-  assert.strictEqual(stripeOrderData.payment_method, 'Stripe');
-  assert.strictEqual(stripeOrderData.payment_status, 'Paid');
-  assert.strictEqual(stripeOrderData.status, 'Confirmed');
-  console.log(`  ✓ PASS: Customer orders verified: Payment Method="Stripe", Payment Status="Paid", Status="Confirmed"`);
+  // 7. Test Webhook Expiration & Inventory Restock (checkout.session.expired)
+  // Create another pending Stripe session
+  await request('POST', '/api/cart', {
+    productId: testProduct.id,
+    quantity: 1,
+    size: 'Standard'
+  }, { Cookie: customerCookie });
+
+  const expiredSessionRes = await request('POST', '/api/payment/stripe/create-checkout-session', {
+    addressId: savedAddressId
+  }, { Cookie: customerCookie });
+  const expiredOrderNumber = expiredSessionRes.json.orderNumber;
+  const expiredSessionId = expiredSessionRes.json.sessionId;
+
+  // Get current stock before expiration
+  const prodBeforeExpire = await request('GET', `/api/products/${testProduct.id}`);
+  const stockBeforeExpire = prodBeforeExpire.json.product.stock;
+
+  // Send checkout.session.expired webhook
+  const expiredPayload = {
+    id: `evt_expire_${Date.now()}`,
+    type: 'checkout.session.expired',
+    data: {
+      object: {
+        id: expiredSessionId,
+        client_reference_id: expiredOrderNumber,
+        status: 'expired'
+      }
+    }
+  };
+  const expiredSig = generateStripeTestWebhookHeader(expiredPayload);
+  const expiredWebhookRes = await request('POST', '/api/payment/stripe/webhook', expiredPayload, {
+    'Content-Type': 'application/json',
+    'stripe-signature': expiredSig
+  });
+  assert.strictEqual(expiredWebhookRes.statusCode, 200, 'Expired webhook must return 200');
+
+  // Verify stock was restored and order was cancelled
+  const prodAfterExpire = await request('GET', `/api/products/${testProduct.id}`);
+  assert.strictEqual(prodAfterExpire.json.product.stock, stockBeforeExpire + 1, 'Inventory stock must be restored on session expiration');
+  const expiredOrderData = await request('GET', `/api/orders/${expiredOrderNumber}`, null, { Cookie: customerCookie });
+  assert.strictEqual(expiredOrderData.json.order.status, 'Cancelled', 'Expired order status must be Cancelled');
+  assert.strictEqual(expiredOrderData.json.order.payment_status, 'Failed', 'Expired order payment_status must be Failed');
+  console.log(`  ✓ PASS: Expired Stripe session handled by webhook: Order Cancelled & Inventory Stock restored`);
 
   // STEP 7: Payment Gateway API (Razorpay Config & Orders)
   console.log('\n--- Phase 7: Payment Gateway Configuration & Razorpay Handlers ---');
