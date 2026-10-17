@@ -476,17 +476,142 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWishlistCount();
   });
 
-  // Global search form listener
+  // Global search form & live suggestions listener
   const searchForms = document.querySelectorAll('.header-search-form');
   searchForms.forEach(form => {
+    const input = form.querySelector('input[name="search"]');
+    if (!input) return;
+
+    // Create suggestions container
+    let suggestionsBox = form.parentElement.querySelector('.search-suggestions-box');
+    if (!suggestionsBox) {
+      suggestionsBox = document.createElement('div');
+      suggestionsBox.className = 'search-suggestions-box';
+      form.parentElement.appendChild(suggestionsBox);
+    }
+
+    let debounceTimer = null;
+    let selectedIndex = -1;
+
+    async function fetchSuggestions(query) {
+      const q = query.trim().toLowerCase();
+      if (q.length < 2) {
+        suggestionsBox.classList.remove('is-visible');
+        suggestionsBox.innerHTML = '';
+        return;
+      }
+
+      let matches = [];
+      try {
+        const res = await fetch(`/api/products?search=${encodeURIComponent(q)}&limit=6`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.products)) {
+            matches = data.products;
+          }
+        }
+      } catch (_) {}
+
+      // Fallback to static products.json if needed
+      if (matches.length === 0) {
+        try {
+          const res = await fetch('/data/products.json');
+          if (res.ok) {
+            const data = await res.json();
+            const list = data.products || [];
+            matches = list.filter(p => 
+              (p.name && p.name.toLowerCase().includes(q)) ||
+              (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
+              (p.brand && p.brand.toLowerCase().includes(q))
+            ).slice(0, 6);
+          }
+        } catch (_) {}
+      }
+
+      if (matches.length === 0) {
+        suggestionsBox.innerHTML = `
+          <div style="padding: 16px; text-align: center; color: var(--muted); font-size: 0.85rem;">
+            No matching styles found for "<strong>${escapeHtml(query)}</strong>"
+          </div>
+          <a class="suggestion-footer" href="/shop.html">Browse All Collections &rarr;</a>
+        `;
+        suggestionsBox.classList.add('is-visible');
+        return;
+      }
+
+      selectedIndex = -1;
+      suggestionsBox.innerHTML = `
+        ${matches.map(p => `
+          <a class="suggestion-item" href="/product.html?id=${p.id}">
+            <img class="suggestion-thumb" src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=100&q=80'">
+            <div class="suggestion-info">
+              <div class="suggestion-title">${escapeHtml(p.name)}</div>
+              <div class="suggestion-meta">
+                <span>${escapeHtml(p.category_name || p.subcategory || p.department || 'Fashion')}</span>
+                <span class="suggestion-price">${formatPrice(p.price)}</span>
+              </div>
+            </div>
+          </a>
+        `).join('')}
+        <a class="suggestion-footer" href="/shop.html?search=${encodeURIComponent(query)}">
+          View all results for "${escapeHtml(query)}" &rarr;
+        </a>
+      `;
+      suggestionsBox.classList.add('is-visible');
+    }
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        fetchSuggestions(input.value);
+      }, 180);
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.value.trim().length >= 2) {
+        fetchSuggestions(input.value);
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (!suggestionsBox.classList.contains('is-visible')) return;
+      const items = suggestionsBox.querySelectorAll('.suggestion-item');
+      if (items.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex + 1) % items.length;
+        items.forEach((it, i) => it.classList.toggle('is-selected', i === selectedIndex));
+        items[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+        items.forEach((it, i) => it.classList.toggle('is-selected', i === selectedIndex));
+        items[selectedIndex]?.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && items[selectedIndex]) {
+          e.preventDefault();
+          items[selectedIndex].click();
+        }
+      } else if (e.key === 'Escape') {
+        suggestionsBox.classList.remove('is-visible');
+      }
+    });
+
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const input = form.querySelector('input[name="search"]');
-      const val = input ? input.value.trim() : '';
+      suggestionsBox.classList.remove('is-visible');
+      const val = input.value.trim();
       if (val) {
         window.location.href = `/shop.html?search=${encodeURIComponent(val)}`;
       } else {
         window.location.href = '/shop.html';
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!form.parentElement.contains(e.target)) {
+        suggestionsBox.classList.remove('is-visible');
       }
     });
   });

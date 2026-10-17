@@ -37,6 +37,22 @@ function parseUrlParams() {
 }
 
 // Generate Product Card HTML
+// Skeleton Loading Card Generator
+function createSkeletonCard() {
+  return `
+    <div class="skeleton-card">
+      <div class="skeleton-img skeleton-shimmer"></div>
+      <div class="skeleton-content">
+        <div class="skeleton-line short skeleton-shimmer"></div>
+        <div class="skeleton-line long skeleton-shimmer"></div>
+        <div class="skeleton-line medium skeleton-shimmer"></div>
+        <div class="skeleton-line short skeleton-shimmer" style="margin-top: 8px;"></div>
+      </div>
+    </div>
+  `;
+}
+
+// Generate Product Card HTML
 function createProductCard(p) {
   const isOutOfStock = (p.stock || 0) <= 0;
   const isLowStock = (p.stock || 0) > 0 && (p.stock || 0) <= 4;
@@ -47,20 +63,42 @@ function createProductCard(p) {
     isWishlisted = saved.some(id => String(id) === String(p.id));
   } catch (_) {}
 
+  // Parse additional images for secondary image hover flip
+  let addImages = [];
+  if (Array.isArray(p.additional_images)) {
+    addImages = p.additional_images;
+  } else if (typeof p.additional_images === 'string' && p.additional_images.startsWith('[')) {
+    try { addImages = JSON.parse(p.additional_images); } catch (_) {}
+  }
+  const hoverImg = (addImages.length > 1 && addImages[1] !== p.image) 
+    ? addImages[1] 
+    : (addImages.length > 0 && addImages[0] !== p.image ? addImages[0] : null);
+
+  // Parse sizes for card display
+  let sizes = [];
+  if (Array.isArray(p.available_sizes)) {
+    sizes = p.available_sizes;
+  } else if (typeof p.available_sizes === 'string' && p.available_sizes.startsWith('[')) {
+    try { sizes = JSON.parse(p.available_sizes); } catch (_) {}
+  }
+  const displaySizes = sizes.map(s => String(s).replace(/\s*\(.*\)/, '').trim()).filter(Boolean).slice(0, 4);
+
   return `
     <div class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" data-id="${p.id}">
       <div class="product-image-wrap">
         <a href="/product.html?id=${p.id}">
-          <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'">
+          <img class="product-primary-img" src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'">
+          ${hoverImg ? `<img class="product-hover-img" src="${hoverImg}" alt="${escapeHtml(p.name)} alternate angle" loading="lazy">` : ''}
         </a>
         ${p.discount > 0 ? `<span class="badge-discount">${p.discount}% OFF</span>` : ''}
         ${isOutOfStock ? `<span class="badge-out-of-stock">OUT OF STOCK</span>` : (isLowStock ? `<span class="badge-stock" style="background:#d97706; color:#ffffff;">Only ${p.stock} left</span>` : '')}
         <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${p.id}, this)" title="Add to Wishlist" style="${isWishlisted ? 'color:var(--primary);' : ''}">${isWishlisted ? '♥' : '♡'}</button>
+        <button class="quick-view-btn" onclick="openQuickView(${p.id}, event)" title="Quick View">Quick View</button>
       </div>
 
       <div class="product-details">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <span class="product-brand" style="margin-bottom: 0;">${p.brand || 'RJ Collection'}</span>
+          <span class="product-brand" style="margin-bottom: 0;">${escapeHtml(p.brand || 'RJ Collection')}</span>
           ${isOutOfStock 
             ? `<span class="stock-status-pill stock-pill-out">🔴 Out of Stock</span>` 
             : (isLowStock 
@@ -68,8 +106,14 @@ function createProductCard(p) {
                 : `<span class="stock-status-pill stock-pill-in">🟢 In Stock</span>`)}
         </div>
         <h3 class="product-title">
-          <a href="/product.html?id=${p.id}" title="${p.name}">${p.name}</a>
+          <a href="/product.html?id=${p.id}" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</a>
         </h3>
+
+        ${displaySizes.length > 0 ? `
+          <div class="product-card-sizes" title="Available Sizes">
+            ${displaySizes.map(sz => `<span class="product-size-chip">${escapeHtml(sz)}</span>`).join('')}
+          </div>
+        ` : ''}
 
         <div class="product-rating">
           <span class="rating-badge">★ ${p.rating ? Number(p.rating).toFixed(1) : '4.5'}</span>
@@ -107,6 +151,179 @@ async function quickBuy(productId) {
   }
 }
 
+// ================= QUICK VIEW MODAL CONTROLLER =================
+let currentQuickViewProduct = null;
+let selectedQuickViewSize = null;
+
+async function openQuickView(productId, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  let p = null;
+  if (window.catalogProducts && Array.isArray(window.catalogProducts)) {
+    p = window.catalogProducts.find(item => String(item.id) === String(productId));
+  }
+  if (!p) {
+    try {
+      const res = await fetch(`/api/products/${productId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.product) p = data.product;
+      }
+    } catch (_) {}
+  }
+  if (!p) {
+    window.location.href = `/product.html?id=${productId}`;
+    return;
+  }
+
+  currentQuickViewProduct = p;
+
+  let allImages = [p.image];
+  let addImages = [];
+  if (Array.isArray(p.additional_images)) {
+    addImages = p.additional_images;
+  } else if (typeof p.additional_images === 'string' && p.additional_images.startsWith('[')) {
+    try { addImages = JSON.parse(p.additional_images); } catch (_) {}
+  }
+  addImages.forEach(img => {
+    if (img && !allImages.includes(img)) allImages.push(img);
+  });
+
+  let sizes = ['Free Size'];
+  if (Array.isArray(p.available_sizes) && p.available_sizes.length > 0) {
+    sizes = p.available_sizes;
+  } else if (typeof p.available_sizes === 'string' && p.available_sizes.startsWith('[')) {
+    try { sizes = JSON.parse(p.available_sizes); } catch (_) {}
+  }
+  selectedQuickViewSize = sizes[0] || 'Free Size';
+
+  let modalBackdrop = document.getElementById('rj-quick-view-backdrop');
+  if (!modalBackdrop) {
+    modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'rj-quick-view-backdrop';
+    modalBackdrop.className = 'quick-view-modal-backdrop';
+    document.body.appendChild(modalBackdrop);
+  }
+
+  const isOutOfStock = (p.stock || 0) <= 0;
+
+  modalBackdrop.innerHTML = `
+    <div class="quick-view-modal" onclick="event.stopPropagation()">
+      <button class="quick-view-close-btn" onclick="closeQuickView()" title="Close">&times;</button>
+      
+      <div class="quick-view-gallery">
+        <div class="quick-view-main-wrap">
+          <img id="qv-main-img" class="quick-view-main-img" src="${allImages[0]}" alt="${escapeHtml(p.name)}">
+        </div>
+        ${allImages.length > 1 ? `
+          <div class="quick-view-thumbs">
+            ${allImages.map((img, idx) => `
+              <img src="${img}" class="quick-view-thumb ${idx === 0 ? 'is-active' : ''}" 
+                   onclick="setQuickViewImage('${img}', this)" alt="Thumbnail ${idx + 1}">
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="quick-view-info">
+        <span class="quick-view-brand">${escapeHtml(p.brand || 'RJ Collection')}</span>
+        <h2 class="quick-view-title">${escapeHtml(p.name)}</h2>
+        
+        <div class="quick-view-price-row">
+          <span class="quick-view-current-price">${formatPrice(p.price)}</span>
+          ${p.original_price > p.price ? `<span class="quick-view-original-price">${formatPrice(p.original_price)}</span>` : ''}
+          ${p.discount > 0 ? `<span class="quick-view-discount">${p.discount}% OFF</span>` : ''}
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          ${isOutOfStock 
+            ? `<span class="stock-status-pill stock-pill-out">🔴 Out of Stock</span>` 
+            : `<span class="stock-status-pill stock-pill-in">🟢 In Stock (${p.stock} units available)</span>`}
+        </div>
+
+        <p class="quick-view-desc">${escapeHtml(p.description || 'Crafted with premium authentic textiles and signature Indian couture detailing.')}</p>
+
+        <div>
+          <div class="quick-view-sizes-label">
+            <span>Select Size</span>
+            <span style="font-size:0.75rem; color:var(--muted);">${escapeHtml(p.category_name || p.category || '')}</span>
+          </div>
+          <div class="quick-view-sizes-grid">
+            ${sizes.map((sz, idx) => `
+              <button type="button" class="quick-view-size-chip ${idx === 0 ? 'is-active' : ''}" 
+                      onclick="selectQuickViewSize('${escapeHtml(sz)}', this)">${escapeHtml(sz)}</button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="quick-view-actions">
+          <button class="btn btn-primary" onclick="quickViewAddToCart(${p.id})" ${isOutOfStock ? 'disabled' : ''}>
+            ${isOutOfStock ? 'Sold Out' : '🛒 Add to Cart'}
+          </button>
+          <button class="btn btn-outline" style="border: 1.5px solid var(--primary); color: var(--primary);" 
+                  onclick="quickViewBuyNow(${p.id})" ${isOutOfStock ? 'disabled' : ''}>
+            ⚡ Instant Buy
+          </button>
+        </div>
+
+        <a href="/product.html?id=${p.id}" class="quick-view-more-link">
+          View Complete Product Specifications & Lightbox Gallery &rarr;
+        </a>
+      </div>
+    </div>
+  `;
+
+  modalBackdrop.onclick = closeQuickView;
+  modalBackdrop.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function setQuickViewImage(imgUrl, thumbEl) {
+  const mainImg = document.getElementById('qv-main-img');
+  if (mainImg) mainImg.src = imgUrl;
+  document.querySelectorAll('.quick-view-thumb').forEach(t => t.classList.remove('is-active'));
+  if (thumbEl) thumbEl.classList.add('is-active');
+}
+
+function selectQuickViewSize(size, chipEl) {
+  selectedQuickViewSize = size;
+  document.querySelectorAll('.quick-view-size-chip').forEach(c => c.classList.remove('is-active'));
+  if (chipEl) chipEl.classList.add('is-active');
+}
+
+function closeQuickView() {
+  const modalBackdrop = document.getElementById('rj-quick-view-backdrop');
+  if (modalBackdrop) {
+    modalBackdrop.classList.remove('is-open');
+  }
+  document.body.style.overflow = '';
+}
+
+async function quickViewAddToCart(productId) {
+  const size = selectedQuickViewSize || 'Free Size';
+  await addToCart(productId, 1, size);
+  closeQuickView();
+}
+
+async function quickViewBuyNow(productId) {
+  const size = selectedQuickViewSize || 'Free Size';
+  const added = await addToCart(productId, 1, size);
+  if (added) {
+    closeQuickView();
+    window.location.href = '/delivery.html';
+  }
+}
+
+window.openQuickView = openQuickView;
+window.closeQuickView = closeQuickView;
+window.setQuickViewImage = setQuickViewImage;
+window.selectQuickViewSize = selectQuickViewSize;
+window.quickViewAddToCart = quickViewAddToCart;
+window.quickViewBuyNow = quickViewBuyNow;
+
 // Fetch and Render Products
 async function loadProducts() {
   const container = document.getElementById('shop-product-grid');
@@ -116,11 +333,7 @@ async function loadProducts() {
 
   if (!container) return;
 
-  container.innerHTML = `
-    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 0;">
-      <p style="font-size: 1.1rem; color: var(--muted);">Loading royal fashion collection...</p>
-    </div>
-  `;
+  container.innerHTML = Array.from({ length: 8 }, createSkeletonCard).join('');
 
   let products = [];
   let total = 0;
@@ -296,6 +509,7 @@ async function loadProducts() {
   }
 
   // Render Product Cards
+  window.catalogProducts = products;
   container.innerHTML = products.map(createProductCard).join('');
 
   // Render Pagination
