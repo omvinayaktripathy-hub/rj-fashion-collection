@@ -291,8 +291,8 @@ function seedInitialData() {
       ['Kurtis', 'kurtis', 'Embroidered, printed, and festive designer kurtis and tunic sets', 'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=700&q=80', 4],
       ['Lehengas', 'lehengas', 'Bridal and party-wear lehenga cholis with elaborate embroidery', 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=700&q=80', 5],
       ['Dresses', 'dresses', 'Fusion Indo-Western dresses, gowns, and contemporary evening wear', 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=700&q=80', 6],
-      ['Accessories', 'accessories', 'Potli bags, clutch purses, dupattas, and ornate ethnic footwear', 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=700&q=80', 7],
-      ['New Arrivals', 'new-arrivals', 'Fresh festive season arrivals and trending runway designs', 'https://images.unsplash.com/photo-1610030469668-935a8df2d2b5?auto=format&fit=crop&w=700&q=80', 8]
+      ['Bags & Gifts', 'accessories', 'Designer potli bags, luxury clutches, celebration gift sets, and bridal keepsakes', 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=700&q=80', 7],
+      ['New Arrivals', 'new-arrivals', 'Fresh festive season arrivals and trending runway designs', 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=700&q=80', 8]
     ];
 
     for (const cat of categories) {
