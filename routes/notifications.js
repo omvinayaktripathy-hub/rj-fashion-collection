@@ -3,6 +3,8 @@ const router = express.Router();
 const { sendPushNotification, FIREBASE_PROJECT_ID } = require('../services/firebase');
 const db = require('../database/db');
 
+const { requireAdmin } = require('../middleware/admin');
+
 // In-memory or database token store
 const registeredTokens = new Set();
 
@@ -35,8 +37,8 @@ router.post('/register-token', (req, res) => {
   res.json({ success: true, message: 'Notification token registered successfully.' });
 });
 
-// POST /api/notifications/test-push
-router.post('/test-push', async (req, res) => {
+// POST /api/notifications/test-push (Admin Only)
+router.post('/test-push', requireAdmin, async (req, res) => {
   const { token, title, body } = req.body;
   const targetToken = token || Array.from(registeredTokens)[0];
 

@@ -21,7 +21,9 @@ with zipfile.ZipFile(out_zip, "w", zipfile.ZIP_DEFLATED) as z:
         # Filter directories in-place to prevent walking them
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
         for f in files:
-            if f.endswith((".pyc", ".tmp", ".log")):
+            if f.endswith((".pyc", ".tmp", ".log", ".sqlite-shm", ".sqlite-wal")):
+                continue
+            if f in (".env", "serviceAccountKey.json"):
                 continue
             full_path = Path(root) / f
             rel_path = full_path.relative_to(root_dir)

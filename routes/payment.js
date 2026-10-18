@@ -477,7 +477,7 @@ router.post('/create-order', requireAuth, async (req, res) => {
     }
 
     if (finalAmount === null || finalAmount <= 0) {
-      return res.status(400).json({ success: false, message: 'Unable to calculate order amount.' });
+      return res.status(400).json({ success: false, message: 'Unable to calculate order amount from cart or order.' });
     }
 
     const amountInPaise = Math.round(Number(finalAmount) * 100);
