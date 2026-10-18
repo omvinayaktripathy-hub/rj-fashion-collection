@@ -210,6 +210,49 @@
       color: #dc2626 !important;
     }
 
+    /* Expand & Multi-Angle Instruction Pill */
+    .fk-expand-pill {
+      position: absolute !important;
+      bottom: 16px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: rgba(15, 23, 42, 0.82) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      color: #ffffff !important;
+      font-size: 0.8rem !important;
+      font-weight: 600 !important;
+      padding: 7px 18px !important;
+      border-radius: 30px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      z-index: 4 !important;
+      pointer-events: none !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      white-space: nowrap !important;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .fk-main-image-container:hover .fk-expand-pill {
+      background: rgba(114, 19, 42, 0.95) !important;
+      border-color: rgba(197, 160, 89, 0.6) !important;
+      transform: translateX(-50%) translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(114, 19, 42, 0.45) !important;
+    }
+    [data-theme="dark"] .fk-expand-pill,
+    .dark-theme .fk-expand-pill {
+      background: rgba(21, 21, 32, 0.9) !important;
+      color: #F8FAFC !important;
+      border: 1px solid rgba(197, 160, 89, 0.4) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+    }
+    [data-theme="dark"] .fk-main-image-container:hover .fk-expand-pill,
+    .dark-theme .fk-main-image-container:hover .fk-expand-pill {
+      background: rgba(197, 160, 89, 0.95) !important;
+      color: #0F172A !important;
+    }
+
     /* Clothing Angles Switcher */
     .fk-angle-switcher-row {
       margin-top: 14px;
