@@ -2,24 +2,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions for Row Level Security & RBAC
+    // ===================================================================
+    // HELPER FUNCTIONS: RBAC & IDENTITY VERIFICATION
+    // ===================================================================
+
     function isAuthenticated() {
       return request.auth != null;
-    }
-
-    function isSuperAdmin() {
-      return isAuthenticated() && (
-        request.auth.uid == "aJC901OkCjU5UvqUUF9tvaqpdbn1" ||
-        request.auth.token.admin == true ||
-        request.auth.token.role == "admin"
-      );
     }
 
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // 1. Products, Categories & Banners: Public read-only, strict Super Admin modification
+    // Server-verified administrator authorization:
+    // Requires authenticated token with admin custom claim OR verified master admin UID
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        request.auth.token.role == "admin" ||
+        request.auth.uid == "aJC901OkCjU5UvqUUF9tvaqpdbn1"
+      );
+    }
+
+    // ===================================================================
+    // 1. PUBLIC STOREFRONT DATA (CATALOG, CATEGORIES, BANNERS)
+    // Public read-only; strict administrator write authorization
+    // ===================================================================
+
     match /products/{productId} {
       allow read: if true;
       allow write: if isSuperAdmin();
@@ -35,35 +44,74 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
-    // 2. Orders: Strict Input Validation + Anti-IDOR Customer Isolation
+    // ===================================================================
+    // 2. ORDERS & TRANSACTIONS
+    // Anti-IDOR customer isolation; prevent client price or status tampering
+    // ===================================================================
+
     match /orders/{orderId} {
-      // Validate customer order payload to prevent forged prices or corrupted schemas
-      allow create: if request.resource.data.keys().hasAll(['order_number', 'total', 'customer_name', 'customer_phone', 'items'])
-                    && request.resource.data.total is number 
-                    && request.resource.data.total >= 0
-                    && request.resource.data.items is list
-                    && request.resource.data.items.size() > 0;
-      
-      // User can only view their own order; Admin can view all
+      // Authenticated customer can place order with their own UID and valid schema
+      allow create: if isAuthenticated() &&
+                    request.resource.data.userId == request.auth.uid &&
+                    request.resource.data.keys().hasAll(['order_number', 'total', 'customer_name', 'customer_phone', 'items']) &&
+                    request.resource.data.total is number &&
+                    request.resource.data.total >= 0 &&
+                    request.resource.data.items is list &&
+                    request.resource.data.items.size() > 0;
+
+      // Customer can ONLY view their own orders; Admin can view all store orders
       allow read: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
-      
-      // Status & Order management restricted to Admin (Prevents customer tampering)
+
+      // Order status transitions (Packed, Shipped, Delivered, Cancelled) & payment status
+      // MUST be performed by server-verified administrators only
       allow update: if isSuperAdmin();
       allow delete: if isSuperAdmin();
     }
 
-    // 3. Customer User Profiles: Strict User ID Isolation
+    // ===================================================================
+    // 3. CUSTOMER USER PROFILES
+    // Anti-Privilege Escalation: Customers CANNOT edit role, isAdmin, or permissions
+    // ===================================================================
+
     match /users/{userId} {
-      allow read, write: if isSuperAdmin() || isOwner(userId);
+      allow read: if isSuperAdmin() || isOwner(userId);
+
+      // Self-registration: prevent elevating role during creation
+      allow create: if isOwner(userId) && (
+        !request.resource.data.keys().hasAny(['role', 'isAdmin', 'customClaims', 'permissions']) ||
+        request.resource.data.role == 'customer'
+      );
+
+      // Profile updates: allow editing name, phone, etc., but reject role modification
+      allow update: if isSuperAdmin() || (
+        isOwner(userId) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isAdmin', 'customClaims', 'permissions'])
+      );
+
+      allow delete: if isSuperAdmin();
     }
 
-    // 4. Addresses: Anti-IDOR (Users can ONLY view, update, delete their own addresses)
+    // ===================================================================
+    // 4. CUSTOMER ADDRESSES
+    // Anti-IDOR: Users can strictly access ONLY their own delivery addresses
+    // ===================================================================
+
     match /addresses/{addressId} {
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow read: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow update: if isSuperAdmin() || (
+        isAuthenticated() &&
+        resource.data.userId == request.auth.uid &&
+        request.resource.data.userId == resource.data.userId
+      );
+      allow delete: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
     }
 
-    // 5. Cloud Shopping Carts & Wishlists: Strict Owner Isolation
+    // ===================================================================
+    // 5. CARTS & WISHLISTS
+    // User-isolated cloud storage
+    // ===================================================================
+
     match /carts/{cartId} {
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
@@ -74,31 +122,65 @@ service cloud.firestore {
       allow read, update, delete: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
     }
 
-    // 6. Contact Inquiries & Feedback: Public submission with basic validation, Admin only view
+    // ===================================================================
+    // 6. PRIVATE TRY-ON SESSIONS & RESULTS
+    // Customer uploaded photos and generated garments are strictly private
+    // ===================================================================
+
+    match /tryon/{tryonId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+
+    match /tryon_results/{resultId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+
+    // ===================================================================
+    // 7. INQUIRIES & CONTACT MESSAGES
+    // Public submission with input validation; Admin-only retrieval
+    // ===================================================================
+
     match /inquiries/{inquiryId} {
-      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message'])
-                    && request.resource.data.name is string
-                    && request.resource.data.email is string
-                    && request.resource.data.message is string;
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message']) &&
+                    request.resource.data.name is string &&
+                    request.resource.data.name.size() > 0 &&
+                    request.resource.data.email is string &&
+                    request.resource.data.email.size() > 0 &&
+                    request.resource.data.message is string &&
+                    request.resource.data.message.size() > 0;
       allow read, write: if isSuperAdmin();
     }
 
-    // 7. Push Notification Tokens: Token registration allowed; read/harvesting forbidden to public
+    // ===================================================================
+    // 8. PUSH NOTIFICATION TOKENS
+    // Device token registration allowed; token harvesting strictly forbidden
+    // ===================================================================
+
     match /fcm_tokens/{tokenId} {
       allow create, update: if true;
       allow read, delete: if isSuperAdmin();
     }
 
-    // 8. Immutable Admin Audit Logs: Append-only by Admins, Read-only by Admins, No deletions
+    // ===================================================================
+    // 9. IMMUTABLE ADMIN AUDIT LOGS
+    // Append-only and read-only by Super Admins; No modifications or deletions
+    // ===================================================================
+
     match /admin_audit_logs/{logId} {
       allow create: if isSuperAdmin();
       allow read: if isSuperAdmin();
-      allow update, delete: if false; // Immutable audit trail
+      allow update, delete: if false;
     }
 
-    // 9. Default Security Stance: Deny all by default
+    // ===================================================================
+    // 10. DEFAULT SECURITY STANCE: DENY ALL BY DEFAULT
+    // Any unrecognized path or collection is explicitly denied
+    // ===================================================================
+
     match /{document=**} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if false;
     }
   }
 }

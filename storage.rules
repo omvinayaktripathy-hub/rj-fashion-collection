@@ -1,0 +1,92 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ===================================================================
+    // HELPER FUNCTIONS: IDENTITY, ROLES & FILE INTEGRITY
+    // ===================================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Server-verified administrator authorization
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.admin == true ||
+        request.auth.token.role == "admin" ||
+        request.auth.uid == "aJC901OkCjU5UvqUUF9tvaqpdbn1"
+      );
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/(jpeg|jpg|png|webp|avif)');
+    }
+
+    function isUnderSize(maxMb) {
+      return request.resource.size <= maxMb * 1024 * 1024;
+    }
+
+    // ===================================================================
+    // 1. PUBLIC PRODUCT CATALOG & STOREFRONT ASSETS
+    // Public read-only; admin-only writes with size & image MIME validation
+    // ===================================================================
+
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSuperAdmin() && isImage() && isUnderSize(15);
+    }
+
+    match /catalog/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSuperAdmin() && isImage() && isUnderSize(15);
+    }
+
+    match /banners/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSuperAdmin() && isImage() && isUnderSize(15);
+    }
+
+    // ===================================================================
+    // 2. PRIVATE CUSTOMER TRY-ON PHOTOS & GENERATED FITTINGS
+    // Private-by-default; strict user ownership isolation & validation
+    // ===================================================================
+
+    match /users/{userId}/tryon/{fileName} {
+      // Only the owning customer or store administrator can read/download
+      allow read: if isSuperAdmin() || isOwner(userId);
+
+      // Customer can upload their own photo (Max 10MB, strictly image MIME)
+      allow write: if (isSuperAdmin() || isOwner(userId)) && isImage() && isUnderSize(10);
+
+      // Customer can delete their own uploaded photos
+      allow delete: if isSuperAdmin() || isOwner(userId);
+    }
+
+    // ===================================================================
+    // 3. PRIVATE CUSTOMER ORDERS & PAYMENT RECEIPTS
+    // Strictly confidential order invoices, proofs and receipts
+    // ===================================================================
+
+    match /users/{userId}/orders/{orderId}/{fileName} {
+      allow read: if isSuperAdmin() || isOwner(userId);
+      allow write: if (isSuperAdmin() || isOwner(userId)) &&
+                   (isImage() || request.resource.contentType == 'application/pdf') &&
+                   isUnderSize(5);
+      allow delete: if isSuperAdmin();
+    }
+
+    // ===================================================================
+    // 4. DEFAULT SECURITY STANCE: DENY ALL BY DEFAULT
+    // Anonymous listing, downloads, and arbitrary path traversal forbidden
+    // ===================================================================
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

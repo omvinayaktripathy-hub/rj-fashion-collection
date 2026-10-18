@@ -1,6 +1,30 @@
-function requireAuth(req, res, next) {
+const { verifyFirebaseToken } = require('../services/firebase');
+
+async function requireAuth(req, res, next) {
   if (req.session && req.session.user) {
     return next();
+  }
+
+  // Firebase Admin ID token authentication support
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.slice(7).trim();
+    try {
+      const decoded = await verifyFirebaseToken(token);
+      if (decoded) {
+        req.firebaseUser = decoded;
+        if (!req.session) req.session = {};
+        if (!req.session.user) {
+          req.session.user = {
+            id: decoded.uid,
+            email: decoded.email,
+            name: decoded.name || decoded.email,
+            role: decoded.admin || decoded.role === 'admin' ? 'admin' : 'customer'
+          };
+        }
+        return next();
+      }
+    } catch (_) {}
   }
   
   const isApi = (req.baseUrl && req.baseUrl.startsWith('/api')) ||
