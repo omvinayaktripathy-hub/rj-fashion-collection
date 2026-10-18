@@ -836,6 +836,24 @@
           </div>
         </div>
 
+                <!-- CARD 3.5: LUXURY GIFT PACKAGING & GREETING CARD -->
+        <div class="checkout-section-card anim-fade-in anim-delay-3" style="background: var(--deliv-card-bg); border: 1px solid var(--deliv-card-border); border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+          <label style="display: flex; align-items: flex-start; gap: 14px; cursor: pointer;">
+            <input type="checkbox" id="gift-wrap-checkbox" onchange="toggleGiftOption(this)" style="width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary);">
+            <div style="flex: 1;">
+              <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c5a059" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                <span>Add Complimentary Luxury Gift Packaging &amp; Greeting Card</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--deliv-text-secondary); margin: 6px 0 0 0; line-height: 1.4;">Complimentary royal gold-ribbon festive gift box with a personalized handwritten greeting card.</p>
+            </div>
+          </label>
+          <div id="gift-message-box" style="display: none; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--deliv-card-border);">
+            <label for="gift-message-text" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--deliv-text-primary); margin-bottom: 6px;">Personalized Greeting Message:</label>
+            <textarea id="gift-message-text" oninput="saveGiftMessage(this.value)" placeholder="Write your personalized greeting message here (e.g., Wishing you endless joy and celebration!)..." rows="2" maxlength="250" style="width: 100%; padding: 10px 14px; border: 1px solid var(--deliv-card-border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; background: var(--deliv-bg-subtle, rgba(0,0,0,0.03)); color: var(--deliv-text-primary); outline: none;"></textarea>
+          </div>
+        </div>
+
         <!-- CARD 4: PAYMENT OPTIONS -->
         <div class="checkout-section-card anim-fade-in anim-delay-4">
           <div class="checkout-card-header">
@@ -979,7 +997,7 @@
             <li><a href="/categories.html">Categories</a></li>
             <li><a href="/shop.html?category=sarees">Silk Sarees</a></li>
             <li><a href="/shop.html?category=jewelry">Jewelry</a></li>
-            <li><a href="/shop.html?offer=true">Festive Offers</a></li>
+            <li><a href="/shop.html?category=accessories">Bags & Gifts</a></li>
           </ul>
         </div>
         <div class="footer-col">

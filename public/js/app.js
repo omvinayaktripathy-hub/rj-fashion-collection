@@ -617,3 +617,47 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+
+
+
+
+// Global Gifting Option Handler & Persistence
+function toggleGiftOption(checkbox) {
+  const msgBox = document.getElementById('gift-message-box');
+  if (msgBox) {
+    msgBox.style.display = checkbox.checked ? 'block' : 'none';
+  }
+  try {
+    sessionStorage.setItem('rjfc_gift_packaging', checkbox.checked ? 'true' : 'false');
+    const msgText = document.getElementById('gift-message-text');
+    if (msgText && checkbox.checked) {
+      msgText.focus();
+    }
+  } catch (_) {}
+}
+
+function saveGiftMessage(val) {
+  try {
+    sessionStorage.setItem('rjfc_gift_message', val || '');
+  } catch (_) {}
+}
+
+function initGiftOptionUI() {
+  try {
+    const isGift = sessionStorage.getItem('rjfc_gift_packaging') === 'true';
+    const giftMsg = sessionStorage.getItem('rjfc_gift_message') || '';
+    const checkbox = document.getElementById('gift-wrap-checkbox');
+    const msgBox = document.getElementById('gift-message-box');
+    const msgText = document.getElementById('gift-message-text');
+
+    if (checkbox && isGift) {
+      checkbox.checked = true;
+      if (msgBox) msgBox.style.display = 'block';
+      if (msgText && giftMsg) msgText.value = giftMsg;
+    }
+  } catch (_) {}
+}
+
+window.toggleGiftOption = toggleGiftOption;
+window.saveGiftMessage = saveGiftMessage;
+document.addEventListener('DOMContentLoaded', initGiftOptionUI);
