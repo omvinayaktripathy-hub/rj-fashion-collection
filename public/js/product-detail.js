@@ -219,12 +219,6 @@ function renderProduct(p) {
   // Calculate estimated delivery date: 3 business days from now
   const estDate = getEstimatedDeliveryDate(3);
 
-  // Virtual Try-On Category Eligibility
-  const prodCat = (p.category_slug || p.category_name || p.subcategory || p.category || '').toLowerCase();
-  const isTryOnEligible = typeof window.isTryonEligibleCategory === 'function'
-    ? window.isTryonEligibleCategory(prodCat)
-    : ['saree', 'kurti', 'dress', 'lehenga', 'ethnic', 'silk'].some(c => prodCat.includes(c));
-
   const container = document.getElementById('product-detail-container');
 
   container.innerHTML = `
@@ -239,11 +233,7 @@ function renderProduct(p) {
             <!-- Badges -->
             ${p.discount > 0 ? `<div class="fk-discount-ribbon">↓ ${p.discount}% OFF</div>` : ''}
             
-            ${isTryOnEligible ? `
-              <div class="rj-tryon-float-badge" onclick="event.stopPropagation(); openRjTryonStudio(currentProduct)" title="Try this outfit with AI">
-                <span>✨</span> Try On AI
-              </div>
-            ` : ''}
+            
             <!-- Floating Heart / Wishlist & Share buttons -->
             <div class="fk-img-floating-actions" onclick="event.stopPropagation()">
               <button class="fk-float-btn fk-wishlist-toggle ${isWishlisted ? 'active' : ''}" onclick="toggleDetailWishlist(${p.id}, this)" title="Add to Wishlist" id="fk-wishlist-btn">
@@ -300,15 +290,6 @@ function renderProduct(p) {
                 `;
               }).join('')}
             </div>
-          ` : ''}
-
-          <!-- ✨ Try It On with AI Button (Eligible Categories) -->
-          ${isTryOnEligible ? `
-            <button type="button" class="rj-tryon-trigger-btn" onclick="openRjTryonStudio(currentProduct)">
-              <span class="rj-tryon-sparkle">✨</span>
-              <span class="rj-tryon-btn-text">Try It On with AI</span>
-              <span class="rj-tryon-badge-pill">Virtual Fitting Room</span>
-            </button>
           ` : ''}
 
           <!-- Flipkart Dual Action Buttons (Desktop / Tablet) -->
@@ -644,12 +625,7 @@ function renderProduct(p) {
 
     <!-- MOBILE STICKY BOTTOM ACTION BAR (Flipkart style) -->
     <div class="fk-mobile-bottom-bar">
-      ${isTryOnEligible ? `
-        <button type="button" class="fk-cta-btn" onclick="openRjTryonStudio(currentProduct)" style="background: linear-gradient(135deg, #700037, #900d4c); color: #fff; border: 1px solid #c5a059; flex: 0.9;">
-          <span class="fk-cta-icon">✨</span>
-          <span>TRY ON AI</span>
-        </button>
-      ` : ''}
+      
       <button type="button" 
         class="fk-cta-btn fk-btn-cart ${isOutOfStock ? 'disabled' : ''}" 
         onclick="addCurrentProductToCart()" 
