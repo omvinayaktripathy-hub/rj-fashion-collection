@@ -290,8 +290,9 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
       });
     }
 
-    // 7. Generate session token for privacy isolation
+    // 7. Generate session token for privacy isolation and diagnostic request tracking
     const sessionToken = crypto.randomBytes(24).toString('hex');
+    const requestId = 'req_' + crypto.randomBytes(6).toString('hex');
     const personBuffer = fs.readFileSync(uploadedFile.path);
     const personFilename = path.basename(uploadedFile.path);
 
@@ -301,6 +302,18 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
     let modelName = 'IDM-VTON / CatVTON';
     let processingTimeMs = 0;
 
+    // Build faithful visual description from verified product attributes (avoids marketing color contradictions)
+    const visualAttributes = [
+      product.name,
+      product.material || product.fabric || '',
+      product.pattern || '',
+      product.fit || ''
+    ].filter(Boolean).join(', ');
+    const garmentDes = visualAttributes || product.name;
+
+    // Safe diagnostic logging (Zero PII, no secrets, safe metadata only)
+    console.log(`[RJ-TRYON-DIAG] RequestID=${requestId} ProductID=${product.id} ProductName="${product.name}" Category="${prodCatSlug || 'sarees'}" PersonSize=${personBuffer.length}B GarmentSize=${garmentBuffer.length}B Status=dispatched`);
+
     const startTime = Date.now();
 
     try {
@@ -309,13 +322,21 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
       formData.append('person_image', new Blob([personBuffer], { type: uploadedFile.mimetype }), personFilename);
       formData.append('garment_image', new Blob([garmentBuffer], { type: 'image/jpeg' }), garmentFilename);
       formData.append('category', prodCatSlug || 'sarees');
-      formData.append('garment_des', `${product.name} - ${product.description || ''}`.substring(0, 100));
+      formData.append('garment_des', garmentDes.substring(0, 150));
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout for ZeroGPU queue
 
+      const aiHeaders = {
+        'X-Request-Id': requestId
+      };
+      if (settings.hf_token) {
+        aiHeaders['X-Hf-Token'] = settings.hf_token;
+      }
+
       const aiResponse = await fetch(`${inferenceUrl}/tryon`, {
         method: 'POST',
+        headers: aiHeaders,
         body: formData,
         signal: controller.signal
       });
@@ -329,7 +350,7 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
         let errJson = null;
         try { errJson = await aiResponse.json(); } catch (_) {}
         const detailMsg = errJson?.detail || 'AI Virtual Try-On service returned an error.';
-        console.warn(`[RJ-TRYON] AI service error (${aiResponse.status}): ${detailMsg}`);
+        console.warn(`[RJ-TRYON-DIAG] RequestID=${requestId} AI service error (${aiResponse.status}): ${detailMsg}`);
         
         if (uploadedFile && fs.existsSync(uploadedFile.path)) {
           fs.unlinkSync(uploadedFile.path);
@@ -340,7 +361,7 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
         });
       }
     } catch (aiErr) {
-      console.warn(`[RJ-TRYON] AI service request failed: ${aiErr.message}`);
+      console.warn(`[RJ-TRYON-DIAG] RequestID=${requestId} AI service request failed: ${aiErr.message}`);
       if (uploadedFile && fs.existsSync(uploadedFile.path)) {
         fs.unlinkSync(uploadedFile.path);
       }
@@ -372,6 +393,8 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
 
     const originalPublicUrl = `/uploads/tryon/temp/${path.basename(uploadedFile.path)}`;
 
+    console.log(`[RJ-TRYON-DIAG] RequestID=${requestId} Status=completed Duration=${processingTimeMs}ms Engine="${modelName}" OutputSize=${resultBuffer.length}B`);
+
     // 8. Log attempt to database (Zero PII - privacy compliant)
     db.prepare(`
       INSERT INTO tryon_logs (
@@ -393,7 +416,7 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
       resultPublicUrl
     );
 
-    // 9. Return isolated result to customer
+    // 9. Return isolated result to customer with diagnostic metadata
     return res.json({
       success: true,
       token: sessionToken,
@@ -401,6 +424,14 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
       processing_time_ms: processingTimeMs,
       original_url: originalPublicUrl,
       result_url: resultPublicUrl,
+      diagnostics: {
+        request_id: requestId,
+        product_id: product.id,
+        product_name: product.name,
+        category: prodCatName || prodCatSlug,
+        engine: modelName,
+        processing_time_ms: processingTimeMs
+      },
       product: {
         id: product.id,
         name: product.name,
@@ -416,7 +447,7 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
     if (uploadedFile && fs.existsSync(uploadedFile.path)) {
       try { fs.unlinkSync(uploadedFile.path); } catch (_) {}
     }
-    console.error('[RJ-TRYON] Pipeline Error:', error);
+    console.error('[RJ-TRYON-DIAG] Pipeline Error:', error);
     return res.status(500).json({
       success: false,
       message: 'An error occurred during virtual try-on processing. Please try again with a clear photo.'
@@ -563,7 +594,8 @@ router.post('/admin/settings', requireAdmin, (req, res) => {
       allowed_categories,
       max_upload_size_mb,
       daily_limit_per_user,
-      retention_hours
+      retention_hours,
+      hf_token
     } = req.body;
 
     let catJson = allowed_categories;
@@ -579,6 +611,7 @@ router.post('/admin/settings', requireAdmin, (req, res) => {
           max_upload_size_mb = ?,
           daily_limit_per_user = ?,
           retention_hours = ?,
+          hf_token = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = 1
     `).run(
@@ -587,7 +620,8 @@ router.post('/admin/settings', requireAdmin, (req, res) => {
       catJson || '["sarees","kurtis","dresses","lehengas","ethnic-wear"]',
       parseInt(max_upload_size_mb, 10) || 8,
       parseInt(daily_limit_per_user, 10) || 25,
-      parseInt(retention_hours, 10) || 2
+      parseInt(retention_hours, 10) || 2,
+      hf_token ? hf_token.trim() : null
     );
 
     res.json({ success: true, message: 'Virtual Try-On settings updated successfully.' });

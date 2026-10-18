@@ -262,6 +262,7 @@ function initSchema() {
   // Initialize default try-on settings row if missing
   try {
     db.exec(`INSERT OR IGNORE INTO tryon_settings (id, enabled) VALUES (1, 1);`);
+    db.exec(`ALTER TABLE tryon_settings ADD COLUMN hf_token TEXT`);
   } catch (_) {}
 
   // Migrations for orders table payment identifiers
@@ -355,7 +356,7 @@ function seedInitialData() {
         'Royal Kanjivaram Pure Silk Zari Saree',
         'royal-kanjivaram-pure-silk-zari-saree',
         1,
-        'Exquisite ruby maroon Kanjivaram pure silk saree woven with genuine gold zari borders and intricate floral pallu motifs. Includes matching unstitched blouse piece.',
+        'Exquisite royal purple Kanjivaram pure silk saree woven with genuine gold floral zari borders, rich pallu motifs, and contrasting black unstitched blouse piece. Perfect for weddings and grand celebrations.',
         'Pure Kanjivaram Silk with Gold Zari',
         'Traditional Temple Zari Motif',
         'Dry Clean Only. Store wrapped in muslin cloth.',
@@ -375,7 +376,7 @@ function seedInitialData() {
         1,
         1,
         JSON.stringify(['Free Size (5.5m + 0.8m Blouse)']),
-        JSON.stringify(['Ruby Maroon', 'Emerald Green', 'Royal Blue'])
+        JSON.stringify(['Royal Purple', 'Ruby Maroon', 'Emerald Green', 'Royal Blue'])
       ],
       [
         'Banarasi Handwoven Georgette Saree',
