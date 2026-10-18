@@ -9,7 +9,7 @@ let countdownInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initCheckoutPage();
-  initDispatchCountdown();
+  // dispatch countdown disabled
 
   // Payment radio card styling & animated toggle
   document.querySelectorAll('input[name="checkout_payment_method"]').forEach(radio => {
@@ -83,35 +83,7 @@ async function initCheckoutPage() {
 // ─────────────────────────────────────────────────────────────
 // Live Dispatch Countdown Timer
 // ─────────────────────────────────────────────────────────────
-function initDispatchCountdown() {
-  const timerEl = document.getElementById('dispatch-countdown-timer');
-  if (!timerEl) return;
-
-  // Set target to end of dispatch window (e.g. 2 hours 45 mins from session)
-  let targetTime = sessionStorage.getItem('rjfc_dispatch_deadline');
-  if (!targetTime) {
-    targetTime = Date.now() + (2 * 60 * 60 * 1000) + (38 * 60 * 1000) + (45 * 1000);
-    sessionStorage.setItem('rjfc_dispatch_deadline', targetTime);
-  } else {
-    targetTime = Number(targetTime);
-  }
-
-  function updateTimer() {
-    const diff = Math.max(0, targetTime - Date.now());
-    const h = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
-    const m = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-    const s = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
-    timerEl.textContent = `${h}h : ${m}m : ${s}s`;
-
-    if (diff <= 0) {
-      clearInterval(countdownInterval);
-      timerEl.textContent = 'Guaranteed Tomorrow';
-    }
-  }
-
-  updateTimer();
-  countdownInterval = setInterval(updateTimer, 1000);
-}
+function initDispatchCountdown() {}
 
 // ─────────────────────────────────────────────────────────────
 // Resolve Delivery Address
