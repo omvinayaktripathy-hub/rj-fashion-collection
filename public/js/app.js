@@ -314,6 +314,7 @@ function initTheme() {
   applyTheme(currentTheme);
 }
 
+
 function applyTheme(theme) {
   const isDark = theme === 'dark';
   if (isDark) {
@@ -341,51 +342,23 @@ window.updateAllThemeToggles = updateThemeToggleUI;
 
 function updateThemeToggleUI(theme) {
   const isDark = theme === 'dark';
+  const sunSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+  const moonSvg = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
 
-  // 1. Update all header theme switch slider containers
-  const switchContainers = document.querySelectorAll('.theme-switch-container');
-  switchContainers.forEach(container => {
-    const text = container.querySelector('.theme-mode-text');
-    if (text) text.textContent = isDark ? 'Dark Mode' : 'Light Mode';
-    container.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
-    container.setAttribute('aria-checked', isDark ? 'true' : 'false');
+  document.querySelectorAll('.theme-mode-text, .theme-toggle-text').forEach(el => {
+    el.textContent = isDark ? 'Light Mode' : 'Dark Mode';
   });
-
-  // 2. Update floating theme quick toggles
-  const floatingBtns = document.querySelectorAll('.floating-theme-toggle');
-  floatingBtns.forEach(btn => {
-    const icon = btn.querySelector('.floating-theme-icon');
-    const text = btn.querySelector('.floating-theme-text');
-    if (isDark) {
-      if (icon) // sun
-      if (text) text.textContent = 'Light Mode';
-      btn.setAttribute('title', 'Switch to Light Mode');
-    } else {
-      if (icon) // moon
-      if (text) text.textContent = 'Dark Mode';
-      btn.setAttribute('title', 'Switch to Dark Mode');
-    }
+  document.querySelectorAll('.theme-toggle-icon').forEach(el => {
+    el.innerHTML = isDark ? sunSvg : moonSvg;
   });
-
-  // 3. Fallback for any legacy buttons
-  const btns = document.querySelectorAll('.theme-toggle-btn');
-  btns.forEach(btn => {
-    const iconSpan = btn.querySelector('.theme-toggle-icon');
-    const textSpan = btn.querySelector('.theme-toggle-text');
-    if (isDark) {
-      if (iconSpan) // sun
-      if (textSpan) textSpan.textContent = 'Light Mode';
-      btn.setAttribute('title', 'Switch to Light Mode');
-    } else {
-      if (iconSpan) // moon
-      if (textSpan) textSpan.textContent = 'Dark Mode';
-      btn.setAttribute('title', 'Switch to Dark Mode');
-    }
+  document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+    btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+    btn.setAttribute('aria-label', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
   });
 }
 
-// Run immediately
-initTheme();
+// Run initial check
+if (typeof initTheme === "function") initTheme();
 
 // ===================================================================
 // AUTOMATIC DEVICE & SCREEN ADAPTATION SYSTEM (MOBILE, TAB, PC)
