@@ -57,11 +57,14 @@
       </div>
 
       <div class="header-actions">
-        <!-- Dark Mode Toggle Button -->
-        <button class="theme-toggle-btn" onclick="toggleTheme()" type="button" aria-label="Toggle Dark and Light Mode" title="Toggle Dark/Light Mode">
-          <span class="theme-toggle-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+        <!-- Luxury Interactive Dark Mode Toggle Slider -->
+        <div class="theme-switch-container" onclick="toggleTheme()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}" role="switch" aria-checked="false" tabindex="0" title="Toggle Dark/Light Mode">
+          <span class="theme-label-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
           <span class="theme-mode-text">Dark Mode</span>
-        </button>
+          <div class="theme-switch-track">
+            <div class="theme-switch-thumb"></div>
+          </div>
+        </div>
         <div class="auth-nav-slot">
           <a href="/login.html" class="action-btn">
             <span><svg class="action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Account</span>
