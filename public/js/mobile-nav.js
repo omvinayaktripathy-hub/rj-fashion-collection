@@ -157,7 +157,7 @@
         <div class="rj-drawer-theme-toggle" onclick="if(window.toggleTheme) window.toggleTheme();">
           <span>🌓 Switch Dark / Light Theme</span>
         </div>
-        <p class="rj-drawer-copyright">© 2026 RJ Fashion Collection. Handcrafted Indian Elegance.</p>
+        <p class="rj-drawer-copyright">© 2026 RJ Fashion Collection. Premium Indian Elegance.</p>
       </div>
     `;
 

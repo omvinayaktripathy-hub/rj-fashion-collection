@@ -508,7 +508,7 @@ function renderProduct(p) {
             </div>
             <div class="fk-specs-row">
               <div class="fk-specs-col fk-specs-col-key">Pattern & Work</div>
-              <div class="fk-specs-col fk-specs-col-val">${p.pattern || 'Authentic Handcrafted Motif'}</div>
+              <div class="fk-specs-col fk-specs-col-val">${p.pattern || 'Authentic Festive Motif'}</div>
             </div>
             <div class="fk-specs-row">
               <div class="fk-specs-col fk-specs-col-key">Care Instructions</div>

@@ -159,7 +159,7 @@ async function loadCart() {
               <div>
                 <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 6px 0; color: #212121; line-height: 1.4;">
                   <a href="/product.html?id=${prodId}" style="color: inherit; text-decoration: none;">
-                    ${item.name || 'Handcrafted Luxury Wear'}
+                    ${item.name || 'Designer Ethnic Wear'}
                   </a>
                 </h3>
                 <div style="font-size: 0.85rem; color: #878787; margin-bottom: 8px;">
@@ -242,7 +242,7 @@ async function loadCart() {
 
         <div class="fk-trust-badge">
           <span style="font-size: 1.4rem;">🛡️</span>
-          <div>Safe and Secure Payments. Easy checkout. 100% Authentic Handcrafted Wear.</div>
+          <div>Safe and Secure Payments. Easy checkout. 100% Authentic Designer Wear.</div>
         </div>
       `;
     }

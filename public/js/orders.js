@@ -113,7 +113,7 @@ async function loadMyOrders() {
         <!-- Items in Order -->
         <div class="order-items-container">
           ${items.map(item => {
-            const name = item.name || item.product_name || 'Handcrafted Luxury Wear';
+            const name = item.name || item.product_name || 'Designer Ethnic Wear';
             const img = item.image || item.product_image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80';
             const size = item.size || 'Free Size';
             const qty = item.quantity || 1;

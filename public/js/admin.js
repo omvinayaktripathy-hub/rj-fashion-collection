@@ -513,7 +513,7 @@ function fetchAllOrdersRealtime() {
         customer_phone: '+91 98301 54782',
         delivery_address: 'Flat 4B, Salt Lake Sector 2, Kolkata, WB - 700091',
         shipping_address: 'Flat 4B, Salt Lake Sector 2, Kolkata, WB - 700091',
-        items: [{ name: "Men's Handcrafted Silk Sherwani Set", price: 4999, quantity: 1, size: 'L' }],
+        items: [{ name: "Men's Designer Silk Sherwani Set", price: 4999, quantity: 1, size: 'L' }],
         total: 4999,
         payment_method: 'Credit Card',
         status: 'Shipped',
@@ -1913,7 +1913,7 @@ async function loadAdminBanners() {
         {
           id: 2,
           title: "Bridal & Heritage Kundan Jewelry",
-          subtitle: "Handcrafted Temple & Royal Polki sets for extraordinary moments",
+          subtitle: "Royal Temple & Royal Polki sets for extraordinary moments",
           image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=1600&q=85",
           link: "/shop.html?category=jewelry",
           active: 1
@@ -1929,7 +1929,7 @@ async function loadAdminBanners() {
         {
           id: 4,
           title: "Men's Royal Sherwanis & Kurtas",
-          subtitle: "Regal bandhgalas, raw silk kurtas, and handcrafted Nehru jackets",
+          subtitle: "Regal bandhgalas, raw silk kurtas, and designer Nehru jackets",
           image: "https://images.unsplash.com/photo-1597983073493-88cd35cf93b0?auto=format&fit=crop&w=1600&q=85",
           link: "/shop.html?department=men",
           active: 1
@@ -2439,7 +2439,7 @@ function buildInvoiceHTML(o, forDownload = false) {
                 <td style="padding: 12px; color: #64748b;">${idx + 1}</td>
                 <td style="padding: 12px; font-weight: 600; color: #1e293b;">
                   <div>${title}</div>
-                  <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Authentic Artisan Handcrafted</div>
+                  <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Premium Quality Guaranteed</div>
                 </td>
                 <td style="padding: 12px; color: #475569;">${it.size || 'Free Size'}</td>
                 <td style="padding: 12px; text-align: center; font-weight: 700;">${qty}</td>
@@ -2476,7 +2476,7 @@ function buildInvoiceHTML(o, forDownload = false) {
 
       <!-- Footer / Auth Sign -->
       <div style="margin-top: 28px; padding-top: 16px; border-top: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #94a3b8;">
-        <div>Computer generated invoice • 100% Genuine Handcrafted Ethnic Wear</div>
+        <div>Computer generated invoice • 100% Genuine Designer Ethnic Wear</div>
         <div style="font-weight: 700; color: #7a003c;">RJ FASHION COLLECTION DIRECT</div>
       </div>
     </div>
