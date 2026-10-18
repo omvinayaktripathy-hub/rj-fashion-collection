@@ -143,14 +143,14 @@ function renderAuthNav(user) {
       container.innerHTML = `
         <div class="user-dropdown-wrap" style="position: relative; display: inline-block;">
           <a href="/account.html" class="action-btn" title="My Account">
-            <span>👤 ${safeFirstName}</span>
+            <span><svg class="action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>${safeFirstName}</span>
           </a>
         </div>
       `;
     } else {
       container.innerHTML = `
         <a href="/login.html" class="action-btn">
-          <span>👤 Login / Account</span>
+          <span><svg class="action-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>Account</span>
         </a>
       `;
     }
@@ -280,7 +280,7 @@ async function toggleWishlist(productId, btnElement) {
     localStorage.setItem('rjfc_wishlist', JSON.stringify(localIds));
     if (btnElement) {
       btnElement.classList.remove('active');
-      btnElement.innerHTML = '♡';
+      btnElement.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
     }
     showToast('Removed from wishlist', 'info');
     updateWishlistCount();
@@ -299,9 +299,9 @@ async function toggleWishlist(productId, btnElement) {
     }
     if (btnElement) {
       btnElement.classList.add('active');
-      btnElement.innerHTML = '♥';
+      btnElement.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
     }
-    showToast('Added to wishlist! ❤️', 'success');
+    showToast('Added to Wishlist!', 'success');
     updateWishlistCount();
   }
 }
@@ -357,11 +357,11 @@ function updateThemeToggleUI(theme) {
     const icon = btn.querySelector('.floating-theme-icon');
     const text = btn.querySelector('.floating-theme-text');
     if (isDark) {
-      if (icon) icon.textContent = '☀️';
+      if (icon) // sun
       if (text) text.textContent = 'Light Mode';
       btn.setAttribute('title', 'Switch to Light Mode');
     } else {
-      if (icon) icon.textContent = '🌙';
+      if (icon) // moon
       if (text) text.textContent = 'Dark Mode';
       btn.setAttribute('title', 'Switch to Dark Mode');
     }
@@ -373,11 +373,11 @@ function updateThemeToggleUI(theme) {
     const iconSpan = btn.querySelector('.theme-toggle-icon');
     const textSpan = btn.querySelector('.theme-toggle-text');
     if (isDark) {
-      if (iconSpan) iconSpan.textContent = '☀️';
+      if (iconSpan) // sun
       if (textSpan) textSpan.textContent = 'Light Mode';
       btn.setAttribute('title', 'Switch to Light Mode');
     } else {
-      if (iconSpan) iconSpan.textContent = '🌙';
+      if (iconSpan) // moon
       if (textSpan) textSpan.textContent = 'Dark Mode';
       btn.setAttribute('title', 'Switch to Dark Mode');
     }

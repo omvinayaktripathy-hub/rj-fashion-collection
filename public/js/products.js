@@ -92,7 +92,11 @@ function createProductCard(p) {
         </a>
         ${p.discount > 0 ? `<span class="badge-discount">${p.discount}% OFF</span>` : ''}
         ${isOutOfStock ? `<span class="badge-out-of-stock">OUT OF STOCK</span>` : (isLowStock ? `<span class="badge-stock" style="background:#d97706; color:#ffffff;">Only ${p.stock} left</span>` : '')}
-        <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${p.id}, this)" title="Add to Wishlist" style="${isWishlisted ? 'color:var(--primary);' : ''}">${isWishlisted ? '♥' : '♡'}</button>
+        <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${p.id}, this)" title="Add to Wishlist" style="${isWishlisted ? 'color:var(--primary);' : ''}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </button>
         <button class="quick-view-btn" onclick="openQuickView(${p.id}, event)" title="Quick View">Quick View</button>
       </div>
 
@@ -100,10 +104,10 @@ function createProductCard(p) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
           <span class="product-brand" style="margin-bottom: 0;">${escapeHtml(p.brand || 'RJ Collection')}</span>
           ${isOutOfStock 
-            ? `<span class="stock-status-pill stock-pill-out">🔴 Out of Stock</span>` 
+            ? `<span class="stock-status-pill stock-pill-out"><span class="status-dot dot-out"></span>Sold Out</span>` 
             : (isLowStock 
-                ? `<span class="stock-status-pill stock-pill-low">⚡ Only ${p.stock} left</span>` 
-                : `<span class="stock-status-pill stock-pill-in">🟢 In Stock</span>`)}
+                ? `<span class="stock-status-pill stock-pill-low"><span class="status-dot dot-low"></span>Only ${p.stock} left</span>` 
+                : `<span class="stock-status-pill stock-pill-in"><span class="status-dot dot-in"></span>In Stock</span>`)}
         </div>
         <h3 class="product-title">
           <a href="/product.html?id=${p.id}" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</a>
@@ -116,7 +120,7 @@ function createProductCard(p) {
         ` : ''}
 
         <div class="product-rating">
-          <span class="rating-badge">★ ${p.rating ? Number(p.rating).toFixed(1) : '4.5'}</span>
+          <span class="rating-badge">&#9733; ${p.rating ? Number(p.rating).toFixed(1) : '4.5'}</span>
           <span class="rating-count">(${p.reviews_count || 12})</span>
         </div>
 
@@ -130,12 +134,18 @@ function createProductCard(p) {
           <button class="btn btn-card btn-outline-primary"
             onclick="addToCart(${p.id})"
             ${isOutOfStock ? 'disabled' : ''}>
-            ${isOutOfStock ? 'Out of Stock' : '🛒 Add'}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px;">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
           </button>
           <button class="btn btn-card btn-primary"
             onclick="quickBuy(${p.id})"
             ${isOutOfStock ? 'disabled' : ''}>
-            ${isOutOfStock ? 'Sold Out' : '⚡ Buy Now'}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px;">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>${isOutOfStock ? 'Sold Out' : 'Buy Now'}
           </button>
         </div>
       </div>

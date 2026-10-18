@@ -760,18 +760,18 @@ button {
 }
 
 .btn-primary {
-  background: var(--dark);
-  color: #ffffff;
-  border: 1px solid var(--dark);
-  box-shadow: 0 4px 14px rgba(41, 35, 31, 0.16);
+  background: var(--primary);
+  color: #ffffff !important;
+  border: 1px solid var(--primary);
+  box-shadow: 0 4px 14px rgba(114, 19, 42, 0.2);
 }
 
 .btn-primary:hover {
-  background: #171311;
-  border-color: #171311;
-  color: #ffffff;
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: #ffffff !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(41, 35, 31, 0.24);
+  box-shadow: 0 6px 18px rgba(114, 19, 42, 0.3);
 }
 
 .btn-gold {
@@ -1055,15 +1055,15 @@ button {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: var(--dark);
-  color: #fff;
+  background: #72132A;
+  color: #ffffff !important;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   padding: 4px 10px;
   border-radius: var(--radius-xs);
   z-index: 2;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(41, 35, 31, 0.2);
+  box-shadow: 0 2px 8px rgba(114, 19, 42, 0.3);
 }
 
 .badge-stock {
@@ -3765,3 +3765,138 @@ body.dark-theme {
   }
 }
 
+
+
+/* ================= LUXURY UI & CONTRAST REFINEMENTS ================= */
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: 0px;
+}
+.dot-in {
+  background: #10B981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+}
+.dot-low {
+  background: #F59E0B;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.7);
+}
+.dot-out {
+  background: #EF4444;
+}
+
+.nav-offer-tag {
+  display: inline-block;
+  background: #BE123C;
+  color: #FFFFFF !important;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  vertical-align: 1px;
+  margin-left: 5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+[data-theme="dark"] .nav-offer-tag,
+.dark-theme .nav-offer-tag {
+  background: #C5A059 !important;
+  color: #0F172A !important;
+}
+
+.theme-label-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  color: #D97706;
+}
+.theme-label-svg.moon-svg {
+  color: #64748B;
+}
+[data-theme="dark"] .theme-label-svg.sun-svg,
+.dark-theme .theme-label-svg.sun-svg {
+  color: #94A3B8;
+}
+[data-theme="dark"] .theme-label-svg.moon-svg,
+.dark-theme .theme-label-svg.moon-svg {
+  color: #DFBA73;
+}
+
+.action-icon {
+  display: inline-block;
+  vertical-align: -3px;
+  margin-right: 5px;
+}
+
+.nav-chevron {
+  display: inline-block;
+  vertical-align: 1px;
+  margin-left: 4px;
+  transition: transform 0.25s ease;
+}
+.has-mega-menu:hover .nav-chevron {
+  transform: rotate(180deg);
+}
+
+/* ================= DARK MODE BUTTONS & BADGES OVERRIDES ================= */
+[data-theme="dark"] .btn-primary,
+.dark-theme .btn-primary {
+  background: #C5A059 !important;
+  color: #0F172A !important;
+  border: 1px solid #DFBA73 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(197, 160, 89, 0.35) !important;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+.dark-theme .btn-primary:hover {
+  background: #DFBA73 !important;
+  color: #000000 !important;
+  border-color: #F3D489 !important;
+  box-shadow: 0 6px 20px rgba(197, 160, 89, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .btn-outline-primary,
+.dark-theme .btn-outline-primary {
+  border: 1.5px solid #C5A059 !important;
+  color: #FFFFFF !important;
+  background: rgba(197, 160, 89, 0.12) !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover,
+.dark-theme .btn-outline-primary:hover {
+  background: #C5A059 !important;
+  color: #0F172A !important;
+  border-color: #C5A059 !important;
+  box-shadow: 0 4px 14px rgba(197, 160, 89, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .badge-discount,
+.dark-theme .badge-discount {
+  background: #BE123C !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] .top-bar,
+.dark-theme .top-bar {
+  background: #0B0B12 !important;
+  color: #E2E8F0 !important;
+  border-bottom: 1px solid #1E293B !important;
+}
+[data-theme="dark"] .top-bar span,
+.dark-theme .top-bar span {
+  color: #DFBA73 !important;
+  font-weight: 700;
+}

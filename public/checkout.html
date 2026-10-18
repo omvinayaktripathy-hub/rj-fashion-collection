@@ -718,7 +718,7 @@
 
   <!-- Top Announcement Bar -->
   <div class="top-bar">
-    <span>🔒 100% SECURE & ENCRYPTED CHECKOUT</span> | Authentic Indian Festive Wear | Express Pan-India Delivery
+    <span>100% SECURE & ENCRYPTED CHECKOUT</span> | Authentic Indian Festive Wear | Express Pan-India Delivery
   </div>
 
   <!-- Luxury Checkout Header -->
@@ -731,16 +731,19 @@
       <div style="display: flex; align-items: center; gap: 20px;">
         <!-- Luxury Interactive Theme Switcher Slider -->
         <div class="theme-switch-container" onclick="toggleTheme()" role="button" tabindex="0" title="Switch Theme">
-          <span class="theme-label-icon">☀️</span>
+          <span class="theme-label-svg sun-svg">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          </span>
           <div class="theme-switch-track">
             <div class="theme-switch-thumb"></div>
           </div>
-          <span class="theme-label-icon">🌙</span>
-          <span class="theme-mode-text">Dark Mode</span>
+          <span class="theme-label-svg moon-svg">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </span>
         </div>
 
         <div style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #10b981; font-weight: 700;">
-          <span style="font-size: 1.1rem;">🛡️</span>
+          <span style="font-size: 1.1rem;"></span>
           <span>100% Safe Payments</span>
         </div>
       </div>
@@ -773,7 +776,7 @@
     <!-- Live Dispatch Countdown Banner -->
     <div class="dispatch-timer-strip anim-fade-in">
       <div class="dispatch-timer-left">
-        <span style="font-size: 1.4rem;">⚡</span>
+        <span style="font-size: 1.4rem;"></span>
         <div>
           <span>Order before midnight for <strong>Guaranteed Free Express Air Dispatch</strong> tomorrow!</span>
         </div>
@@ -792,10 +795,10 @@
         <div class="checkout-section-card anim-fade-in anim-delay-1">
           <div class="checkout-card-header">
             <h2>
-              <span>📍</span> Delivery Address
+              Delivery Address
             </h2>
             <a href="/delivery.html" class="change-link-btn" title="Change Address">
-              ✏️ CHANGE ADDRESS
+              CHANGE ADDRESS
             </a>
           </div>
 
@@ -808,10 +811,10 @@
         <div class="checkout-section-card anim-fade-in anim-delay-2">
           <div class="checkout-card-header">
             <h2>
-              <span>🛍️</span> Order Summary (<span id="checkout-items-count">0</span> items)
+              Order Summary (<span id="checkout-items-count">0</span> items)
             </h2>
             <a href="/cart.html" style="font-size: 0.85rem; color: var(--gold); text-decoration: none; font-weight: 700;">
-              ✏️ Edit Bag
+              Edit Bag
             </a>
           </div>
 
@@ -831,7 +834,6 @@
         <div class="coupon-card-section anim-fade-in anim-delay-3">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="font-size: 0.96rem; font-weight: 800; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px;">
-              <span>🏷️</span>
               <span>Have a Festive Coupon or Promo Code?</span>
             </div>
             <span style="font-size: 0.78rem; font-weight: 700; color: #10b981;">UP TO 10% EXTRA DISCOUNT</span>
@@ -843,8 +845,8 @@
           </div>
 
           <div class="coupon-chips">
-            <span class="coupon-chip" onclick="applyPromoCode('ROYAL10')">✨ Apply ROYAL10 (Save 10% Extra)</span>
-            <span class="coupon-chip" onclick="applyPromoCode('WELCOME500')">🎁 Apply WELCOME500 (Save ₹500)</span>
+            <span class="coupon-chip" onclick="applyPromoCode('ROYAL10')">Apply ROYAL10 (Save 10% Extra)</span>
+            <span class="coupon-chip" onclick="applyPromoCode('WELCOME500')">Apply WELCOME500 (Save ₹500)</span>
           </div>
         </div>
 
@@ -852,7 +854,7 @@
         <div class="checkout-section-card anim-fade-in anim-delay-4">
           <div class="checkout-card-header">
             <h2>
-              <span>💳</span> Payment Options
+              Payment Options
             </h2>
             <span style="font-size: 0.82rem; color: #10b981; font-weight: 700;">✓ 100% Encrypted & Safe</span>
           </div>
@@ -864,7 +866,7 @@
                 <input type="radio" name="checkout_payment_method" value="Cash on Delivery" checked style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
                 <div style="flex: 1;">
                   <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px;">
-                    <span>💵 Cash on Delivery (Pay on Delivery)</span>
+                    <span>Cash on Delivery (Pay on Delivery)</span>
                     <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: 800;">MOST POPULAR</span>
                   </div>
                   <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
@@ -883,7 +885,7 @@
                 <input type="radio" name="checkout_payment_method" value="Stripe" style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
                 <div style="flex: 1;">
                   <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span>💳 Stripe Checkout</span>
+                    <span>Stripe Checkout</span>
                     <span style="font-size: 0.72rem; background: rgba(99, 91, 255, 0.15); color: #635bff; padding: 2px 8px; border-radius: 4px; font-weight: 800;">GLOBAL &amp; DOMESTIC</span>
                     <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: 800;">CARDS / APPLE PAY / GPAY</span>
                   </div>
@@ -903,7 +905,7 @@
                 <input type="radio" name="checkout_payment_method" value="UPI" style="accent-color: var(--primary); width: 20px; height: 20px; margin-top: 2px;">
                 <div style="flex: 1;">
                   <div style="font-weight: 800; font-size: 1.05rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 10px;">
-                    <span>⚡ Direct Instant UPI (PhonePe, GPay, Paytm)</span>
+                    <span>Direct Instant UPI (PhonePe, GPay, Paytm)</span>
                     <span style="font-size: 0.72rem; background: rgba(197, 155, 39, 0.2); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: 800;">ZERO FEES</span>
                   </div>
                   <div style="font-size: 0.88rem; color: var(--deliv-text-secondary); margin-top: 4px; line-height: 1.5;">
@@ -947,19 +949,15 @@
           <div style="padding: 18px 22px; background: var(--deliv-selected-bg); border-top: 1px solid var(--deliv-card-border); border-radius: 0 0 8px 8px;">
             <div class="trust-guarantee-box">
               <div class="trust-item">
-                <span>🛡️</span>
                 <span><strong>100% Genuine Handloom</strong> with Silk Mark Certification</span>
               </div>
               <div class="trust-item">
-                <span>⚡</span>
                 <span><strong>Priority Air Dispatch</strong> via Blue Dart / Delhivery</span>
               </div>
               <div class="trust-item">
-                <span>🔒</span>
                 <span><strong>256-Bit SSL Encryption</strong> for bank-level security</span>
               </div>
               <div class="trust-item">
-                <span>📞</span>
                 <span><strong>Live VIP Support:</strong> +91 7894093586</span>
               </div>
             </div>
@@ -982,10 +980,10 @@
             Curating India's most exquisite handwoven silk sarees, bridal lehengas, and royal heritage jewelry for timeless celebrations.
           </p>
           <div style="margin-top: 14px; font-size: 0.82rem; color: #94a3b8; line-height: 1.6;">
-            <p style="margin-bottom: 4px;">📍 <strong>Store Address:</strong> RJ FASHION COLLECTION, ODISHA, Jharsuguda, Sarbhal, Zipcode - 768201</p>
-            <p style="margin-bottom: 4px;">📞 <strong>Phone:</strong> <a href="tel:+917894093586" style="color: #e2e8f0; font-weight: 600; text-decoration: none;">+91 7894093586</a></p>
-            <p style="margin-bottom: 4px;">✉️ <strong>Email:</strong> <a href="mailto:rjfashioncollection@gmail.com" style="color: #e2e8f0; text-decoration: none;">rjfashioncollection@gmail.com</a></p>
-            <p style="margin-bottom: 0;">🕒 <strong>Available:</strong> Mon to Sat (10:00 AM – 5:00 PM)</p>
+            <p style="margin-bottom: 4px;"><strong>Store Address:</strong> RJ FASHION COLLECTION, ODISHA, Jharsuguda, Sarbhal, Zipcode - 768201</p>
+            <p style="margin-bottom: 4px;"><strong>Phone:</strong> <a href="tel:+917894093586" style="color: #e2e8f0; font-weight: 600; text-decoration: none;">+91 7894093586</a></p>
+            <p style="margin-bottom: 4px;"><strong>Email:</strong> <a href="mailto:rjfashioncollection@gmail.com" style="color: #e2e8f0; text-decoration: none;">rjfashioncollection@gmail.com</a></p>
+            <p style="margin-bottom: 0;"><strong>Available:</strong> Mon to Sat (10:00 AM – 5:00 PM)</p>
           </div>
         </div>
         <div class="footer-col">
@@ -1030,7 +1028,7 @@
       <div style="width: 72px; height: 72px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 2px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 18px; animation: pulseGlow 1.8s infinite;">
         ✓
       </div>
-      <h2 style="font-family: var(--font-serif); font-size: 1.75rem; color: var(--deliv-text-primary); margin-bottom: 8px;">Order Placed Successfully! 👑</h2>
+      <h2 style="font-family: var(--font-serif); font-size: 1.75rem; color: var(--deliv-text-primary); margin-bottom: 8px;">Order Placed Successfully! </h2>
       <p style="color: var(--deliv-text-muted); font-size: 0.94rem; margin-bottom: 22px; line-height: 1.5;">
         Thank you for choosing RJ Fashion Collection. Your royal handcrafted ethnic wear is being carefully prepared for priority dispatch.
       </p>
