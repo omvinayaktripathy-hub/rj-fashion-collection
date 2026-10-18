@@ -312,7 +312,7 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
       formData.append('garment_des', `${product.name} - ${product.description || ''}`.substring(0, 100));
 
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 90000); // 90s timeout
+      const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout for ZeroGPU queue
 
       const aiResponse = await fetch(`${inferenceUrl}/tryon`, {
         method: 'POST',
@@ -326,36 +326,49 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
         processingTimeMs = Date.now() - startTime;
         modelName = aiResult.engine || modelName;
       } else {
-        const errText = await aiResponse.text();
-        console.warn(`[RJ-TRYON] AI service responded with status ${aiResponse.status}: ${errText}`);
+        let errJson = null;
+        try { errJson = await aiResponse.json(); } catch (_) {}
+        const detailMsg = errJson?.detail || 'AI Virtual Try-On service returned an error.';
+        console.warn(`[RJ-TRYON] AI service error (${aiResponse.status}): ${detailMsg}`);
+        
+        if (uploadedFile && fs.existsSync(uploadedFile.path)) {
+          fs.unlinkSync(uploadedFile.path);
+        }
+        return res.status(aiResponse.status || 502).json({
+          success: false,
+          message: detailMsg
+        });
       }
     } catch (aiErr) {
-      console.warn(`[RJ-TRYON] AI service call failed (${aiErr.message}). Engaging seamless store resilience mode...`);
+      console.warn(`[RJ-TRYON] AI service request failed: ${aiErr.message}`);
+      if (uploadedFile && fs.existsSync(uploadedFile.path)) {
+        fs.unlinkSync(uploadedFile.path);
+      }
+      return res.status(503).json({
+        success: false,
+        message: 'The AI virtual try-on service is currently connecting to the neural GPU space. Please try again in a few moments.'
+      });
     }
 
-    // If AI service was reachable and returned image
-    let resultFileName = null;
-    let resultPublicUrl = null;
-
-    if (aiResult && aiResult.image_base64) {
-      // Decode base64 and save to temp result file
-      const base64Data = aiResult.image_base64.replace(/^data:image\/\w+;base64,/, '');
-      const resultBuffer = Buffer.from(base64Data, 'base64');
-      
-      resultFileName = `result_${sessionToken}.jpg`;
-      const resultFilePath = path.join(TEMP_DIR, resultFileName);
-      fs.writeFileSync(resultFilePath, resultBuffer);
-      resultPublicUrl = `/uploads/tryon/temp/${resultFileName}`;
-    } else {
-      // Store-level fallback so customer never faces a total crash
-      // Save person photo copy as result for comparison
-      resultFileName = `result_${sessionToken}.jpg`;
-      const resultFilePath = path.join(TEMP_DIR, resultFileName);
-      fs.copyFileSync(uploadedFile.path, resultFilePath);
-      resultPublicUrl = `/uploads/tryon/temp/${resultFileName}`;
-      modelName = 'RJ Fallback Engine (Service Busy)';
-      processingTimeMs = Date.now() - startTime;
+    // Verify genuine AI image output was received
+    if (!aiResult || !aiResult.image_base64) {
+      if (uploadedFile && fs.existsSync(uploadedFile.path)) {
+        fs.unlinkSync(uploadedFile.path);
+      }
+      return res.status(502).json({
+        success: false,
+        message: 'Virtual try-on model did not return a valid result. Please try another photo.'
+      });
     }
+
+    // Decode base64 and save to temp result file
+    const base64Data = aiResult.image_base64.replace(/^data:image\/\w+;base64,/, '');
+    const resultBuffer = Buffer.from(base64Data, 'base64');
+    
+    const resultFileName = `result_${sessionToken}.jpg`;
+    const resultFilePath = path.join(TEMP_DIR, resultFileName);
+    fs.writeFileSync(resultFilePath, resultBuffer);
+    const resultPublicUrl = `/uploads/tryon/temp/${resultFileName}`;
 
     const originalPublicUrl = `/uploads/tryon/temp/${path.basename(uploadedFile.path)}`;
 
