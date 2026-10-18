@@ -20,6 +20,7 @@ const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payment');
 const notificationRoutes = require('./routes/notifications');
 const contactRoutes = require('./routes/contact');
+const tryonRoutes = require('./routes/tryon');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -204,7 +205,9 @@ app.use((req, res, next) => {
     req.path === '/api/auth/register' ||
     req.path === '/api/auth/forgot-password' ||
     req.path === '/api/auth/reset-password' ||
-    req.path === '/api/auth/admin-login'
+    req.path === '/api/auth/admin-login' ||
+    req.path === '/api/tryon/process' ||
+    req.path === '/api/tryon/delete'
   ) {
     return next();
   }
@@ -303,6 +306,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/contact', authLimiter, contactRoutes);
+app.use('/api/tryon', tryonRoutes);
 
 // Private Admin URL route
 app.get('/admin', (req, res) => {

@@ -61,3 +61,9 @@ coverage/
 .firebase/
 backups/
 
+# Virtual Try-On Temporary Customer Data (Privacy compliance)
+public/uploads/tryon/
+ai-service/temp_ai_cache/
+ai-service/__pycache__/
+ai-service/venv/
+ai-service/.env

@@ -208,6 +208,36 @@ function initSchema() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS tryon_settings (
+      id INTEGER PRIMARY KEY DEFAULT 1,
+      enabled INTEGER DEFAULT 1,
+      inference_url TEXT DEFAULT 'http://localhost:5000',
+      allowed_categories TEXT DEFAULT '["sarees","kurtis","dresses","lehengas","ethnic-wear"]',
+      max_upload_size_mb INTEGER DEFAULT 8,
+      daily_limit_per_user INTEGER DEFAULT 20,
+      retention_hours INTEGER DEFAULT 2,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS tryon_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token TEXT NOT NULL UNIQUE,
+      user_id INTEGER,
+      product_id INTEGER NOT NULL,
+      product_name TEXT,
+      category TEXT,
+      status TEXT DEFAULT 'pending',
+      error_message TEXT,
+      processing_time_ms INTEGER,
+      model_name TEXT DEFAULT 'IDM-VTON / CatVTON',
+      user_ip TEXT,
+      customer_image_path TEXT,
+      result_image_path TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     -- High-Performance Database Indexes
     CREATE INDEX IF NOT EXISTS idx_products_category ON products (category_id, active);
     CREATE INDEX IF NOT EXISTS idx_products_slug ON products (slug);
@@ -224,7 +254,15 @@ function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items (order_id);
     CREATE INDEX IF NOT EXISTS idx_audit_created ON admin_audit_logs (created_at);
     CREATE INDEX IF NOT EXISTS idx_audit_action ON admin_audit_logs (action);
+    CREATE INDEX IF NOT EXISTS idx_tryon_token ON tryon_logs (token);
+    CREATE INDEX IF NOT EXISTS idx_tryon_status ON tryon_logs (status);
+    CREATE INDEX IF NOT EXISTS idx_tryon_created ON tryon_logs (created_at);
   `);
+
+  // Initialize default try-on settings row if missing
+  try {
+    db.exec(`INSERT OR IGNORE INTO tryon_settings (id, enabled) VALUES (1, 1);`);
+  } catch (_) {}
 
   // Migrations for orders table payment identifiers
   try {

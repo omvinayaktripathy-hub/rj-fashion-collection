@@ -1,0 +1,21 @@
+# RJ Fashion Collection - AI Virtual Try-On Service
+# Free-first dependencies (Compatible with Python 3.10, 3.11, 3.12)
+
+# Web Service Framework
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+
+# Free HuggingFace Open-Source Model Inference (Zero-GPU / Cloud Spaces)
+gradio_client>=0.14.0
+
+# Image Processing & Utilities
+pillow>=10.2.0
+requests>=2.31.0
+python-dotenv>=1.0.1
+
+# Optional Local GPU Acceleration (Only if 12GB+ NVIDIA GPU available)
+# torch>=2.2.0
+# torchvision>=0.17.0
+# diffusers>=0.27.0
+# accelerate>=0.28.0
