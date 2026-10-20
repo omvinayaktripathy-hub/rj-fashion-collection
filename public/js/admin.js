@@ -48,22 +48,22 @@ function ensureFirebaseInitialized() {
 async function initAdmin() {
   ensureFirebaseInitialized();
 
-  // 1. Check persistent sessionStorage first
+  // 1. Quick display if sessionStorage exists
   try {
     const saved = sessionStorage.getItem('rjfc_admin_session');
     if (saved) {
       adminUser = JSON.parse(saved);
       hideAdminLoginScreen();
-      document.getElementById('admin-topbar-username').textContent = adminUser.name;
+      const topbarName = document.getElementById('admin-topbar-username');
+      if (topbarName) topbarName.textContent = adminUser.name;
       setupSidebarCollapseState();
       loadDashboardStats();
       loadCategoriesList();
-      startRealtimeSync();
-      return;
+      loadAdminProducts();
     }
   } catch (e) {}
 
-  // 2. Check if user is already signed in with Firebase Auth
+  // 2. Ensure Firebase Auth session is active & synchronized
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       firebase.auth().onAuthStateChanged((user) => {
@@ -84,6 +84,8 @@ async function initAdmin() {
           loadCategoriesList();
           loadAdminProducts();
           startRealtimeSync();
+        } else if (!user && !sessionStorage.getItem('rjfc_admin_session')) {
+          showAdminLoginScreen();
         }
       });
     } catch (_) {}
@@ -1194,14 +1196,74 @@ function updateImagePreview(url) {
   }
 }
 
+// Client-side image compression for blazing fast uploads & sub-100KB Firestore documents
+function compressImageFile(file, maxWidth = 1000, maxHeight = 1000, quality = 0.78) {
+  return new Promise((resolve) => {
+    if (!file || !file.type.startsWith('image/')) {
+      resolve({ blob: file, dataUrl: null });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => resolve({ blob: file, dataUrl: null });
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => resolve({ blob: file, dataUrl: e.target.result });
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            resolve({ blob: file, dataUrl: e.target.result });
+            return;
+          }
+          const reader2 = new FileReader();
+          reader2.onloadend = () => {
+            resolve({ blob, dataUrl: reader2.result });
+          };
+          reader2.readAsDataURL(blob);
+        }, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 async function handleProductImageUpload(input) {
   const file = input.files && input.files[0];
   if (!file) return;
 
   const statusEl = document.getElementById('prod-upload-status');
   if (statusEl) {
-    statusEl.textContent = '⏳ Uploading image to Cloud Storage...';
+    statusEl.textContent = '⏳ Optimizing image...';
     statusEl.style.color = '#0284c7';
+  }
+
+  // Compress image client-side to ensure it is always under 100KB
+  let fileToUpload = file;
+  let compressedDataUrl = null;
+  try {
+    const compressed = await compressImageFile(file);
+    if (compressed.blob) fileToUpload = compressed.blob;
+    if (compressed.dataUrl) compressedDataUrl = compressed.dataUrl;
+  } catch (_) {}
+
+  if (statusEl) {
+    statusEl.textContent = '⏳ Uploading image to cloud...';
   }
 
   // 1. Try Express API if server is running locally
@@ -1253,21 +1315,22 @@ async function handleProductImageUpload(input) {
     console.warn('Firebase Storage upload error:', storageErr);
   }
 
-  // 3. Fallback: Local Data URL (FileReader) so uploading never blocks admin
+  // 3. Fallback: Local Data URL (compressed) so uploading never blocks admin
   try {
-    if (statusEl) statusEl.textContent = 'Processing local image...';
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const dataUrl = e.target.result;
-      document.getElementById('prod-form-image').value = dataUrl;
-      updateImagePreview(dataUrl);
-      if (statusEl) {
-        statusEl.textContent = '✅ Image selected successfully!';
-        statusEl.style.color = '#15803d';
-      }
-      showToast('Image loaded successfully', 'success');
-    };
-    reader.readAsDataURL(file);
+    const dataUrl = compressedDataUrl || (await new Promise((res) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.readAsDataURL(fileToUpload);
+    }));
+    document.getElementById('prod-form-image').value = dataUrl;
+    updateImagePreview(dataUrl);
+    if (statusEl) {
+      statusEl.textContent = '✅ Image ready (optimized)!';
+      statusEl.style.color = '#15803d';
+    }
+    showToast('Image optimized & ready', 'success');
+    input.value = '';
+    return;
   } catch (readErr) {
     if (statusEl) {
       statusEl.textContent = '❌ Failed to read image file';
@@ -1429,6 +1492,15 @@ async function handleProductFormSubmit(e) {
   // 2. Direct Cloud Firestore Save (Production Firebase Hosting)
   if (typeof firebase !== 'undefined' && firebase.firestore) {
     try {
+      // Check auth state
+      const authUser = firebase.auth && firebase.auth().currentUser;
+      if (!authUser && !window.__dev_mode) {
+        // If not signed in to Firebase Auth, prompt sign in
+        showToast('⚠️ Please sign in to your Super Admin account to save to live Firestore.', 'error');
+        showAdminLoginScreen();
+        return;
+      }
+
       const db = firebase.firestore();
       await db.collection('products').doc(String(prodId)).set({
         ...payload,
@@ -1438,7 +1510,10 @@ async function handleProductFormSubmit(e) {
       }, { merge: true });
       savedSuccessfully = true;
     } catch (fsErr) {
-      console.warn('Firestore product write notice:', fsErr);
+      console.error('Firestore product write error:', fsErr);
+      showToast('Firestore Error: ' + (fsErr.message || 'Permission denied'), 'error');
+      // Do not silently pretend it succeeded if Firestore failed
+      return;
     }
   }
 

@@ -502,6 +502,9 @@ async function loadProducts() {
         all.sort((a, b) => Number(b.rating || 4.5) - Number(a.rating || 4.5));
       } else if (currentFilters.sort === 'discount') {
         all.sort((a, b) => Number(b.discount || 0) - Number(a.discount || 0));
+      } else {
+        // Default: Newest products first so newly added products are visible immediately at top of page 1!
+        all.sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
       }
 
       total = all.length;

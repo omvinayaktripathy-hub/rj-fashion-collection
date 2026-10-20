@@ -717,11 +717,11 @@
   <!-- Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-  <script src="/firebase-config.js?v=20261021-01"></script>
-  <script src="/js/app.js?v=20261017-03"></script>
-  <script src="/js/products.js?v=20261017-02"></script>
+  <script src="/firebase-config.js?v=20261021-03"></script>
+  <script src="/js/app.js?v=20261021-03"></script>
+  <script src="/js/products.js?v=20261021-03"></script>
   <script>
-    // Load Homepage Dynamic Products with robust direct static fallback
+    // Load Homepage Dynamic Products with real-time Firestore synchronization
     async function loadHomepageSections() {
       const featGrid = document.getElementById('homepage-featured-grid');
       const newGrid = document.getElementById('homepage-new-grid');
@@ -730,43 +730,70 @@
       if (newGrid) newGrid.innerHTML = Array.from({ length: 4 }, createSkeletonCard).join('');
 
       try {
-        let featProducts = [];
-        let newProducts = [];
+        let list = [];
 
-        // 1. Direct Static Fetch (Guaranteed high performance)
-        try {
-          const res = await fetch('/data/products.json');
-          if (res.ok) {
-            const data = await res.json();
-            const list = data.products || [];
-            featProducts = list.filter(p => p.featured).slice(0, 4);
-            if (featProducts.length < 4) featProducts = list.slice(0, 4);
-            newProducts = list.filter(p => p.newArrival || p.new_arrival).slice(0, 4);
-            if (newProducts.length < 4) newProducts = list.slice(4, 8);
+        // 1. Live Cloud Firestore Products
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+          try {
+            const db = firebase.firestore();
+            const snap = await db.collection('products').get();
+            if (!snap.empty) {
+              snap.forEach(doc => {
+                const d = doc.data();
+                if (d.active !== false && d.active !== 0 && d.active !== '0') {
+                  list.push({ ...d, id: d.id || doc.id });
+                }
+              });
+            }
+          } catch (eFs) {
+            console.warn('Firestore homepage fetch notice:', eFs);
           }
-        } catch (e1) {
-          console.warn('Static data fetch fallback:', e1);
         }
 
-        // 2. Node API Fallback
-        if (featProducts.length === 0) {
+        // 2. Direct Static Fallback
+        if (list.length === 0) {
           try {
-            const fRes = await fetch(`${API_BASE}/products?featured=true&limit=4`);
-            if (fRes.ok) {
-              const fData = await fRes.json();
-              if (fData.success && Array.isArray(fData.products)) featProducts = fData.products;
+            const res = await fetch('/data/products.json');
+            if (res.ok) {
+              const data = await res.json();
+              list = (data.products || []).filter(p => p.active !== false && p.active !== 0);
             }
-          } catch (e2) {}
+          } catch (e1) {
+            console.warn('Static data fetch fallback:', e1);
+          }
         }
-        if (newProducts.length === 0) {
+
+        // 3. Node API Fallback
+        if (list.length === 0) {
           try {
-            const nRes = await fetch(`${API_BASE}/products?newArrival=true&limit=4`);
-            if (nRes.ok) {
-              const nData = await nRes.json();
-              if (nData.success && Array.isArray(nData.products)) newProducts = nData.products;
+            const res = await fetch(`${API_BASE}/products`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.success && Array.isArray(data.products)) list = data.products;
             }
-          } catch (e3) {}
+          } catch (_) {}
         }
+
+        // 4. Merge any local custom products
+        try {
+          const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+          customLocal.forEach(cp => {
+            if (cp.active !== false && cp.active !== 0) {
+              const idx = list.findIndex(p => String(p.id) === String(cp.id));
+              if (idx >= 0) list[idx] = { ...list[idx], ...cp };
+              else list.unshift(cp);
+            }
+          });
+        } catch (_) {}
+
+        // Sort newest products first for new arrivals
+        const sortedList = [...list].sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
+
+        let featProducts = sortedList.filter(p => p.featured).slice(0, 4);
+        if (featProducts.length < 4) featProducts = sortedList.slice(0, 4);
+
+        let newProducts = sortedList.filter(p => p.newArrival || p.new_arrival).slice(0, 4);
+        if (newProducts.length < 4) newProducts = sortedList.slice(0, 4);
 
         window.catalogProducts = [...featProducts, ...newProducts];
 

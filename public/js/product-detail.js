@@ -126,19 +126,49 @@ async function loadProductDetails() {
 
   let foundProduct = null;
 
-  // 1. Primary fast fetch from static products.json (guaranteed on Firebase)
-  try {
-    const res = await fetch('/data/products.json');
-    if (res.ok) {
-      const data = await res.json();
-      const list = data.products || (Array.isArray(data) ? data : []);
-      const match = list.find(p => String(p.id) === String(id) || String(p.slug) === String(id));
-      if (match) {
-        foundProduct = normalizeProduct(match);
+  // 1. Live fetch from Cloud Firestore (primary)
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    try {
+      const db = firebase.firestore();
+      const docSnap = await db.collection('products').doc(String(id)).get();
+      if (docSnap.exists) {
+        foundProduct = normalizeProduct({ ...docSnap.data(), id: docSnap.data().id || docSnap.id });
+      } else {
+        const querySnap = await db.collection('products').where('id', '==', Number(id) || id).limit(1).get();
+        if (!querySnap.empty) {
+          const d = querySnap.docs[0].data();
+          foundProduct = normalizeProduct({ ...d, id: d.id || querySnap.docs[0].id });
+        }
       }
+    } catch (fsErr) {
+      console.warn('Firestore product detail fetch notice:', fsErr);
     }
-  } catch (err) {
-    console.warn('Direct products.json fetch failed, trying API:', err);
+  }
+
+  // 1b. Check local cache
+  if (!foundProduct) {
+    try {
+      const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+      const match = customLocal.find(p => String(p.id) === String(id));
+      if (match) foundProduct = normalizeProduct(match);
+    } catch (_) {}
+  }
+
+  // 1c. Fast fetch from static products.json
+  if (!foundProduct) {
+    try {
+      const res = await fetch('/data/products.json');
+      if (res.ok) {
+        const data = await res.json();
+        const list = data.products || (Array.isArray(data) ? data : []);
+        const match = list.find(p => String(p.id) === String(id) || String(p.slug) === String(id));
+        if (match) {
+          foundProduct = normalizeProduct(match);
+        }
+      }
+    } catch (err) {
+      console.warn('Direct products.json fetch failed, trying API:', err);
+    }
   }
 
   // 2. If not found in static file, query backend API
