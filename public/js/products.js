@@ -384,12 +384,47 @@ async function loadProducts() {
     } catch (_) {}
   }
 
-  // Load from static products.json if server didn't provide
+  // Load from Cloud Firestore or static products.json if server didn't provide
   if (products.length === 0 && total === 0) {
     try {
-      const fbRes = await fetch('/data/products.json');
-      const staticData = await fbRes.json();
-      let all = staticData.products || [];
+      let all = [];
+      // 1. Try fetching from Cloud Firestore
+      if (typeof firebase !== 'undefined' && firebase.firestore) {
+        try {
+          const db = firebase.firestore();
+          const snap = await db.collection('products').get();
+          if (!snap.empty) {
+            snap.forEach(doc => {
+              const d = doc.data();
+              all.push({ ...d, id: d.id || doc.id });
+            });
+          }
+        } catch (fsErr) {
+          console.warn('Firestore storefront fetch notice:', fsErr);
+        }
+      }
+
+      // 2. Fallback to static products.json if Firestore returned no products
+      if (all.length === 0) {
+        const fbRes = await fetch('/data/products.json');
+        const staticData = await fbRes.json();
+        all = staticData.products || [];
+      }
+
+      // 3. Merge any offline cached custom products from localStorage
+      try {
+        const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+        if (customLocal.length > 0) {
+          customLocal.forEach(cp => {
+            const idx = all.findIndex(p => String(p.id) === String(cp.id));
+            if (idx >= 0) all[idx] = { ...all[idx], ...cp };
+            else all.unshift(cp);
+          });
+        }
+      } catch (_) {}
+
+      // Keep only active products on the storefront
+      all = all.filter(p => p.active !== false && p.active !== 0 && p.active !== '0');
 
       // Filter: Search
       if (currentFilters.search) {

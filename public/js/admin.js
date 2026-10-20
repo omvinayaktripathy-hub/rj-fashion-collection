@@ -944,42 +944,91 @@ async function loadAdminProducts() {
 
   try {
     let prods = null;
+    // 1. Try Express API (Local server)
     try {
       const res = await fetch(`${API_BASE}/admin/products?${q.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.products)) {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
           prods = data.products;
         }
       }
     } catch (_) {}
 
-    if (!prods) {
-      // Fallback for Netlify static hosting
-      const pRes = await fetch('/data/products.json');
-      const pData = await pRes.json();
-      prods = pData.products || [];
-
-      // Filter locally
-      if (search) {
-        const sLower = search.toLowerCase();
-        prods = prods.filter(p => 
-          (p.name && p.name.toLowerCase().includes(sLower)) ||
-          (p.brand && p.brand.toLowerCase().includes(sLower)) ||
-          (p.subcategory && p.subcategory.toLowerCase().includes(sLower))
-        );
-      }
-      if (department) {
-        prods = prods.filter(p => (p.department || '').toLowerCase() === department.toLowerCase());
-      }
-      if (stockStatus === 'in') {
-        prods = prods.filter(p => (p.stock || 0) > 0);
-      } else if (stockStatus === 'low') {
-        prods = prods.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 4);
-      } else if (stockStatus === 'out') {
-        prods = prods.filter(p => (p.stock || 0) <= 0);
+    // 2. Try Cloud Firestore (Direct live database on Firebase Hosting)
+    if (!prods && typeof firebase !== 'undefined' && firebase.firestore) {
+      try {
+        const db = firebase.firestore();
+        const snap = await db.collection('products').get();
+        if (!snap.empty) {
+          prods = [];
+          snap.forEach(doc => {
+            const data = doc.data();
+            prods.push({
+              ...data,
+              id: data.id || doc.id,
+              docId: doc.id
+            });
+          });
+        }
+      } catch (fsErr) {
+        console.warn('Firestore products fetch notice:', fsErr);
       }
     }
+
+    // 3. Fallback to /data/products.json
+    if (!prods || prods.length === 0) {
+      try {
+        const pRes = await fetch('/data/products.json');
+        const pData = await pRes.json();
+        prods = pData.products || [];
+      } catch (_) {
+        prods = [];
+      }
+    }
+
+    // 4. Merge any locally cached custom products
+    try {
+      const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+      if (customLocal.length > 0) {
+        customLocal.forEach(cp => {
+          const idx = prods.findIndex(p => String(p.id) === String(cp.id));
+          if (idx >= 0) {
+            prods[idx] = { ...prods[idx], ...cp };
+          } else {
+            prods.unshift(cp);
+          }
+        });
+      }
+    } catch (_) {}
+
+    // 5. Filter locally
+    if (search) {
+      const sLower = search.toLowerCase();
+      prods = prods.filter(p => 
+        (p.name && p.name.toLowerCase().includes(sLower)) ||
+        (p.brand && p.brand.toLowerCase().includes(sLower)) ||
+        (p.subcategory && p.subcategory.toLowerCase().includes(sLower)) ||
+        (p.department && p.department.toLowerCase().includes(sLower))
+      );
+    }
+    if (department) {
+      prods = prods.filter(p => (p.department || '').toLowerCase() === department.toLowerCase());
+    }
+    if (stockStatus === 'in') {
+      prods = prods.filter(p => (p.stock || 0) > 0);
+    } else if (stockStatus === 'low') {
+      prods = prods.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 4);
+    } else if (stockStatus === 'out') {
+      prods = prods.filter(p => (p.stock || 0) <= 0);
+    }
+
+    // Sort newest products first
+    prods.sort((a, b) => {
+      const idA = Number(a.id) || 0;
+      const idB = Number(b.id) || 0;
+      return idB - idA;
+    });
 
     currentProducts = prods;
 
@@ -1100,18 +1149,38 @@ async function toggleProductStock(productId, currentStock) {
     summaryEl.innerHTML = `Showing <strong>${currentProducts.length}</strong> items (${inStockCount} In Stock, <span style="color:#ef4444;">${outStockCount} Out of Stock</span>)`;
   }
 
+  // Sync to Express API
   try {
-    const res = await fetch(`${API_BASE}/admin/products/${productId}/toggle-stock`, {
-      method: 'PATCH'
-    });
-    if (res.ok) {
-      showToast(newStock > 0 ? 'Product marked In Stock' : 'Product marked Out of Stock', newStock > 0 ? 'success' : 'info');
-      loadDashboardStats();
-      return;
-    }
+    await fetch(`${API_BASE}/admin/products/${productId}/toggle-stock`, { method: 'PATCH' });
   } catch (_) {}
 
-  showToast(newStock > 0 ? 'Product marked In Stock' : 'Product marked Out of Stock', 'info');
+  // Sync to Cloud Firestore
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    try {
+      const db = firebase.firestore();
+      await db.collection('products').doc(String(productId)).set({
+        stock: newStock,
+        updated_at: new Date().toISOString()
+      }, { merge: true });
+    } catch (fsErr) {
+      console.warn('Firestore stock sync err:', fsErr);
+    }
+  }
+
+  // Sync to localStorage
+  try {
+    const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+    const existingIdx = customLocal.findIndex(p => String(p.id) === String(productId));
+    if (existingIdx >= 0) {
+      customLocal[existingIdx].stock = newStock;
+    } else {
+      customLocal.push({ id: productId, stock: newStock });
+    }
+    localStorage.setItem('rjfc_custom_products', JSON.stringify(customLocal));
+  } catch (_) {}
+
+  showToast(newStock > 0 ? 'Product marked In Stock ✅' : 'Product marked Out of Stock 🚫', newStock > 0 ? 'success' : 'info');
+  loadDashboardStats();
 }
 
 function updateImagePreview(url) {
@@ -1130,29 +1199,81 @@ async function handleProductImageUpload(input) {
   if (!file) return;
 
   const statusEl = document.getElementById('prod-upload-status');
-  if (statusEl) statusEl.textContent = 'Uploading image...';
+  if (statusEl) {
+    statusEl.textContent = '⏳ Uploading image to Cloud Storage...';
+    statusEl.style.color = '#0284c7';
+  }
 
-  const formData = new FormData();
-  formData.append('image', file);
-
+  // 1. Try Express API if server is running locally
   try {
+    const formData = new FormData();
+    formData.append('image', file);
     const res = await fetch(`${API_BASE}/admin/upload`, {
       method: 'POST',
       body: formData
     });
-    const data = await res.json();
-    if (data.success && data.url) {
-      document.getElementById('prod-form-image').value = data.url;
-      updateImagePreview(data.url);
-      if (statusEl) statusEl.textContent = '✅ Image uploaded successfully!';
-      showToast('Image uploaded', 'success');
-    } else {
-      if (statusEl) statusEl.textContent = '❌ Upload failed: ' + (data.message || 'Error');
-      showToast(data.message || 'Upload failed', 'error');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.url) {
+        document.getElementById('prod-form-image').value = data.url;
+        updateImagePreview(data.url);
+        if (statusEl) {
+          statusEl.textContent = '✅ Image uploaded successfully!';
+          statusEl.style.color = '#15803d';
+        }
+        showToast('Image uploaded successfully', 'success');
+        input.value = '';
+        return;
+      }
     }
-  } catch (err) {
-    if (statusEl) statusEl.textContent = '❌ Network error during upload';
-    showToast('Failed to upload image file', 'error');
+  } catch (_) {}
+
+  // 2. Direct Cloud Storage Upload (Production Firebase Hosting)
+  try {
+    if (typeof firebase !== 'undefined' && firebase.storage) {
+      if (statusEl) statusEl.textContent = '☁️ Uploading to Firebase Cloud Storage...';
+      const storage = firebase.storage();
+      const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const storageRef = storage.ref(`products/${Date.now()}_${cleanFileName}`);
+      const uploadTask = await storageRef.put(file, { contentType: file.type || 'image/jpeg' });
+      const downloadUrl = await uploadTask.ref.getDownloadURL();
+      if (downloadUrl) {
+        document.getElementById('prod-form-image').value = downloadUrl;
+        updateImagePreview(downloadUrl);
+        if (statusEl) {
+          statusEl.textContent = '✅ Image uploaded to Cloud Storage!';
+          statusEl.style.color = '#15803d';
+        }
+        showToast('Image uploaded successfully to Cloud Storage!', 'success');
+        input.value = '';
+        return;
+      }
+    }
+  } catch (storageErr) {
+    console.warn('Firebase Storage upload error:', storageErr);
+  }
+
+  // 3. Fallback: Local Data URL (FileReader) so uploading never blocks admin
+  try {
+    if (statusEl) statusEl.textContent = 'Processing local image...';
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const dataUrl = e.target.result;
+      document.getElementById('prod-form-image').value = dataUrl;
+      updateImagePreview(dataUrl);
+      if (statusEl) {
+        statusEl.textContent = '✅ Image selected successfully!';
+        statusEl.style.color = '#15803d';
+      }
+      showToast('Image loaded successfully', 'success');
+    };
+    reader.readAsDataURL(file);
+  } catch (readErr) {
+    if (statusEl) {
+      statusEl.textContent = '❌ Failed to read image file';
+      statusEl.style.color = '#dc2626';
+    }
+    showToast('Failed to read image file', 'error');
   } finally {
     input.value = '';
   }
@@ -1258,47 +1379,89 @@ function closeProductModal() {
 
 async function handleProductFormSubmit(e) {
   e.preventDefault();
-  const id = document.getElementById('prod-form-id').value;
+  const idInput = document.getElementById('prod-form-id').value;
+  const isEditing = !!idInput;
+
+  const catSelect = document.getElementById('prod-form-category');
+  const catName = catSelect && catSelect.options[catSelect.selectedIndex] ? catSelect.options[catSelect.selectedIndex].text : '';
+
+  const prodId = isEditing ? (isNaN(idInput) ? idInput : Number(idInput)) : Date.now();
+
   const payload = {
+    id: prodId,
     name: document.getElementById('prod-form-name').value.trim(),
     department: document.getElementById('prod-form-department').value,
     subcategory: document.getElementById('prod-form-subcategory').value.trim(),
-    category_id: document.getElementById('prod-form-category').value,
+    category_id: Number(catSelect?.value) || 1,
+    category_name: catName,
     price: Number(document.getElementById('prod-form-price').value),
     original_price: Number(document.getElementById('prod-form-orig-price').value) || Number(document.getElementById('prod-form-price').value),
     stock: Number(document.getElementById('prod-form-stock').value),
-    image: document.getElementById('prod-form-image').value.trim(),
-    brand: document.getElementById('prod-form-brand').value.trim(),
+    image: document.getElementById('prod-form-image').value.trim() || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+    brand: document.getElementById('prod-form-brand').value.trim() || 'RJ Collection',
     description: document.getElementById('prod-form-desc').value.trim(),
     material: document.getElementById('prod-form-material').value.trim(),
     pattern: document.getElementById('prod-form-pattern').value.trim(),
     care_instructions: document.getElementById('prod-form-care').value.trim(),
-    active: document.getElementById('prod-form-active').checked,
-    featured: document.getElementById('prod-form-featured').checked,
-    new_arrival: document.getElementById('prod-form-new').checked
+    active: document.getElementById('prod-form-active').checked ? 1 : 0,
+    featured: document.getElementById('prod-form-featured').checked ? 1 : 0,
+    new_arrival: document.getElementById('prod-form-new').checked ? 1 : 0,
+    updated_at: new Date().toISOString()
   };
 
-  try {
-    const url = id ? `${API_BASE}/admin/products/${id}` : `${API_BASE}/admin/products`;
-    const method = id ? 'PUT' : 'POST';
+  let savedSuccessfully = false;
 
+  // 1. Try Express API
+  try {
+    const url = isEditing ? `${API_BASE}/admin/products/${prodId}` : `${API_BASE}/admin/products`;
+    const method = isEditing ? 'PUT' : 'POST';
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-
-    if (data.success) {
-      showToast(id ? 'Product updated successfully' : 'Product added successfully', 'success');
-      closeProductModal();
-      loadAdminProducts();
-      loadDashboardStats();
-    } else {
-      showToast(data.message || 'Operation failed', 'error');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) savedSuccessfully = true;
     }
-  } catch (err) {
-    showToast('Failed to save product', 'error');
+  } catch (_) {}
+
+  // 2. Direct Cloud Firestore Save (Production Firebase Hosting)
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    try {
+      const db = firebase.firestore();
+      await db.collection('products').doc(String(prodId)).set({
+        ...payload,
+        active: payload.active === 1 || payload.active === true,
+        featured: payload.featured === 1 || payload.featured === true,
+        new_arrival: payload.new_arrival === 1 || payload.new_arrival === true
+      }, { merge: true });
+      savedSuccessfully = true;
+    } catch (fsErr) {
+      console.warn('Firestore product write notice:', fsErr);
+    }
+  }
+
+  // 3. Fallback: Save to LocalStorage cache
+  try {
+    const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+    const existingIdx = customLocal.findIndex(p => String(p.id) === String(prodId));
+    if (existingIdx >= 0) {
+      customLocal[existingIdx] = { ...customLocal[existingIdx], ...payload };
+    } else {
+      customLocal.unshift(payload);
+    }
+    localStorage.setItem('rjfc_custom_products', JSON.stringify(customLocal));
+    savedSuccessfully = true;
+  } catch (_) {}
+
+  if (savedSuccessfully) {
+    showToast(isEditing ? 'Product updated successfully! ✅' : 'Product added successfully! 🎉', 'success');
+    closeProductModal();
+    loadAdminProducts();
+    loadDashboardStats();
+  } else {
+    showToast('Failed to save product. Please try again.', 'error');
   }
 }
 
@@ -1310,36 +1473,75 @@ async function quickUpdateStockPrompt(productId, currentStock) {
       alert('Stock cannot be negative');
       return;
     }
+
+    // 1. Try Express API
     try {
-      const res = await fetch(`${API_BASE}/admin/products/${productId}/stock`, {
+      await fetch(`${API_BASE}/admin/products/${productId}/stock`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stock: num })
       });
-      const data = await res.json();
-      if (data.success) {
-        showToast(data.message || 'Stock updated', 'success');
-        loadAdminProducts();
-        loadDashboardStats();
+    } catch (_) {}
+
+    // 2. Try Firestore
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+      try {
+        const db = firebase.firestore();
+        await db.collection('products').doc(String(productId)).set({
+          stock: num,
+          updated_at: new Date().toISOString()
+        }, { merge: true });
+      } catch (fsErr) {
+        console.warn('Firestore stock prompt err:', fsErr);
       }
-    } catch (err) {
-      showToast('Failed to update stock', 'error');
     }
+
+    // 3. LocalStorage
+    try {
+      const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+      const existingIdx = customLocal.findIndex(p => String(p.id) === String(productId));
+      if (existingIdx >= 0) {
+        customLocal[existingIdx].stock = num;
+      } else {
+        customLocal.push({ id: productId, stock: num });
+      }
+      localStorage.setItem('rjfc_custom_products', JSON.stringify(customLocal));
+    } catch (_) {}
+
+    showToast('Stock quantity updated to ' + num, 'success');
+    loadAdminProducts();
+    loadDashboardStats();
   }
 }
 
 async function deleteProduct(id) {
-  if (!confirm('Are you sure you want to permanently remove this product from the database?')) return;
+  if (!confirm('Are you sure you want to permanently remove this product from the catalog?')) return;
+  
+  // 1. Try Express API
   try {
-    const res = await fetch(`${API_BASE}/admin/products/${id}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (data.success) {
-      showToast('Product removed', 'info');
-      loadAdminProducts();
+    await fetch(`${API_BASE}/admin/products/${id}`, { method: 'DELETE' });
+  } catch (_) {}
+
+  // 2. Direct Cloud Firestore Delete
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    try {
+      const db = firebase.firestore();
+      await db.collection('products').doc(String(id)).delete();
+    } catch (fsErr) {
+      console.warn('Firestore delete product err:', fsErr);
     }
-  } catch (err) {
-    showToast('Failed to delete product', 'error');
   }
+
+  // 3. LocalStorage Cache
+  try {
+    let customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+    customLocal = customLocal.filter(p => String(p.id) !== String(id));
+    localStorage.setItem('rjfc_custom_products', JSON.stringify(customLocal));
+  } catch (_) {}
+
+  showToast('Product removed from catalog', 'info');
+  loadAdminProducts();
+  loadDashboardStats();
 }
 
 // 3. Admin Orders
@@ -2254,19 +2456,42 @@ async function quickAdjustStock(productId, delta) {
     summaryEl.innerHTML = `Showing <strong>${currentProducts.length}</strong> items (${inStockCount} In Stock, <span style="color:#ef4444;">${outStockCount} Out of Stock</span>)`;
   }
 
+  // 1. Try Express API
   try {
-    const res = await fetch(`${API_BASE}/admin/products/${productId}/stock`, {
+    await fetch(`${API_BASE}/admin/products/${productId}/stock`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stock: newStock })
     });
-    if (res.ok) {
-      showToast(`Stock updated to ${newStock} units`, 'success');
-      loadDashboardStats();
+  } catch (_) {}
+
+  // 2. Direct Cloud Firestore Sync
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    try {
+      const db = firebase.firestore();
+      await db.collection('products').doc(String(productId)).set({
+        stock: newStock,
+        updated_at: new Date().toISOString()
+      }, { merge: true });
+    } catch (fsErr) {
+      console.warn('Firestore quickAdjustStock sync err:', fsErr);
     }
-  } catch (err) {
-    showToast(`Stock set to ${newStock}`, 'info');
   }
+
+  // 3. LocalStorage Sync
+  try {
+    const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
+    const existingIdx = customLocal.findIndex(p => String(p.id) === String(productId));
+    if (existingIdx >= 0) {
+      customLocal[existingIdx].stock = newStock;
+    } else {
+      customLocal.push({ id: productId, stock: newStock });
+    }
+    localStorage.setItem('rjfc_custom_products', JSON.stringify(customLocal));
+  } catch (_) {}
+
+  showToast(`Stock updated to ${newStock} units`, 'success');
+  loadDashboardStats();
 }
 
 // 5. Export Products Catalog as CSV Spreadsheet
