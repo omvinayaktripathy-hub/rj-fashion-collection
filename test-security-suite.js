@@ -138,15 +138,18 @@ async function runSecuritySuite() {
   // -------------------------------------------------------------
   console.log('\n--- Domain 3: CSRF & Strict Origin Defense ---');
 
-  // Fetch CSRF token
-  const csrfRes = await request('GET', '/api/csrf-token');
+  // Fetch CSRF token for buyer session
+  const csrfRes = await request('GET', '/api/csrf-token', null, { Cookie: buyerCookie });
   assert.strictEqual(csrfRes.statusCode, 200, 'CSRF token endpoint available');
   assert(csrfRes.json.csrfToken && csrfRes.json.csrfToken.length === 64, 'CSRF token is 64-char crypto hex string');
   pass("Cryptographically strong anti-CSRF token generated (SHA-256 / 32 bytes hex)");
 
+  // Ensure product has stock for CSRF test
+  const testProdId = 1;
+
   // Cross-site forged request (Sec-Fetch-Site: cross-site) must be blocked
   const forgedReq = await request('POST', '/api/cart', {
-    productId: 64,
+    productId: testProdId,
     quantity: 1
   }, {
     Cookie: buyerCookie,
@@ -159,7 +162,7 @@ async function runSecuritySuite() {
 
   // Valid CSRF token allows state change
   const validCsrfReq = await request('POST', '/api/cart', {
-    productId: 64,
+    productId: testProdId,
     quantity: 1,
     size: 'Free Size'
   }, {

@@ -220,6 +220,19 @@ function initSchema() {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS store_settings (
+      id INTEGER PRIMARY KEY DEFAULT 1,
+      store_name TEXT DEFAULT 'RJ Fashion Collection',
+      support_phone TEXT DEFAULT '+91 78940 93586',
+      support_whatsapp TEXT DEFAULT '917894093586',
+      support_email TEXT DEFAULT 'omvinayakwork@gmail.com',
+      upi_id TEXT DEFAULT 'q070080131@ybl',
+      store_address TEXT DEFAULT 'Sarbhal, Jharsuguda, ODISHA - 768201',
+      store_timings TEXT DEFAULT 'Mon to Sat: 10:00 AM - 5:00 PM',
+      free_shipping_threshold INTEGER DEFAULT 999,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS tryon_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       token TEXT NOT NULL UNIQUE,
@@ -262,6 +275,7 @@ function initSchema() {
   // Initialize default try-on settings row if missing
   try {
     db.exec(`INSERT OR IGNORE INTO tryon_settings (id, enabled) VALUES (1, 1);`);
+    db.exec(`INSERT OR IGNORE INTO store_settings (id, store_name) VALUES (1, 'RJ Fashion Collection');`);
     db.exec(`ALTER TABLE tryon_settings ADD COLUMN hf_token TEXT`);
   } catch (_) {}
 

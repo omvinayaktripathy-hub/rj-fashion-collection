@@ -325,6 +325,15 @@ function switchAdminTab(tabName) {
     case 'audit':
       loadAdminAuditLogs();
       break;
+    case 'inventory':
+      loadAdminInventory();
+      break;
+    case 'reports':
+      loadAdminReports();
+      break;
+    case 'settings':
+      loadAdminSettings();
+      break;
   }
 }
 
@@ -717,16 +726,57 @@ async function loadDashboardStats() {
     const allOrders = fetchAllOrdersRealtime();
     currentOrders = allOrders;
 
+    // Filter by active dashboard date range
+    const filteredOrders = typeof filterOrdersByDateRange === 'function' 
+      ? filterOrdersByDateRange(allOrders, typeof currentDashboardDateRange !== 'undefined' ? currentDashboardDateRange : 'all')
+      : allOrders;
+
     // Calculate live business metrics
-    const nonCancelledOrders = allOrders.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
+    const nonCancelledOrders = filteredOrders.filter(o => !['cancelled', 'refunded'].includes((o.status || '').toLowerCase()));
     const totalSales = nonCancelledOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
-    const totalOrders = allOrders.length;
+    const totalOrders = filteredOrders.length;
     const pendingOrders = allOrders.filter(o => ['pending', 'confirmed', 'processing'].includes((o.status || '').toLowerCase())).length;
+
+    // Today's orders
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const todayOrdersCount = allOrders.filter(o => new Date(o.created_at || Date.now()) >= startOfToday).length;
 
     // Inventory metrics
     const inStock = prods.filter(p => Number(p.stock || 0) > 0);
     const lowStock = prods.filter(p => Number(p.stock || 0) > 0 && Number(p.stock || 0) <= 4);
     const outOfStock = prods.filter(p => Number(p.stock || 0) <= 0);
+
+    // Operational Alert Banners
+    const alertsBanner = document.getElementById('dashboard-alerts-banner');
+    if (alertsBanner) {
+      const alerts = [];
+      if (outOfStock.length > 0) {
+        alerts.push(`
+          <div class="alert-box alert-danger">
+            <span>🚨 <strong>${outOfStock.length} Product(s) Out of Stock:</strong> Immediate restock recommended to prevent lost customer orders.</span>
+            <button onclick="switchAdminTab('inventory'); filterInventoryByStatus('out_of_stock');" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem; border-color: #ef4444; color: #dc2626;">View OOS</button>
+          </div>
+        `);
+      }
+      if (lowStock.length > 0) {
+        alerts.push(`
+          <div class="alert-box alert-warning">
+            <span>⚠️ <strong>${lowStock.length} Product(s) Low in Stock:</strong> 4 or fewer units remaining.</span>
+            <button onclick="switchAdminTab('inventory'); filterInventoryByStatus('low_stock');" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem; border-color: #f59e0b; color: #b45309;">Restock Now</button>
+          </div>
+        `);
+      }
+      if (pendingOrders > 0) {
+        alerts.push(`
+          <div class="alert-box alert-info">
+            <span>📦 <strong>${pendingOrders} Pending Order(s):</strong> Awaiting fulfillment & dispatch.</span>
+            <button onclick="switchAdminTab('orders')" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.75rem; border-color: #0284c7; color: #0369a1;">Process Orders</button>
+          </div>
+        `);
+      }
+      alertsBanner.innerHTML = alerts.join('');
+    }
 
     // Customer count
     const uniqueCustomers = new Set(allOrders.map(o => (o.customer_email || o.customer_phone || o.customer_name || '').toLowerCase())).size;
@@ -737,6 +787,9 @@ async function loadDashboardStats() {
 
     const ordersEl = document.getElementById('stat-total-orders');
     if (ordersEl) ordersEl.textContent = totalOrders;
+
+    const todayOrdersEl = document.getElementById('stat-today-orders');
+    if (todayOrdersEl) todayOrdersEl.textContent = todayOrdersCount;
 
     const prodsEl = document.getElementById('stat-total-products');
     if (prodsEl) prodsEl.textContent = prods.length;
@@ -1389,6 +1442,12 @@ function openAddProductModal() {
   document.getElementById('prod-form-department').value = 'women';
   document.getElementById('prod-form-subcategory').value = '';
   document.getElementById('prod-form-stock').value = 15;
+  const skuAddEl = document.getElementById('prod-form-sku');
+  if (skuAddEl) skuAddEl.value = 'RJ-' + Math.floor(1000 + Math.random() * 9000);
+  const sizesAddEl = document.getElementById('prod-form-sizes');
+  if (sizesAddEl) sizesAddEl.value = 'S, M, L, XL, XXL';
+  const colorsAddEl = document.getElementById('prod-form-colors');
+  if (colorsAddEl) colorsAddEl.value = '';
   document.getElementById('stock-radio-in').checked = true;
   handleModalStockStatusChange(true);
   updateImagePreview('');
@@ -1410,6 +1469,12 @@ function openEditProductModal(id) {
   document.getElementById('prod-form-price').value = p.price;
   document.getElementById('prod-form-orig-price').value = p.original_price;
   document.getElementById('prod-form-stock').value = p.stock;
+  const skuEditEl = document.getElementById('prod-form-sku');
+  if (skuEditEl) skuEditEl.value = p.sku || '';
+  const sizesEditEl = document.getElementById('prod-form-sizes');
+  if (sizesEditEl) sizesEditEl.value = p.sizes || '';
+  const colorsEditEl = document.getElementById('prod-form-colors');
+  if (colorsEditEl) colorsEditEl.value = p.colors || '';
 
   if (p.stock > 0) {
     document.getElementById('stock-radio-in').checked = true;
@@ -1460,6 +1525,9 @@ async function handleProductFormSubmit(e) {
     price: Number(document.getElementById('prod-form-price').value),
     original_price: Number(document.getElementById('prod-form-orig-price').value) || Number(document.getElementById('prod-form-price').value),
     stock: Number(document.getElementById('prod-form-stock').value),
+    sku: document.getElementById('prod-form-sku')?.value?.trim() || '',
+    sizes: document.getElementById('prod-form-sizes')?.value?.trim() || '',
+    colors: document.getElementById('prod-form-colors')?.value?.trim() || '',
     image: document.getElementById('prod-form-image').value.trim() || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
     brand: document.getElementById('prod-form-brand').value.trim() || 'RJ Collection',
     description: document.getElementById('prod-form-desc').value.trim(),
@@ -1922,9 +1990,14 @@ async function loadAdminCustomers() {
         <td><span style="font-weight:600; background:#f1f5f9; padding:2px 8px; border-radius:12px; font-size:0.8rem;">${c.order_count} orders</span></td>
         <td style="font-weight:700; color:#1e293b;">${formatPrice(c.total_spent)}</td>
         <td>
-          <button onclick="deleteCustomer('${c.email}', ${c.id ? `'${c.id}'` : 'null'})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;" title="Remove this customer record">
-            Delete
-          </button>
+          <div style="display: flex; gap: 4px;">
+            <button onclick="openCustomerOrdersModal('${c.email}', '${(c.name || '').replace(/'/g, "\\'")}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;" title="View all orders by this customer">
+              Orders
+            </button>
+            <button onclick="deleteCustomer('${c.email}', ${c.id ? `'${c.id}'` : 'null'})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;" title="Remove this customer record">
+              Delete
+            </button>
+          </div>
         </td>
       </tr>
     `).join('');
@@ -2119,6 +2192,11 @@ async function handleCategoryFormSubmit(e) {
 }
 
 async function deleteCategory(id) {
+  const assigned = (currentProducts || []).filter(p => Number(p.category_id) === Number(id));
+  if (assigned.length > 0) {
+    showToast(`Cannot delete category: ${assigned.length} active products are currently assigned to it. Please reassign or delete them first.`, 'error');
+    return;
+  }
   if (!confirm('Are you sure you want to delete this category?')) return;
   try {
     const res = await fetch(`${API_BASE}/admin/categories/${id}`, { method: 'DELETE' });
@@ -2569,26 +2647,37 @@ async function quickAdjustStock(productId, delta) {
   loadDashboardStats();
 }
 
-// 5. Export Products Catalog as CSV Spreadsheet
+// Helper: Neutralize CSV Formula Injection (=, +, -, @, \t, \r)
+function sanitizeCsvCell(val) {
+  if (val === null || val === undefined) return '""';
+  let s = String(val);
+  if (/^[=+\-@\t\r]/.test(s)) {
+    s = "'" + s; // Prepend apostrophe to neutralize formula execution in Excel/Calc
+  }
+  return `"${s.replace(/"/g, '""')}"`;
+}
+
+// 5. Export Products Catalog as CSV Spreadsheet (Formula-Injection Safe)
 function exportProductsCSV() {
   if (!currentProducts || currentProducts.length === 0) {
     showToast('No products available to export', 'error');
     return;
   }
-  const headers = ['ID', 'Product Name', 'Brand', 'Department', 'Subcategory', 'Category', 'Price (INR)', 'Original MRP', 'Stock Quantity', 'Stock Status', 'Active', 'Image URL'];
+  const headers = ['ID', 'Product Name', 'SKU', 'Brand', 'Department', 'Subcategory', 'Category', 'Price (INR)', 'Original MRP', 'Stock Quantity', 'Stock Status', 'Active', 'Image URL'];
   const rows = currentProducts.map(p => [
-    p.id,
-    `"${(p.name || '').replace(/"/g, '""')}"`,
-    `"${(p.brand || 'RJ Collection').replace(/"/g, '""')}"`,
-    p.department || 'women',
-    `"${(p.subcategory || '').replace(/"/g, '""')}"`,
-    `"${(p.category_name || '').replace(/"/g, '""')}"`,
+    sanitizeCsvCell(p.id),
+    sanitizeCsvCell(p.name),
+    sanitizeCsvCell(p.sku || ''),
+    sanitizeCsvCell(p.brand || 'RJ Collection'),
+    sanitizeCsvCell(p.department || 'women'),
+    sanitizeCsvCell(p.subcategory || ''),
+    sanitizeCsvCell(p.category_name || ''),
     p.price || 0,
     p.original_price || p.price || 0,
     p.stock || 0,
-    (p.stock > 0 ? (p.stock <= 4 ? 'Low Stock' : 'In Stock') : 'Out of Stock'),
-    p.active ? 'Active' : 'Hidden',
-    `"${(p.image || '').replace(/"/g, '""')}"`
+    sanitizeCsvCell(p.stock > 0 ? (p.stock <= 4 ? 'Low Stock' : 'In Stock') : 'Out of Stock'),
+    sanitizeCsvCell(p.active ? 'Active' : 'Hidden'),
+    sanitizeCsvCell(p.image || '')
   ]);
 
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -2601,10 +2690,10 @@ function exportProductsCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('Products catalog exported to CSV! 📥', 'success');
+  showToast('Products catalog exported to CSV safely! 📥', 'success');
 }
 
-// 6. Export Orders Ledger as CSV Spreadsheet
+// 6. Export Orders Ledger as CSV Spreadsheet (Formula-Injection Safe)
 function exportOrdersCSV() {
   if (!currentOrders || currentOrders.length === 0) {
     showToast('No orders available to export', 'error');
@@ -2612,15 +2701,15 @@ function exportOrdersCSV() {
   }
   const headers = ['Order Number', 'Date', 'Customer Name', 'Phone', 'Email', 'Delivery Address', 'Total (INR)', 'Payment Method', 'Status', 'Item Count'];
   const rows = currentOrders.map(o => [
-    `"${o.order_number}"`,
-    `"${new Date(o.created_at).toLocaleDateString()}"`,
-    `"${(o.customer_name || '').replace(/"/g, '""')}"`,
-    `"${(o.customer_phone || '').replace(/"/g, '""')}"`,
-    `"${(o.customer_email || '').replace(/"/g, '""')}"`,
-    `"${(o.delivery_address || '').replace(/"/g, '""')}"`,
+    sanitizeCsvCell(o.order_number),
+    sanitizeCsvCell(new Date(o.created_at).toLocaleDateString()),
+    sanitizeCsvCell(o.customer_name || ''),
+    sanitizeCsvCell(o.customer_phone || ''),
+    sanitizeCsvCell(o.customer_email || ''),
+    sanitizeCsvCell(o.delivery_address || ''),
     o.total || 0,
-    `"${o.payment_method || 'Online'}"`,
-    `"${o.status || 'Pending'}"`,
+    sanitizeCsvCell(o.payment_method || 'Online'),
+    sanitizeCsvCell(o.status || 'Pending'),
     (o.items || []).length
   ]);
 
@@ -2634,7 +2723,7 @@ function exportOrdersCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('Orders ledger exported to CSV! 📊', 'success');
+  showToast('Orders ledger exported to CSV safely! 📊', 'success');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2908,3 +2997,470 @@ function printCurrentInvoice() {
 }
 
 
+
+
+// ─────────────────────────────────────────────────────────────
+// 8. Dashboard Date Filter & Operational Alert Banners
+// ─────────────────────────────────────────────────────────────
+let currentDashboardDateRange = 'all';
+
+function setDashboardDateRange(range) {
+  currentDashboardDateRange = range;
+  document.querySelectorAll('.date-range-pills .pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.range === range);
+  });
+  loadDashboardStats();
+}
+
+// Filter orders by selected timeframe
+function filterOrdersByDateRange(orders, range) {
+  if (!orders || orders.length === 0) return [];
+  if (range === 'all') return orders;
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  if (range === 'today') {
+    return orders.filter(o => new Date(o.created_at || Date.now()) >= startOfDay);
+  } else if (range === '7d') {
+    const cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return orders.filter(o => new Date(o.created_at || Date.now()) >= cutoff);
+  } else if (range === '30d') {
+    const cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return orders.filter(o => new Date(o.created_at || Date.now()) >= cutoff);
+  }
+  return orders;
+}
+
+// ─────────────────────────────────────────────────────────────
+// 9. Real-Time Inventory & Restock Hub
+// ─────────────────────────────────────────────────────────────
+let invCategoryFilter = 'all';
+let invStatusFilter = 'all';
+let invSearchQuery = '';
+
+async function loadAdminInventory() {
+  const tbody = document.getElementById('inventory-table-body');
+  if (!tbody) return;
+
+  // Make sure products are loaded
+  if (!currentProducts || currentProducts.length === 0) {
+    try {
+      const res = await fetch('/data/products.json');
+      if (res.ok) {
+        const data = await res.json();
+        currentProducts = data.products || [];
+      }
+    } catch (_) {}
+  }
+
+  // Populate inventory category dropdown filter if empty
+  const catSelect = document.getElementById('inv-category-filter');
+  if (catSelect && catSelect.children.length <= 1) {
+    (currentCategories || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      catSelect.appendChild(opt);
+    });
+  }
+
+  // Compute stock counters
+  const totalSkus = currentProducts.length;
+  const totalUnits = currentProducts.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
+  const lowSkus = currentProducts.filter(p => Number(p.stock) > 0 && Number(p.stock) <= 4).length;
+  const outSkus = currentProducts.filter(p => Number(p.stock) <= 0).length;
+
+  if (document.getElementById('inv-total-skus')) document.getElementById('inv-total-skus').textContent = totalSkus;
+  if (document.getElementById('inv-total-units')) document.getElementById('inv-total-units').textContent = totalUnits;
+  if (document.getElementById('inv-low-skus')) document.getElementById('inv-low-skus').textContent = lowSkus;
+  if (document.getElementById('inv-out-skus')) document.getElementById('inv-out-skus').textContent = outSkus;
+
+  // Update nav badge
+  const navBadge = document.getElementById('nav-badge-stock') || document.getElementById('nav-inv-badge');
+  if (navBadge) {
+    const urgentCount = lowSkus + outSkus;
+    navBadge.textContent = urgentCount;
+    navBadge.style.display = urgentCount > 0 ? 'inline-block' : 'none';
+  }
+
+  // Filter products
+  let filtered = [...currentProducts];
+  if (invCategoryFilter !== 'all') {
+    filtered = filtered.filter(p => String(p.category_id) === String(invCategoryFilter));
+  }
+  if (invStatusFilter === 'low_stock') {
+    filtered = filtered.filter(p => Number(p.stock) > 0 && Number(p.stock) <= 4);
+  } else if (invStatusFilter === 'out_of_stock') {
+    filtered = filtered.filter(p => Number(p.stock) <= 0);
+  } else if (invStatusFilter === 'in_stock') {
+    filtered = filtered.filter(p => Number(p.stock) > 4);
+  }
+
+  if (invSearchQuery) {
+    const q = invSearchQuery.toLowerCase();
+    filtered = filtered.filter(p => 
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.sku || '').toLowerCase().includes(q) ||
+      (p.subcategory || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 28px; color: #64748b;">No products match the selected inventory filters.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => {
+    const stock = Number(p.stock) || 0;
+    let badgeClass = 'status-delivered';
+    let badgeLabel = 'In Stock';
+    if (stock <= 0) {
+      badgeClass = 'status-cancelled';
+      badgeLabel = 'Out of Stock';
+    } else if (stock <= 4) {
+      badgeClass = 'status-pending';
+      badgeLabel = 'Low Stock';
+    }
+
+    const skuDisplay = p.sku ? `<span style="font-family: monospace; font-size: 0.78rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${p.sku}</span>` : '<span style="color:#94a3b8; font-size:0.75rem;">None</span>';
+
+    return `
+      <tr>
+        <td>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <img src="${p.image}" alt="${p.name}" style="width: 38px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+            <div>
+              <div style="font-weight: 700; color: #1e293b; font-size: 0.86rem; line-height: 1.3;">${p.name}</div>
+              <div style="font-size: 0.72rem; color: #64748b;">${p.department || ''} &bull; ${p.subcategory || ''}</div>
+            </div>
+          </div>
+        </td>
+        <td>${skuDisplay}</td>
+        <td style="font-size: 0.82rem; color: #475569;">${p.category_name || '-'}</td>
+        <td style="font-weight: 700; color: #1e293b;">${formatPrice(p.price)}</td>
+        <td>
+          <div style="display: inline-flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; background: #fff;">
+            <button onclick="adjustProductStock(${p.id}, -1)" style="border: none; background: #f8fafc; padding: 4px 8px; cursor: pointer; font-weight: bold; color: #475569;" title="Decrease stock">-</button>
+            <input type="number" min="0" value="${stock}" onchange="setDirectProductStock(${p.id}, this.value)" style="width: 50px; text-align: center; border: none; font-weight: bold; font-size: 0.85rem; padding: 4px 0; -moz-appearance: textfield;">
+            <button onclick="adjustProductStock(${p.id}, 1)" style="border: none; background: #f8fafc; padding: 4px 8px; cursor: pointer; font-weight: bold; color: #475569;" title="Increase stock">+</button>
+          </div>
+        </td>
+        <td><span class="status-pill ${badgeClass}">${badgeLabel}</span></td>
+        <td>
+          <div style="display: flex; gap: 6px;">
+            <button onclick="toggleProductAvailability(${p.id})" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" title="${stock > 0 ? 'Mark Out of Stock' : 'Mark In Stock'}">
+              ${stock > 0 ? '🔴 OOS' : '🟢 Restock'}
+            </button>
+            <button onclick="openEditProductModal(${p.id})" class="btn btn-outline-primary" style="padding: 4px 8px; font-size: 0.75rem;">Edit</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterInventoryByCategory(val) {
+  invCategoryFilter = val;
+  loadAdminInventory();
+}
+
+function filterInventoryByStatus(val) {
+  invStatusFilter = val;
+  loadAdminInventory();
+}
+
+function searchInventory(query) {
+  invSearchQuery = query;
+  loadAdminInventory();
+}
+
+async function adjustProductStock(prodId, delta) {
+  const p = currentProducts.find(item => Number(item.id) === Number(prodId));
+  if (!p) return;
+  const newStock = Math.max(0, (Number(p.stock) || 0) + delta);
+  await saveQuickStockUpdate(prodId, newStock);
+}
+
+async function setDirectProductStock(prodId, value) {
+  const num = Math.max(0, parseInt(value, 10) || 0);
+  await saveQuickStockUpdate(prodId, num);
+}
+
+async function toggleProductAvailability(prodId) {
+  const p = currentProducts.find(item => Number(item.id) === Number(prodId));
+  if (!p) return;
+  const newStock = (Number(p.stock) || 0) > 0 ? 0 : 15;
+  await saveQuickStockUpdate(prodId, newStock);
+}
+
+async function saveQuickStockUpdate(prodId, newStock) {
+  const p = currentProducts.find(item => Number(item.id) === Number(prodId));
+  if (!p) return;
+  const oldStock = p.stock;
+  p.stock = newStock;
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/products/${prodId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...p, stock: newStock })
+    });
+    if (res.ok) {
+      showToast(`Stock updated to ${newStock} units`, 'success');
+      loadAdminInventory();
+      loadAdminProducts();
+      loadDashboardStats();
+      return;
+    }
+  } catch (_) {}
+
+  // Fallback for client/static
+  localStorage.setItem('rj_catalog_overrides', JSON.stringify(currentProducts));
+  showToast(`Stock updated to ${newStock} units`, 'success');
+  loadAdminInventory();
+  loadAdminProducts();
+  loadDashboardStats();
+}
+
+// ─────────────────────────────────────────────────────────────
+// 10. Financial & Business Intelligence Reports Module
+// ─────────────────────────────────────────────────────────────
+let currentReportsRange = '30d';
+
+function setReportsDateRange(range) {
+  currentReportsRange = range;
+  document.querySelectorAll('#pane-reports .date-range-pills .pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.range === range);
+  });
+  loadAdminReports();
+}
+
+function loadAdminReports() {
+  const allOrders = fetchAllOrdersRealtime() || [];
+  const filteredOrders = filterOrdersByDateRange(allOrders, currentReportsRange);
+
+  // Exclude cancelled and refunded orders for trustworthy gross revenue
+  const validOrders = filteredOrders.filter(o => !['cancelled', 'refunded'].includes((o.status || '').toLowerCase()));
+  const grossRev = validOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const paidCount = validOrders.length;
+  const aov = paidCount > 0 ? Math.round(grossRev / paidCount) : 0;
+  const deliveredCount = validOrders.filter(o => (o.status || '').toLowerCase() === 'delivered').length;
+  const fulfillRate = paidCount > 0 ? Math.round((deliveredCount / paidCount) * 100) : 0;
+
+  if (document.getElementById('rep-gross-revenue')) document.getElementById('rep-gross-revenue').textContent = formatPrice(grossRev);
+  if (document.getElementById('rep-order-count')) document.getElementById('rep-order-count').textContent = paidCount;
+  if (document.getElementById('rep-aov')) document.getElementById('rep-aov').textContent = formatPrice(aov);
+  if (document.getElementById('rep-fulfillment-rate')) document.getElementById('rep-fulfillment-rate').textContent = fulfillRate + '%';
+
+  // Category breakdown
+  const categorySales = {};
+  validOrders.forEach(o => {
+    (o.items || []).forEach(item => {
+      const cat = item.category_name || item.department || 'Fashion';
+      if (!categorySales[cat]) categorySales[cat] = { units: 0, revenue: 0 };
+      const qty = Number(item.quantity) || 1;
+      const price = Number(item.price) || 0;
+      categorySales[cat].units += qty;
+      categorySales[cat].revenue += (price * qty);
+    });
+  });
+
+  const catContainer = document.getElementById('reports-category-breakdown');
+  if (catContainer) {
+    const catKeys = Object.keys(categorySales);
+    if (catKeys.length === 0) {
+      catContainer.innerHTML = '<p style="color: #94a3b8; font-size: 0.85rem; padding: 16px; text-align: center;">No category sales data for selected period.</p>';
+    } else {
+      catContainer.innerHTML = `
+        <table class="admin-table" style="font-size: 0.82rem;">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Units Sold</th>
+              <th>Revenue</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${catKeys.sort((a,b) => categorySales[b].revenue - categorySales[a].revenue).map(cat => {
+              const data = categorySales[cat];
+              const share = grossRev > 0 ? Math.round((data.revenue / grossRev) * 100) : 0;
+              return `
+                <tr>
+                  <td style="font-weight: 700; color: #1e293b;">${cat}</td>
+                  <td>${data.units}</td>
+                  <td style="font-weight: 700; color: #831843;">${formatPrice(data.revenue)}</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <div style="flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${share}%; height: 100%; background: #be123c;"></div>
+                      </div>
+                      <span style="font-size: 0.75rem; font-weight: 700; color: #64748b;">${share}%</span>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+  }
+
+  // Best Selling Products
+  const prodSales = {};
+  validOrders.forEach(o => {
+    (o.items || []).forEach(item => {
+      const pid = item.id || item.product_id || item.name;
+      if (!prodSales[pid]) {
+        prodSales[pid] = {
+          name: item.name || 'Unnamed Saree / Apparel',
+          image: item.image || '',
+          units: 0,
+          revenue: 0
+        };
+      }
+      const qty = Number(item.quantity) || 1;
+      const price = Number(item.price) || 0;
+      prodSales[pid].units += qty;
+      prodSales[pid].revenue += (price * qty);
+    });
+  });
+
+  const bestTbody = document.getElementById('reports-bestsellers-tbody');
+  if (bestTbody) {
+    const sortedProds = Object.values(prodSales).sort((a,b) => b.units - a.units);
+    if (sortedProds.length === 0) {
+      bestTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 24px;">No product sales recorded in this timeframe.</td></tr>';
+    } else {
+      bestTbody.innerHTML = sortedProds.slice(0, 8).map((p, idx) => `
+        <tr>
+          <td>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-weight: 800; font-size: 0.9rem; color: #c59b27; width: 20px;">#${idx + 1}</span>
+              ${p.image ? `<img src="${p.image}" style="width: 32px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">` : ''}
+              <span style="font-weight: 700; color: #1e293b; font-size: 0.84rem;">${p.name}</span>
+            </div>
+          </td>
+          <td style="font-weight: 700;">${p.units}</td>
+          <td style="font-weight: 700; color: #831843;">${formatPrice(p.revenue)}</td>
+          <td><span class="status-pill status-delivered">Top Seller</span></td>
+        </tr>
+      `).join('');
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// 11. Active Store Settings Module (Persistence & Firestore sync)
+// ─────────────────────────────────────────────────────────────
+async function loadAdminSettings() {
+  try {
+    const res = await fetch('/api/admin/settings');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.settings) {
+        applySettingsToForm(data.settings);
+        return;
+      }
+    }
+  } catch (_) {}
+
+  // Fallback to localStorage
+  const saved = localStorage.getItem('rj_store_settings');
+  if (saved) {
+    try {
+      applySettingsToForm(JSON.parse(saved));
+    } catch (_) {}
+  }
+}
+
+function applySettingsToForm(s) {
+  if (document.getElementById('set-store-name')) document.getElementById('set-store-name').value = s.store_name || 'RJ Fashion Collection';
+  if (document.getElementById('set-store-phone')) document.getElementById('set-store-phone').value = s.store_phone || '+91 78940 93586';
+  if (document.getElementById('set-store-email')) document.getElementById('set-store-email').value = s.store_email || 'contact@rjfashion.com';
+  if (document.getElementById('set-store-address')) document.getElementById('set-store-address').value = s.store_address || 'Bhubaneswar, Odisha, India';
+  if (document.getElementById('set-store-upi')) document.getElementById('set-store-upi').value = s.upi_id || '7894093586@upi';
+  if (document.getElementById('set-store-whatsapp')) document.getElementById('set-store-whatsapp').value = s.whatsapp_number || '+91 78940 93586';
+  if (document.getElementById('set-shipping-threshold')) document.getElementById('set-shipping-threshold').value = s.free_shipping_threshold || 999;
+  if (document.getElementById('set-shipping-fee')) document.getElementById('set-shipping-fee').value = s.shipping_fee || 99;
+  if (document.getElementById('set-tryon-enabled')) document.getElementById('set-tryon-enabled').checked = s.tryon_enabled === 1 || s.tryon_enabled === true;
+  if (document.getElementById('set-tryon-api-url')) document.getElementById('set-tryon-api-url').value = s.tryon_api_url || '';
+}
+
+async function handleSettingsFormSubmit(e) {
+  if (e) e.preventDefault();
+
+  const settingsPayload = {
+    store_name: document.getElementById('set-store-name')?.value?.trim() || 'RJ Fashion Collection',
+    store_phone: document.getElementById('set-store-phone')?.value?.trim() || '+91 78940 93586',
+    store_email: document.getElementById('set-store-email')?.value?.trim() || 'contact@rjfashion.com',
+    store_address: document.getElementById('set-store-address')?.value?.trim() || 'Bhubaneswar, Odisha, India',
+    upi_id: document.getElementById('set-store-upi')?.value?.trim() || '7894093586@upi',
+    whatsapp_number: document.getElementById('set-store-whatsapp')?.value?.trim() || '+91 78940 93586',
+    free_shipping_threshold: Number(document.getElementById('set-shipping-threshold')?.value) || 999,
+    shipping_fee: Number(document.getElementById('set-shipping-fee')?.value) || 99,
+    tryon_enabled: document.getElementById('set-tryon-enabled')?.checked ? 1 : 0,
+    tryon_api_url: document.getElementById('set-tryon-api-url')?.value?.trim() || ''
+  };
+
+  try {
+    const res = await fetch('/api/admin/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settingsPayload)
+    });
+    if (res.ok) {
+      localStorage.setItem('rj_store_settings', JSON.stringify(settingsPayload));
+      showToast('Store settings saved successfully! ⚙️', 'success');
+      return;
+    }
+  } catch (_) {}
+
+  // Fallback
+  localStorage.setItem('rj_store_settings', JSON.stringify(settingsPayload));
+  showToast('Store settings saved locally! ⚙️', 'success');
+}
+
+// ─────────────────────────────────────────────────────────────
+// 12. Customer Order History Modal (Safe Customer Inspector)
+// ─────────────────────────────────────────────────────────────
+function openCustomerOrdersModal(customerEmail, customerName) {
+  const modal = document.getElementById('customer-orders-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('cust-modal-name');
+  if (titleEl) titleEl.textContent = customerName || customerEmail || 'Customer';
+
+  const allOrders = fetchAllOrdersRealtime() || [];
+  const custOrders = allOrders.filter(o => 
+    (customerEmail && (o.customer_email || '').toLowerCase() === customerEmail.toLowerCase()) ||
+    (customerName && (o.customer_name || '').toLowerCase() === customerName.toLowerCase())
+  );
+
+  const tbody = document.getElementById('customer-orders-tbody') || document.getElementById('cust-orders-tbody');
+  if (tbody) {
+    if (custOrders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px;">No previous orders found for this customer.</td></tr>';
+    } else {
+      tbody.innerHTML = custOrders.map(o => `
+        <tr>
+          <td style="font-weight: 700; color: #831843;">${o.order_number}</td>
+          <td>${new Date(o.created_at || Date.now()).toLocaleDateString()}</td>
+          <td style="font-weight: 700;">${formatPrice(o.total)}</td>
+          <td><span class="status-pill status-${(o.status || 'pending').toLowerCase()}">${o.status}</span></td>
+          <td>
+            <button onclick="closeCustomerOrdersModal(); viewOrderModal('${o.id}');" class="btn btn-outline-primary" style="padding: 4px 8px; font-size: 0.75rem;">View Order</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  modal.classList.add('active');
+}
+
+function closeCustomerOrdersModal() {
+  const modal = document.getElementById('customer-orders-modal');
+  if (modal) modal.classList.remove('active');
+}

@@ -611,6 +611,13 @@ router.put('/categories/:id', (req, res) => {
 router.delete('/categories/:id', (req, res) => {
   try {
     const { id } = req.params;
+    const assigned = db.prepare('SELECT COUNT(*) as count FROM products WHERE category_id = ?').get(Number(id));
+    if (assigned && assigned.count > 0) {
+      return res.status(409).json({
+        success: false,
+        message: `Cannot delete category: ${assigned.count} active product(s) are assigned to it. Please reassign or delete the products first.`
+      });
+    }
     db.prepare('DELETE FROM categories WHERE id = ?').run(Number(id));
 
     db.logAdminAction({
@@ -749,6 +756,97 @@ router.post('/backup', (req, res) => {
   } catch (error) {
     console.error('Error triggering backup:', error);
     res.status(500).json({ success: false, message: 'Backup error occurred' });
+  }
+});
+
+// Store & System Settings
+router.get('/settings', (req, res) => {
+  try {
+    const storeSettings = db.prepare('SELECT * FROM store_settings WHERE id = 1').get() || {
+      store_name: 'RJ Fashion Collection',
+      support_phone: '+91 78940 93586',
+      support_whatsapp: '917894093586',
+      support_email: 'omvinayakwork@gmail.com',
+      upi_id: 'q070080131@ybl',
+      store_address: 'Sarbhal, Jharsuguda, ODISHA - 768201',
+      store_timings: 'Mon to Sat: 10:00 AM - 5:00 PM',
+      free_shipping_threshold: 999
+    };
+    const tryonSettings = db.prepare('SELECT * FROM tryon_settings WHERE id = 1').get() || {
+      enabled: 1,
+      retention_hours: 2
+    };
+    res.json({ success: true, settings: { ...storeSettings, tryon: tryonSettings } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch settings' });
+  }
+});
+
+router.post('/settings', (req, res) => {
+  try {
+    const {
+      store_name,
+      support_phone,
+      support_whatsapp,
+      support_email,
+      upi_id,
+      store_address,
+      store_timings,
+      free_shipping_threshold,
+      tryon_enabled,
+      tryon_retention_hours
+    } = req.body;
+
+    db.prepare(`
+      UPDATE store_settings SET
+        store_name = COALESCE(?, store_name),
+        support_phone = COALESCE(?, support_phone),
+        support_whatsapp = COALESCE(?, support_whatsapp),
+        support_email = COALESCE(?, support_email),
+        upi_id = COALESCE(?, upi_id),
+        store_address = COALESCE(?, store_address),
+        store_timings = COALESCE(?, store_timings),
+        free_shipping_threshold = COALESCE(?, free_shipping_threshold),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = 1
+    `).run(
+      store_name?.trim() || null,
+      support_phone?.trim() || null,
+      support_whatsapp?.trim() || null,
+      support_email?.trim() || null,
+      upi_id?.trim() || null,
+      store_address?.trim() || null,
+      store_timings?.trim() || null,
+      Number(free_shipping_threshold) || null
+    );
+
+    if (tryon_enabled !== undefined || tryon_retention_hours !== undefined) {
+      db.prepare(`
+        UPDATE tryon_settings SET
+          enabled = COALESCE(?, enabled),
+          retention_hours = COALESCE(?, retention_hours),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = 1
+      `).run(
+        tryon_enabled !== undefined ? (tryon_enabled ? 1 : 0) : null,
+        tryon_retention_hours ? Number(tryon_retention_hours) : null
+      );
+    }
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'UPDATE_STORE_SETTINGS',
+      entityType: 'settings',
+      entityId: 1,
+      details: { store_name, support_phone, upi_id, tryon_enabled },
+      req
+    });
+
+    res.json({ success: true, message: 'Store settings saved successfully' });
+  } catch (err) {
+    console.error('Settings update error:', err);
+    res.status(500).json({ success: false, message: 'Failed to update settings' });
   }
 });
 

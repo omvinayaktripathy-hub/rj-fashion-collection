@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node test-e2e.js && node test-delivery-flow.js && node test-full-checkout.js && node test-lightbox-gallery.js && node test-security-suite.js && node scripts/test-rbac-idor.js && node scripts/test-firebase-rules.js",
+    "test": "node test-e2e.js && node test-delivery-flow.js && node test-full-checkout.js && node test-lightbox-gallery.js && node test-security-suite.js && node scripts/test-rbac-idor.js && node scripts/test-firebase-rules.js && node test-tryon-suite.js",
     "test:security": "node test-security-suite.js && node scripts/test-rbac-idor.js",
     "test:firebase": "node scripts/test-firebase-rules.js",
     "test:rbac": "node scripts/test-rbac-idor.js"
