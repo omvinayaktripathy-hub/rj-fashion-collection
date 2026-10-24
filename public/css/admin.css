@@ -1236,3 +1236,21 @@ body.admin-body {
 }
 
 
+
+
+/* Mobile & Tablet iOS Safari Anti-Zoom Guarantee (>= 16px) */
+@media screen and (max-width: 820px) {
+  input,
+  select,
+  textarea,
+  .form-group input,
+  .form-group select,
+  .form-group textarea,
+  .search-box input,
+  #admin-product-search,
+  #admin-email,
+  #admin-password,
+  .form-control {
+    font-size: 16px !important;
+  }
+}
