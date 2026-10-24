@@ -871,7 +871,7 @@ async function loadDashboardStats() {
                 <div style="font-size:0.72rem; color:#ef4444; font-weight:700;">Only ${p.stock} remaining</div>
               </div>
             </div>
-            <button onclick="quickAdjustStock(${p.id}, 10)" class="btn btn-outline-primary" style="padding:3px 8px; font-size:0.72rem; font-weight:700;">+10</button>
+            <button onclick="quickAdjustStock('${p.id}', 10)" class="btn btn-outline-primary" style="padding:3px 8px; font-size:0.72rem; font-weight:700;">+10</button>
           </div>
         `).join('');
       }
@@ -1139,22 +1139,22 @@ async function loadAdminProducts() {
                 ${isInStock ? (isLowStock ? `⚠️ Low (${p.stock})` : `🟢 In Stock (${p.stock})`) : `🔴 Out of Stock (0)`}
               </span>
               <div class="compact-stock-stepper" title="Fast click +/- to adjust stock">
-                <button type="button" class="stepper-btn" onclick="quickAdjustStock(${p.id}, -1)" title="Reduce 1">−</button>
+                <button type="button" class="stepper-btn" onclick="quickAdjustStock('${p.id}', -1)" title="Reduce 1">−</button>
                 <span class="stepper-val" id="stock-val-${p.id}">${p.stock}</span>
-                <button type="button" class="stepper-btn" onclick="quickAdjustStock(${p.id}, 1)" title="Add 1">+</button>
+                <button type="button" class="stepper-btn" onclick="quickAdjustStock('${p.id}', 1)" title="Add 1">+</button>
               </div>
             </div>
           </td>
           <td>
             <div style="display:flex; gap:6px; align-items:center;">
-              <button onclick="toggleProductStock(${p.id}, ${p.stock})"
+              <button onclick="toggleProductStock('${p.id}', ${p.stock})"
                 id="stock-toggle-btn-${p.id}"
                 class="btn ${isInStock ? 'btn-warn-outline' : 'btn-success-outline'}"
                 style="padding:5px 9px; font-size:0.75rem; font-weight:700; white-space:nowrap;"
                 title="${isInStock ? 'Click to mark product as Out of Stock' : 'Click to mark product as In Stock'}">
                 ${isInStock ? 'Mark Out 🚫' : 'Mark In ✅'}
               </button>
-              <button onclick="quickUpdateStockPrompt(${p.id}, ${p.stock})"
+              <button onclick="quickUpdateStockPrompt('${p.id}', ${p.stock})"
                 style="padding:5px 8px; border:1px solid #cbd5e1; border-radius:4px; background:#fff; cursor:pointer; font-size:0.75rem; color:#475569;"
                 title="Edit exact stock quantity">
                 ✏️ Qty
@@ -1167,8 +1167,8 @@ async function loadAdminProducts() {
           </td>
           <td>
             <div style="display:flex; gap:6px;">
-              <button onclick="openEditProductModal(${p.id})" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;">Edit</button>
-              <button onclick="deleteProduct(${p.id})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;">Delete</button>
+              <button onclick="openEditProductModal('${p.id}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;">Edit</button>
+              <button onclick="deleteProduct('${p.id}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;">Delete</button>
             </div>
           </td>
         </tr>
@@ -2138,7 +2138,7 @@ async function loadAdminCategories() {
         <td>${cat.product_count || 0} products</td>
         <td>${cat.display_order || 1}</td>
         <td>
-          <button onclick="deleteCategory(${cat.id})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;">Delete</button>
+          <button onclick="deleteCategory('${cat.id}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;">Delete</button>
         </td>
       </tr>
     `).join('');
@@ -2315,7 +2315,7 @@ async function loadAdminBanners() {
           </span>
         </td>
         <td>
-          <button onclick="deleteBanner(${b.id})" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;">Delete</button>
+          <button onclick="deleteBanner('${b.id}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem; color:#ef4444; border-color:#fca5a5;">Delete</button>
         </td>
       </tr>
     `).join('');
@@ -3149,18 +3149,18 @@ async function loadAdminInventory() {
         <td style="font-weight: 700; color: #1e293b;">${formatPrice(p.price)}</td>
         <td>
           <div style="display: inline-flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; background: #fff;">
-            <button onclick="adjustProductStock(${p.id}, -1)" style="border: none; background: #f8fafc; padding: 4px 8px; cursor: pointer; font-weight: bold; color: #475569;" title="Decrease stock">-</button>
-            <input type="number" min="0" value="${stock}" onchange="setDirectProductStock(${p.id}, this.value)" style="width: 50px; text-align: center; border: none; font-weight: bold; font-size: 0.85rem; padding: 4px 0; -moz-appearance: textfield;">
-            <button onclick="adjustProductStock(${p.id}, 1)" style="border: none; background: #f8fafc; padding: 4px 8px; cursor: pointer; font-weight: bold; color: #475569;" title="Increase stock">+</button>
+            <button onclick="adjustProductStock('${p.id}', -1)" style="border: none; background: #f8fafc; padding: 4px 8px; cursor: pointer; font-weight: bold; color: #475569;" title="Decrease stock">-</button>
+            <input type="number" min="0" value="${stock}" onchange="setDirectProductStock('${p.id}', this.value)" style="width: 50px; text-align: center; border: none; font-weight: bold; font-size: 0.85rem; padding: 4px 0; -moz-appearance: textfield;">
+            <button onclick="adjustProductStock('${p.id}', 1)" style="border: none; background: #f8fafc; padding: 4px 8px; cursor: pointer; font-weight: bold; color: #475569;" title="Increase stock">+</button>
           </div>
         </td>
         <td><span class="status-pill ${badgeClass}">${badgeLabel}</span></td>
         <td>
           <div style="display: flex; gap: 6px;">
-            <button onclick="toggleProductAvailability(${p.id})" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" title="${stock > 0 ? 'Mark Out of Stock' : 'Mark In Stock'}">
+            <button onclick="toggleProductAvailability('${p.id}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" title="${stock > 0 ? 'Mark Out of Stock' : 'Mark In Stock'}">
               ${stock > 0 ? '🔴 OOS' : '🟢 Restock'}
             </button>
-            <button onclick="openEditProductModal(${p.id})" class="btn btn-outline-primary" style="padding: 4px 8px; font-size: 0.75rem;">Edit</button>
+            <button onclick="openEditProductModal('${p.id}')" class="btn btn-outline-primary" style="padding: 4px 8px; font-size: 0.75rem;">Edit</button>
           </div>
         </td>
       </tr>
@@ -3522,7 +3522,7 @@ function renderPromotionsTable(promos) {
       <td style="font-size: 0.82rem; color: #64748b;">${p.times_used || 0} / ${p.usage_limit || '∞'}</td>
       <td><span class="status-pill ${p.active ? 'status-delivered' : 'status-cancelled'}">${p.active ? 'Active' : 'Disabled'}</span></td>
       <td>
-        <button onclick="deletePromotion(${p.id})" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fca5a5;">Delete</button>
+        <button onclick="deletePromotion('${p.id}')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fca5a5;">Delete</button>
       </td>
     </tr>
   `).join('');
@@ -3771,7 +3771,7 @@ function renderReviewsTable(reviews) {
       <td style="font-size: 0.78rem; color: #64748b;">${new Date(r.created_at || Date.now()).toLocaleDateString()}</td>
       <td><span class="status-pill ${r.verified ? 'status-delivered' : 'status-pending'}">${r.verified ? 'Verified Buyer' : 'Pending'}</span></td>
       <td>
-        <button onclick="toggleReviewVerification(${r.id}, ${r.verified ? 1 : 0})" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;">
+        <button onclick="toggleReviewVerification('${r.id}', ${r.verified ? 1 : 0})" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;">
           ${r.verified ? 'Unverify' : 'Verify'}
         </button>
       </td>

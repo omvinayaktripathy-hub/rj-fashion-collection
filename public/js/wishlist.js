@@ -34,10 +34,22 @@ async function loadWishlist() {
       if (savedIds.length === 0) {
         items = [];
       } else {
-        const pRes = await fetch('/data/products.json');
-        const pData = await pRes.json();
-        const allProducts = pData.products || [];
-        items = allProducts.filter(p => savedIds.some(id => String(id) === String(p.id)));
+        items = [];
+        for (const sid of savedIds) {
+          let prod = null;
+          if (typeof resolveProductById === 'function') {
+            prod = await resolveProductById(sid);
+          }
+          if (prod) items.push(prod);
+        }
+        if (items.length === 0) {
+          try {
+            const pRes = await fetch('/data/products.json');
+            const pData = await pRes.json();
+            const allProducts = pData.products || [];
+            items = allProducts.filter(p => savedIds.some(id => String(id) === String(p.id)));
+          } catch (_) {}
+        }
       }
     } catch (e) {
       items = [];
@@ -66,7 +78,7 @@ async function loadWishlist() {
             <img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'">
           </a>
           ${p.discount > 0 ? `<span class="badge-discount">${p.discount}% OFF</span>` : ''}
-          <button class="wishlist-toggle-btn active" onclick="removeFromWishlist(${p.id})" title="Remove from Wishlist" style="color: var(--primary); background: rgba(255,255,255,0.9);">✕</button>
+          <button class="wishlist-toggle-btn active" onclick="removeFromWishlist('${escapeHtml(String(p.id))}')" title="Remove from Wishlist" style="color: var(--primary); background: rgba(255,255,255,0.9);">✕</button>
         </div>
 
         <div class="product-details">
@@ -81,7 +93,7 @@ async function loadWishlist() {
 
           <div class="product-actions" style="grid-template-columns: 1fr;">
             <button class="btn btn-card btn-primary"
-              onclick="moveToCartFromWishlist(${p.id})"
+              onclick="moveToCartFromWishlist('${escapeHtml(String(p.id))}')"
               ${isOutOfStock ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
               ${isOutOfStock ? 'Out of Stock' : '🛒 Move to Cart'}
             </button>

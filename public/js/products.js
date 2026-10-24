@@ -92,12 +92,12 @@ function createProductCard(p) {
         </a>
         ${p.discount > 0 ? `<span class="badge-discount">${p.discount}% OFF</span>` : ''}
         ${isOutOfStock ? `<span class="badge-out-of-stock">OUT OF STOCK</span>` : (isLowStock ? `<span class="badge-stock" style="background:#d97706; color:#ffffff;">Only ${p.stock} left</span>` : '')}
-        <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist(${p.id}, this)" title="Add to Wishlist" style="${isWishlisted ? 'color:var(--primary);' : ''}">
+        <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist('${escapeHtml(String(p.id))}', this)" title="Add to Wishlist" style="${isWishlisted ? 'color:var(--primary);' : ''}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
-        <button class="quick-view-btn" onclick="openQuickView(${p.id}, event)" title="Quick View">Quick View</button>
+        <button class="quick-view-btn" onclick="openQuickView('${escapeHtml(String(p.id))}', event)" title="Quick View">Quick View</button>
       </div>
 
       <div class="product-details">
@@ -132,7 +132,7 @@ function createProductCard(p) {
 
         <div class="product-actions">
           <button class="btn btn-card btn-outline-primary"
-            onclick="addToCart(${p.id})"
+            onclick="addToCart('${escapeHtml(String(p.id))}')"
             ${isOutOfStock ? 'disabled' : ''}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px;">
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -141,7 +141,7 @@ function createProductCard(p) {
             </svg>${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
           </button>
           <button class="btn btn-card btn-primary"
-            onclick="quickBuy(${p.id})"
+            onclick="quickBuy('${escapeHtml(String(p.id))}')"
             ${isOutOfStock ? 'disabled' : ''}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px;">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
@@ -270,11 +270,11 @@ async function openQuickView(productId, event) {
         </div>
 
         <div class="quick-view-actions">
-          <button class="btn btn-primary" onclick="quickViewAddToCart(${p.id})" ${isOutOfStock ? 'disabled' : ''}>
+          <button class="btn btn-primary" onclick="quickViewAddToCart('${escapeHtml(String(p.id))}')" ${isOutOfStock ? 'disabled' : ''}>
             ${isOutOfStock ? 'Sold Out' : '🛒 Add to Cart'}
           </button>
           <button class="btn btn-outline" style="border: 1.5px solid var(--primary); color: var(--primary);" 
-                  onclick="quickViewBuyNow(${p.id})" ${isOutOfStock ? 'disabled' : ''}>
+                  onclick="quickViewBuyNow('${escapeHtml(String(p.id))}')" ${isOutOfStock ? 'disabled' : ''}>
             ⚡ Instant Buy
           </button>
         </div>
