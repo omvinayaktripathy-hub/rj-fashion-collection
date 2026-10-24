@@ -311,14 +311,14 @@ app.get('/api/campaign', (req, res) => {
   try {
     const db = require('./database/db');
     const campaign = db.prepare('SELECT * FROM homepage_campaign WHERE id = 1').get() || {
-      announcement_text: 'THE GRAND OPENING — COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
+      announcement_text: 'INTRODUCING THE NEW RJ FASHION COLLECTION • COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
       announcement_active: 1,
-      hero_headline: 'A New Era of Style Begins.',
-      hero_subtitle: 'Discover your style. Elevate every moment.',
-      hero_badge: 'GRAND OPENING',
+      hero_headline: 'STYLE, REDEFINED.',
+      hero_subtitle: 'A considered collection. A contemporary point of view. Discover the signature style of RJ Fashion Collection.',
+      hero_badge: 'RJ FASHION COLLECTION',
       hero_image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=85',
       hero_secondary_image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=85',
-      hero_cta_primary: 'Explore the Collection',
+      hero_cta_primary: 'EXPLORE THE COLLECTION',
       hero_cta_secondary: "Discover What's New",
       launch_countdown_enabled: 1,
       launch_date: '2026-11-15T10:00:00',
@@ -333,13 +333,13 @@ app.get('/api/campaign', (req, res) => {
     res.json({
       success: true,
       campaign: {
-        announcement_text: 'THE GRAND OPENING — COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
+        announcement_text: 'INTRODUCING THE NEW RJ FASHION COLLECTION • COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
         announcement_active: 1,
-        hero_headline: 'A New Era of Style Begins.',
-        hero_subtitle: 'Discover your style. Elevate every moment.',
-        hero_badge: 'GRAND OPENING',
+        hero_headline: 'STYLE, REDEFINED.',
+        hero_subtitle: 'A considered collection. A contemporary point of view. Discover the signature style of RJ Fashion Collection.',
+        hero_badge: 'RJ FASHION COLLECTION',
         hero_image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=85',
-        hero_cta_primary: 'Explore the Collection',
+        hero_cta_primary: 'EXPLORE THE COLLECTION',
         hero_cta_secondary: "Discover What's New",
         launch_countdown_enabled: 1,
         launch_date: '2026-11-15T10:00:00'

@@ -910,69 +910,6 @@ function initLuxuryStyle() {
 function applyLuxuryStyle(styleName, showNotification = true) {
   const isEditorial = styleName === 'editorial-impact';
   const targetStyle = isEditorial ? 'editorial-impact' : 'quiet-luxury';
-  const displayName = isEditorial ? 'Editorial Impact' : 'Quiet Luxury';
-
-  document.documentElement.setAttribute('data-luxury-style', targetStyle);
-  if (document.body) {
-    if (isEditorial) {
-      document.body.classList.add('style-editorial-impact');
-      document.body.classList.remove('style-quiet-luxury');
-    } else {
-      document.body.classList.add('style-quiet-luxury');
-      document.body.classList.remove('style-editorial-impact');
-    }
-  }
-
-  try {
-    localStorage.setItem('rjfc_luxury_style', targetStyle);
-  } catch (_) {}
-
-  // Update UI indicators
-  document.querySelectorAll('.style-switcher-text, #luxury-style-text').forEach(el => {
-    el.innerHTML = `CHOOSE YOUR EXPERIENCE: <strong>${displayName}</strong>`;
-  });
-  document.querySelectorAll('#rj-mobile-style-text').forEach(el => {
-    el.textContent = `✦ Experience: ${displayName}`;
-  });
-  document.querySelectorAll('.luxury-style-switcher').forEach(el => {
-    el.setAttribute('title', `Choose Your Experience (Current: ${displayName})`);
-    el.setAttribute('data-current-style', targetStyle);
-  });
-
-  if (showNotification && typeof showToast === 'function') {
-    showToast(isEditorial ? '✨ Theme: Editorial Impact activated' : '🕊️ Theme: Quiet Luxury activated', 'info');
-  }
-}
-
-function toggleLuxuryStyle() {
-  openExperienceModal();
-}
-
-window.openExperienceModal = openExperienceModal;
-window.closeExperienceModal = closeExperienceModal;
-window.selectExperience = selectExperience;
-window.initLuxuryStyle = initLuxuryStyle;
-window.applyLuxuryStyle = applyLuxuryStyle;
-window.toggleLuxuryStyle = toggleLuxuryStyle;
-
-// Run initial check
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initLuxuryStyle);
-} else {
-  initLuxuryStyle();
-}
-
-function initLuxuryStyle() {
-  let saved = 'editorial-impact';
-  try {
-    saved = localStorage.getItem('rjfc_luxury_style') || 'editorial-impact';
-  } catch (_) {}
-  applyLuxuryStyle(saved, false);
-}
-
-function applyLuxuryStyle(styleName, showNotification = true) {
-  const isEditorial = styleName === 'editorial-impact';
-  const targetStyle = isEditorial ? 'editorial-impact' : 'quiet-luxury';
 
   document.documentElement.setAttribute('data-luxury-style', targetStyle);
   if (document.body) {
@@ -1039,3 +976,91 @@ function copyPromoCode(code) {
   }
 }
 window.copyPromoCode = copyPromoCode;
+
+
+// ===================================================================
+// FRAMER MOTION INSPIRED UNIFIED CINEMATIC MOTION CONTROLLER
+// Directional reveals, spring physics, viewport observation, reduced motion
+// ===================================================================
+const MotionSystem = {
+  observer: null,
+  init() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('reduced-motion');
+      return;
+    }
+
+    if ('IntersectionObserver' in window) {
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('motion-in-view');
+            this.observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        root: null,
+        rootMargin: '0px 0px -40px 0px',
+        threshold: 0.1
+      });
+
+      this.observeAll();
+    }
+
+    this.animateHeroSequence();
+  },
+
+  observeAll() {
+    if (!this.observer) return;
+    const elements = document.querySelectorAll(`
+      .motion-reveal,
+      .motion-fade-up,
+      .motion-fade-down,
+      .motion-fade-left,
+      .motion-fade-right,
+      .motion-scale-in,
+      .product-card,
+      .category-card,
+      .our-story-grid,
+      .spotlight-card,
+      .review-card,
+      .grand-campaign-strip
+    `);
+
+    elements.forEach((el, idx) => {
+      if (!el.style.getPropertyValue('--motion-index')) {
+        el.style.setProperty('--motion-index', (idx % 6).toString());
+      }
+      this.observer.observe(el);
+    });
+  },
+
+  animateHeroSequence() {
+    const heroSection = document.querySelector('.grand-hero-section');
+    if (!heroSection) return;
+
+    const tag = heroSection.querySelector('.grand-opening-tag');
+    const title = heroSection.querySelector('.grand-hero-title');
+    const subtitle = heroSection.querySelector('.grand-hero-subtitle');
+    const actions = heroSection.querySelector('.grand-hero-actions');
+    const gallery = heroSection.querySelector('.grand-hero-gallery');
+    const floatCard = heroSection.querySelector('.grand-hero-float-card');
+
+    if (tag) tag.classList.add('motion-hero-tag');
+    if (title) title.classList.add('motion-hero-title');
+    if (subtitle) subtitle.classList.add('motion-hero-sub');
+    if (actions) actions.classList.add('motion-hero-actions');
+    if (gallery) gallery.classList.add('motion-hero-gallery');
+    if (floatCard) floatCard.classList.add('motion-hero-float');
+
+    heroSection.classList.add('motion-hero-ready');
+  }
+};
+window.MotionSystem = MotionSystem;
+
+// Initialize Motion on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => MotionSystem.init());
+} else {
+  MotionSystem.init();
+}
