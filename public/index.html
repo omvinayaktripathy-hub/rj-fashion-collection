@@ -125,11 +125,23 @@
 </head>
 <body>
 
-  <!-- Top Announcement Bar -->
-  <div class="top-bar" id="announcement-bar">
-    <span class="top-bar-badge">RJ SIGNATURE</span>
-    <span id="announcement-text">INTRODUCING THE NEW RJ FASHION COLLECTION | COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: <strong>GRANDRJ</strong></span>
-  </div>
+    <!-- Premium Luxury Announcement Bar -->
+  <aside class="top-bar" id="announcement-bar" aria-label="Announcement">
+    <div class="top-bar-inner">
+      <span class="top-bar-brand">RJ FASHION COLLECTION</span>
+      <span class="top-bar-sep" aria-hidden="true">•</span>
+      <span class="top-bar-content" id="announcement-text">
+        <span class="top-bar-msg">INTRODUCING THE NEW RJ FASHION COLLECTION</span>
+        <span class="top-bar-sep" aria-hidden="true">•</span>
+        <span class="top-bar-perk">COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999</span>
+        <span class="top-bar-code-pill" onclick="copyPromoCode('GRANDRJ')" title="Click to copy coupon code GRANDRJ" role="button" tabindex="0">
+          <span class="code-label">USE CODE:</span>
+          <strong class="code-val">GRANDRJ</strong>
+          <span class="code-copy-tip" id="code-copy-tip">COPIED</span>
+        </span>
+      </span>
+    </div>
+  </aside>
 
   <!-- Main Site Header -->
   <header class="site-header">
@@ -419,7 +431,7 @@
         <div class="grand-hero-content">
           <div class="grand-opening-tag">
             <span class="pulse-dot"></span>
-            <span id="hero-badge-text">INTRODUCING RJ SIGNATURE</span>
+            <span id="hero-badge-text">RJ FASHION COLLECTION</span>
           </div>
           <h1 class="grand-hero-title" id="hero-headline-text">STYLE, REDEFINED.</h1>
           <p class="grand-hero-subtitle" id="hero-subtitle-text">A considered collection. A contemporary point of view. Discover the signature style of RJ Fashion Collection.</p>

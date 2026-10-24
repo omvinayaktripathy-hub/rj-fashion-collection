@@ -819,7 +819,7 @@ document.addEventListener('DOMContentLoaded', initGiftOptionUI);
 
 
 // ===================================================================
-// DUAL-STYLE LUXURY EXPERIENCE CONTROLLER (RJ SIGNATURE)
+// DUAL-STYLE LUXURY EXPERIENCE CONTROLLER (RJ FASHION COLLECTION)
 // 01. QUIET LUXURY — minimal ivory and beige
 // 02. EDITORIAL IMPACT — bold modern fashion editorial
 // Selector: "CHOOSE YOUR EXPERIENCE"
@@ -1022,3 +1022,20 @@ if (document.readyState === 'loading') {
 } else {
   initLuxuryStyle();
 }
+
+
+// Announcement Bar Copy Promo Code Helper
+function copyPromoCode(code) {
+  if (!code) code = 'GRANDRJ';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).catch(function() {});
+  }
+  document.querySelectorAll('.code-copy-tip').forEach(function(tip) {
+    tip.classList.add('show');
+    setTimeout(function() { tip.classList.remove('show'); }, 1800);
+  });
+  if (typeof showToast === 'function') {
+    showToast('Promo code ' + code + ' copied to clipboard!', 'success');
+  }
+}
+window.copyPromoCode = copyPromoCode;

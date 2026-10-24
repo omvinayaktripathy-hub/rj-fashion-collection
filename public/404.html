@@ -84,8 +84,8 @@
     });
   </script>
 
-  <link rel="stylesheet" href="/css/style.css?v=20261024-09">
-  <link rel="stylesheet" href="/css/responsive.css?v=20261024-09">
+  <link rel="stylesheet" href="/css/style.css?v=20261025-01">
+  <link rel="stylesheet" href="/css/responsive.css?v=20261025-01">
   <style>
     .error-hero {
       min-height: 65vh;
@@ -159,10 +159,23 @@
   </style>
 </head>
 <body>
-  <!-- Top Announcement Bar -->
-  <div class="top-bar">
-    <span>COMPLIMENTARY EXPRESS SHIPPING</span> ON ORDERS ABOVE ₹999 | PREMIUM INDIAN FASHION & ETHNIC WEAR
-  </div>
+    <!-- Premium Luxury Announcement Bar -->
+  <aside class="top-bar" id="announcement-bar" aria-label="Announcement">
+    <div class="top-bar-inner">
+      <span class="top-bar-brand">RJ FASHION COLLECTION</span>
+      <span class="top-bar-sep" aria-hidden="true">•</span>
+      <span class="top-bar-content" id="announcement-text">
+        <span class="top-bar-msg">INTRODUCING THE NEW RJ FASHION COLLECTION</span>
+        <span class="top-bar-sep" aria-hidden="true">•</span>
+        <span class="top-bar-perk">COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999</span>
+        <span class="top-bar-code-pill" onclick="copyPromoCode('GRANDRJ')" title="Click to copy coupon code GRANDRJ" role="button" tabindex="0">
+          <span class="code-label">USE CODE:</span>
+          <strong class="code-val">GRANDRJ</strong>
+          <span class="code-copy-tip" id="code-copy-tip">COPIED</span>
+        </span>
+      </span>
+    </div>
+  </aside>
 
   <!-- Site Header -->
   <header class="site-header">
@@ -309,7 +322,7 @@
     </div>
   </footer>
 
-  <script src="/js/app.js?v=20261024-09"></script>
+  <script src="/js/app.js?v=20261025-01"></script>
   <script src="/js/analytics.js" defer></script>
 </body>
 </html>

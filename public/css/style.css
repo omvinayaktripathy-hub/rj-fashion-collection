@@ -9,7 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* RJ SIGNATURE CORE COLORS */
+  /* RJ FASHION COLLECTION CORE COLORS */
   --bg-page: #FAF8F4;          /* Porcelain Ivory */
   --bg-subtle: #F2EDE4;        /* Soft Cream */
   --bg-sand: #E4D7C6;          /* Sand Beige */
@@ -157,27 +157,7 @@ button {
   padding: 0 24px;
 }
 
-/* ================= TOP PROMO ANNOUNCEMENT BAR ================= */
-.top-bar {
-  background: var(--dark);
-  color: var(--bg-page);
-  font-size: 0.78rem;
-  padding: 8px 16px;
-  text-align: center;
-  letter-spacing: 0.6px;
-  font-weight: 500;
-  border-bottom: 1px solid rgba(184, 154, 104, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
 
-.top-bar span {
-  color: var(--gold);
-  font-weight: 700;
-  letter-spacing: 0.8px;
-}
 
 /* ================= SITE HEADER & NAVBAR ================= */
 .site-header {
@@ -3971,35 +3951,7 @@ body.dark-theme {
   50% { transform: translateY(-6px); }
 }
 
-/* Grand Opening Announcement Bar */
-.top-bar {
-  background: #0f0f11;
-  color: #f5efe6;
-  font-size: 0.76rem;
-  letter-spacing: 1.8px;
-  font-weight: 600;
-  padding: 10px 16px;
-  text-align: center;
-  border-bottom: 1px solid rgba(197, 160, 89, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
 
-.top-bar-badge {
-  background: linear-gradient(135deg, #c5a059 0%, #e8cf99 50%, #c5a059 100%);
-  background-size: 200% auto;
-  animation: goldShimmer 3.5s linear infinite;
-  color: #1a1614;
-  font-size: 0.68rem;
-  font-weight: 800;
-  padding: 2px 8px;
-  border-radius: 3px;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-}
 
 /* Cinematic Grand Opening Hero Section */
 .grand-hero-section {
@@ -4730,7 +4682,7 @@ body.style-editorial-impact {
 
 
 /* ===================================================================
-   RJ SIGNATURE - CHOOSE YOUR EXPERIENCE (MODAL & THEME CONTROLS)
+   RJ FASHION COLLECTION - CHOOSE YOUR EXPERIENCE (MODAL & THEME CONTROLS)
    =================================================================== */
 .exp-modal-backdrop {
   position: fixed;
@@ -4935,4 +4887,189 @@ body.style-editorial-impact {
   background: #171715;
   color: #FFFFFF;
   border-color: #171715;
+}
+
+/* ===================================================================
+   PREMIUM LUXURY ANNOUNCEMENT BAR — RJ FASHION COLLECTION
+   Refined Deep Espresso / Editorial Black with Champagne Gold Accents
+   =================================================================== */
+.top-bar {
+  background: #171715;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  letter-spacing: 0.8px;
+  font-weight: 500;
+  padding: 9px 20px;
+  border-bottom: 1px solid rgba(189, 164, 119, 0.3);
+  position: relative;
+  z-index: 100;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .top-bar,
+.dark-theme .top-bar {
+  background: #11100F;
+  border-bottom-color: rgba(189, 164, 119, 0.35);
+}
+
+.top-bar-inner {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.top-bar-brand {
+  font-family: 'Cinzel', var(--font-serif), Georgia, serif;
+  font-weight: 700;
+  font-size: 0.77rem;
+  letter-spacing: 2px;
+  color: #BDA477;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  user-select: none;
+}
+
+.top-bar-brand::before {
+  content: '✦';
+  font-size: 0.65rem;
+  color: #BDA477;
+}
+
+.top-bar-sep {
+  color: rgba(189, 164, 119, 0.55);
+  font-size: 0.75rem;
+  user-select: none;
+  margin: 0 2px;
+}
+
+.top-bar-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.top-bar-msg {
+  color: #FFFFFF;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+}
+
+.top-bar-perk {
+  color: #F2EDE4;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.top-bar-code-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(189, 164, 119, 0.12);
+  border: 1px solid rgba(189, 164, 119, 0.45);
+  padding: 2px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.top-bar-code-pill:hover {
+  background: rgba(189, 164, 119, 0.25);
+  border-color: #BDA477;
+  box-shadow: 0 0 12px rgba(189, 164, 119, 0.35);
+  transform: translateY(-1px);
+}
+
+.top-bar-code-pill .code-label {
+  font-size: 0.64rem;
+  color: #E4D7C6;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+}
+
+.top-bar-code-pill .code-val {
+  font-size: 0.72rem;
+  color: #BDA477;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.code-copy-tip {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px);
+  background: #BDA477;
+  color: #171715;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  z-index: 10;
+}
+
+.code-copy-tip.show {
+  display: block;
+}
+
+/* Responsive Announcement Bar */
+@media (max-width: 992px) {
+  .top-bar {
+    padding: 8px 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.5px;
+  }
+  .top-bar-inner {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 680px) {
+  .top-bar {
+    padding: 8px 12px;
+  }
+  .top-bar-inner {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .top-bar-brand {
+    font-size: 0.74rem;
+    letter-spacing: 1.4px;
+  }
+  .top-bar-sep {
+    display: none;
+  }
+  .top-bar-content {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .top-bar-msg {
+    font-size: 0.70rem;
+  }
+  .top-bar-perk {
+    font-size: 0.68rem;
+  }
 }

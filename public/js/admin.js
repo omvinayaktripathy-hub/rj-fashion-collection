@@ -3607,7 +3607,7 @@ async function loadAdminCampaign() {
 
   // Fallback
   cachedCampaign = {
-    announcement_text: 'THE GRAND OPENING — COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
+    announcement_text: 'INTRODUCING THE NEW RJ FASHION COLLECTION • COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
     announcement_active: 1,
     hero_headline: 'A New Era of Style Begins.',
     hero_subtitle: 'Discover your style. Elevate every moment with handcrafted Banarasi silks, bridal lehengas, and royal Kundan jewelry.',
@@ -3688,7 +3688,7 @@ function previewCampaignModal() {
   body.innerHTML = `
     <!-- Top Announcement Bar Preview -->
     <div style="background: #0f0f11; color: #f5efe6; font-size: 0.76rem; letter-spacing: 1.5px; font-weight: 600; padding: 10px 16px; text-align: center; border-bottom: 1px solid rgba(197, 160, 89, 0.35); display: flex; align-items: center; justify-content: center; gap: 10px;">
-      <span style="background: #c5a059; color: #111; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 3px;">GRAND OPENING</span>
+      <span style="color: #BDA477; font-weight: 700; letter-spacing: 1.8px;">✦ RJ FASHION COLLECTION</span> •
       <span>${annText}</span>
     </div>
 

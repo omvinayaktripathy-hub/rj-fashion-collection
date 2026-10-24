@@ -87,8 +87,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=20261024-09">
-  <link rel="stylesheet" href="/css/responsive.css?v=20261024-09">
+  <link rel="stylesheet" href="/css/style.css?v=20261025-01">
+  <link rel="stylesheet" href="/css/responsive.css?v=20261025-01">
   <style>
     /* ==============================================================
        LUXURY CHECKOUT & DELIVERY ADDRESS THEME SYSTEM
@@ -635,10 +635,23 @@
 </head>
 <body>
 
-  <!-- Top Announcement Bar -->
-  <div class="top-bar">
-    <span>100% SECURE & ENCRYPTED CHECKOUT</span> | Authentic Indian Festive Wear | Express Pan-India Delivery
-  </div>
+    <!-- Premium Luxury Announcement Bar -->
+  <aside class="top-bar" id="announcement-bar" aria-label="Announcement">
+    <div class="top-bar-inner">
+      <span class="top-bar-brand">RJ FASHION COLLECTION</span>
+      <span class="top-bar-sep" aria-hidden="true">•</span>
+      <span class="top-bar-content" id="announcement-text">
+        <span class="top-bar-msg">INTRODUCING THE NEW RJ FASHION COLLECTION</span>
+        <span class="top-bar-sep" aria-hidden="true">•</span>
+        <span class="top-bar-perk">COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999</span>
+        <span class="top-bar-code-pill" onclick="copyPromoCode('GRANDRJ')" title="Click to copy coupon code GRANDRJ" role="button" tabindex="0">
+          <span class="code-label">USE CODE:</span>
+          <strong class="code-val">GRANDRJ</strong>
+          <span class="code-copy-tip" id="code-copy-tip">COPIED</span>
+        </span>
+      </span>
+    </div>
+  </aside>
 
   <!-- Luxury Checkout Header -->
   <header style="background: var(--deliv-card-bg); border-bottom: 1px solid var(--deliv-card-border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
@@ -960,10 +973,10 @@
     <span class="whatsapp-label">WhatsApp Concierge</span>
   </a>
 
-  <script src="/firebase-config.js?v=20261024-09"></script>
-  <script src="/js/app.js?v=20261024-09"></script>
-  <script src="/js/delivery.js?v=20261024-09"></script>
-  <script src="/js/mobile-nav.js?v=20261024-09" defer></script>
+  <script src="/firebase-config.js?v=20261025-01"></script>
+  <script src="/js/app.js?v=20261025-01"></script>
+  <script src="/js/delivery.js?v=20261025-01"></script>
+  <script src="/js/mobile-nav.js?v=20261025-01" defer></script>
   <script src="/js/analytics.js" defer></script>
 </body>
 </html>
