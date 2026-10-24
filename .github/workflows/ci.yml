@@ -1,0 +1,51 @@
+name: CI Security & Quality Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  security-and-tests:
+    name: Security Scan & Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Dependency Vulnerability Audit
+        run: npm audit --audit-level=high
+
+      - name: Static Security Scans (SQL, XSS, SSRF)
+        run: |
+          node scripts/audit-sql.js
+          node scripts/audit-xss.js
+          node scripts/audit-ssrf.js
+
+      - name: Run Secret Scan
+        run: python scripts/scan_secrets.py
+
+      - name: Execute Full Test Suite
+        env:
+          PORT: 3000
+          NODE_ENV: test
+          SESSION_SECRET: test_ci_session_secret_for_automated_testing_12345
+          STRIPE_ENABLED: 'true'
+          EMAIL_ENABLED: 'false'
+        run: |
+          node scripts/run_test_suite.js
