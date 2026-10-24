@@ -1064,3 +1064,15 @@ if (document.readyState === 'loading') {
 } else {
   MotionSystem.init();
 }
+
+// Header sticky scroll effect
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('.site-header');
+  if (header) {
+    if (window.scrollY > 25) {
+      header.classList.add('is-scrolled');
+    } else {
+      header.classList.remove('is-scrolled');
+    }
+  }
+}, { passive: true });

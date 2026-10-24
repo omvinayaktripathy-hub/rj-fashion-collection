@@ -131,9 +131,9 @@
       <span class="top-bar-brand">RJ FASHION COLLECTION</span>
       <span class="top-bar-sep" aria-hidden="true">•</span>
       <span class="top-bar-content" id="announcement-text">
-        <span class="top-bar-msg">INTRODUCING THE NEW RJ FASHION COLLECTION</span>
+        <span class="top-bar-msg">Discover the New Season — Explore the RJ Fashion Collection</span>
         <span class="top-bar-sep" aria-hidden="true">•</span>
-        <span class="top-bar-perk">COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999</span>
+        <span class="top-bar-perk">Complimentary Express Shipping on Orders Above ₹999</span>
         <span class="top-bar-code-pill" onclick="copyPromoCode('GRANDRJ')" title="Click to copy coupon code GRANDRJ" role="button" tabindex="0">
           <span class="code-label">USE CODE:</span>
           <strong class="code-val">GRANDRJ</strong>
@@ -433,15 +433,15 @@
             <span class="pulse-dot"></span>
             <span id="hero-badge-text">RJ FASHION COLLECTION</span>
           </div>
-          <h1 class="grand-hero-title" id="hero-headline-text">STYLE, REDEFINED.</h1>
-          <p class="grand-hero-subtitle" id="hero-subtitle-text">A considered collection. A contemporary point of view. Discover the signature style of RJ Fashion Collection.</p>
+          <h1 class="grand-hero-title" id="hero-headline-text">Style That Speaks Without Words.</h1>
+          <p class="grand-hero-subtitle" id="hero-subtitle-text">Discover timeless silhouettes and contemporary Indian fashion. An exquisite curation by RJ Fashion Collection.</p>
           <div class="grand-hero-actions">
             <a href="/shop.html" class="grand-btn-primary" id="hero-cta-prim">
-              <span>EXPLORE THE COLLECTION</span>
+              <span>Explore Collection</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </a>
-            <a href="#our-story" class="grand-btn-secondary" id="hero-cta-sec">
-              <span>DISCOVER OUR STORY</span>
+            <a href="/shop.html?newArrival=true" class="grand-btn-secondary" id="hero-cta-sec">
+              <span>Discover New Arrivals</span>
             </a>
           </div>
         </div>
@@ -682,6 +682,38 @@
       </div>
     </section>
 
+    <!-- SECTION 6: Trending Bestsellers -->
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <span class="section-eyebrow">Client Favorites</span>
+          <h2 class="section-title">Trending Bestsellers</h2>
+        </div>
+        <a href="/shop.html?sort=rating" class="view-all-link">View All Bestsellers →</a>
+      </div>
+      <div class="product-grid" id="homepage-bestsellers-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- SECTION 8: Signature Category Showcase Tabs -->
+    <section class="section signature-tabs-section">
+      <div class="section-header" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <span class="section-eyebrow">Curated Edits</span>
+        <h2 class="section-title" style="margin: 0;">Signature Collections</h2>
+        <p style="font-size: 0.92rem; color: var(--muted); max-width: 540px; margin: 0 auto;">Explore handloom sarees, celebratory kurtis, evening dresses, and heritage jewelry.</p>
+        <div class="collection-tabs-nav" role="tablist">
+          <button class="col-tab-btn is-active" onclick="switchCollectionTab('sarees', this)" role="tab">Sarees</button>
+          <button class="col-tab-btn" onclick="switchCollectionTab('kurtis', this)" role="tab">Kurtis</button>
+          <button class="col-tab-btn" onclick="switchCollectionTab('dresses', this)" role="tab">Dresses</button>
+          <button class="col-tab-btn" onclick="switchCollectionTab('jewelry', this)" role="tab">Jewellery</button>
+        </div>
+      </div>
+      <div class="product-grid" id="homepage-tabs-grid">
+        <!-- Dynamic Category Showcase -->
+      </div>
+    </section>
+
     <!-- Brand Storytelling Section (Our Story) -->
     <section class="our-story-section" id="our-story">
       <div class="our-story-grid motion-reveal">
@@ -694,6 +726,61 @@
           <p class="our-story-p">Founded on the timeless heritage of Indian handlooms and royal craftsmanship, RJ Fashion Collection curates authentic celebratory ensembles for modern royalty. Every saree, lehenga, and jewelry masterpiece tells a story of art, tradition, and devotion to beauty.</p>
           <p class="our-story-p">From the master weavers of Varanasi and Kanchipuram to the intricate zardozi embroiderers of Lucknow, our collections are directly sourced to bring you heirloom quality with unmatched elegance.</p>
           <div class="our-story-signature">— The RJ Fashion Atelier</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 10: Verified Customer Social Proof & Testimonials -->
+    <section class="section reviews-social-proof-section">
+      <div class="section-header" style="text-align: center; margin-bottom: 36px;">
+        <span class="section-eyebrow">Client Reflections</span>
+        <h2 class="section-title">Love from Our Patrons</h2>
+        <p style="font-size: 0.92rem; color: var(--muted); max-width: 540px; margin: 0 auto;">Read genuine impressions from verified patrons of RJ Fashion Collection.</p>
+      </div>
+      <div class="reviews-proof-grid">
+        <div class="review-proof-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-quote">“The zari work on this Kanjivaram saree is magnificent! Looked royal on my cousin’s wedding.”</p>
+          <div class="review-author-row">
+            <div class="review-avatar">AD</div>
+            <div>
+              <div class="review-author-name">Ananya Desai</div>
+              <div class="review-author-meta">Verified Buyer • Mumbai</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-proof-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-quote">“Exceptional quality silk, feels rich and heavy. Exactly like the pictures and arrived within 2 days.”</p>
+          <div class="review-author-row">
+            <div class="review-avatar">MN</div>
+            <div>
+              <div class="review-author-name">Meera Nair</div>
+              <div class="review-author-meta">Verified Buyer • Bengaluru</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-proof-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-quote">“The Kundan choker set exceeded my expectations. So many compliments received during Diwali celebrations!”</p>
+          <div class="review-author-row">
+            <div class="review-avatar">SP</div>
+            <div>
+              <div class="review-author-name">Sneha Patel</div>
+              <div class="review-author-meta">Verified Buyer • Ahmedabad</div>
+            </div>
+          </div>
+        </div>
+        <div class="review-proof-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-quote">“Stunning Banarasi weave with pure gold zari finish. The packaging and personal note felt truly luxurious.”</p>
+          <div class="review-author-row">
+            <div class="review-avatar">PS</div>
+            <div>
+              <div class="review-author-name">Priyanka Sharma</div>
+              <div class="review-author-meta">Verified Buyer • New Delhi</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -895,10 +982,45 @@
         if (newGrid && newProducts.length > 0) {
           newGrid.innerHTML = newProducts.map(createProductCard).join('');
         }
+
+        const bestGrid = document.getElementById('homepage-bestsellers-grid');
+        if (bestGrid) {
+          const bestList = sortedList.filter(p => (Number(p.rating) >= 4.5 || p.featured)).slice(0, 4);
+          bestGrid.innerHTML = (bestList.length ? bestList : sortedList.slice(0, 4)).map(createProductCard).join('');
+        }
+
+        window.homepageFullCatalog = sortedList;
+        renderCollectionTab('sarees');
+
+        if (window.MotionSystem && window.MotionSystem.observeAll) {
+          window.MotionSystem.observeAll();
+        }
       } catch (err) {
         console.error('Failed to load homepage sections:', err);
       }
     }
+    
+    function renderCollectionTab(catSlug) {
+      const tabsGrid = document.getElementById('homepage-tabs-grid');
+      if (!tabsGrid || !window.homepageFullCatalog) return;
+      const filtered = window.homepageFullCatalog.filter(p => {
+        const cat = String(p.category_name || p.category || p.category_id || '').toLowerCase();
+        return cat.includes(catSlug.toLowerCase());
+      }).slice(0, 4);
+      tabsGrid.innerHTML = (filtered.length ? filtered : window.homepageFullCatalog.slice(0, 4)).map(createProductCard).join('');
+      if (window.MotionSystem && window.MotionSystem.observeAll) {
+        window.MotionSystem.observeAll();
+      }
+    }
+
+    function switchCollectionTab(catSlug, btnEl) {
+      document.querySelectorAll('.col-tab-btn').forEach(b => b.classList.remove('is-active'));
+      if (btnEl) btnEl.classList.add('is-active');
+      renderCollectionTab(catSlug);
+    }
+    window.switchCollectionTab = switchCollectionTab;
+    window.renderCollectionTab = renderCollectionTab;
+
     document.addEventListener('DOMContentLoaded', loadHomepageSections);
   </script>
 
