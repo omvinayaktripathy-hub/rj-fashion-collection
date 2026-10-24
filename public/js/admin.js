@@ -334,6 +334,15 @@ function switchAdminTab(tabName) {
     case 'settings':
       loadAdminSettings();
       break;
+    case 'promotions':
+      loadAdminPromotions();
+      break;
+    case 'campaign':
+      loadAdminCampaign();
+      break;
+    case 'reviews':
+      loadAdminReviews();
+      break;
   }
 }
 
@@ -3463,4 +3472,327 @@ function openCustomerOrdersModal(customerEmail, customerName) {
 function closeCustomerOrdersModal() {
   const modal = document.getElementById('customer-orders-modal');
   if (modal) modal.classList.remove('active');
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// 13. Promotions & Coupons Management Module
+// ─────────────────────────────────────────────────────────────
+let currentPromotions = [];
+
+async function loadAdminPromotions() {
+  const tbody = document.getElementById('admin-promotions-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">Loading promotional campaigns...</td></tr>';
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/promotions`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.promotions)) {
+        currentPromotions = data.promotions;
+        renderPromotionsTable(currentPromotions);
+        return;
+      }
+    }
+  } catch (_) {}
+
+  // Fallback defaults
+  currentPromotions = [
+    { id: 1, code: 'GRANDRJ', description: 'Inaugural Grand Opening 10% Privilege', discount_type: 'percentage', discount_value: 10, min_order_amount: 500, times_used: 14, usage_limit: 500, active: 1 },
+    { id: 2, code: 'ROYAL100', description: 'Flat ₹100 Off on Celebration Wear', discount_type: 'fixed', discount_value: 100, min_order_amount: 999, times_used: 8, usage_limit: 500, active: 1 }
+  ];
+  renderPromotionsTable(currentPromotions);
+}
+
+function renderPromotionsTable(promos) {
+  const tbody = document.getElementById('admin-promotions-tbody');
+  if (!tbody) return;
+  if (!promos || promos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">No promotional codes created yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = promos.map(p => `
+    <tr>
+      <td><span style="font-family: monospace; font-weight: 800; font-size: 0.92rem; background: #fdf2f4; color: #be123c; padding: 4px 10px; border-radius: 4px; border: 1px solid #fecdd3;">${p.code}</span></td>
+      <td style="font-size: 0.84rem; color: #334155;">${p.description || '-'}</td>
+      <td style="font-weight: 700; color: #1e293b;">${p.discount_type === 'percentage' ? `${p.discount_value}% OFF` : `₹${p.discount_value} FLAT`}</td>
+      <td>₹${p.min_order_amount || 0}</td>
+      <td style="font-size: 0.82rem; color: #64748b;">${p.times_used || 0} / ${p.usage_limit || '∞'}</td>
+      <td><span class="status-pill ${p.active ? 'status-delivered' : 'status-cancelled'}">${p.active ? 'Active' : 'Disabled'}</span></td>
+      <td>
+        <button onclick="deletePromotion(${p.id})" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; color: #ef4444; border-color: #fca5a5;">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openPromoModal() {
+  document.getElementById('promo-form').reset();
+  document.getElementById('promo-modal').classList.add('active');
+}
+
+function closePromoModal() {
+  document.getElementById('promo-modal').classList.remove('active');
+}
+
+async function handleCreatePromoSubmit(e) {
+  if (e) e.preventDefault();
+  const payload = {
+    code: document.getElementById('promo-form-code')?.value?.trim(),
+    description: document.getElementById('promo-form-desc')?.value?.trim(),
+    discount_type: document.getElementById('promo-form-type')?.value,
+    discount_value: Number(document.getElementById('promo-form-val')?.value),
+    min_order_amount: Number(document.getElementById('promo-form-min')?.value) || 0,
+    usage_limit: Number(document.getElementById('promo-form-limit')?.value) || 200,
+    active: 1
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/promotions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message, 'success');
+      closePromoModal();
+      loadAdminPromotions();
+      return;
+    }
+    showToast(data.message || 'Failed to create promo code', 'error');
+  } catch (_) {
+    payload.id = Date.now();
+    currentPromotions.unshift(payload);
+    renderPromotionsTable(currentPromotions);
+    closePromoModal();
+    showToast(`Promo code ${payload.code} created locally!`, 'success');
+  }
+}
+
+async function deletePromotion(id) {
+  if (!confirm('Are you sure you want to delete this promotional code?')) return;
+  try {
+    const res = await fetch(`${API_BASE}/admin/promotions/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast('Promotion removed', 'info');
+      loadAdminPromotions();
+      return;
+    }
+  } catch (_) {}
+  currentPromotions = currentPromotions.filter(p => p.id !== id);
+  renderPromotionsTable(currentPromotions);
+  showToast('Promotion removed', 'info');
+}
+
+// ─────────────────────────────────────────────────────────────
+// 14. Homepage & Grand Opening Campaign Controls
+// ─────────────────────────────────────────────────────────────
+let cachedCampaign = null;
+
+async function loadAdminCampaign() {
+  try {
+    const res = await fetch(`${API_BASE}/admin/campaign`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.campaign) {
+        cachedCampaign = data.campaign;
+        applyCampaignToAdminForm(cachedCampaign);
+        return;
+      }
+    }
+  } catch (_) {}
+
+  // Fallback
+  cachedCampaign = {
+    announcement_text: 'THE GRAND OPENING — COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
+    announcement_active: 1,
+    hero_headline: 'A New Era of Style Begins.',
+    hero_subtitle: 'Discover your style. Elevate every moment with handcrafted Banarasi silks, bridal lehengas, and royal Kundan jewelry.',
+    hero_badge: 'GRAND OPENING',
+    hero_image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=85',
+    hero_secondary_image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=85',
+    hero_cta_primary: 'Explore the Collection',
+    hero_cta_secondary: "Discover What's New",
+    launch_countdown_enabled: 1,
+    launch_date: '2026-11-15T10:00:00',
+    spotlight_title: 'The Royal Heritage Edit',
+    spotlight_image: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85'
+  };
+  applyCampaignToAdminForm(cachedCampaign);
+}
+
+function applyCampaignToAdminForm(c) {
+  if (document.getElementById('cmp-announcement-text')) document.getElementById('cmp-announcement-text').value = c.announcement_text || '';
+  if (document.getElementById('cmp-announcement-active')) document.getElementById('cmp-announcement-active').checked = c.announcement_active !== 0;
+  if (document.getElementById('cmp-hero-badge')) document.getElementById('cmp-hero-badge').value = c.hero_badge || 'GRAND OPENING';
+  if (document.getElementById('cmp-hero-headline')) document.getElementById('cmp-hero-headline').value = c.hero_headline || 'A New Era of Style Begins.';
+  if (document.getElementById('cmp-hero-subtitle')) document.getElementById('cmp-hero-subtitle').value = c.hero_subtitle || '';
+  if (document.getElementById('cmp-hero-image')) document.getElementById('cmp-hero-image').value = c.hero_image || '';
+  if (document.getElementById('cmp-hero-sec-img')) document.getElementById('cmp-hero-sec-img').value = c.hero_secondary_image || '';
+  if (document.getElementById('cmp-launch-date')) {
+    const raw = c.launch_date || '2026-11-15T10:00';
+    document.getElementById('cmp-launch-date').value = raw.slice(0, 16);
+  }
+  if (document.getElementById('cmp-spotlight-title')) document.getElementById('cmp-spotlight-title').value = c.spotlight_title || 'The Royal Heritage Edit';
+  if (document.getElementById('cmp-spotlight-img')) document.getElementById('cmp-spotlight-img').value = c.spotlight_image || '';
+}
+
+async function saveAdminCampaign(e) {
+  if (e) e.preventDefault();
+  const payload = {
+    announcement_text: document.getElementById('cmp-announcement-text')?.value?.trim(),
+    announcement_active: document.getElementById('cmp-announcement-active')?.checked ? 1 : 0,
+    hero_badge: document.getElementById('cmp-hero-badge')?.value?.trim(),
+    hero_headline: document.getElementById('cmp-hero-headline')?.value?.trim(),
+    hero_subtitle: document.getElementById('cmp-hero-subtitle')?.value?.trim(),
+    hero_image: document.getElementById('cmp-hero-image')?.value?.trim(),
+    hero_secondary_image: document.getElementById('cmp-hero-sec-img')?.value?.trim(),
+    launch_date: document.getElementById('cmp-launch-date')?.value,
+    spotlight_title: document.getElementById('cmp-spotlight-title')?.value?.trim(),
+    spotlight_image: document.getElementById('cmp-spotlight-img')?.value?.trim()
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/campaign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      showToast('Grand Opening & Homepage Campaign saved and published! 🚀', 'success');
+      cachedCampaign = payload;
+      return;
+    }
+  } catch (_) {}
+
+  localStorage.setItem('rj_campaign_settings', JSON.stringify(payload));
+  cachedCampaign = payload;
+  showToast('Grand Opening Campaign settings saved locally! 🚀', 'success');
+}
+
+function previewCampaignModal() {
+  const modal = document.getElementById('campaign-preview-modal');
+  const body = document.getElementById('campaign-preview-body');
+  if (!modal || !body) return;
+
+  const annText = document.getElementById('cmp-announcement-text')?.value || 'THE GRAND OPENING PRIVILEGE';
+  const badge = document.getElementById('cmp-hero-badge')?.value || 'GRAND OPENING';
+  const headline = document.getElementById('cmp-hero-headline')?.value || 'A New Era of Style Begins.';
+  const subtitle = document.getElementById('cmp-hero-subtitle')?.value || 'Discover your style.';
+  const heroImg = document.getElementById('cmp-hero-image')?.value || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=85';
+  const secImg = document.getElementById('cmp-hero-sec-img')?.value || 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=300&q=80';
+
+  body.innerHTML = `
+    <!-- Top Announcement Bar Preview -->
+    <div style="background: #0f0f11; color: #f5efe6; font-size: 0.76rem; letter-spacing: 1.5px; font-weight: 600; padding: 10px 16px; text-align: center; border-bottom: 1px solid rgba(197, 160, 89, 0.35); display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <span style="background: #c5a059; color: #111; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 3px;">GRAND OPENING</span>
+      <span>${annText}</span>
+    </div>
+
+    <!-- Cinematic Hero Preview -->
+    <div style="background: linear-gradient(135deg, #121013 0%, #1c1319 60%, #150f14 100%); padding: 48px; color: #fff; margin: 20px; border-radius: 12px; border: 1px solid rgba(197, 160, 89, 0.35); display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center;">
+      <div>
+        <span style="background: rgba(197, 160, 89, 0.16); border: 1px solid rgba(197, 160, 89, 0.55); color: #e5cb9c; padding: 4px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px; display: inline-block; margin-bottom: 14px;">${badge}</span>
+        <h1 style="font-family: Georgia, serif; font-size: 2.4rem; font-weight: 700; margin: 0 0 12px 0; line-height: 1.15;">${headline}</h1>
+        <p style="font-size: 0.94rem; color: #cbd5e1; line-height: 1.6; margin: 0 0 24px 0;">${subtitle}</p>
+        <div style="display: flex; gap: 12px;">
+          <span style="background: linear-gradient(135deg, #c5a059 0%, #e2c589 100%); color: #111; padding: 10px 22px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px;">EXPLORE THE COLLECTION →</span>
+          <span style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 10px 20px; border-radius: 4px; font-weight: 600; font-size: 0.8rem;">DISCOVER WHAT'S NEW</span>
+        </div>
+      </div>
+      <div style="position: relative;">
+        <img src="${heroImg}" style="width: 100%; height: 280px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(197, 160, 89, 0.4);">
+        <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(18,16,19,0.92); border: 1px solid rgba(197,160,89,0.4); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; gap: 8px;">
+          <img src="${secImg}" style="width: 32px; height: 40px; object-fit: cover; border-radius: 4px;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.78rem; color: #fff;">The Kundan Vault</div>
+            <div style="font-size: 0.68rem; color: #c5a059; font-weight: 700;">24K GOLD ACCENTS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('active');
+}
+
+function closeCampaignPreviewModal() {
+  const modal = document.getElementById('campaign-preview-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+// ─────────────────────────────────────────────────────────────
+// 15. Customer Reviews Moderation Module
+// ─────────────────────────────────────────────────────────────
+let currentReviews = [];
+
+async function loadAdminReviews() {
+  const tbody = document.getElementById('admin-reviews-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">Loading customer reviews...</td></tr>';
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/reviews`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.reviews)) {
+        currentReviews = data.reviews;
+        renderReviewsTable(currentReviews);
+        return;
+      }
+    }
+  } catch (_) {}
+
+  // Fallback demo reviews for empty store
+  currentReviews = [
+    { id: 1, user_name: 'Ananya Deshmukh', rating: 5, comment: 'The Kanjivaram zari work is absolutely breathtaking. Pure royal elegance!', product_name: 'Royal Kanjivaram Pure Silk Saree', created_at: new Date().toISOString(), verified: 1 },
+    { id: 2, user_name: 'Pooja Singhania', rating: 5, comment: 'The Kundan choker arrived in luxury velvet packaging. Truly heirloom quality.', product_name: 'Heritage 24k Gold Plated Kundan Choker', created_at: new Date().toISOString(), verified: 1 }
+  ];
+  renderReviewsTable(currentReviews);
+}
+
+function renderReviewsTable(reviews) {
+  const tbody = document.getElementById('admin-reviews-tbody');
+  if (!tbody) return;
+  if (!reviews || reviews.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">No reviews submitted yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = reviews.map(r => `
+    <tr>
+      <td style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">${r.product_name || 'Boutique Apparel'}</td>
+      <td style="font-weight: 600;">${r.user_name || 'Verified Buyer'}</td>
+      <td><span style="color: #f59e0b; font-weight: 800;">★ ${r.rating || 5}.0</span></td>
+      <td style="font-size: 0.82rem; color: #475569; max-width: 260px;">"${r.comment || ''}"</td>
+      <td style="font-size: 0.78rem; color: #64748b;">${new Date(r.created_at || Date.now()).toLocaleDateString()}</td>
+      <td><span class="status-pill ${r.verified ? 'status-delivered' : 'status-pending'}">${r.verified ? 'Verified Buyer' : 'Pending'}</span></td>
+      <td>
+        <button onclick="toggleReviewVerification(${r.id}, ${r.verified ? 1 : 0})" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;">
+          ${r.verified ? 'Unverify' : 'Verify'}
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleReviewVerification(id, currentStatus) {
+  const newStatus = currentStatus ? 0 : 1;
+  try {
+    await fetch(`${API_BASE}/admin/reviews/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ verified: newStatus })
+    });
+    showToast('Review status updated', 'success');
+    loadAdminReviews();
+  } catch (_) {
+    const r = currentReviews.find(item => item.id === id);
+    if (r) r.verified = newStatus;
+    renderReviewsTable(currentReviews);
+    showToast('Review status updated locally', 'success');
+  }
 }

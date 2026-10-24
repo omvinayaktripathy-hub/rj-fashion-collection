@@ -322,6 +322,14 @@ function renderProduct(p) {
             </div>
           ` : ''}
 
+          <!-- AI Virtual Try-On Studio Action Button -->
+          <div style="margin-bottom: 12px;">
+            <button type="button" class="fk-cta-btn fk-btn-tryon" onclick="window.openRjTryonStudio && window.openRjTryonStudio(window.currentProductDetail)" title="Virtual Dressing Room">
+              <span class="fk-cta-icon">✨</span>
+              <span>AI VIRTUAL DRESSING ROOM — TRY ON IN REAL-TIME</span>
+            </button>
+          </div>
+
           <!-- Flipkart Dual Action Buttons (Desktop / Tablet) -->
           <div class="fk-cta-grid fk-desktop-cta">
             <button class="fk-cta-btn fk-btn-cart ${isOutOfStock ? 'disabled' : ''}" 

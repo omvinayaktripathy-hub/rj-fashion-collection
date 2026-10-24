@@ -486,6 +486,21 @@
           <span>🖼️</span> <span>Banners</span>
         </button>
       </li>
+      <li class="admin-nav-item" id="nav-promotions">
+        <button onclick="switchAdminTab('promotions')">
+          <span>🎟️</span> <span>Promotions</span>
+        </button>
+      </li>
+      <li class="admin-nav-item" id="nav-campaign">
+        <button onclick="switchAdminTab('campaign')">
+          <span>🚀</span> <span>Grand Opening</span>
+        </button>
+      </li>
+      <li class="admin-nav-item" id="nav-reviews">
+        <button onclick="switchAdminTab('reviews')">
+          <span>⭐</span> <span>Reviews</span>
+        </button>
+      </li>
       <li class="admin-nav-item" id="nav-reports">
         <button onclick="switchAdminTab('reports')">
           <span>📈</span> <span>Reports & Analytics</span>
@@ -1232,6 +1247,153 @@
         </div>
       </section>
 
+      <!-- SECTION: PROMOTIONS & COUPONS -->
+      <section id="pane-promotions" class="admin-section-pane" style="display: none;">
+        <div class="admin-card">
+          <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h3 style="margin-bottom: 2px;">🎟️ Promotional Codes & Campaigns</h3>
+              <span style="font-size: 0.8rem; color: #64748b;">Configure checkout discount coupons, minimum orders, and usage rules</span>
+            </div>
+            <button onclick="openPromoModal()" class="btn btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+              + Create Promo Code
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Description</th>
+                  <th>Discount</th>
+                  <th>Min Order</th>
+                  <th>Usage</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-promotions-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: HOMEPAGE & GRAND OPENING CAMPAIGN -->
+      <section id="pane-campaign" class="admin-section-pane" style="display: none;">
+        <div class="admin-card" style="padding: 28px; max-width: 950px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid #f1e2e6; padding-bottom: 16px;">
+            <div>
+              <h3 style="margin: 0; font-size: 1.3rem; color: var(--admin-primary); font-weight: 800;">🚀 Grand Opening &amp; Homepage Controls</h3>
+              <span style="font-size: 0.82rem; color: #64748b;">Manage hero headlines, announcement banner, launch countdown, and featured spotlight</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button type="button" onclick="previewCampaignModal()" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.84rem;">
+                👁️ Live Preview
+              </button>
+              <button type="button" onclick="saveAdminCampaign(event)" class="btn btn-primary" style="padding: 6px 18px; font-size: 0.84rem; font-weight: 700;">
+                💾 Save &amp; Publish
+              </button>
+            </div>
+          </div>
+
+          <form id="campaign-settings-form" onsubmit="saveAdminCampaign(event)" style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="settings-grid">
+              
+              <!-- Announcement Bar Controls -->
+              <div class="settings-card" style="grid-column: 1 / -1;">
+                <h4>📢 Announcement Bar (Top of Storefront)</h4>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Announcement Message *</label>
+                  <input type="text" id="cmp-announcement-text" required value="THE GRAND OPENING — COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+                </div>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">
+                  <input type="checkbox" id="cmp-announcement-active" checked>
+                  <span>Display Announcement Bar on Storefront</span>
+                </label>
+              </div>
+
+              <!-- Hero Section Content -->
+              <div class="settings-card">
+                <h4>✨ Grand Opening Hero Content</h4>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Badge Tagline</label>
+                  <input type="text" id="cmp-hero-badge" value="GRAND OPENING" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Hero Headline *</label>
+                  <input type="text" id="cmp-hero-headline" required value="A New Era of Style Begins." style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+                </div>
+                <div class="form-group">
+                  <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Hero Supporting Subtitle *</label>
+                  <textarea id="cmp-hero-subtitle" rows="3" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; resize: vertical;">Discover your style. Elevate every moment with handcrafted Banarasi silks, bridal lehengas, and royal Kundan jewelry.</textarea>
+                </div>
+              </div>
+
+              <!-- Hero Imagery & Countdown -->
+              <div class="settings-card">
+                <h4>🖼️ Imagery &amp; Launch Countdown</h4>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Primary Hero Image URL</label>
+                  <input type="text" id="cmp-hero-image" value="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=85" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Secondary Accent Image (Kundan Card)</label>
+                  <input type="text" id="cmp-hero-sec-img" value="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=85" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+                </div>
+                <div class="form-group">
+                  <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Grand Opening Target Date</label>
+                  <input type="datetime-local" id="cmp-launch-date" value="2026-11-15T10:00" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background:#fff;">
+                </div>
+              </div>
+
+              <!-- Curated Spotlight Collection -->
+              <div class="settings-card" style="grid-column: 1 / -1;">
+                <h4>👑 Featured Spotlight Atelier</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="form-group">
+                    <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Spotlight Title</label>
+                    <input type="text" id="cmp-spotlight-title" value="The Royal Heritage Edit" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+                  </div>
+                  <div class="form-group">
+                    <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Spotlight Image URL</label>
+                    <input type="text" id="cmp-spotlight-img" value="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- SECTION: CUSTOMER REVIEWS MODERATION -->
+      <section id="pane-reviews" class="admin-section-pane" style="display: none;">
+        <div class="admin-card">
+          <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h3 style="margin-bottom: 2px;">⭐ Customer Reviews &amp; Testimonials</h3>
+              <span style="font-size: 0.8rem; color: #64748b;">Moderate authentic customer ratings, verified buyer badges, and published testimonials</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Customer</th>
+                  <th>Rating</th>
+                  <th>Review Commentary</th>
+                  <th>Date</th>
+                  <th>Verified</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-reviews-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- SECTION 8: CLOUD MESSAGING (FIREBASE) -->
       <section id="pane-notifications" class="admin-section-pane" style="display: none;">
         <div class="admin-card" style="padding: 28px; max-width: 800px; margin-bottom: 24px;">
@@ -1647,5 +1809,65 @@
   <script src="/firebase-config.js?v=20261021-03"></script>
   <script src="/js/app.js?v=20261021-03"></script>
   <script src="/js/admin.js?v=20261021-03"></script>
+  <!-- CREATE PROMO CODE MODAL -->
+  <div id="promo-modal" class="modal-backdrop">
+    <div class="modal-window" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 id="promo-modal-title">Create Promotional Code</h3>
+        <button class="modal-close" onclick="closePromoModal()">✕</button>
+      </div>
+      <form id="promo-form" onsubmit="handleCreatePromoSubmit(event)" class="modal-body">
+        <div class="form-group">
+          <label>Coupon Code *</label>
+          <input type="text" id="promo-form-code" required placeholder="e.g. FESTIVE20" style="text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+          <label>Campaign Description</label>
+          <input type="text" id="promo-form-desc" placeholder="e.g. 20% Off Inaugural Festive Wear">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Discount Type</label>
+            <select id="promo-form-type">
+              <option value="percentage">Percentage (%)</option>
+              <option value="fixed">Fixed Amount (₹)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Discount Value *</label>
+            <input type="number" id="promo-form-val" required min="1" placeholder="10">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Min Order (₹)</label>
+            <input type="number" id="promo-form-min" value="499" min="0">
+          </div>
+          <div class="form-group">
+            <label>Usage Limit</label>
+            <input type="number" id="promo-form-limit" value="200" min="1">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button type="button" class="btn btn-outline" onclick="closePromoModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Code</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CAMPAIGN LIVE PREVIEW MODAL -->
+  <div id="campaign-preview-modal" class="modal-backdrop">
+    <div class="modal-window" style="max-width: 900px; padding: 0; overflow: hidden;">
+      <div class="modal-header" style="padding: 16px 24px; background: #0f0f11; color: #fff; border-bottom: 1px solid rgba(197, 160, 89, 0.4);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="background: #c5a059; color: #111; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 4px;">LIVE PREVIEW</span>
+          <h3 style="margin: 0; font-size: 1.1rem; color: #fff;">Grand Opening Storefront Preview</h3>
+        </div>
+        <button class="modal-close" style="color: #fff;" onclick="closeCampaignPreviewModal()">✕</button>
+      </div>
+      <div id="campaign-preview-body" style="max-height: 80vh; overflow-y: auto; background: #faf8f5;"></div>
+    </div>
+  </div>
 </body>
 </html>

@@ -233,6 +233,48 @@ function initSchema() {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS homepage_campaign (
+      id INTEGER PRIMARY KEY DEFAULT 1,
+      announcement_text TEXT DEFAULT 'THE GRAND OPENING — COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
+      announcement_active INTEGER DEFAULT 1,
+      hero_headline TEXT DEFAULT 'A New Era of Style Begins.',
+      hero_subtitle TEXT DEFAULT 'Discover your style. Elevate every moment.',
+      hero_badge TEXT DEFAULT 'GRAND OPENING',
+      hero_image TEXT DEFAULT 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=85',
+      hero_secondary_image TEXT DEFAULT 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=85',
+      hero_cta_primary TEXT DEFAULT 'Explore the Collection',
+      hero_cta_secondary TEXT DEFAULT 'Discover What''s New',
+      launch_countdown_enabled INTEGER DEFAULT 1,
+      launch_date TEXT DEFAULT '2026-11-15T10:00:00',
+      spotlight_badge TEXT DEFAULT 'Curated Bridal Atelier',
+      spotlight_title TEXT DEFAULT 'The Royal Heritage Edit',
+      spotlight_desc TEXT DEFAULT 'Heirloom Kanjivaram silks woven with 24k gold zari and imperial bridal ensembles handcrafted for modern royalty.',
+      spotlight_image TEXT DEFAULT 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85',
+      spotlight_link TEXT DEFAULT '/shop.html?category=sarees',
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS promotions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      description TEXT,
+      discount_type TEXT DEFAULT 'percentage',
+      discount_value REAL NOT NULL,
+      min_order_amount REAL DEFAULT 0,
+      max_discount_amount REAL,
+      usage_limit INTEGER DEFAULT 100,
+      times_used INTEGER DEFAULT 0,
+      active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      source TEXT DEFAULT 'grand_opening',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS tryon_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       token TEXT NOT NULL UNIQUE,
@@ -276,6 +318,11 @@ function initSchema() {
   try {
     db.exec(`INSERT OR IGNORE INTO tryon_settings (id, enabled) VALUES (1, 1);`);
     db.exec(`INSERT OR IGNORE INTO store_settings (id, store_name) VALUES (1, 'RJ Fashion Collection');`);
+    db.exec(`INSERT OR IGNORE INTO homepage_campaign (id, hero_headline) VALUES (1, 'A New Era of Style Begins.');`);
+    db.exec(`INSERT OR IGNORE INTO promotions (code, description, discount_type, discount_value, min_order_amount, usage_limit, active)
+             VALUES ('GRANDRJ', 'Inaugural Grand Opening 10% Privilege', 'percentage', 10, 500, 500, 1);`);
+    db.exec(`INSERT OR IGNORE INTO promotions (code, description, discount_type, discount_value, min_order_amount, usage_limit, active)
+             VALUES ('ROYAL100', 'Flat ₹100 Off on Celebration Wear', 'fixed', 100, 999, 500, 1);`);
     db.exec(`ALTER TABLE tryon_settings ADD COLUMN hf_token TEXT`);
   } catch (_) {}
 

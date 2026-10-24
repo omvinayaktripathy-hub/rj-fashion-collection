@@ -850,4 +850,224 @@ router.post('/settings', (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────────────────────
+// Homepage & Grand Opening Campaign Controls
+// ─────────────────────────────────────────────────────────────
+router.get('/campaign', (req, res) => {
+  try {
+    const campaign = db.prepare('SELECT * FROM homepage_campaign WHERE id = 1').get() || {
+      announcement_text: 'THE GRAND OPENING — COMPLIMENTARY EXPRESS SHIPPING ON ORDERS ABOVE ₹999 | CODE: GRANDRJ',
+      announcement_active: 1,
+      hero_headline: 'A New Era of Style Begins.',
+      hero_subtitle: 'Discover your style. Elevate every moment.',
+      hero_badge: 'GRAND OPENING',
+      hero_image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1600&q=85',
+      hero_secondary_image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=85',
+      hero_cta_primary: 'Explore the Collection',
+      hero_cta_secondary: "Discover What's New",
+      launch_countdown_enabled: 1,
+      launch_date: '2026-11-15T10:00:00',
+      spotlight_badge: 'Curated Bridal Atelier',
+      spotlight_title: 'The Royal Heritage Edit',
+      spotlight_desc: 'Heirloom Kanjivaram silks woven with 24k gold zari and imperial bridal ensembles handcrafted for modern royalty.',
+      spotlight_image: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85',
+      spotlight_link: '/shop.html?category=sarees'
+    };
+    res.json({ success: true, campaign });
+  } catch (err) {
+    console.error('Fetch campaign error:', err);
+    res.status(500).json({ success: false, message: 'Failed to retrieve campaign data' });
+  }
+});
+
+router.post('/campaign', (req, res) => {
+  try {
+    const {
+      announcement_text,
+      announcement_active,
+      hero_headline,
+      hero_subtitle,
+      hero_badge,
+      hero_image,
+      hero_secondary_image,
+      hero_cta_primary,
+      hero_cta_secondary,
+      launch_countdown_enabled,
+      launch_date,
+      spotlight_badge,
+      spotlight_title,
+      spotlight_desc,
+      spotlight_image,
+      spotlight_link
+    } = req.body;
+
+    db.prepare(`
+      UPDATE homepage_campaign SET
+        announcement_text = COALESCE(?, announcement_text),
+        announcement_active = COALESCE(?, announcement_active),
+        hero_headline = COALESCE(?, hero_headline),
+        hero_subtitle = COALESCE(?, hero_subtitle),
+        hero_badge = COALESCE(?, hero_badge),
+        hero_image = COALESCE(?, hero_image),
+        hero_secondary_image = COALESCE(?, hero_secondary_image),
+        hero_cta_primary = COALESCE(?, hero_cta_primary),
+        hero_cta_secondary = COALESCE(?, hero_cta_secondary),
+        launch_countdown_enabled = COALESCE(?, launch_countdown_enabled),
+        launch_date = COALESCE(?, launch_date),
+        spotlight_badge = COALESCE(?, spotlight_badge),
+        spotlight_title = COALESCE(?, spotlight_title),
+        spotlight_desc = COALESCE(?, spotlight_desc),
+        spotlight_image = COALESCE(?, spotlight_image),
+        spotlight_link = COALESCE(?, spotlight_link),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = 1
+    `).run(
+      announcement_text?.trim() || null,
+      announcement_active !== undefined ? (announcement_active ? 1 : 0) : null,
+      hero_headline?.trim() || null,
+      hero_subtitle?.trim() || null,
+      hero_badge?.trim() || null,
+      hero_image?.trim() || null,
+      hero_secondary_image?.trim() || null,
+      hero_cta_primary?.trim() || null,
+      hero_cta_secondary?.trim() || null,
+      launch_countdown_enabled !== undefined ? (launch_countdown_enabled ? 1 : 0) : null,
+      launch_date?.trim() || null,
+      spotlight_badge?.trim() || null,
+      spotlight_title?.trim() || null,
+      spotlight_desc?.trim() || null,
+      spotlight_image?.trim() || null,
+      spotlight_link?.trim() || null
+    );
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'UPDATE_HOMEPAGE_CAMPAIGN',
+      entityType: 'campaign',
+      entityId: 1,
+      details: { hero_headline, launch_date, announcement_text },
+      req
+    });
+
+    res.json({ success: true, message: 'Homepage & Grand Opening Campaign saved and published!' });
+  } catch (err) {
+    console.error('Update campaign error:', err);
+    res.status(500).json({ success: false, message: 'Failed to update campaign' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// Promotions & Discount Campaigns
+// ─────────────────────────────────────────────────────────────
+router.get('/promotions', (req, res) => {
+  try {
+    const promotions = db.prepare('SELECT * FROM promotions ORDER BY id DESC').all();
+    res.json({ success: true, promotions });
+  } catch (err) {
+    console.error('Fetch promotions error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch promotions' });
+  }
+});
+
+router.post('/promotions', (req, res) => {
+  try {
+    const { code, description, discount_type, discount_value, min_order_amount, usage_limit, active } = req.body;
+    if (!code || !discount_value) {
+      return res.status(400).json({ success: false, message: 'Code and discount value are required' });
+    }
+
+    const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+    const stmt = db.prepare(`
+      INSERT INTO promotions (code, description, discount_type, discount_value, min_order_amount, usage_limit, active)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    const result = stmt.run(
+      cleanCode,
+      description?.trim() || '',
+      discount_type === 'fixed' ? 'fixed' : 'percentage',
+      Number(discount_value),
+      Number(min_order_amount) || 0,
+      Number(usage_limit) || 100,
+      active !== undefined ? (active ? 1 : 0) : 1
+    );
+
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'CREATE_PROMOTION',
+      entityType: 'promotion',
+      entityId: result.lastInsertRowid,
+      details: { code: cleanCode, discount_value },
+      req
+    });
+
+    res.json({ success: true, message: `Promo code ${cleanCode} created successfully` });
+  } catch (err) {
+    if (err.message && err.message.includes('UNIQUE')) {
+      return res.status(409).json({ success: false, message: 'A promotional code with this name already exists' });
+    }
+    console.error('Create promo error:', err);
+    res.status(500).json({ success: false, message: 'Failed to create promotion' });
+  }
+});
+
+router.delete('/promotions/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    db.prepare('DELETE FROM promotions WHERE id = ?').run(Number(id));
+    db.logAdminAction({
+      adminId: req.session?.user?.id,
+      adminEmail: req.session?.user?.email,
+      action: 'DELETE_PROMOTION',
+      entityType: 'promotion',
+      entityId: id,
+      details: { id },
+      req
+    });
+    res.json({ success: true, message: 'Promotion removed' });
+  } catch (err) {
+    console.error('Delete promo error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete promotion' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// Customer Reviews Moderation
+// ─────────────────────────────────────────────────────────────
+router.get('/reviews', (req, res) => {
+  try {
+    const reviews = db.prepare(`
+      SELECT r.*, p.name as product_name, p.image as product_image
+      FROM reviews r
+      LEFT JOIN products p ON r.product_id = p.id
+      ORDER BY r.created_at DESC
+    `).all();
+    res.json({ success: true, reviews });
+  } catch (err) {
+    console.error('Fetch reviews error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch reviews' });
+  }
+});
+
+router.patch('/reviews/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { verified } = req.body;
+    db.prepare(`
+      UPDATE reviews SET
+        verified = COALESCE(?, verified)
+      WHERE id = ?
+    `).run(
+      verified !== undefined ? (verified ? 1 : 0) : null,
+      Number(id)
+    );
+
+    res.json({ success: true, message: 'Review updated successfully' });
+  } catch (err) {
+    console.error('Update review error:', err);
+    res.status(500).json({ success: false, message: 'Failed to update review' });
+  }
+});
+
 module.exports = router;

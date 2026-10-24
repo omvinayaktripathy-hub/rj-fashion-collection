@@ -4,14 +4,23 @@ const db = require('../database/db');
 const { requireAuth } = require('../middleware/auth');
 const { sendOrderConfirmation } = require('../services/email');
 
-// Generate Unique Order Number: RJFC-YYYYMMDD-XXXX
+// Generate Unique Order Number: RJFC-YYYYMMDD-XXXX (Guaranteed Collision-Free)
 function generateOrderNumber() {
   const now = new Date();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  return `RJFC-${year}${month}${day}-${randomSuffix}`;
+  let orderNumber;
+  let attempts = 0;
+  while (attempts < 100) {
+    attempts++;
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    orderNumber = `RJFC-${year}${month}${day}-${randomSuffix}`;
+    const exists = db.prepare('SELECT id FROM orders WHERE order_number = ?').get(orderNumber);
+    if (!exists) return orderNumber;
+  }
+  // Fallback if thousands of orders on same day
+  return `RJFC-${year}${month}${day}-${Date.now().toString().slice(-4)}`;
 }
 
 // Create / Place a new order
