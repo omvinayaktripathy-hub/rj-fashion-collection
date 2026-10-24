@@ -1,3 +1,7 @@
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 // RJ FASHION COLLECTION - FLIPKART-STYLE LUXURY PRODUCT DETAIL PAGE
 // Resilient architecture: Instant local JSON fallback + SQLite API support + Full state management
 
@@ -213,7 +217,7 @@ async function loadProductDetails() {
 
 // Render Flipkart-Style Luxury Layout
 function renderProduct(p) {
-  document.title = `${p.name} | Buy at Best Price on RJ Fashion Collection`;
+  document.title = `${escapeHtml(p.name)} | Buy at Best Price on RJ Fashion Collection`;
 
   // Update breadcrumb
   const breadcrumbTitle = document.getElementById('breadcrumb-prod-title');
@@ -258,7 +262,7 @@ function renderProduct(p) {
         <div class="fk-gallery-sticky">
           <!-- Main Hero Image Box -->
           <div class="fk-main-image-container" id="main-image-zoom-box" onclick="openProductLightbox(currentGalleryIndex)" role="button" tabindex="0" title="Click to view large & see all sides of clothing">
-            <img id="main-product-img" src="${currentMainImage}" alt="${p.name}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'">
+            <img id="main-product-img" src="${currentMainImage}" alt="${escapeHtml(p.name)}" loading="eager" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80'">
             
             <!-- Badges -->
             ${p.discount > 0 ? `<div class="fk-discount-ribbon">↓ ${p.discount}% OFF</div>` : ''}
@@ -314,7 +318,7 @@ function renderProduct(p) {
                 const info = getAngleInfo(idx);
                 return `
                   <div class="fk-thumb-card ${idx === 0 ? 'active' : ''}" onclick="switchClothingAngle(${idx})" title="Switch to ${info.label}">
-                    <img src="${img}" alt="${p.name} ${info.short} side" loading="lazy">
+                    <img src="${img}" alt="${escapeHtml(p.name)} ${info.short} side" loading="lazy">
                     <span class="fk-thumb-angle-tag">${info.short}</span>
                   </div>
                 `;
@@ -384,7 +388,7 @@ function renderProduct(p) {
         </div>
 
         <!-- Product Title -->
-        <h1 class="fk-product-title">${p.name}</h1>
+        <h1 class="fk-product-title">${escapeHtml(p.name)}</h1>
 
         <!-- Rating & Assured Badge Row -->
         <div class="fk-rating-row">

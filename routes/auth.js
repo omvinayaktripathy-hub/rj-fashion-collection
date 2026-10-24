@@ -465,9 +465,9 @@ router.post('/forgot-password', (req, res) => {
         WHERE id = ?
       `).run(hashedToken, expiresAt, user.id);
 
-      // Safe logging (never logs the raw token in production)
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`[Auth Reset] Token generated for ${user.email}: ${rawToken}`);
+      // Safe logging (never log full raw token to avoid credential leakage in logs)
+      if (process.env.NODE_ENV === 'test') {
+        console.log(`[Auth Reset] Token generated for ${user.email}: ${rawToken.slice(0, 4)}...[PROTECTED]`);
       }
     }
 

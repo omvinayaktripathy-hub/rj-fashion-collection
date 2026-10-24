@@ -1,3 +1,7 @@
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 // RJ FASHION COLLECTION - DEDICATED LUXURY DELIVERY ADDRESS CONTROLLER (STEP 2)
 
 let savedAddresses = [];
@@ -113,9 +117,9 @@ async function loadDeliveryCartSummary() {
   if (itemsPreview) {
     itemsPreview.innerHTML = items.map(item => `
       <div class="deliv-item-card">
-        <img src="${item.image || '/images/placeholder.jpg'}" alt="${item.name}" class="deliv-item-thumb">
+        <img src="${item.image || '/images/placeholder.jpg'}" alt="${escapeHtml(item.name)}" class="deliv-item-thumb">
         <div style="flex: 1; min-width: 0;">
-          <h4 class="deliv-item-title">${item.name}</h4>
+          <h4 class="deliv-item-title">${escapeHtml(item.name)}</h4>
           <div class="deliv-item-meta">
             <span>Size: <strong>${item.size || 'Free Size'}</strong></span>
             <span>Qty: <strong>${item.quantity || 1}</strong></span>
@@ -314,7 +318,7 @@ function openEditAddress(e, id) {
   document.getElementById('deliv-city').value = addr.city || '';
   document.getElementById('deliv-state').value = addr.state || '';
 
-  const typeRadio = document.querySelector(`input[name="address_type"][value="${addr.address_type || 'Home'}"]`);
+  const typeRadio = document.querySelector(`input[name="address_type"][value="${escapeHtml(addr.address_type || 'Home')}"]`);
   if (typeRadio) typeRadio.checked = true;
 
   if (formBox) {

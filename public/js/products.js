@@ -1,3 +1,7 @@
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 // RJ FASHION COLLECTION - SHOP & PRODUCT LISTING LOGIC
 // High performance: Supports Direct Cloud Static data & Node API fallback
 

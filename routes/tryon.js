@@ -65,6 +65,30 @@ function verifyImageSignature(filePath) {
   }
 }
 
+// Anti-SSRF URL validator (blocks loopback, cloud metadata, and private IP subnets)
+function isSafeExternalUrl(rawUrl) {
+  try {
+    const parsed = new URL(rawUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+    const hostname = parsed.hostname.toLowerCase();
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '::1' ||
+      hostname === '0.0.0.0' ||
+      hostname.startsWith('169.254.') || // Cloud metadata (AWS, GCP, Azure)
+      hostname.startsWith('10.') ||       // RFC 1918 Class A
+      hostname.startsWith('192.168.') ||  // RFC 1918 Class C
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) // RFC 1918 Class B
+    ) {
+      return false;
+    }
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 // Helper: Auto-cleanup of expired files
 function cleanupStaleTryonFiles(retentionHours = 2) {
   try {
@@ -269,10 +293,10 @@ router.post('/process', upload.single('person_image'), async (req, res) => {
       }
     }
 
-    // Fallback if product image is an external URL
-    if (!garmentBuffer && product.image && product.image.startsWith('http')) {
+    // Fallback if product image is an external URL (Anti-SSRF protected)
+    if (!garmentBuffer && product.image && product.image.startsWith('http') && isSafeExternalUrl(product.image)) {
       try {
-        const fetchRes = await fetch(product.image);
+        const fetchRes = await fetch(product.image, { signal: AbortSignal.timeout(6000) });
         if (fetchRes.ok) {
           const ab = await fetchRes.arrayBuffer();
           garmentBuffer = Buffer.from(ab);

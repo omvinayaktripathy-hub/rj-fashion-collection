@@ -1,3 +1,4 @@
+const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
 // RJ FASHION COLLECTION - ORDERS CONTROLLER (WITH LOCALSTORAGE PERSISTENCE)
 
 let activeCancelOrderNumber = null;

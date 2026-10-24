@@ -1,4 +1,5 @@
 // RJ FASHION COLLECTION - SHOPPING CART CONTROLLER (FLIPKART STYLE)
+const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
 
 async function loadCart() {
   const container = document.getElementById('cart-items-list');
@@ -144,7 +145,7 @@ async function loadCart() {
           <!-- Thumbnail & Stepper Column -->
           <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; width: 110px;">
             <a href="/product.html?id=${prodId}">
-              <img src="${item.image || '/images/placeholder.jpg'}" alt="${item.name || 'Product'}" style="width: 100px; height: 120px; object-fit: cover; border-radius: 2px; border: 1px solid #e0e0e0;">
+              <img src="${item.image || '/images/placeholder.jpg'}" alt="${escapeHtml(item.name || 'Product')}" style="width: 100px; height: 120px; object-fit: cover; border-radius: 2px; border: 1px solid #e0e0e0;">
             </a>
             <div class="qty-stepper">
               <button class="qty-btn" type="button" onclick="changeCartQty('${itemId}', ${qty - 1})" title="Decrease">-</button>
@@ -159,7 +160,7 @@ async function loadCart() {
               <div>
                 <h3 style="font-size: 1.05rem; font-weight: 600; margin: 0 0 6px 0; color: #212121; line-height: 1.4;">
                   <a href="/product.html?id=${prodId}" style="color: inherit; text-decoration: none;">
-                    ${item.name || 'Designer Ethnic Wear'}
+                    ${escapeHtml(item.name || 'Designer Ethnic Wear')}
                   </a>
                 </h3>
                 <div style="font-size: 0.85rem; color: #878787; margin-bottom: 8px;">

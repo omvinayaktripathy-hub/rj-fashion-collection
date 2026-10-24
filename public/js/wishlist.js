@@ -1,3 +1,7 @@
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 // RJ FASHION COLLECTION - WISHLIST CONTROLLER
 // Supports Firebase Hosting static mode & local storage sync
 
@@ -75,7 +79,7 @@ async function loadWishlist() {
       <div class="product-card" id="wishlist-item-${p.id}">
         <div class="product-image-wrap">
           <a href="/product.html?id=${p.id}">
-            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'">
+            <img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'">
           </a>
           ${p.discount > 0 ? `<span class="badge-discount">${p.discount}% OFF</span>` : ''}
           <button class="wishlist-toggle-btn active" onclick="removeFromWishlist('${escapeHtml(String(p.id))}')" title="Remove from Wishlist" style="color: var(--primary); background: rgba(255,255,255,0.9);">✕</button>
@@ -83,7 +87,7 @@ async function loadWishlist() {
 
         <div class="product-details">
           <span class="product-brand">${p.brand || 'RJ Collection'}</span>
-          <h3 class="product-title"><a href="/product.html?id=${p.id}">${p.name}</a></h3>
+          <h3 class="product-title"><a href="/product.html?id=${p.id}">${escapeHtml(p.name)}</a></h3>
 
           <div class="product-price-row">
             <span class="price-current">${formatPrice(p.price)}</span>

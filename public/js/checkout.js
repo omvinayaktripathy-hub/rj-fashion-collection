@@ -1,3 +1,4 @@
+const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
 // RJ FASHION COLLECTION - DEDICATED ORDER REVIEW & PAYMENT CONTROLLER (STEP 3)
 
 let activeAddressData = null;
@@ -196,9 +197,9 @@ async function loadCheckoutCart() {
   if (container) {
     container.innerHTML = cart.items.map(item => `
       <div class="checkout-item-row">
-        <img src="${item.image || '/images/placeholder.jpg'}" alt="${item.name}" class="checkout-item-thumb">
+        <img src="${item.image || '/images/placeholder.jpg'}" alt="${escapeHtml(item.name)}" class="checkout-item-thumb">
         <div style="flex: 1; min-width: 0;">
-          <h4 class="checkout-item-title">${item.name}</h4>
+          <h4 class="checkout-item-title">${escapeHtml(item.name)}</h4>
           <div class="checkout-item-meta">
             <span>Size: <strong>${item.size || 'Free Size'}</strong></span>
             <span>Qty: <strong>${item.quantity || 1}</strong></span>

@@ -1,3 +1,7 @@
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 // RJ FASHION COLLECTION - PRIVATE ADMIN PANEL CONTROLLER
 
 let adminUser = null;
@@ -867,7 +871,7 @@ async function loadDashboardStats() {
             <div style="display:flex; gap:10px; align-items:center;">
               <img src="${p.image}" style="width:36px; height:45px; object-fit:cover; border-radius:4px; border:1px solid #e2e8f0;">
               <div>
-                <div style="font-weight:600; font-size:0.82rem; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</div>
+                <div style="font-weight:600; font-size:0.82rem; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(p.name)}</div>
                 <div style="font-size:0.72rem; color:#ef4444; font-weight:700;">Only ${p.stock} remaining</div>
               </div>
             </div>
@@ -1118,8 +1122,8 @@ async function loadAdminProducts() {
             <img src="${p.image}" style="width:44px; height:56px; object-fit:cover; border-radius:4px; border:1px solid #e2e8f0; ${!isInStock ? 'filter:grayscale(60%); opacity:0.75;' : ''}" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=100&q=80'">
           </td>
           <td>
-            <div style="font-weight:700; max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#1e293b;" title="${p.name}">
-              ${p.name}
+            <div style="font-weight:700; max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#1e293b;" title="${escapeHtml(p.name)}">
+              ${escapeHtml(p.name)}
             </div>
             <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
               Brand: <strong>${p.brand || 'RJ Collection'}</strong>
@@ -3137,9 +3141,9 @@ async function loadAdminInventory() {
       <tr>
         <td>
           <div style="display: flex; gap: 10px; align-items: center;">
-            <img src="${p.image}" alt="${p.name}" style="width: 38px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+            <img src="${p.image}" alt="${escapeHtml(p.name)}" style="width: 38px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; flex-shrink: 0;">
             <div>
-              <div style="font-weight: 700; color: #1e293b; font-size: 0.86rem; line-height: 1.3;">${p.name}</div>
+              <div style="font-weight: 700; color: #1e293b; font-size: 0.86rem; line-height: 1.3;">${escapeHtml(p.name)}</div>
               <div style="font-size: 0.72rem; color: #64748b;">${p.department || ''} &bull; ${p.subcategory || ''}</div>
             </div>
           </div>
@@ -3348,7 +3352,7 @@ function loadAdminReports() {
             <div style="display: flex; gap: 10px; align-items: center;">
               <span style="font-weight: 800; font-size: 0.9rem; color: #c59b27; width: 20px;">#${idx + 1}</span>
               ${p.image ? `<img src="${p.image}" style="width: 32px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">` : ''}
-              <span style="font-weight: 700; color: #1e293b; font-size: 0.84rem;">${p.name}</span>
+              <span style="font-weight: 700; color: #1e293b; font-size: 0.84rem;">${escapeHtml(p.name)}</span>
             </div>
           </td>
           <td style="font-weight: 700;">${p.units}</td>
@@ -3765,9 +3769,9 @@ function renderReviewsTable(reviews) {
   tbody.innerHTML = reviews.map(r => `
     <tr>
       <td style="font-weight: 700; color: #1e293b; font-size: 0.85rem;">${r.product_name || 'Boutique Apparel'}</td>
-      <td style="font-weight: 600;">${r.user_name || 'Verified Buyer'}</td>
+      <td style="font-weight: 600;">${escapeHtml(r.user_name || 'Verified Buyer')}</td>
       <td><span style="color: #f59e0b; font-weight: 800;">★ ${r.rating || 5}.0</span></td>
-      <td style="font-size: 0.82rem; color: #475569; max-width: 260px;">"${r.comment || ''}"</td>
+      <td style="font-size: 0.82rem; color: #475569; max-width: 260px;">"${escapeHtml(r.comment || '')}"</td>
       <td style="font-size: 0.78rem; color: #64748b;">${new Date(r.created_at || Date.now()).toLocaleDateString()}</td>
       <td><span class="status-pill ${r.verified ? 'status-delivered' : 'status-pending'}">${r.verified ? 'Verified Buyer' : 'Pending'}</span></td>
       <td>

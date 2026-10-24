@@ -16,6 +16,14 @@ const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA foreign_keys = ON;');
 db.exec('PRAGMA journal_mode = WAL;');
 
+// Durability & checkpoint helper
+db.checkpoint = function() {
+  try {
+    db.exec('PRAGMA wal_checkpoint(TRUNCATE);');
+  } catch (_) {}
+};
+setInterval(db.checkpoint, 15 * 60 * 1000).unref();
+
 // Atomic Transaction helper for node:sqlite
 db.transaction = function(fn) {
   return function(...args) {

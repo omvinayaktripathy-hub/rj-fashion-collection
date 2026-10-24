@@ -24,17 +24,27 @@ router.get('/', (req, res) => {
       `).run(owner.value, req.sessionID);
     }
 
-    const items = db.prepare(`
-      SELECT ci.id, ci.product_id, ci.quantity, ci.size, ci.color,
-             p.name, p.price, p.original_price, p.discount, p.stock, p.image,
-             (ci.quantity * p.price) as item_total,
-             c.name as category_name
-      FROM cart_items ci
-      JOIN products p ON ci.product_id = p.id
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE ci.${owner.field} = ?
-      ORDER BY ci.created_at DESC
-    `).all(owner.value);
+    const itemsQuery = owner.field === 'user_id'
+      ? `SELECT ci.id, ci.product_id, ci.quantity, ci.size, ci.color,
+                p.name, p.price, p.original_price, p.discount, p.stock, p.image,
+                (ci.quantity * p.price) as item_total,
+                c.name as category_name
+         FROM cart_items ci
+         JOIN products p ON ci.product_id = p.id
+         LEFT JOIN categories c ON p.category_id = c.id
+         WHERE ci.user_id = ?
+         ORDER BY ci.created_at DESC`
+      : `SELECT ci.id, ci.product_id, ci.quantity, ci.size, ci.color,
+                p.name, p.price, p.original_price, p.discount, p.stock, p.image,
+                (ci.quantity * p.price) as item_total,
+                c.name as category_name
+         FROM cart_items ci
+         JOIN products p ON ci.product_id = p.id
+         LEFT JOIN categories c ON p.category_id = c.id
+         WHERE ci.session_id = ?
+         ORDER BY ci.created_at DESC`;
+
+    const items = db.prepare(itemsQuery).all(owner.value);
 
     // Calculate totals
     const subtotal = items.reduce((sum, item) => sum + item.item_total, 0);
@@ -84,10 +94,9 @@ router.post('/', (req, res) => {
     const requestedQty = Math.max(1, Number(quantity));
 
     // Check if item already exists in cart with same size/color
-    const existing = db.prepare(`
-      SELECT id, quantity FROM cart_items
-      WHERE ${owner.field} = ? AND product_id = ? AND size = ?
-    `).get(owner.value, product.id, size);
+    const existing = owner.field === 'user_id'
+      ? db.prepare('SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ? AND size = ?').get(owner.value, product.id, size)
+      : db.prepare('SELECT id, quantity FROM cart_items WHERE session_id = ? AND product_id = ? AND size = ?').get(owner.value, product.id, size);
 
     if (existing) {
       const newQty = existing.quantity + requestedQty;
@@ -135,12 +144,9 @@ router.put('/:id', (req, res) => {
     const { quantity } = req.body;
     const owner = getCartOwner(req);
 
-    const item = db.prepare(`
-      SELECT ci.*, p.stock, p.name
-      FROM cart_items ci
-      JOIN products p ON ci.product_id = p.id
-      WHERE ci.id = ? AND ci.${owner.field} = ?
-    `).get(Number(id), owner.value);
+    const item = owner.field === 'user_id'
+      ? db.prepare(`SELECT ci.*, p.stock, p.name FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.id = ? AND ci.user_id = ?`).get(Number(id), owner.value)
+      : db.prepare(`SELECT ci.*, p.stock, p.name FROM cart_items ci JOIN products p ON ci.product_id = p.id WHERE ci.id = ? AND ci.session_id = ?`).get(Number(id), owner.value);
 
     if (!item) {
       return res.status(404).json({ success: false, message: 'Cart item not found' });
@@ -176,9 +182,9 @@ router.delete('/:id', (req, res) => {
     const { id } = req.params;
     const owner = getCartOwner(req);
 
-    const result = db.prepare(`
-      DELETE FROM cart_items WHERE id = ? AND ${owner.field} = ?
-    `).run(Number(id), owner.value);
+    const result = owner.field === 'user_id'
+      ? db.prepare('DELETE FROM cart_items WHERE id = ? AND user_id = ?').run(Number(id), owner.value)
+      : db.prepare('DELETE FROM cart_items WHERE id = ? AND session_id = ?').run(Number(id), owner.value);
 
     if (result.changes === 0) {
       return res.status(404).json({ success: false, message: 'Item not found in cart' });
@@ -195,7 +201,11 @@ router.delete('/:id', (req, res) => {
 router.delete('/', (req, res) => {
   try {
     const owner = getCartOwner(req);
-    db.prepare(`DELETE FROM cart_items WHERE ${owner.field} = ?`).run(owner.value);
+    if (owner.field === 'user_id') {
+      db.prepare('DELETE FROM cart_items WHERE user_id = ?').run(owner.value);
+    } else {
+      db.prepare('DELETE FROM cart_items WHERE session_id = ?').run(owner.value);
+    }
     res.json({ success: true, message: 'Cart cleared' });
   } catch (error) {
     console.error('Error clearing cart:', error);
