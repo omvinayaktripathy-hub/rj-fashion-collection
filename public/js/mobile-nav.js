@@ -154,6 +154,9 @@
       </div>
 
       <div class="rj-drawer-footer">
+        <div class="rj-drawer-theme-toggle" onclick="if(window.toggleLuxuryStyle) window.toggleLuxuryStyle();" style="margin-bottom: 8px;">
+          <span id="rj-mobile-style-text">✦ Style: Editorial Impact</span>
+        </div>
         <div class="rj-drawer-theme-toggle" onclick="if(window.toggleTheme) window.toggleTheme();">
           <span>🌓 Switch Dark / Light Theme</span>
         </div>

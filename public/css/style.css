@@ -4594,3 +4594,136 @@ body.dark-theme {
     font-size: 1.3rem;
   }
 }
+
+
+/* ===================================================================
+   DUAL-STYLE LUXURY EXPERIENCE:
+   STYLE A (QUIET LUXURY - IVORY & BEIGE) & STYLE B (EDITORIAL IMPACT - BOLD MODERN)
+   =================================================================== */
+
+/* Common Luxury Style Switcher Pill */
+.luxury-style-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--dark);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.4px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.luxury-style-switcher:hover {
+  border-color: var(--gold);
+  background: var(--bg-white);
+  box-shadow: 0 4px 14px rgba(194, 168, 120, 0.2);
+  transform: translateY(-1px);
+}
+
+.style-switcher-icon {
+  color: var(--gold);
+  font-size: 0.82rem;
+}
+
+/* STYLE A: QUIET LUXURY (Minimal Ivory & Soft Beige) */
+[data-luxury-style="quiet-luxury"],
+body.style-quiet-luxury {
+  --bg-page: #FAF8F3;
+  --bg-subtle: #F5EFEB;
+  --bg-card: #FFFFFF;
+  --border: #E8DECE;
+  --border-subtle: rgba(48, 39, 32, 0.06);
+  --dark: #2B2520;
+  --muted: #82786F;
+  --primary: #3A3028;
+  --primary-hover: #211B16;
+  --gold: #C2A878;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+[data-luxury-style="quiet-luxury"] .grand-hero-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.9rem;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+[data-luxury-style="quiet-luxury"] .section-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: 0.2px;
+  text-transform: none;
+}
+
+[data-luxury-style="quiet-luxury"] .product-card {
+  border-radius: 10px;
+  border-color: #E8DECE;
+  box-shadow: 0 2px 8px rgba(48, 39, 32, 0.03);
+}
+
+/* STYLE B: EDITORIAL IMPACT (Bold Modern Fashion Editorial) */
+[data-luxury-style="editorial-impact"],
+body.style-editorial-impact {
+  --bg-page: #FAF8F3;
+  --bg-subtle: #F2EDE4;
+  --bg-card: #FFFFFF;
+  --border: #D8CABE;
+  --border-subtle: rgba(23, 23, 21, 0.12);
+  --dark: #171715;
+  --muted: #6B6259;
+  --primary: #171715;
+  --primary-hover: #302720;
+  --gold: #C2A878;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+}
+
+[data-luxury-style="editorial-impact"] .grand-hero-title {
+  font-family: 'Cormorant Garamond', 'Cinzel', Georgia, serif;
+  font-size: 3.6rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+[data-luxury-style="editorial-impact"] .grand-opening-tag {
+  letter-spacing: 3px;
+  background: rgba(23, 23, 21, 0.7);
+  border-color: #C2A878;
+  color: #FBF8F2;
+}
+
+[data-luxury-style="editorial-impact"] .section-title {
+  font-family: 'Cormorant Garamond', 'Cinzel', Georgia, serif;
+  font-size: 2.1rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+[data-luxury-style="editorial-impact"] .product-card {
+  border: 1px solid #D8CABE;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(23, 23, 21, 0.05);
+}
+
+[data-luxury-style="editorial-impact"] .product-card:hover {
+  border-color: #C2A878;
+  box-shadow: 0 12px 28px rgba(23, 23, 21, 0.12);
+  transform: translateY(-4px);
+}
+
+[data-luxury-style="editorial-impact"] .our-story-title {
+  font-family: 'Cormorant Garamond', 'Cinzel', serif;
+  letter-spacing: 2px;
+  font-size: 2.8rem;
+}

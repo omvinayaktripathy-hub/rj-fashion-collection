@@ -816,3 +816,71 @@ function initGiftOptionUI() {
 window.toggleGiftOption = toggleGiftOption;
 window.saveGiftMessage = saveGiftMessage;
 document.addEventListener('DOMContentLoaded', initGiftOptionUI);
+
+
+// ===================================================================
+// DUAL-STYLE LUXURY EXPERIENCE CONTROLLER
+// Style A: Quiet Luxury (Minimal Ivory & Soft Beige)
+// Style B: Editorial Impact (Bold Modern Fashion Editorial)
+// ===================================================================
+
+function initLuxuryStyle() {
+  let saved = 'editorial-impact';
+  try {
+    saved = localStorage.getItem('rjfc_luxury_style') || 'editorial-impact';
+  } catch (_) {}
+  applyLuxuryStyle(saved, false);
+}
+
+function applyLuxuryStyle(styleName, showNotification = true) {
+  const isEditorial = styleName === 'editorial-impact';
+  const targetStyle = isEditorial ? 'editorial-impact' : 'quiet-luxury';
+
+  document.documentElement.setAttribute('data-luxury-style', targetStyle);
+  if (document.body) {
+    if (isEditorial) {
+      document.body.classList.add('style-editorial-impact');
+      document.body.classList.remove('style-quiet-luxury');
+    } else {
+      document.body.classList.add('style-quiet-luxury');
+      document.body.classList.remove('style-editorial-impact');
+    }
+  }
+
+  try {
+    localStorage.setItem('rjfc_luxury_style', targetStyle);
+  } catch (_) {}
+
+  // Update UI indicators
+  document.querySelectorAll('.style-switcher-text, #luxury-style-text').forEach(el => {
+    el.textContent = isEditorial ? 'Editorial Impact' : 'Quiet Luxury';
+  });
+  document.querySelectorAll('#rj-mobile-style-text').forEach(el => {
+    el.textContent = isEditorial ? '✦ Style: Editorial Impact' : '✦ Style: Quiet Luxury';
+  });
+  document.querySelectorAll('.luxury-style-switcher').forEach(el => {
+    el.setAttribute('title', isEditorial ? 'Switch to Quiet Luxury (Minimal Ivory & Beige)' : 'Switch to Editorial Impact (Bold Modern)');
+    el.setAttribute('data-current-style', targetStyle);
+  });
+
+  if (showNotification && typeof showToast === 'function') {
+    showToast(isEditorial ? '✨ Editorial Impact style activated' : '🕊️ Quiet Luxury style activated', 'info');
+  }
+}
+
+function toggleLuxuryStyle() {
+  const current = document.documentElement.getAttribute('data-luxury-style') || 'editorial-impact';
+  const next = current === 'editorial-impact' ? 'quiet-luxury' : 'editorial-impact';
+  applyLuxuryStyle(next, true);
+}
+
+window.initLuxuryStyle = initLuxuryStyle;
+window.applyLuxuryStyle = applyLuxuryStyle;
+window.toggleLuxuryStyle = toggleLuxuryStyle;
+
+// Run initial check
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLuxuryStyle);
+} else {
+  initLuxuryStyle();
+}
