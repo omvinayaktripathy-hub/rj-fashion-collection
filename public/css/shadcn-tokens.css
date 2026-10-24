@@ -1,0 +1,830 @@
+/**
+ * RJ FASHION COLLECTION — SHADCN/UI DESIGN SYSTEM & COMPONENT TOKENS
+ * Luxury Fashion Adaptation: Ivory & Cream, Deep Charcoal/Espresso, Champagne Gold
+ * Fully accessible WAI-ARIA primitives, focus rings, and responsive spring physics.
+ */
+
+:root {
+  /* Shadcn/UI Core HSL Design Tokens (Quiet Luxury Light) */
+  --background: 40 33% 97%;           /* #FAF8F4 Porcelain Ivory */
+  --foreground: 30 10% 9%;            /* #171715 Editorial Black */
+  
+  --card: 0 0% 100%;                  /* #FFFFFF Pure White */
+  --card-foreground: 30 10% 9%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 30 10% 9%;
+  
+  --primary: 30 20% 16%;              /* #302720 Deep Espresso */
+  --primary-foreground: 40 33% 97%;
+  
+  --secondary: 35 25% 92%;            /* #F2EDE4 Soft Sand */
+  --secondary-foreground: 30 20% 16%;
+  
+  --muted: 36 20% 90%;                /* #EAE4D9 Muted Taupe */
+  --muted-foreground: 30 8% 42%;      /* #6E6760 Subdued Text */
+  
+  --accent: 38 45% 64%;               /* #C5A880 Champagne Soft Gold */
+  --accent-foreground: 30 10% 9%;
+  
+  --destructive: 0 72% 51%;           /* Luxury Ruby Warning */
+  --destructive-foreground: 0 0% 98%;
+  
+  --border: 35 15% 88%;               /* #E3DDD4 Subtle Divider */
+  --input: 35 15% 88%;
+  --ring: 38 45% 64%;                 /* Champagne Gold Focus Ring */
+  
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Elevation Shadows */
+  --ui-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ui-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+  --ui-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --ui-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --ui-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"],
+.dark-theme,
+html[data-theme="dark"] {
+  /* Shadcn/UI HSL Design Tokens (Editorial Impact Dark) */
+  --background: 30 5% 7%;             /* #121110 Deep Obsidian */
+  --foreground: 40 20% 95%;           /* #F5EFEB Alabaster */
+  
+  --card: 30 5% 10%;                  /* #1A1817 Charcoal Surface */
+  --card-foreground: 40 20% 95%;
+  
+  --popover: 30 5% 10%;
+  --popover-foreground: 40 20% 95%;
+  
+  --primary: 38 45% 64%;              /* #C5A880 Champagne Gold Primary in Dark */
+  --primary-foreground: 30 10% 9%;
+  
+  --secondary: 30 5% 14%;             /* #262423 Deep Ash */
+  --secondary-foreground: 40 20% 95%;
+  
+  --muted: 30 5% 15%;
+  --muted-foreground: 30 5% 65%;
+  
+  --accent: 38 45% 64%;
+  --accent-foreground: 30 10% 9%;
+  
+  --destructive: 0 62% 38%;
+  --destructive-foreground: 0 0% 98%;
+  
+  --border: 30 5% 18%;               /* #2F2D2B Dark Charcoal Border */
+  --input: 30 5% 18%;
+  --ring: 38 45% 64%;
+}
+
+/* ===================================================================
+   1. BUTTON COMPONENT (.ui-btn)
+   =================================================================== */
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid transparent;
+  gap: 0.5rem;
+  touch-action: manipulation;
+  min-height: 44px; /* Touch target accessibility */
+  padding: 0.625rem 1.25rem;
+  outline: none;
+}
+
+.ui-btn:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.ui-btn:active {
+  transform: scale(0.98);
+}
+
+.ui-btn:disabled,
+.ui-btn[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Button Variants */
+.ui-btn-default {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: var(--ui-shadow-sm);
+}
+
+.ui-btn-default:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  box-shadow: var(--ui-shadow-md);
+  transform: translateY(-1px);
+}
+
+.ui-btn-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.ui-btn-secondary:hover {
+  background-color: hsl(var(--secondary) / 0.8);
+}
+
+.ui-btn-outline {
+  border-color: hsl(var(--border));
+  background-color: transparent;
+  color: hsl(var(--foreground));
+}
+
+.ui-btn-outline:hover {
+  background-color: hsl(var(--secondary));
+  border-color: hsl(var(--accent));
+  color: hsl(var(--foreground));
+}
+
+.ui-btn-ghost {
+  background-color: transparent;
+  color: hsl(var(--foreground));
+}
+
+.ui-btn-ghost:hover {
+  background-color: hsl(var(--secondary));
+}
+
+.ui-btn-gold {
+  background: linear-gradient(135deg, #d4af37, #bfa054);
+  color: #171715;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.ui-btn-gold:hover {
+  background: linear-gradient(135deg, #e0be46, #cfae60);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.45);
+  transform: translateY(-1px);
+}
+
+.ui-btn-destructive {
+  background-color: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+
+.ui-btn-destructive:hover {
+  background-color: hsl(var(--destructive) / 0.9);
+}
+
+/* Button Sizes */
+.ui-btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  min-height: 36px;
+}
+
+.ui-btn-lg {
+  padding: 0.75rem 1.75rem;
+  font-size: 1rem;
+  min-height: 48px;
+}
+
+.ui-btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+/* ===================================================================
+   2. INPUT COMPONENT (.ui-input)
+   =================================================================== */
+.ui-input {
+  display: flex;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid hsl(var(--input));
+  background-color: hsl(var(--card));
+  padding: 0.625rem 0.875rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: hsl(var(--foreground));
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ui-input:focus {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.25);
+}
+
+.ui-input::placeholder {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.8;
+}
+
+.ui-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media screen and (max-width: 820px) {
+  .ui-input {
+    font-size: 16px !important; /* iOS Safari anti-zoom guarantee */
+  }
+}
+
+/* ===================================================================
+   3. SHEET COMPONENT (.ui-sheet) — SLIDE-OVER DRAWER
+   =================================================================== */
+.ui-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+}
+
+.ui-sheet-backdrop[data-state="open"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ui-sheet {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 9999;
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  box-shadow: var(--ui-shadow-xl);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  box-sizing: border-box;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.ui-sheet[data-side="left"] {
+  left: 0;
+  width: min(86vw, 380px);
+  border-right: 1px solid hsl(var(--border));
+  transform: translateX(-100%);
+}
+
+.ui-sheet[data-side="right"] {
+  right: 0;
+  width: min(86vw, 420px);
+  border-left: 1px solid hsl(var(--border));
+  transform: translateX(100%);
+}
+
+.ui-sheet[data-state="open"] {
+  transform: translateX(0);
+}
+
+.ui-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+}
+
+.ui-sheet-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.ui-sheet-close {
+  background: transparent;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.ui-sheet-close:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.ui-sheet-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem 1.5rem;
+}
+
+.ui-sheet-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ===================================================================
+   4. DIALOG COMPONENT (.ui-dialog) — MODAL WINDOW
+   =================================================================== */
+.ui-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 99990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
+}
+
+.ui-dialog-backdrop[data-state="open"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ui-dialog {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border-radius: var(--radius-lg);
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--ui-shadow-xl);
+  max-width: min(92vw, 560px);
+  width: 100%;
+  max-height: calc(100dvh - 3rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.ui-dialog-backdrop[data-state="open"] .ui-dialog {
+  transform: scale(1);
+}
+
+.ui-dialog-header {
+  padding: 1.5rem 1.75rem 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ui-dialog-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin: 0;
+}
+
+.ui-dialog-description {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  margin-top: 0.25rem;
+}
+
+.ui-dialog-close {
+  background: transparent;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  transition: background-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.ui-dialog-close:hover {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--foreground));
+}
+
+.ui-dialog-body {
+  padding: 0 1.75rem 1.5rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+.ui-dialog-footer {
+  padding: 1rem 1.75rem 1.5rem;
+  border-top: 1px solid hsl(var(--border));
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* ===================================================================
+   5. COMMAND / SEARCH PALETTE (.ui-command)
+   =================================================================== */
+.ui-command-dialog {
+  max-width: min(94vw, 640px) !important;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  background: hsl(var(--card));
+}
+
+.ui-command-input-wrap {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+  gap: 0.75rem;
+  height: 52px;
+}
+
+.ui-command-input-wrap svg {
+  color: hsl(var(--muted-foreground));
+  flex-shrink: 0;
+}
+
+.ui-command-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 1rem;
+  color: hsl(var(--foreground));
+}
+
+.ui-command-list {
+  max-height: 360px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem;
+}
+
+.ui-command-group-heading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: hsl(var(--muted-foreground));
+  padding: 0.5rem 0.75rem 0.25rem;
+  text-transform: uppercase;
+}
+
+.ui-command-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.ui-command-item:hover,
+.ui-command-item.is-selected {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--primary));
+}
+
+.ui-command-empty {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+}
+
+/* ===================================================================
+   6. TABS COMPONENT (.ui-tabs)
+   =================================================================== */
+.ui-tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.ui-tabs-list {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: hsl(var(--secondary));
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  gap: 0.25rem;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border: 1px solid hsl(var(--border));
+}
+
+.ui-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+.ui-tabs-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.ui-tabs-trigger:hover {
+  color: hsl(var(--foreground));
+}
+
+.ui-tabs-trigger[aria-selected="true"],
+.ui-tabs-trigger.is-active {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  box-shadow: var(--ui-shadow-sm);
+}
+
+.ui-tabs-content {
+  display: none;
+  padding-top: 1.5rem;
+  animation: uiFadeIn 0.3s ease;
+}
+
+.ui-tabs-content.is-active,
+.ui-tabs-content[data-state="active"] {
+  display: block;
+}
+
+@keyframes uiFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===================================================================
+   7. ACCORDION COMPONENT (.ui-accordion)
+   =================================================================== */
+.ui-accordion {
+  width: 100%;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.ui-accordion-item {
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.ui-accordion-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 0;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s;
+}
+
+.ui-accordion-trigger:hover {
+  color: hsl(var(--accent));
+}
+
+.ui-accordion-chevron {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: hsl(var(--muted-foreground));
+  flex-shrink: 0;
+}
+
+.ui-accordion-item[data-state="open"] .ui-accordion-chevron {
+  transform: rotate(180deg);
+}
+
+.ui-accordion-content {
+  display: none;
+  padding-bottom: 1rem;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.6;
+}
+
+.ui-accordion-item[data-state="open"] .ui-accordion-content {
+  display: block;
+}
+
+/* ===================================================================
+   8. SKELETON COMPONENT (.ui-skeleton)
+   =================================================================== */
+.ui-skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--secondary)) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: uiShimmer 1.8s infinite linear;
+  border-radius: var(--radius);
+}
+
+@keyframes uiShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===================================================================
+   9. BADGE COMPONENT (.ui-badge)
+   =================================================================== */
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.ui-badge-default {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.ui-badge-secondary {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.ui-badge-outline {
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+  background-color: transparent;
+}
+
+.ui-badge-gold {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(189, 164, 119, 0.3));
+  color: #bfa054;
+  border-color: rgba(212, 175, 55, 0.45);
+}
+
+.ui-badge-destructive {
+  background-color: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+
+/* ===================================================================
+   10. SEPARATOR & BREADCRUMB
+   =================================================================== */
+.ui-separator {
+  background-color: hsl(var(--border));
+  border: none;
+  height: 1px;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.ui-separator[data-orientation="vertical"] {
+  height: 100%;
+  width: 1px;
+  margin: 0 0.75rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.ui-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.ui-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ui-breadcrumb-link {
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.ui-breadcrumb-link:hover {
+  color: hsl(var(--foreground));
+}
+
+.ui-breadcrumb-current {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.ui-breadcrumb-sep {
+  color: hsl(var(--border));
+}
+
+/* ===================================================================
+   11. TOOLTIP COMPONENT (.ui-tooltip)
+   =================================================================== */
+.ui-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.ui-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  background-color: hsl(var(--foreground));
+  color: hsl(var(--background));
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3125rem 0.625rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 99999;
+  box-shadow: var(--ui-shadow-md);
+}
+
+.ui-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: hsl(var(--foreground)) transparent transparent transparent;
+}
+
+.ui-tooltip-wrapper:hover .ui-tooltip,
+.ui-tooltip-wrapper:focus-within .ui-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-10px);
+}
