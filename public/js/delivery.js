@@ -74,7 +74,7 @@ async function loadDeliveryCartSummary() {
 
   if (!cart) {
     try {
-      const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+      const local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || sessionStorage.getItem('rjfc_local_cart') || '[]');
       if (local.length > 0) {
         const count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
         const subtotal = local.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);

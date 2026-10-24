@@ -71,7 +71,7 @@ async function loadCart() {
     // If API returned nothing or failed, load from localStorage
     if (!data || !data.items || data.items.length === 0) {
       try {
-        const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+        const local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || sessionStorage.getItem('rjfc_local_cart') || '[]');
         const count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
         const subtotal = local.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
         const originalSubtotal = local.reduce((s, i) => s + ((Number(i.original_price) || Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
@@ -280,11 +280,11 @@ async function changeCartQty(cartItemId, newQty) {
 
   // 2. Always keep localStorage in sync as fallback
   try {
-    const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+    const local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || sessionStorage.getItem('rjfc_local_cart') || '[]');
     const item = local.find(i => String(i.id) === String(cartItemId) || String(i.product_id) === String(cartItemId));
     if (item) {
       item.quantity = Number(newQty);
-      localStorage.setItem('rjfc_local_cart', JSON.stringify(local));
+      if (typeof saveLocalCartSafe === 'function') { saveLocalCartSafe(local); } else { localStorage.setItem('rjfc_local_cart', JSON.stringify(local)); }
     }
   } catch (_) {}
 
@@ -304,9 +304,9 @@ async function removeCartItem(cartItemId) {
 
   // 2. Always remove from localStorage
   try {
-    let local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+    let local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || sessionStorage.getItem('rjfc_local_cart') || '[]');
     local = local.filter(i => String(i.id) !== String(cartItemId) && String(i.product_id) !== String(cartItemId));
-    localStorage.setItem('rjfc_local_cart', JSON.stringify(local));
+    if (typeof saveLocalCartSafe === 'function') { saveLocalCartSafe(local); } else { localStorage.setItem('rjfc_local_cart', JSON.stringify(local)); }
   } catch (_) {}
 
   showToast('Item removed from cart', 'info');

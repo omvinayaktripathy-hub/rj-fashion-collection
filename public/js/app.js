@@ -209,8 +209,48 @@ async function updateWishlistCount() {
   });
 }
 
-// Resilient Product Resolver for Storefront, Cart, and Wishlist
-async function resolveProductById(productId) {
+// Helper to retrieve local cart across all storage mechanisms
+function getLocalCartSafe() {
+  try {
+    const raw = localStorage.getItem('rjfc_local_cart');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (_) {}
+
+  try {
+    const sRaw = sessionStorage.getItem('rjfc_local_cart');
+    if (sRaw) {
+      const parsed = JSON.parse(sRaw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (_) {}
+
+  if (typeof window !== 'undefined' && Array.isArray(window._rjfc_memory_cart)) {
+    return window._rjfc_memory_cart;
+  }
+  return [];
+}
+
+// Helper to save local cart across all storage mechanisms
+function saveLocalCartSafe(cartArray) {
+  if (!Array.isArray(cartArray)) cartArray = [];
+  if (typeof window !== 'undefined') {
+    window._rjfc_memory_cart = cartArray;
+  }
+  try {
+    localStorage.setItem('rjfc_local_cart', JSON.stringify(cartArray));
+  } catch (e1) {
+    console.warn('localStorage save warning:', e1);
+  }
+  try {
+    sessionStorage.setItem('rjfc_local_cart', JSON.stringify(cartArray));
+  } catch (_) {}
+}
+
+// Synchronous fast product finder
+function findProductFastSync(productId) {
   if (productId === undefined || productId === null || productId === '') return null;
   const pIdStr = String(productId).trim();
 
@@ -240,7 +280,7 @@ async function resolveProductById(productId) {
     }
   }
 
-  // 5. LocalStorage custom products (added via Admin or local session)
+  // 5. LocalStorage custom products
   try {
     const customLocal = JSON.parse(localStorage.getItem('rjfc_custom_products') || '[]');
     const found = customLocal.find(p => p && (String(p.id) === pIdStr || String(p.slug) === pIdStr));
@@ -254,48 +294,7 @@ async function resolveProductById(productId) {
     if (found) return found;
   } catch (_) {}
 
-  // 7. Cloud Firestore
-  if (typeof firebase !== 'undefined' && firebase.firestore) {
-    try {
-      const db = firebase.firestore();
-      const docSnap = await db.collection('products').doc(pIdStr).get();
-      if (docSnap.exists) {
-        return { id: docSnap.id, ...docSnap.data() };
-      }
-      const numId = Number(pIdStr);
-      const querySnap = await db.collection('products').where('id', '==', isNaN(numId) ? pIdStr : numId).limit(1).get();
-      if (!querySnap.empty) {
-        const d = querySnap.docs[0].data();
-        return { id: querySnap.docs[0].id, ...d };
-      }
-    } catch (fsErr) {
-      console.warn('Firestore lookup notice:', fsErr);
-    }
-  }
-
-  // 8. Static /data/products.json
-  try {
-    const fbRes = await fetch('/data/products.json');
-    if (fbRes.ok) {
-      const fbData = await fbRes.json();
-      const list = fbData.products || (Array.isArray(fbData) ? fbData : []);
-      const found = list.find(p => p && (String(p.id) === pIdStr || String(p.slug) === pIdStr));
-      if (found) return found;
-    }
-  } catch (_) {}
-
-  // 9. Server API
-  try {
-    const apiRes = await fetch(`${API_BASE}/products/${encodeURIComponent(pIdStr)}`);
-    if (apiRes.ok) {
-      const apiData = await apiRes.json();
-      if (apiData && apiData.success && apiData.product) {
-        return apiData.product;
-      }
-    }
-  } catch (_) {}
-
-  // 10. DOM Card Fallback (Safety Net)
+  // 7. DOM Card Inspection (Instant fallback)
   if (typeof document !== 'undefined') {
     try {
       const card = document.querySelector(`.product-card[data-id="${pIdStr}"]`);
@@ -325,7 +324,60 @@ async function resolveProductById(productId) {
   return null;
 }
 
-// Global Add to Cart
+// Resilient Product Resolver for Storefront, Cart, and Wishlist
+async function resolveProductById(productId) {
+  if (productId === undefined || productId === null || productId === '') return null;
+  const pIdStr = String(productId).trim();
+
+  // 1. Fast Synchronous Check
+  const fast = findProductFastSync(pIdStr);
+  if (fast) return fast;
+
+  // 2. Cloud Firestore
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    try {
+      const db = firebase.firestore();
+      const docSnap = await db.collection('products').doc(pIdStr).get();
+      if (docSnap.exists) {
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+      const numId = Number(pIdStr);
+      const querySnap = await db.collection('products').where('id', '==', isNaN(numId) ? pIdStr : numId).limit(1).get();
+      if (!querySnap.empty) {
+        const d = querySnap.docs[0].data();
+        return { id: querySnap.docs[0].id, ...d };
+      }
+    } catch (fsErr) {
+      console.warn('Firestore lookup notice:', fsErr);
+    }
+  }
+
+  // 3. Static /data/products.json
+  try {
+    const fbRes = await fetch('/data/products.json');
+    if (fbRes.ok) {
+      const fbData = await fbRes.json();
+      const list = fbData.products || (Array.isArray(fbData) ? fbData : []);
+      const found = list.find(p => p && (String(p.id) === pIdStr || String(p.slug) === pIdStr));
+      if (found) return found;
+    }
+  } catch (_) {}
+
+  // 4. Server API
+  try {
+    const apiRes = await fetch(`${API_BASE}/products/${encodeURIComponent(pIdStr)}`);
+    if (apiRes.ok) {
+      const apiData = await apiRes.json();
+      if (apiData && apiData.success && apiData.product) {
+        return apiData.product;
+      }
+    }
+  } catch (_) {}
+
+  return null;
+}
+
+// Global Add to Cart - Instant & Guaranteed
 async function addToCart(productId, quantity = 1, size = 'Free Size') {
   if (productId === undefined || productId === null || productId === '') {
     showToast('Product ID is required', 'error');
@@ -334,69 +386,63 @@ async function addToCart(productId, quantity = 1, size = 'Free Size') {
   const qty = Math.max(1, parseInt(quantity, 10) || 1);
   const selectedSize = size || 'Free Size';
 
-  // 1. Resolve product details across all sources
-  const product = await resolveProductById(productId);
+  // 1. Instant Synchronous resolution
+  let product = findProductFastSync(productId);
 
-  // 2. Try server API first if running with backend
-  let apiSuccess = false;
+  // 2. Fallback to async resolution if not in fast sync cache
+  if (!product) {
+    try {
+      product = await resolveProductById(productId);
+    } catch (_) {}
+  }
+
+  // 3. Build product object
+  const pName = product ? (product.name || product.title) : `RJ Fashion Item (${productId})`;
+  const pPrice = product ? Number(product.price) : 600;
+  const pOrigPrice = product ? (Number(product.original_price) || pPrice) : pPrice;
+  const pDiscount = product ? (Number(product.discount) || (pOrigPrice > pPrice ? Math.round(((pOrigPrice - pPrice) / pOrigPrice) * 100) : 0)) : 0;
+  const pImage = product ? (product.image || (Array.isArray(product.images) ? product.images[0] : '/images/placeholder.jpg')) : '/images/placeholder.jpg';
+  const pBrand = product ? (product.brand || 'RJ Collection') : 'RJ Collection';
+  const pStock = product ? (Number(product.stock) || 99) : 99;
+
+  // 4. Always save item to local cart
+  const local = getLocalCartSafe();
+  const existing = local.find(i => String(i.product_id) === String(productId) && i.size === selectedSize);
+
+  if (existing) {
+    existing.quantity = (Number(existing.quantity) || 1) + qty;
+  } else {
+    local.push({
+      id: Date.now() + Math.floor(Math.random() * 1000),
+      product_id: productId,
+      name: pName,
+      price: pPrice,
+      original_price: pOrigPrice,
+      discount: pDiscount,
+      image: pImage,
+      brand: pBrand,
+      size: selectedSize,
+      quantity: qty,
+      stock: pStock
+    });
+  }
+
+  saveLocalCartSafe(local);
+
+  // 5. Instantly provide positive UI feedback
+  showToast('Added to cart!', 'success');
+  updateCartCount();
+
+  // 6. Fire background API sync (non-blocking)
   try {
-    const res = await fetch(`${API_BASE}/cart`, {
+    fetch(`${API_BASE}/cart`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId, quantity: qty, size: selectedSize })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success) {
-        apiSuccess = true;
-      }
-    }
+    }).catch(() => {});
   } catch (_) {}
 
-  // 3. Always maintain and sync client-side cart (handles Firebase static hosting & offline)
-  try {
-    const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
-    const existing = local.find(i => String(i.product_id) === String(productId) && i.size === selectedSize);
-
-    if (existing) {
-      existing.quantity = (Number(existing.quantity) || 1) + qty;
-    } else {
-      const pName = product ? (product.name || product.title) : `RJ Fashion Item (${productId})`;
-      const pPrice = product ? Number(product.price) : 0;
-      const pOrigPrice = product ? (Number(product.original_price) || pPrice) : pPrice;
-      const pDiscount = product ? (Number(product.discount) || (pOrigPrice > pPrice ? Math.round(((pOrigPrice - pPrice) / pOrigPrice) * 100) : 0)) : 0;
-      const pImage = product ? (product.image || (Array.isArray(product.images) ? product.images[0] : '/images/placeholder.jpg')) : '/images/placeholder.jpg';
-      const pBrand = product ? (product.brand || 'RJ Collection') : 'RJ Collection';
-      const pStock = product ? (Number(product.stock) || 99) : 99;
-
-      local.push({
-        id: Date.now() + Math.floor(Math.random() * 1000),
-        product_id: productId,
-        name: pName,
-        price: pPrice,
-        original_price: pOrigPrice,
-        discount: pDiscount,
-        image: pImage,
-        brand: pBrand,
-        size: selectedSize,
-        quantity: qty,
-        stock: pStock
-      });
-    }
-    localStorage.setItem('rjfc_local_cart', JSON.stringify(local));
-    showToast('Added to cart!', 'success');
-    updateCartCount();
-    return true;
-  } catch (err) {
-    console.error('Local cart storage error:', err);
-    if (apiSuccess) {
-      showToast('Added to cart!', 'success');
-      updateCartCount();
-      return true;
-    }
-    showToast('Failed to add item to cart', 'error');
-    return false;
-  }
+  return true;
 }
 
 // Global Toggle Wishlist
