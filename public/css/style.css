@@ -6,31 +6,38 @@
                Plus Jakarta Sans (Crisp Modern UI)
    =================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Refined Luxury Fashion Palette */
-  --bg-page: #FAF8F5;          /* Sophisticated Warm Ivory */
-  --bg-subtle: #F3EFEA;        /* Subtle Warm Ivory Surface */
+  /* Signature Quiet Luxury Palette Tokens */
+  --bg-page: #FAF8F3;          /* Warm Ivory */
+  --bg-subtle: #F2EDE4;        /* Soft Cream */
+  --bg-sand: #E5D8C8;          /* Sand Beige */
   --bg-white: #FFFFFF;         /* Pure White */
   --bg-card: #FFFFFF;
-  --dark: #1E293B;             /* Crisp Charcoal */
-  --dark-light: #334155;
-  --dark-subtle: #475569;
-  --primary: #72132A;          /* Deep Burgundy / Wine Primary Accent */
-  --primary-hover: #580F21;
-  --primary-gradient: linear-gradient(135deg, #72132A 0%, #881337 100%);
-  --primary-light: #FDF2F4;
-  --primary-subtle: rgba(114, 19, 42, 0.08);
 
-  --gold: #C5A059;             /* Refined Champagne Gold Highlight */
-  --gold-hover: #B08C45;
-  --gold-gradient: linear-gradient(135deg, #C5A059 0%, #DFBA73 100%);
+  --dark: #171715;             /* Editorial Black */
+  --dark-espresso: #302720;    /* Deep Espresso */
+  --dark-light: #302720;
+  --dark-subtle: #5A524A;
+  --taupe: #A59685;            /* Warm Taupe */
+
+  --primary: #302720;          /* Deep Espresso Primary Accent */
+  --primary-hover: #171715;    /* Editorial Black Hover */
+  --primary-gradient: linear-gradient(135deg, #302720 0%, #171715 100%);
+  --primary-light: #F2EDE4;
+  --primary-subtle: rgba(48, 39, 32, 0.08);
+
+  --accent-burgundy: #72132A;  /* Heritage Royal Burgundy Accent */
+  --gold: #C2A878;             /* Restrained Champagne Accent */
+  --gold-hover: #B09562;
+  --gold-gradient: linear-gradient(135deg, #C2A878 0%, #DFBA73 100%);
   --gold-light: #FAF6ED;
-  --gold-subtle: rgba(197, 160, 89, 0.14);
+  --gold-subtle: rgba(194, 168, 120, 0.16);
 
-  --soft-rose: #F3EAE7;        /* Soft Rose Highlight */
-  --soft-rose-light: #FAF5F3;
+  --champagne: #C2A878;
+  --champagne-light: #FBF8F2;
+  --champagne-border: #E8DECE;
 
   /* Neutrals */
   --secondary: #64748B;        /* Secondary Charcoal Text */
