@@ -163,7 +163,7 @@ async function main() {
 
     for (const page of PAGES_TO_TEST) {
       await cdp.send('Page.navigate', { url: page.url });
-      await new Promise(r => setTimeout(r, 600)); // wait for layout & dynamic load
+      await new Promise(r => setTimeout(r, 900)); // wait for layout & dynamic load
 
       // Evaluate layout metrics in browser
       const evalRes = await cdp.send('Runtime.evaluate', {
