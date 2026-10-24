@@ -9,10 +9,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* Signature Quiet Luxury Palette Tokens */
-  --bg-page: #FAF8F3;          /* Warm Ivory */
+  /* RJ SIGNATURE CORE COLORS */
+  --bg-page: #FAF8F4;          /* Porcelain Ivory */
   --bg-subtle: #F2EDE4;        /* Soft Cream */
-  --bg-sand: #E5D8C8;          /* Sand Beige */
+  --bg-sand: #E4D7C6;          /* Sand Beige */
   --bg-white: #FFFFFF;         /* Pure White */
   --bg-card: #FFFFFF;
 
@@ -20,22 +20,22 @@
   --dark-espresso: #302720;    /* Deep Espresso */
   --dark-light: #302720;
   --dark-subtle: #5A524A;
-  --taupe: #A59685;            /* Warm Taupe */
+  --taupe: #A49685;            /* Warm Taupe */
 
-  --primary: #302720;          /* Deep Espresso Primary Accent */
-  --primary-hover: #171715;    /* Editorial Black Hover */
+  --primary: #302720;          /* Deep Espresso */
+  --primary-hover: #171715;    /* Editorial Black */
   --primary-gradient: linear-gradient(135deg, #302720 0%, #171715 100%);
   --primary-light: #F2EDE4;
   --primary-subtle: rgba(48, 39, 32, 0.08);
 
-  --accent-burgundy: #72132A;  /* Heritage Royal Burgundy Accent */
-  --gold: #C2A878;             /* Restrained Champagne Accent */
-  --gold-hover: #B09562;
-  --gold-gradient: linear-gradient(135deg, #C2A878 0%, #DFBA73 100%);
+  --accent-burgundy: #72132A;  /* Royal Heritage Accent */
+  --gold: #BDA477;             /* Champagne Accent */
+  --gold-hover: #A98F61;
+  --gold-gradient: linear-gradient(135deg, #BDA477 0%, #D8C296 100%);
   --gold-light: #FAF6ED;
-  --gold-subtle: rgba(194, 168, 120, 0.16);
+  --gold-subtle: rgba(189, 164, 119, 0.16);
 
-  --champagne: #C2A878;
+  --champagne: #BDA477;
   --champagne-light: #FBF8F2;
   --champagne-border: #E8DECE;
 
@@ -4726,4 +4726,213 @@ body.style-editorial-impact {
   font-family: 'Cormorant Garamond', 'Cinzel', serif;
   letter-spacing: 2px;
   font-size: 2.8rem;
+}
+
+
+/* ===================================================================
+   RJ SIGNATURE - CHOOSE YOUR EXPERIENCE (MODAL & THEME CONTROLS)
+   =================================================================== */
+.exp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 23, 21, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.exp-modal-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.exp-modal-card {
+  background: #FAF8F4;
+  border: 1px solid #E4D7C6;
+  border-radius: 14px;
+  max-width: 760px;
+  width: 100%;
+  padding: 36px 32px;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(23, 23, 21, 0.3);
+  transform: translateY(16px) scale(0.98);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.exp-modal-backdrop.is-open .exp-modal-card {
+  transform: translateY(0) scale(1);
+}
+
+.exp-modal-header {
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.exp-modal-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #BDA477;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.exp-modal-title {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #171715;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.exp-modal-desc {
+  font-size: 0.88rem;
+  color: #6B6259;
+  max-width: 540px;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+.exp-modal-close {
+  position: absolute;
+  top: -12px;
+  right: -8px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #6B6259;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.exp-modal-close:hover {
+  color: #171715;
+}
+
+.exp-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .exp-options-grid {
+    grid-template-columns: 1fr;
+  }
+  .exp-modal-card {
+    padding: 24px 18px;
+  }
+}
+
+.exp-card {
+  background: #FFFFFF;
+  border: 2px solid #E4D7C6;
+  border-radius: 10px;
+  padding: 24px 20px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.exp-card:hover {
+  border-color: #BDA477;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(48, 39, 32, 0.08);
+}
+
+.exp-card.is-selected {
+  border-color: #BDA477;
+  background: #FCFAF7;
+  box-shadow: 0 0 0 3px rgba(189, 164, 119, 0.25);
+}
+
+.exp-card-badge {
+  font-size: 0.68rem;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: #BDA477;
+  margin-bottom: 12px;
+}
+
+.exp-card-preview {
+  height: 48px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #E4D7C6;
+}
+
+.quiet-luxury-preview {
+  background: #FAF8F4;
+}
+
+.editorial-impact-preview {
+  background: #171715;
+}
+
+.preview-palette {
+  display: flex;
+  gap: 8px;
+}
+
+.preview-palette span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+
+.exp-card-title {
+  font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #171715;
+  margin: 0 0 8px 0;
+}
+
+.exp-card-sub {
+  font-size: 0.82rem;
+  color: #6B6259;
+  line-height: 1.5;
+  margin-bottom: 18px;
+  flex: 1;
+}
+
+.exp-card-btn {
+  background: #F2EDE4;
+  border: 1px solid #E4D7C6;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #302720;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.exp-card:hover .exp-card-btn,
+.exp-card.is-selected .exp-card-btn {
+  background: #171715;
+  color: #FFFFFF;
+  border-color: #171715;
 }

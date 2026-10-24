@@ -819,10 +819,148 @@ document.addEventListener('DOMContentLoaded', initGiftOptionUI);
 
 
 // ===================================================================
-// DUAL-STYLE LUXURY EXPERIENCE CONTROLLER
-// Style A: Quiet Luxury (Minimal Ivory & Soft Beige)
-// Style B: Editorial Impact (Bold Modern Fashion Editorial)
+// DUAL-STYLE LUXURY EXPERIENCE CONTROLLER (RJ SIGNATURE)
+// 01. QUIET LUXURY — minimal ivory and beige
+// 02. EDITORIAL IMPACT — bold modern fashion editorial
+// Selector: "CHOOSE YOUR EXPERIENCE"
 // ===================================================================
+
+function openExperienceModal() {
+  let modal = document.getElementById('experience-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'experience-modal';
+    modal.className = 'exp-modal-backdrop';
+    modal.onclick = function(e) { if (e.target === modal) closeExperienceModal(); };
+    modal.innerHTML = `
+      <div class="exp-modal-card" onclick="event.stopPropagation()">
+        <div class="exp-modal-header">
+          <span class="exp-modal-eyebrow">THE SIGNATURE EDIT</span>
+          <h3 class="exp-modal-title">CHOOSE YOUR EXPERIENCE</h3>
+          <p class="exp-modal-desc">Explore two distinct aesthetic expressions of RJ Fashion Collection. Switch anytime without losing your cart or browsing state.</p>
+          <button type="button" class="exp-modal-close" onclick="closeExperienceModal()">&times;</button>
+        </div>
+        <div class="exp-options-grid">
+          <!-- Option 1: Quiet Luxury -->
+          <div class="exp-card" id="exp-card-quiet-luxury" onclick="selectExperience('quiet-luxury')">
+            <div class="exp-card-badge">THEME 01</div>
+            <div class="exp-card-preview quiet-luxury-preview">
+              <div class="preview-palette">
+                <span style="background: #FAF8F4;" title="Porcelain Ivory"></span>
+                <span style="background: #F2EDE4;" title="Soft Cream"></span>
+                <span style="background: #E4D7C6;" title="Sand Beige"></span>
+                <span style="background: #BDA477;" title="Champagne Accent"></span>
+              </div>
+            </div>
+            <h4 class="exp-card-title">Quiet Luxury</h4>
+            <p class="exp-card-sub">Minimal Porcelain Ivory, soft cream surfaces, refined serif typography, and understated champagne accents. Serene and timeless.</p>
+            <button type="button" class="exp-card-btn">Select Quiet Luxury</button>
+          </div>
+
+          <!-- Option 2: Editorial Impact -->
+          <div class="exp-card" id="exp-card-editorial-impact" onclick="selectExperience('editorial-impact')">
+            <div class="exp-card-badge">THEME 02</div>
+            <div class="exp-card-preview editorial-impact-preview">
+              <div class="preview-palette">
+                <span style="background: #171715;" title="Editorial Black"></span>
+                <span style="background: #302720;" title="Deep Espresso"></span>
+                <span style="background: #FAF8F4;" title="Porcelain Ivory"></span>
+                <span style="background: #BDA477;" title="Champagne Accent"></span>
+              </div>
+            </div>
+            <h4 class="exp-card-title">Editorial Impact</h4>
+            <p class="exp-card-sub">Bold display headlines, high-impact fashion photography, split-screen compositions, and high-contrast editorial drama.</p>
+            <button type="button" class="exp-card-btn">Select Editorial Impact</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  const current = document.documentElement.getAttribute('data-luxury-style') || 'editorial-impact';
+  const cardQuiet = modal.querySelector('#exp-card-quiet-luxury');
+  const cardEdit = modal.querySelector('#exp-card-editorial-impact');
+  if (cardQuiet) cardQuiet.classList.toggle('is-selected', current === 'quiet-luxury');
+  if (cardEdit) cardEdit.classList.toggle('is-selected', current === 'editorial-impact');
+
+  modal.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeExperienceModal() {
+  const modal = document.getElementById('experience-modal');
+  if (modal) modal.classList.remove('is-open');
+  document.body.style.overflow = '';
+}
+
+function selectExperience(styleName) {
+  applyLuxuryStyle(styleName, true);
+  closeExperienceModal();
+}
+
+function initLuxuryStyle() {
+  let saved = 'editorial-impact';
+  try {
+    saved = localStorage.getItem('rjfc_luxury_style') || 'editorial-impact';
+  } catch (_) {}
+  applyLuxuryStyle(saved, false);
+}
+
+function applyLuxuryStyle(styleName, showNotification = true) {
+  const isEditorial = styleName === 'editorial-impact';
+  const targetStyle = isEditorial ? 'editorial-impact' : 'quiet-luxury';
+  const displayName = isEditorial ? 'Editorial Impact' : 'Quiet Luxury';
+
+  document.documentElement.setAttribute('data-luxury-style', targetStyle);
+  if (document.body) {
+    if (isEditorial) {
+      document.body.classList.add('style-editorial-impact');
+      document.body.classList.remove('style-quiet-luxury');
+    } else {
+      document.body.classList.add('style-quiet-luxury');
+      document.body.classList.remove('style-editorial-impact');
+    }
+  }
+
+  try {
+    localStorage.setItem('rjfc_luxury_style', targetStyle);
+  } catch (_) {}
+
+  // Update UI indicators
+  document.querySelectorAll('.style-switcher-text, #luxury-style-text').forEach(el => {
+    el.innerHTML = `CHOOSE YOUR EXPERIENCE: <strong>${displayName}</strong>`;
+  });
+  document.querySelectorAll('#rj-mobile-style-text').forEach(el => {
+    el.textContent = `✦ Experience: ${displayName}`;
+  });
+  document.querySelectorAll('.luxury-style-switcher').forEach(el => {
+    el.setAttribute('title', `Choose Your Experience (Current: ${displayName})`);
+    el.setAttribute('data-current-style', targetStyle);
+  });
+
+  if (showNotification && typeof showToast === 'function') {
+    showToast(isEditorial ? '✨ Theme: Editorial Impact activated' : '🕊️ Theme: Quiet Luxury activated', 'info');
+  }
+}
+
+function toggleLuxuryStyle() {
+  openExperienceModal();
+}
+
+window.openExperienceModal = openExperienceModal;
+window.closeExperienceModal = closeExperienceModal;
+window.selectExperience = selectExperience;
+window.initLuxuryStyle = initLuxuryStyle;
+window.applyLuxuryStyle = applyLuxuryStyle;
+window.toggleLuxuryStyle = toggleLuxuryStyle;
+
+// Run initial check
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLuxuryStyle);
+} else {
+  initLuxuryStyle();
+}
 
 function initLuxuryStyle() {
   let saved = 'editorial-impact';
