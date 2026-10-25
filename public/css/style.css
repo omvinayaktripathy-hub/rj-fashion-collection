@@ -180,24 +180,78 @@ button {
   gap: 28px;
 }
 
-/* Brand Logo */
+/* Brand Logo Composite Lockup */
 .brand-logo {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
   position: relative;
   text-decoration: none;
-  gap: 2px;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.brand-logo:hover {
+  opacity: 0.92;
+}
+
+.brand-logo-mark {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.brand-logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.brand-logo:hover .brand-logo-mark img {
+  transform: scale(1.06);
+}
+
+.brand-logo-mark .logo-img-dark {
+  display: none;
+}
+
+.dark-theme .brand-logo-mark .logo-img-light,
+[data-theme="dark"] .brand-logo-mark .logo-img-light {
+  display: none;
+}
+
+.dark-theme .brand-logo-mark .logo-img-dark,
+[data-theme="dark"] .brand-logo-mark .logo-img-dark {
+  display: block;
+}
+
+.brand-logo-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .brand-logo .logo-title {
-  font-family: var(--font-cinzel);
-  font-size: 1.5rem;
+  font-family: 'Playfair Display', var(--font-cinzel), Georgia, serif;
+  font-size: 1.22rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 0.10em;
   color: var(--dark);
   text-transform: uppercase;
   line-height: 1.1;
   transition: var(--transition);
+}
+
+.dark-theme .brand-logo .logo-title,
+[data-theme="dark"] .brand-logo .logo-title {
+  color: #FFFFFF !important;
 }
 
 .brand-logo:hover .logo-title {
@@ -206,12 +260,51 @@ button {
 
 .brand-logo .logo-subtitle {
   font-family: var(--font-sans);
-  font-size: 0.65rem;
-  letter-spacing: 3.5px;
-  color: var(--gold);
+  font-size: 0.58rem;
+  letter-spacing: 0.28em;
+  color: #C5A880;
   text-transform: uppercase;
-  font-weight: 700;
-  margin-left: 2px;
+  font-weight: 600;
+  margin-top: 3px;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .brand-logo-mark {
+    width: 32px;
+    height: 32px;
+  }
+  .brand-logo .logo-title {
+    font-size: 0.96rem !important;
+    letter-spacing: 0.05em !important;
+  }
+  .brand-logo .logo-subtitle {
+    font-size: 0.48rem;
+    letter-spacing: 0.15em;
+  }
+  .checkout-safe-badge {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .checkout-safe-badge {
+    display: none !important;
+  }
+  .checkout-nav-container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-logo {
+    gap: 6px;
+  }
+  .brand-logo .logo-title {
+    font-size: 0.82rem !important;
+    letter-spacing: 0.02em !important;
+  }
 }
 
 /* Live Search Bar */

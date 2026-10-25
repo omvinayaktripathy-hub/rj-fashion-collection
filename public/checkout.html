@@ -742,13 +742,13 @@
   </aside>
 
   <!-- Luxury Checkout Header -->
-  <header style="background: var(--deliv-card-bg); border-bottom: 1px solid var(--deliv-card-border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
-    <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px;">
+  <header class="checkout-page-header" style="background: var(--deliv-card-bg); border-bottom: 1px solid var(--deliv-card-border); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+    <div class="container checkout-nav-container" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px;">
       <a href="/" class="brand-logo" style="text-decoration: none;">
-        <span class="logo-title" style="font-size: 1.45rem;">RJ Fashion Collection</span>
+        <span class="logo-title">RJ Fashion Collection</span>
       </a>
 
-      <div style="display: flex; align-items: center; gap: 20px;">
+      <div class="checkout-header-actions" style="display: flex; align-items: center; gap: 10px;">
         <!-- Luxury Interactive Dark Mode Toggle Slider -->
                 
         <div class="theme-switch-container" onclick="toggleTheme()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}" role="switch" aria-checked="false" tabindex="0" title="Toggle Dark/Light Mode">
@@ -760,8 +760,8 @@
         </div>
 
 
-        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #10b981; font-weight: 700;">
-          <span style="font-size: 1.1rem;"></span>
+        <div class="checkout-safe-badge" style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #10b981; font-weight: 700;">
+          <span style="font-size: 1.1rem;">🔒</span>
           <span>100% Safe Payments</span>
         </div>
       </div>

@@ -472,13 +472,42 @@ export const Header = ({
             <Menu className="w-6 h-6" />
           </button>
 
-          <a href="/" className="flex flex-col group text-left">
-            <span className="font-serif text-xl sm:text-2xl font-bold tracking-[0.08em] text-neutral-900 dark:text-white uppercase group-hover:text-[#8C6D3F] dark:group-hover:text-[#D4AF37] transition-colors">
-              RJ FASHION COLLECTION
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.28em] text-[#8C6D3F] dark:text-[#C5A880] font-medium hidden sm:inline-block">
-              Luxury Ethnic Couture
-            </span>
+          {/* Composite Brand Logo Lockup */}
+          <a
+            href="/"
+            className="flex items-center gap-2.5 sm:gap-3.5 group text-left transition-opacity duration-200 hover:opacity-90 flex-shrink-0"
+            title="RJ Fashion Collection Homepage"
+            aria-label="RJ Fashion Collection - Haute Couture & Bridal"
+          >
+            {/* Monogram Mark with Dark Mode Contrast Adaptation */}
+            <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 flex-shrink-0">
+              <img
+                src="/images/rj-logo-monogram.svg"
+                alt="RJ Monogram"
+                width={44}
+                height={44}
+                className="w-full h-full object-contain dark:hidden transition-transform duration-300 group-hover:scale-105"
+                loading="eager"
+              />
+              <img
+                src="/images/rj-logo-monogram-dark.svg"
+                alt="RJ Monogram (Dark Mode)"
+                width={44}
+                height={44}
+                className="w-full h-full object-contain hidden dark:block transition-transform duration-300 group-hover:scale-105"
+                loading="eager"
+              />
+            </div>
+
+            {/* Editorial Wordmark Typography */}
+            <div className="flex flex-col justify-center">
+              <span className="font-serif text-base sm:text-lg lg:text-xl font-semibold tracking-[0.2em] text-neutral-900 dark:text-white uppercase leading-none group-hover:text-[#8C6D3F] dark:group-hover:text-[#D4AF37] transition-colors">
+                RJ FASHION COLLECTION
+              </span>
+              <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.3em] text-[#C5A880] font-medium mt-1 leading-none">
+                HAUTE COUTURE &amp; BRIDAL
+              </span>
+            </div>
           </a>
 
           {/* Search Bar */}
@@ -628,7 +657,32 @@ export const Header = ({
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} aria-hidden="true" />
           <div className="fixed inset-y-0 left-0 w-full max-w-xs bg-white dark:bg-[#121212] shadow-2xl flex flex-col z-10">
             <div className="p-4 border-b border-gray-200 dark:border-neutral-800 flex items-center justify-between">
-              <span className="font-serif font-bold text-base tracking-wider text-neutral-900 dark:text-white">RJ FASHION COLLECTION</span>
+              <div className="flex items-center gap-2.5">
+                <div className="relative w-8 h-8 flex-shrink-0">
+                  <img
+                    src="/images/rj-logo-monogram.svg"
+                    alt="RJ"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-contain dark:hidden"
+                  />
+                  <img
+                    src="/images/rj-logo-monogram-dark.svg"
+                    alt="RJ"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-contain hidden dark:block"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-serif font-semibold text-sm tracking-[0.16em] text-neutral-900 dark:text-white leading-tight">
+                    RJ FASHION COLLECTION
+                  </span>
+                  <span className="text-[8px] uppercase tracking-[0.25em] text-[#C5A880] mt-0.5 font-medium">
+                    HAUTE COUTURE &amp; BRIDAL
+                  </span>
+                </div>
+              </div>
               <button type="button" onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 text-neutral-500 hover:text-black dark:hover:text-white" aria-label="Close menu">
                 <X className="w-5 h-5" />
               </button>
