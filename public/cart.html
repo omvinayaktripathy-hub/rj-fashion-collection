@@ -175,94 +175,122 @@
     </nav>
   </header>
 
-  <!-- Main Shopping Bag Container (The Row / SSENSE / Acne Studios Ultra-Minimalist) -->
-  <main class="cart-page-wrapper cart-minimal-experience">
-    <div class="container cart-inner-container">
+  <!-- Main Luxury Shopping Bag Wrapper (Matching Wishlist Aesthetic) -->
+  <main class="cart-page-wrapper">
+    <div class="container" style="max-width: 1320px; padding-top: 24px; padding-bottom: 70px;">
 
-      <!-- Header: Title & Discreet Continue Shopping -->
-      <div class="cart-minimal-header-row">
-        <div class="cart-title-group">
-          <h1 class="cart-minimal-title">Shopping Bag</h1>
-          <span class="cart-minimal-count" id="cart-heading-count">(0)</span>
+      <!-- Breadcrumbs: HOME / SHOPPING BAG -->
+      <nav class="cart-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-active">Shopping Bag</span>
+      </nav>
+
+      <!-- 1. Editorial Header & Hierarchy (Exact Wishlist Match) -->
+      <section class="cart-header-control" aria-label="Shopping Bag Header">
+        <div class="cart-title-row">
+          <div class="cart-headline-block">
+            <!-- Gold Eyebrow Tag -->
+            <div class="cart-tagline">
+              <span class="sparkle-icon">✨</span>
+              <span>REVIEW YOUR SELECTION</span>
+            </div>
+            <!-- Title & Black Pill Counter -->
+            <div class="cart-title-wrap">
+              <h1 class="cart-main-title">My Shopping Bag</h1>
+              <span id="cart-heading-count" class="cart-count-capsule">[ 0 Items ]</span>
+            </div>
+          </div>
         </div>
-        <a href="/shop.html" class="cart-minimal-continue-link">Continue Shopping</a>
+      </section>
+
+      <!-- 2. Empty State (Exact Wishlist Match) -->
+      <div id="cart-empty-state" class="cart-empty-editorial" style="display: none;">
+        <div class="empty-bag-icon-wrap">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <div class="empty-text-block">
+          <h2 class="empty-headline">Your Shopping Bag is Empty</h2>
+          <p class="empty-subtext">
+            Explore our latest arrivals and discover royal silhouettes, handcrafted ethnic wear, and statement jewellery.
+          </p>
+        </div>
+        <div class="empty-cta-wrap">
+          <a href="/shop.html?newArrival=true" class="btn btn-luxury-primary">
+            <span>EXPLORE NEW ARRIVALS →</span>
+          </a>
+        </div>
       </div>
 
-      <!-- Empty State: Poetic & Minimal -->
-      <div id="cart-empty-state" class="cart-minimal-empty-state" style="display: none;">
-        <p class="empty-minimal-msg">Your bag is currently empty.</p>
-        <a href="/shop.html" class="empty-minimal-cta">Explore the Collection</a>
-      </div>
-
-      <!-- Active Cart Layout (Balanced 2-Column Desktop, Fluid Mobile) -->
-      <div class="cart-minimal-grid" id="cart-page-layout">
+      <!-- 3. Active Cart Layout (Clean 2-Column Desktop Grid / Fluid Mobile) -->
+      <div class="cart-editorial-layout" id="cart-page-layout">
         
-        <!-- LEFT COLUMN: Item Details (Spacious, Hairline Dividers) -->
-        <div class="cart-items-column">
-          <!-- Hidden address element for delivery address sync -->
+        <!-- LEFT COLUMN: Minimalist Product Cards Separated by Hairline Borders -->
+        <div class="cart-left-column">
+          <!-- Hidden address element for delivery address compatibility -->
           <div id="cart-pincode-display" style="display: none;"></div>
 
-          <div id="cart-items-list" class="cart-minimal-items-list">
-            <!-- Dynamically populated by cart.js -->
+          <div class="cart-items-card-wrapper">
+            <div id="cart-items-list" class="cart-items-list-flow">
+              <!-- Dynamically rendered by cart.js -->
+            </div>
           </div>
         </div>
 
-        <!-- RIGHT COLUMN: Borderless/Single-Hairline Summary & Checkout (Sticky) -->
-        <aside class="cart-summary-column">
-          <div class="cart-summary-minimal-card" id="cart-summary-box">
-            
-            <!-- Summary Line Items -->
-            <div class="summary-line-item">
-              <span class="summary-label">Subtotal</span>
-              <span class="summary-value" id="cart-subtotal-display">₹0</span>
-            </div>
+        <!-- RIGHT COLUMN: Crisp Minimal Order Summary Card (Sticky) -->
+        <aside class="cart-right-column">
+          <div class="cart-summary-card" id="cart-summary-box">
+            <h2 class="summary-card-title">Order Summary</h2>
 
-            <!-- Optional Promo Discount Row -->
-            <div class="summary-line-item promo-discount-line" id="cart-promo-discount-row" style="display: none;">
-              <span class="summary-label" id="applied-promo-label">Promo Discount</span>
-              <span class="summary-value discount-text" id="cart-promo-discount-display">− ₹0</span>
-            </div>
-
-            <div class="summary-line-item">
-              <span class="summary-label">Shipping</span>
-              <span class="summary-value text-muted-subtle">Calculated at checkout</span>
-            </div>
-
-            <div class="summary-total-divider"></div>
-
-            <div class="summary-total-row">
-              <span class="total-label">Total</span>
-              <span class="total-value" id="cart-total-display">₹0</span>
-            </div>
-
-            <!-- Collapsible Discreet Promo Code Link & Input -->
-            <div class="cart-promo-minimal-module">
-              <div id="promo-toggle-link-wrap">
-                <button type="button" class="btn-minimal-promo-toggle" id="btn-toggle-promo" onclick="toggleCartPromoField(true)">
-                  + Add Promo Code
-                </button>
+            <!-- Summary Rows -->
+            <div class="summary-details-flow">
+              <div class="summary-row">
+                <span class="summary-lbl">Subtotal</span>
+                <span class="summary-val" id="cart-subtotal-display">₹0</span>
               </div>
 
-              <form id="cart-coupon-form" onsubmit="applyCartCoupon(event)" class="promo-minimal-form" style="display: none;">
-                <div class="promo-minimal-input-row">
-                  <input type="text" id="coupon-code-input" placeholder="ENTER CODE" autocomplete="off">
-                  <button type="submit" class="btn-minimal-promo-apply">Apply</button>
-                  <button type="button" class="btn-minimal-promo-cancel" onclick="toggleCartPromoField(false)">✕</button>
-                </div>
-              </form>
+              <!-- Optional Promo Row -->
+              <div class="summary-row promo-discount-row" id="cart-promo-discount-row" style="display: none;">
+                <span class="summary-lbl" id="applied-promo-label">Promo Discount</span>
+                <span class="summary-val discount-val" id="cart-promo-discount-display">− ₹0</span>
+              </div>
 
-              <div id="applied-coupon-pill-wrap" class="applied-promo-minimal-tag" style="display: none;"></div>
+              <div class="summary-row">
+                <span class="summary-lbl">Shipping</span>
+                <span class="summary-val" id="cart-shipping-display">Complimentary</span>
+              </div>
+
+              <div class="summary-divider"></div>
+
+              <div class="summary-row total-row">
+                <span class="total-lbl">Total</span>
+                <span class="total-val" id="cart-total-display">₹0</span>
+              </div>
             </div>
 
-            <!-- Primary Action: Solid Matte Black Button, 2px radius, wide tracking -->
-            <button type="button" onclick="handleCartProceedCheckout()" class="btn-proceed-minimal" id="btn-proceed-checkout">
-              Proceed to Checkout
+            <!-- Minimal Promo Code Input -->
+            <div class="cart-promo-box">
+              <form id="cart-coupon-form" onsubmit="applyCartCoupon(event)" class="promo-form-row">
+                <input type="text" id="coupon-code-input" placeholder="USE CODE: GRANDRJ" autocomplete="off">
+                <button type="submit" class="btn-promo-apply">Apply</button>
+              </form>
+              <div id="applied-coupon-pill-wrap" style="display: none; margin-top: 8px;"></div>
+            </div>
+
+            <!-- Primary CTA: Black Pill Button "PROCEED TO CHECKOUT →" Matching "DISCOVER NEW ARRIVALS" -->
+            <button type="button" onclick="handleCartProceedCheckout()" class="btn btn-luxury-primary btn-cart-checkout" id="btn-proceed-checkout">
+              <span>PROCEED TO CHECKOUT →</span>
             </button>
 
-            <!-- Trust Note -->
-            <p class="cart-minimal-trust-note">
-              Complimentary returns within 14 days • Encrypted checkout
-            </p>
+            <!-- Secure Badge Text -->
+            <div class="cart-secure-badge-row">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Authentic Luxury Guaranteed • Complimentary Express Delivery</span>
+            </div>
           </div>
         </aside>
 
@@ -271,14 +299,14 @@
     </div>
   </main>
 
-  <!-- Clean Mobile Sticky Checkout Bar (Uncluttered) -->
-  <div class="mobile-sticky-minimal-bar" id="mobile-sticky-checkout-bar" style="display: none;">
-    <div class="mobile-minimal-total-info">
-      <span class="mobile-minimal-label">Total</span>
-      <span class="mobile-minimal-price" id="mobile-sticky-total-price">₹0</span>
+  <!-- Clean Mobile Sticky Checkout Bar -->
+  <div class="mobile-sticky-checkout-bar" id="mobile-sticky-checkout-bar" style="display: none;">
+    <div class="mobile-sticky-info">
+      <span class="mobile-sticky-lbl">Total</span>
+      <span class="mobile-sticky-val" id="mobile-sticky-total-price">₹0</span>
     </div>
-    <button type="button" onclick="handleCartProceedCheckout()" class="btn-mobile-minimal-checkout">
-      Proceed to Checkout
+    <button type="button" onclick="handleCartProceedCheckout()" class="btn btn-luxury-primary btn-mobile-checkout-action">
+      <span>CHECKOUT →</span>
     </button>
   </div>
 

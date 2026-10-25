@@ -1,5 +1,5 @@
-// RJ FASHION COLLECTION - ULTRA-MINIMALIST EDITORIAL SHOPPING BAG CONTROLLER
-// Inspired by The Row, SSENSE, and Acne Studios
+// RJ FASHION COLLECTION - SHOPPING BAG CONTROLLER
+// Perfectly styled to match the "/wishlist" ("My Saved Collection") visual identity
 const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
 
 let appliedCartCoupon = null;
@@ -19,41 +19,18 @@ function formatPriceSafe(amount) {
   return '₹' + Number(amount || 0).toLocaleString('en-IN');
 }
 
-function toggleCartPromoField(show) {
-  const linkWrap = document.getElementById('promo-toggle-link-wrap');
-  const form = document.getElementById('cart-coupon-form');
-  const input = document.getElementById('coupon-code-input');
-
-  if (linkWrap && form) {
-    if (show) {
-      linkWrap.style.display = 'none';
-      form.style.display = 'flex';
-      if (input) {
-        input.focus();
-      }
-    } else {
-      linkWrap.style.display = 'block';
-      form.style.display = 'none';
-      if (input) {
-        input.value = '';
-      }
-    }
-  }
-}
-
 async function loadCart() {
   const container = document.getElementById('cart-items-list');
   const cartLayout = document.getElementById('cart-page-layout');
   const emptyState = document.getElementById('cart-empty-state');
   const headingCount = document.getElementById('cart-heading-count');
   const subtotalDisplay = document.getElementById('cart-subtotal-display');
+  const shippingDisplay = document.getElementById('cart-shipping-display');
   const totalDisplay = document.getElementById('cart-total-display');
   const promoRow = document.getElementById('cart-promo-discount-row');
   const promoVal = document.getElementById('cart-promo-discount-display');
   const promoLabel = document.getElementById('applied-promo-label');
   const appliedPillWrap = document.getElementById('applied-coupon-pill-wrap');
-  const promoToggleWrap = document.getElementById('promo-toggle-link-wrap');
-  const promoForm = document.getElementById('cart-coupon-form');
   const mobileStickyBar = document.getElementById('mobile-sticky-checkout-bar');
   const mobileStickyPrice = document.getElementById('mobile-sticky-total-price');
 
@@ -95,7 +72,7 @@ async function loadCart() {
       if (cartLayout) cartLayout.style.display = 'none';
       if (emptyState) emptyState.style.display = 'block';
       if (mobileStickyBar) mobileStickyBar.style.display = 'none';
-      if (headingCount) headingCount.textContent = '(0)';
+      if (headingCount) headingCount.textContent = '[ 0 Items ]';
       if (typeof updateCartCount === 'function') updateCartCount();
       return;
     }
@@ -108,9 +85,9 @@ async function loadCart() {
     const itemCount = data.itemCount || items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
     const subtotal = data.subtotal || items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
 
-    if (headingCount) headingCount.textContent = `(${itemCount})`;
+    if (headingCount) headingCount.textContent = `[ ${itemCount} ${itemCount === 1 ? 'Item' : 'Items'} ]`;
 
-    // 2. Render Spacious 3:4 Vertical Items with Hairline Dividers
+    // 2. Render Minimalist Product Cards with 3:4 Aspect Ratio
     container.innerHTML = items.map((item, index) => {
       const itemId = item.id || item.product_id;
       const prodId = item.product_id || item.id;
@@ -118,46 +95,46 @@ async function loadCart() {
       const price = Number(item.price) || 0;
       const linePrice = price * qty;
       const stock = Number(item.stock) || 99;
-      const selectedSize = item.size || 'Standard';
+      const selectedSize = item.size || 'Free Size';
       const colorway = item.color || item.colorway || 'Signature Tone';
-      const sku = item.sku || `ITEM: RJ-${String(prodId || index + 100).padStart(4, '0')}`;
+      const category = item.category || 'Luxury Couture';
 
       return `
-        <div class="cart-item-minimal-row" id="cart-row-${itemId}">
-          <!-- Large 3:4 Vertical Portrait Thumbnail -->
-          <div class="cart-item-thumb-wrapper">
-            <a href="/product.html?id=${prodId}" class="cart-thumb-anchor">
-              <img src="${item.image || '/images/placeholder.jpg'}" alt="${escapeHtml(item.name || 'Artisanal Garment')}" class="cart-thumb-img" loading="lazy">
+        <div class="cart-item-card" id="cart-row-${itemId}">
+          <!-- Tall 3:4 Portrait Thumbnail with Rounded Corners -->
+          <div class="cart-item-media">
+            <a href="/product.html?id=${prodId}" class="cart-item-thumb-link">
+              <img src="${item.image || '/images/placeholder.jpg'}" alt="${escapeHtml(item.name || 'Artisanal Garment')}" class="cart-item-thumb-img" loading="lazy">
             </a>
           </div>
 
-          <!-- Product Details & Controls -->
-          <div class="cart-item-content-wrapper">
-            <div class="cart-item-specs-header">
-              <span class="cart-item-sku">${escapeHtml(sku)}</span>
-              <h2 class="cart-item-headline">
+          <!-- Item Details -->
+          <div class="cart-item-info">
+            <div class="cart-item-top">
+              <div class="cart-item-cat-tag">${escapeHtml(category)}</div>
+              <h2 class="cart-item-name">
                 <a href="/product.html?id=${prodId}">${escapeHtml(item.name || 'Artisanal Ensemble')}</a>
               </h2>
-              <div class="cart-item-meta-details">
-                <span class="meta-color">Color: ${escapeHtml(colorway)}</span>
-                <span class="meta-sep">•</span>
-                <span class="meta-size">Size: ${escapeHtml(selectedSize)}</span>
+              <div class="cart-item-variant-pill">
+                <span>Color: <strong>${escapeHtml(colorway)}</strong></span>
+                <span class="variant-sep">•</span>
+                <span>Size: <strong>${escapeHtml(selectedSize)}</strong></span>
               </div>
             </div>
 
-            <!-- Bottom Row: Inline Minimal Stepper, Line Price, and Understated Remove Link -->
-            <div class="cart-item-bottom-bar">
-              <!-- Minimalist Text Stepper (No heavy button boxes) -->
-              <div class="qty-stepper-minimal">
-                <button type="button" class="qty-stepper-btn" onclick="changeCartQty('${itemId}', ${qty - 1})" aria-label="Decrease quantity">−</button>
-                <span class="qty-stepper-count">${qty}</span>
-                <button type="button" class="qty-stepper-btn" onclick="changeCartQty('${itemId}', ${qty + 1})" ${qty >= stock ? 'disabled' : ''} aria-label="Increase quantity">+</button>
+            <!-- Bottom Row: Stepper, Line Price, and Discreet Remove -->
+            <div class="cart-item-bottom">
+              <!-- Minimal Inline Stepper (- 1 +) -->
+              <div class="cart-stepper-box">
+                <button type="button" class="btn-step" onclick="changeCartQty('${itemId}', ${qty - 1})" aria-label="Decrease quantity">−</button>
+                <span class="step-count">${qty}</span>
+                <button type="button" class="btn-step" onclick="changeCartQty('${itemId}', ${qty + 1})" ${qty >= stock ? 'disabled' : ''} aria-label="Increase quantity">+</button>
               </div>
 
               <!-- Price & Remove -->
-              <div class="cart-item-pricing-action">
-                <span class="cart-item-line-price">${formatPriceSafe(linePrice)}</span>
-                <button type="button" class="btn-item-remove-link" onclick="animateAndRemoveCartItem('${itemId}')">Remove</button>
+              <div class="cart-price-remove-wrap">
+                <span class="cart-unit-price-bold">${formatPriceSafe(linePrice)}</span>
+                <button type="button" class="btn-cart-remove" onclick="animateAndRemoveCartItem('${itemId}')">Remove</button>
               </div>
             </div>
           </div>
@@ -165,7 +142,10 @@ async function loadCart() {
       `;
     }).join('');
 
-    // 3. Calculate Promo Discount
+    // 3. Calculate Shipping & Promo Code
+    const isComplimentary = subtotal >= 999;
+    const shippingFee = isComplimentary ? 0 : 49;
+
     let couponDiscountAmount = 0;
     if (appliedCartCoupon) {
       if (appliedCartCoupon.discount_type === 'percentage') {
@@ -178,11 +158,19 @@ async function loadCart() {
       }
     }
 
-    const finalTotal = Math.max(0, subtotal - couponDiscountAmount);
+    const finalTotal = Math.max(0, subtotal - couponDiscountAmount + shippingFee);
 
-    // Update Summary Displays
+    // Update Summary Card
     if (subtotalDisplay) subtotalDisplay.textContent = formatPriceSafe(subtotal);
     if (totalDisplay) totalDisplay.textContent = formatPriceSafe(finalTotal);
+
+    if (shippingDisplay) {
+      if (isComplimentary) {
+        shippingDisplay.innerHTML = `<span class="shipping-complimentary-tag">Complimentary</span>`;
+      } else {
+        shippingDisplay.textContent = formatPriceSafe(shippingFee);
+      }
+    }
 
     if (promoRow && promoVal) {
       if (couponDiscountAmount > 0) {
@@ -194,20 +182,19 @@ async function loadCart() {
       }
     }
 
-    // Applied Promo Tag
+    // Applied Coupon Tag
     if (appliedPillWrap) {
       if (appliedCartCoupon && couponDiscountAmount > 0) {
         appliedPillWrap.style.display = 'flex';
         appliedPillWrap.innerHTML = `
-          <span class="applied-code-badge">${escapeHtml(appliedCartCoupon.code)} Applied</span>
-          <button type="button" class="btn-clear-code" onclick="removeCartCoupon()" title="Remove promo code">✕</button>
+          <div class="applied-coupon-tag">
+            <span>🏷️ ${escapeHtml(appliedCartCoupon.code)} Applied (−${formatPriceSafe(couponDiscountAmount)})</span>
+            <button type="button" class="btn-tag-remove" onclick="removeCartCoupon()" title="Remove coupon">✕</button>
+          </div>
         `;
-        if (promoToggleWrap) promoToggleWrap.style.display = 'none';
-        if (promoForm) promoForm.style.display = 'none';
       } else {
         appliedPillWrap.style.display = 'none';
         appliedPillWrap.innerHTML = '';
-        if (promoToggleWrap) promoToggleWrap.style.display = 'block';
       }
     }
 
@@ -220,7 +207,7 @@ async function loadCart() {
   } catch (err) {
     console.error('Error loading cart:', err);
     if (container) {
-      container.innerHTML = `<p style="padding: 32px 0; color: #707070; text-align: center; font-size: 13px;">Unable to load items. <button onclick="loadCart()" style="background: none; border: none; text-decoration: underline; cursor: pointer; color: #0f0f0f; margin-left: 8px;">Retry</button></p>`;
+      container.innerHTML = `<p style="padding: 32px 0; color: #78716C; text-align: center; font-size: 13px;">Unable to load items. <button onclick="loadCart()" style="background: none; border: none; text-decoration: underline; cursor: pointer; color: #111111; margin-left: 8px;">Retry</button></p>`;
     }
   }
 }
@@ -258,14 +245,13 @@ async function changeCartQty(cartItemId, newQty) {
   if (typeof updateCartCount === 'function') updateCartCount();
 }
 
-// Micro-fade removal animation
 function animateAndRemoveCartItem(cartItemId) {
   const row = document.getElementById(`cart-row-${cartItemId}`);
   if (row) {
     row.classList.add('item-row-fade-out');
     setTimeout(async () => {
       await executeRemoveCartItem(cartItemId);
-    }, 320);
+    }, 280);
   } else {
     executeRemoveCartItem(cartItemId);
   }
@@ -292,7 +278,6 @@ async function executeRemoveCartItem(cartItemId) {
   if (typeof updateCartCount === 'function') updateCartCount();
 }
 
-// Keep removeCartItem pointing to animateAndRemoveCartItem for backwards compatibility
 const removeCartItem = animateAndRemoveCartItem;
 
 async function moveToWishlistFromCart(productId, cartItemId) {
@@ -316,7 +301,6 @@ async function moveToWishlistFromCart(productId, cartItemId) {
   if (typeof updateWishlistCount === 'function') updateWishlistCount();
 }
 
-// Minimal Collapsible Promo Code
 async function applyCartCoupon(e) {
   if (e && e.preventDefault) e.preventDefault();
   const input = document.getElementById('coupon-code-input');
@@ -387,11 +371,10 @@ async function applyCartCoupon(e) {
       localStorage.setItem('rjfc_cart_coupon', JSON.stringify(appliedCartCoupon));
     } catch (_) {}
     if (input) input.value = '';
-    toggleCartPromoField(false);
     await loadCart();
   } else {
     if (typeof showToast === 'function') {
-      showToast('Invalid promo code', 'error');
+      showToast('Invalid promo code or minimum order amount not met', 'error');
     }
   }
 }
@@ -427,6 +410,5 @@ window.moveToWishlistFromCart = moveToWishlistFromCart;
 window.applyCartCoupon = applyCartCoupon;
 window.removeCartCoupon = removeCartCoupon;
 window.handleCartProceedCheckout = handleCartProceedCheckout;
-window.toggleCartPromoField = toggleCartPromoField;
 
 document.addEventListener('DOMContentLoaded', loadCart);
