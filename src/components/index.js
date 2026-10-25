@@ -8,3 +8,5 @@ export * from './CartPage.jsx';
 export * from './Footer.jsx';
 export * from './Header.jsx';
 export * from './ProductCard.jsx';
+export * from './AIVirtualTryOnModal.jsx';
+export * from './VirtualTryOnButton.jsx';

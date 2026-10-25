@@ -8,3 +8,5 @@ export * from './CartPage';
 export * from './Footer';
 export * from './Header';
 export * from './ProductCard';
+export * from './AIVirtualTryOnModal';
+export * from './VirtualTryOnButton';

@@ -207,6 +207,9 @@ async function loadProductDetails() {
   }
 
   currentProduct = foundProduct;
+  window.currentProduct = foundProduct;
+  window.currentProductDetail = foundProduct;
+  window.lastLoadedProduct = foundProduct;
   selectedSize = foundProduct.available_sizes[0] || 'Free Size';
   selectedColor = foundProduct.available_colors[0] || '';
   currentQty = 1;
@@ -328,7 +331,15 @@ function renderProduct(p) {
 
           <!-- AI Virtual Try-On Studio Action Button -->
           <div style="margin-bottom: 12px;">
-            <button type="button" class="fk-cta-btn fk-btn-tryon" onclick="window.openRjTryonStudio && window.openRjTryonStudio(window.currentProductDetail)" title="Virtual Dressing Room">
+            <button type="button" 
+              id="btnOpenTryonStudio" 
+              class="fk-cta-btn fk-btn-tryon" 
+              role="button" 
+              tabindex="0" 
+              aria-haspopup="dialog"
+              aria-label="AI Virtual Dressing Room — Try On in Real-Time"
+              onclick="handleOpenTryonStudio(event)" 
+              title="Virtual Dressing Room">
               <span class="fk-cta-icon">✨</span>
               <span>AI VIRTUAL DRESSING ROOM — TRY ON IN REAL-TIME</span>
             </button>
@@ -1292,3 +1303,27 @@ async function loadRelatedProducts(categoryOrDept, currentId) {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', loadProductDetails);
+
+// Interactive AI Virtual Dressing Room Launcher
+function handleOpenTryonStudio(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const prod = currentProduct || window.currentProduct || window.currentProductDetail || window.lastLoadedProduct;
+  if (typeof window.openRjTryonStudio === 'function') {
+    window.openRjTryonStudio(prod);
+  } else {
+    const btn = document.getElementById('btnOpenTryonStudio');
+    if (btn) btn.classList.add('loading');
+    setTimeout(() => {
+      if (btn) btn.classList.remove('loading');
+      if (typeof window.openRjTryonStudio === 'function') {
+        window.openRjTryonStudio(prod);
+      } else {
+        alert('Opening Virtual Dressing Room...');
+      }
+    }, 150);
+  }
+}
+window.handleOpenTryonStudio = handleOpenTryonStudio;

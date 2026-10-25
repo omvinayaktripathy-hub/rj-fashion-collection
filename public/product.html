@@ -404,21 +404,52 @@
       box-shadow: 0 6px 20px rgba(255,159,0,0.35);
     }
     .fk-btn-tryon {
-      background: linear-gradient(135deg, #72132a 0%, #be123c 50%, #c59b27 100%);
+      background: linear-gradient(90deg, #78350f 0%, #4c0519 50%, #b45309 100%);
       color: #ffffff;
-      border: 1px solid rgba(197, 160, 89, 0.4);
+      border: 1px solid rgba(245, 158, 11, 0.4);
       grid-column: 1 / -1;
-      box-shadow: 0 4px 16px rgba(114, 19, 42, 0.25);
+      box-shadow: 0 4px 16px rgba(76, 5, 25, 0.35);
       font-weight: 700;
       letter-spacing: 0.5px;
       margin-bottom: 8px;
       cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fk-btn-tryon::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.75s ease;
+      pointer-events: none;
+    }
+    .fk-btn-tryon:hover::before {
+      left: 140%;
     }
     .fk-btn-tryon:hover {
-      background: linear-gradient(135deg, #881337 0%, #e11d48 50%, #d4af37 100%);
+      filter: brightness(1.12);
       transform: translateY(-2px);
-      box-shadow: 0 6px 22px rgba(190, 18, 60, 0.35);
+      box-shadow: 0 8px 24px rgba(76, 5, 25, 0.45);
+      border-color: rgba(245, 158, 11, 0.6);
     }
+    .fk-btn-tryon:active {
+      transform: scale(0.98);
+    }
+    .fk-btn-tryon .fk-cta-icon {
+      display: inline-block;
+      animation: rjSparkleBounce 2s infinite ease-in-out;
+    }
+    @keyframes rjSparkleBounce {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.22) rotate(12deg); }
+    }
+
     .fk-btn-buy {
       background: #fb641b;
       color: #ffffff;
