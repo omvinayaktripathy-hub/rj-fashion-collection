@@ -564,46 +564,229 @@
       </div>
     </section>
 
-    <!-- Shop by Department Section -->
-    <section class="section" style="padding-top: 24px; padding-bottom: 10px;">
-      <div class="section-header">
-        <h2 class="section-title">Shop by Department</h2>
-        <span style="font-size: 0.88rem; color: var(--muted);">Explore collections for the entire family</span>
+        <!-- Shop by Department Section -->
+    <section class="dept-section" id="shop-by-department" aria-labelledby="dept-heading">
+      <div class="dept-header">
+        <div class="dept-overline">
+          <span style="font-size: 11px;">✨</span>
+          <span>CURATED FOR EVERYONE</span>
+        </div>
+        <h2 class="dept-headline" id="dept-heading">SHOP BY DEPARTMENT</h2>
+        <p class="dept-subtitle">Discover boutique collections meticulously curated across high-fashion apparel, heirloom accessories, and elevated everyday essentials.</p>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-        <!-- Women Card -->
-        <a href="/shop.html?department=women" style="display: block; border-radius: 12px; overflow: hidden; position: relative; height: 260px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-decoration: none;">
-          <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=700&q=80" alt="Women's Collection" style="width: 100%; height: 100%; object-fit: cover;">
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; color: #fff;">
-            <span style="background: var(--primary); color: #fff; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; align-self: flex-start; text-transform: uppercase; margin-bottom: 8px;">Women's Store</span>
-            <h3 style="font-family: var(--font-serif); font-size: 1.45rem; font-weight: 700; margin: 0 0 4px 0; color: #fff;">Women's Fashion</h3>
-            <p style="font-size: 0.82rem; color: #e2e8f0; margin: 0 0 10px 0;">Sarees, Lehengas, Kurtis, Western & Party Dresses</p>
-            <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.82rem; color: var(--gold);">EXPLORE WOMEN →</span>
+      <!-- Snap Carousel on Mobile (<768px), 3-Column Grid on Tablet/Desktop -->
+      <div class="dept-carousel-wrap" id="dept-carousel">
+        <!-- 1. Women's Fashion -->
+        <a href="/shop.html?category=sarees" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80" alt="Women's Fashion" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Signature Couture</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'womens-fashion')" aria-label="Save Women's Fashion to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Women's Fashion</h3>
+            <p class="dept-card-sub">Sarees, Lehengas, Kurtis &amp; Designer Wear</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE WOMEN</span>
+              <span class="cta-arrow">→</span>
+            </div>
           </div>
         </a>
 
-        <!-- Men Card -->
-        <a href="/shop.html?department=men" style="display: block; border-radius: 12px; overflow: hidden; position: relative; height: 260px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-decoration: none;">
-          <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=700&q=80" alt="Men's Collection" style="width: 100%; height: 100%; object-fit: cover;">
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; color: #fff;">
-            <span style="background: #0284c7; color: #fff; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; align-self: flex-start; text-transform: uppercase; margin-bottom: 8px;">Men's Store</span>
-            <h3 style="font-family: var(--font-serif); font-size: 1.45rem; font-weight: 700; margin: 0 0 4px 0; color: #fff;">Men's Fashion</h3>
-            <p style="font-size: 0.82rem; color: #e2e8f0; margin: 0 0 10px 0;">Kurta Pyjamas, Sherwanis, Blazers & Mojaris</p>
-            <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.82rem; color: var(--gold);">EXPLORE MEN →</span>
+        <!-- 2. Men's Fashion -->
+        <a href="/shop.html?category=mens-fashion" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80" alt="Men's Fashion" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Bespoke Men</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'mens-fashion')" aria-label="Save Men's Fashion to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Men's Fashion</h3>
+            <p class="dept-card-sub">Suits, Sherwanis, Kurta Sets &amp; Formals</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE MEN</span>
+              <span class="cta-arrow">→</span>
+            </div>
           </div>
         </a>
 
-        <!-- Kids Card -->
-        <a href="/shop.html?department=kids" style="display: block; border-radius: 12px; overflow: hidden; position: relative; height: 260px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-decoration: none;">
-          <img src="https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=700&q=80" alt="Kids Collection" style="width: 100%; height: 100%; object-fit: cover;">
-          <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; color: #fff;">
-            <span style="background: #10b981; color: #fff; font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; align-self: flex-start; text-transform: uppercase; margin-bottom: 8px;">Kids Store</span>
-            <h3 style="font-family: var(--font-serif); font-size: 1.45rem; font-weight: 700; margin: 0 0 4px 0; color: #fff;">Kids & Children</h3>
-            <p style="font-size: 0.82rem; color: #e2e8f0; margin: 0 0 10px 0;">Boys Ethnic, Girls Lehengas, Rompers & Juttis</p>
-            <span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.82rem; color: var(--gold);">EXPLORE KIDS →</span>
+        <!-- 3. Kids & Children -->
+        <a href="/shop.html?category=kids-fashion" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80" alt="Kids & Children" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Little Royals</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'kids-children')" aria-label="Save Kids & Children to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Kids &amp; Children</h3>
+            <p class="dept-card-sub">Festive Embroidered &amp; Comfortable Sets</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE KIDS</span>
+              <span class="cta-arrow">→</span>
+            </div>
           </div>
         </a>
+
+        <!-- 4. Bags & Wallets -->
+        <a href="/shop.html?category=bags" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80" alt="Bags & Wallets" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Artisan Leather</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'bags-wallets')" aria-label="Save Bags & Wallets to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Bags &amp; Wallets</h3>
+            <p class="dept-card-sub">Artisan Clutches, Handbags &amp; Leather Wallets</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE BAGS</span>
+              <span class="cta-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 5. Sunglasses & Eyewear -->
+        <a href="/shop.html?category=eyewear" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80" alt="Sunglasses & Eyewear" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">New Season</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'sunglasses-eyewear')" aria-label="Save Sunglasses & Eyewear to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Sunglasses &amp; Eyewear</h3>
+            <p class="dept-card-sub">Luxury Acetate Frames &amp; UV Protection Shades</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE EYEWEAR</span>
+              <span class="cta-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 6. Fashion Jewelry -->
+        <a href="/shop.html?category=jewelry" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80" alt="Fashion Jewelry" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Trending Jewels</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'fashion-jewelry')" aria-label="Save Fashion Jewelry to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Fashion Jewelry</h3>
+            <p class="dept-card-sub">Kundan, Antique Finish &amp; Statement Chokers</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE JEWELRY</span>
+              <span class="cta-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 7. Curated Gifts & Hampers -->
+        <a href="/shop.html?category=gifts" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80" alt="Curated Gifts & Hampers" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Gift Ready</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'curated-gifts')" aria-label="Save Curated Gifts to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Curated Gifts &amp; Hampers</h3>
+            <p class="dept-card-sub">Luxury Festive Boxes &amp; Keepsake Packs</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE GIFTS</span>
+              <span class="cta-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 8. Men's Innerwear & Loungewear -->
+        <a href="/shop.html?category=mens-loungewear" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80" alt="Men's Innerwear & Loungewear" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Ultra Comfort</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'mens-innerwear')" aria-label="Save Men's Innerwear to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Men's Innerwear &amp; Loungewear</h3>
+            <p class="dept-card-sub">Premium Modal Cotton Basics, Trunks &amp; Robes</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE INNERWEAR</span>
+              <span class="cta-arrow">→</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- 9. Women's & Girls' Lingerie & Sleepwear -->
+        <a href="/shop.html?category=lingerie" class="dept-card">
+          <div class="dept-card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80" alt="Women's & Girls' Lingerie & Sleepwear" class="dept-card-img" loading="lazy">
+          </div>
+          <div class="dept-card-overlay"></div>
+          <div class="dept-card-top">
+            <span class="dept-card-tag">Delicate Luxuries</span>
+            <button type="button" class="dept-wishlist-btn" onclick="toggleDeptWishlist(event, this, 'womens-lingerie')" aria-label="Save Lingerie & Sleepwear to Wishlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            </button>
+          </div>
+          <div class="dept-card-content">
+            <h3 class="dept-card-title">Women's &amp; Girls' Lingerie &amp; Sleepwear</h3>
+            <p class="dept-card-sub">Satin Sleepwear, Everyday Bras &amp; Intimate Sets</p>
+            <div class="dept-card-cta">
+              <span>EXPLORE LINGERIE</span>
+              <span class="cta-arrow">→</span>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Mobile Indicators -->
+      <div class="dept-indicators" id="dept-indicators">
+        <button type="button" class="dept-dot is-active" onclick="scrollDeptCarousel(0)" aria-label="Slide 1"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(1)" aria-label="Slide 2"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(2)" aria-label="Slide 3"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(3)" aria-label="Slide 4"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(4)" aria-label="Slide 5"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(5)" aria-label="Slide 6"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(6)" aria-label="Slide 7"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(7)" aria-label="Slide 8"></button>
+        <button type="button" class="dept-dot" onclick="scrollDeptCarousel(8)" aria-label="Slide 9"></button>
       </div>
     </section>
 

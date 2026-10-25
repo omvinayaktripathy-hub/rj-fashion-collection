@@ -137,4 +137,61 @@
   } else {
     initLuxuryHeroMesh();
   }
+
+    // Luxury Shop by Department carousel & wishlist engine
+    (function initDeptCarousel() {
+      const carousel = document.getElementById('dept-carousel');
+      const dots = document.querySelectorAll('.dept-dot');
+      if (!carousel) return;
+
+      carousel.addEventListener('scroll', function () {
+        const card = carousel.querySelector('.dept-card');
+        if (!card || !dots.length) return;
+        const cardWidth = card.offsetWidth;
+        const index = Math.round(carousel.scrollLeft / (cardWidth + 16));
+        const clamped = Math.max(0, Math.min(dots.length - 1, index));
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('is-active', idx === clamped);
+        });
+      }, { passive: true });
+
+      window.scrollDeptCarousel = function (index) {
+        const cards = carousel.querySelectorAll('.dept-card');
+        if (cards[index]) {
+          cards[index].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          dots.forEach((dot, idx) => {
+            dot.classList.toggle('is-active', idx === index);
+          });
+        }
+      };
+
+      window.toggleDeptWishlist = function (e, btn, deptId) {
+        e.preventDefault();
+        e.stopPropagation();
+        btn.classList.toggle('is-active');
+        const isActive = btn.classList.contains('is-active');
+        const svg = btn.querySelector('svg');
+        if (svg) {
+          svg.setAttribute('fill', isActive ? '#ef4444' : 'none');
+        }
+        try {
+          const saved = JSON.parse(localStorage.getItem('rj_dept_wishlist') || '[]');
+          const updated = isActive ? [...new Set([...saved, deptId])] : saved.filter(id => id !== deptId);
+          localStorage.setItem('rj_dept_wishlist', JSON.stringify(updated));
+        } catch (err) {}
+      };
+
+      try {
+        const saved = JSON.parse(localStorage.getItem('rj_dept_wishlist') || '[]');
+        saved.forEach(deptId => {
+          const btn = document.querySelector(`[onclick*="${deptId}"]`);
+          if (btn) {
+            btn.classList.add('is-active');
+            const svg = btn.querySelector('svg');
+            if (svg) svg.setAttribute('fill', '#ef4444');
+          }
+        });
+      } catch (err) {}
+    })();
+
 })();
