@@ -2,12 +2,73 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 
 /**
- * LuxuryHero Component for RJ Fashion Collection
- * Inspired by ultra-luxury Indian couture (Sabyasachi, Manish Malhotra, Raw Mango)
- * 
- * Tech Stack: React, Tailwind CSS, Framer Motion
+ * Figma MCP Design Tokens & Theme Palettes
  */
-export default function LuxuryHero({
+export const LUXURY_DESIGN_TOKENS = {
+  colors: {
+    midnightCanvas: '#070D1E', // Deep Midnight Royal Blue
+    midnightSurface: '#0B1528', // Elevated Midnight Navy Surface
+    midnightDock: '#060B18', // Docked Footer & Bottom Bar
+    royalNavy: '#0A1128', // Deep Royal Blue Ambient
+    goldMetallic: {
+      primary: '#D4AF37',
+      light: '#DFBF58',
+      dark: '#B38728',
+      champagne: '#F3E7C4',
+      eyebrowText: '#E8C568',
+      glow: 'rgba(212, 175, 55, 0.18)',
+    },
+    crimsonBacking: '#3B0811',
+    text: {
+      display: '#FFFFFF',
+      subtext: '#CBD5E1', // slate-300
+      muted: '#94A3B8', // slate-400
+    },
+  },
+  typography: {
+    displaySans: "system-ui, -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', sans-serif",
+    editorialSerif: "'Playfair Display', 'Cormorant Garamond', Georgia, serif",
+  },
+};
+
+/**
+ * Embedded shadcn/ui Badge Variant (Luxury Royal Pill)
+ */
+export const LuxuryBadge = ({ className = '', children, ...props }) => (
+  <div
+    className={`border border-[#D4AF37]/40 bg-[#0B1528]/80 text-[#E8C568] px-4 py-1.5 text-[11px] font-medium tracking-[0.25em] uppercase rounded-full backdrop-blur-md inline-flex items-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.15)] ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
+);
+
+/**
+ * Embedded shadcn/ui Button Variants
+ */
+export const LuxuryPrimaryButton = ({ className = '', children, ...props }) => (
+  <a
+    className={`inline-flex items-center justify-center bg-gradient-to-r from-[#D4AF37] via-[#DFBF58] to-[#B38728] text-[#0A1128] font-semibold text-xs tracking-widest px-8 py-4 sm:py-6 rounded-full shadow-lg shadow-[#D4AF37]/20 hover:brightness-110 active:scale-95 transition-all duration-300 ${className}`}
+    {...props}
+  >
+    {children}
+  </a>
+);
+
+export const LuxurySecondaryButton = ({ className = '', children, ...props }) => (
+  <a
+    className={`inline-flex items-center justify-center border border-[#D4AF37]/40 bg-white/5 hover:bg-white/10 text-white font-medium text-xs tracking-widest px-8 py-4 sm:py-6 rounded-full backdrop-blur-sm active:scale-95 transition-all duration-300 ${className}`}
+    {...props}
+  >
+    {children}
+  </a>
+);
+
+/**
+ * Production-Ready LuxuryHero Component for RJ Fashion Collection (JSX)
+ * Architecture: shadcn/ui primitives + 21st.dev luxury design patterns + Figma MCP design tokens
+ */
+export const LuxuryHero = ({
   brandName = "RJ FASHION COLLECTION",
   headlineLine1 = "ROYAL WEAVES,",
   headlineLine2 = "Timeless Grace.",
@@ -17,26 +78,25 @@ export default function LuxuryHero({
   primaryCtaLink = "/shop.html",
   secondaryCtaLink = "/shop.html?newArrival=true",
   modelImage = "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1200&q=85",
-  kundanThumb = "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80",
-}) {
-  const canvasRef = useRef(null);
+  vaultThumb = "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80",
+}) => {
   const containerRef = useRef(null);
+  const canvasRef = useRef(null);
 
   // 1. Mouse Parallax Motion Values
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const springConfig = { damping: 25, stiffness: 120 };
+  const springConfig = { damping: 26, stiffness: 120 };
   const smoothMouseX = useSpring(mouseX, springConfig);
   const smoothMouseY = useSpring(mouseY, springConfig);
 
-  // 3D Tilt and Parallax Shifts
-  const modelRotateX = useTransform(smoothMouseY, [-300, 300], [5, -5]);
-  const modelRotateY = useTransform(smoothMouseX, [-300, 300], [-5, 5]);
-  const badge1X = useTransform(smoothMouseX, [-300, 300], [-14, 14]);
-  const badge1Y = useTransform(smoothMouseY, [-300, 300], [-10, 10]);
-  const badge2X = useTransform(smoothMouseX, [-300, 300], [16, -16]);
-  const badge2Y = useTransform(smoothMouseY, [-300, 300], [14, -14]);
+  const modelRotateX = useTransform(smoothMouseY, [-300, 300], [4, -4]);
+  const modelRotateY = useTransform(smoothMouseX, [-300, 300], [-4, 4]);
+  const badge1X = useTransform(smoothMouseX, [-300, 300], [-12, 12]);
+  const badge1Y = useTransform(smoothMouseY, [-300, 300], [-8, 8]);
+  const badge2X = useTransform(smoothMouseX, [-300, 300], [14, -14]);
+  const badge2Y = useTransform(smoothMouseY, [-300, 300], [10, -10]);
 
   const handleMouseMove = (e) => {
     if (!containerRef.current) return;
@@ -52,11 +112,13 @@ export default function LuxuryHero({
     mouseY.set(0);
   };
 
-  // 2. Interactive Fluid Ambient Wave Canvas Background
+  // 2. Interactive Ambient Canvas Wave Ribbon (Midnight Royal Blue Canvas)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     let animationFrameId;
     let width = (canvas.width = canvas.offsetWidth);
     let height = (canvas.height = canvas.offsetHeight);
@@ -73,34 +135,22 @@ export default function LuxuryHero({
       step += 0.005;
       ctx.clearRect(0, 0, width, height);
 
-      // Deep dark royal obsidian background
+      // Deep Midnight Royal Blue luxury background
       const baseGrad = ctx.createLinearGradient(0, 0, width, height);
-      baseGrad.addColorStop(0, '#0C0A09');
-      baseGrad.addColorStop(0.5, '#16120E');
-      baseGrad.addColorStop(1, '#0C0A09');
+      baseGrad.addColorStop(0, '#070D1E');
+      baseGrad.addColorStop(0.5, '#0A1128');
+      baseGrad.addColorStop(1, '#060B18');
       ctx.fillStyle = baseGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // Ambient Glowing Fluid Orbs (Champagne & Golden Brass Pulses)
-      const orb1X = width * 0.72 + Math.sin(step) * 50;
-      const orb1Y = height * 0.40 + Math.cos(step * 0.8) * 40;
-      const grad1 = ctx.createRadialGradient(orb1X, orb1Y, 10, orb1X, orb1Y, Math.min(width * 0.45, 420));
-      grad1.addColorStop(0, 'rgba(212, 175, 55, 0.20)');
-      grad1.addColorStop(0.5, 'rgba(180, 83, 9, 0.10)');
-      grad1.addColorStop(1, 'rgba(12, 10, 9, 0)');
-      ctx.fillStyle = grad1;
+      // Ambient Metallic Gold & Champagne Fluid Wave Ribbons
       ctx.beginPath();
-      ctx.arc(orb1X, orb1Y, Math.min(width * 0.45, 420), 0, Math.PI * 2);
-      ctx.fill();
-
-      // Fluid Wave Ribbons
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.58);
+      ctx.moveTo(0, height * 0.55);
       for (let x = 0; x <= width; x += 25) {
-        const y = height * 0.58 + Math.sin(x * 0.0028 + step) * 26 + Math.cos(x * 0.0055 + step * 1.1) * 14;
+        const y = height * 0.55 + Math.sin(x * 0.0028 + step) * 24 + Math.cos(x * 0.0055 + step * 1.1) * 12;
         ctx.lineTo(x, y);
       }
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.08)';
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.07)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
@@ -114,7 +164,7 @@ export default function LuxuryHero({
     };
   }, []);
 
-  // 3. Button Click Ripple Effect
+  // 3. Button Click Wave Physics Ripple
   const [ripples, setRipples] = useState([]);
   const createRipple = (e) => {
     const button = e.currentTarget;
@@ -129,7 +179,7 @@ export default function LuxuryHero({
     }, 600);
   };
 
-  // 4. Staggered Text Reveal Animations
+  // 4. Staggered Text Animations
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -139,7 +189,7 @@ export default function LuxuryHero({
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 18 },
     visible: {
       opacity: 1,
       y: 0,
@@ -152,103 +202,98 @@ export default function LuxuryHero({
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative w-full min-h-[85vh] lg:min-h-[680px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#0C0A09] via-[#16120E] to-[#0C0A09] text-white selection:bg-[#d4af37] selection:text-black border border-amber-500/20 rounded-2xl shadow-2xl"
+      className="relative w-full min-h-[85vh] h-[calc(100vh-80px)] max-h-[850px] flex flex-col justify-between overflow-hidden bg-[#070D1E] text-white selection:bg-[#D4AF37] selection:text-[#0A1128] border border-[#D4AF37]/30 rounded-2xl shadow-2xl"
     >
-      {/* Background Interactive Canvas Mesh */}
+      {/* Background Interactive Ambient Canvas */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none z-0"
       />
 
-      {/* Warm Amber Halo Backlight */}
-      <div className="absolute top-1/4 right-[15%] w-96 h-96 bg-amber-600/15 rounded-full blur-3xl pointer-events-none z-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0)_0%,rgba(12,10,9,0.75)_100%)] pointer-events-none z-0" />
+      {/* 21st.dev Radial Ambient Lighting with Metallic Gold Highlights */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background: 'radial-gradient(ellipse at 75% 50%, rgba(212,175,55,0.18), transparent 70%)',
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/10 via-transparent to-transparent pointer-events-none z-0" />
 
-      {/* Main Content Grid (Split 2-Column Responsive Layout) */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center flex-1">
+      {/* Main Inner Wrapper: 7 / 5 Column Responsive Grid */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center w-full flex-1">
         
-        {/* ================= LEFT COLUMN: Editorial Typography & CTAs ================= */}
+        {/* ================= LEFT COLUMN: Editorial Typography & Actions (7 Cols) ================= */}
         <motion.div
-          className="lg:col-span-7 flex flex-col items-start text-left space-y-5"
+          className="lg:col-span-7 flex flex-col items-start text-left"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {/* Eyebrow Pill Tag with Gold Hairline Border */}
-          <motion.div
-            variants={itemVariants}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-[#D4AF37]/45 backdrop-blur-md shadow-[0_0_15px_rgba(212,175,55,0.15)]"
-          >
-            <span className="text-[#D4AF37] text-xs">✦</span>
-            <span className="text-xs font-bold tracking-[0.25em] text-[#D4AF37] uppercase">
-              ✦ {brandName}
-            </span>
+          {/* Eyebrow Badge (shadcn/ui Badge Variant) */}
+          <motion.div variants={itemVariants} className="mb-4">
+            <LuxuryBadge>
+              <span className="text-[#D4AF37] text-xs">✦</span>
+              <span>{brandName}</span>
+            </LuxuryBadge>
           </motion.div>
 
-          {/* Grand Headline (2-Line Composition) */}
+          {/* Main Display Heading */}
           <motion.h1
             variants={itemVariants}
-            className="flex flex-col tracking-tight leading-[1.08] m-0"
+            className="flex flex-col tracking-tight leading-[1.08] m-0 mb-3"
           >
-            <span className="font-sans font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white tracking-wide uppercase drop-shadow-md">
+            <span className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white uppercase drop-shadow-md">
               {headlineLine1}
             </span>
-            <span className="font-serif italic font-medium text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-[#FBF8F3] drop-shadow-[0_2px_20px_rgba(212,175,55,0.25)]">
+            <span className="text-4xl sm:text-5xl lg:text-6xl text-[#F3E7C4] italic font-normal drop-shadow-[0_2px_20px_rgba(212,175,55,0.25)] font-serif">
               {headlineLine2}
             </span>
           </motion.h1>
 
-          {/* Curated Subtext */}
+          {/* Supporting Description */}
           <motion.p
             variants={itemVariants}
-            className="text-neutral-400 text-sm md:text-base max-w-lg leading-relaxed mt-2 mb-6 font-normal"
+            className="text-slate-300 text-sm sm:text-base max-w-lg leading-relaxed mt-4 mb-8 font-normal"
           >
             {subtext}
           </motion.p>
 
-          {/* Dual Luxury Action CTAs */}
+          {/* Dual CTAs (shadcn/ui Button Primitives) */}
           <motion.div
             variants={itemVariants}
-            className="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto"
+            className="flex flex-wrap items-center gap-4 pt-1 w-full sm:w-auto"
           >
-            {/* Primary CTA with Metallic Gold Gradient */}
-            <a
-              href={primaryCtaLink}
-              onClick={createRipple}
-              className="relative overflow-hidden inline-flex items-center justify-center px-8 py-4 rounded-full text-xs font-semibold tracking-wider text-black bg-gradient-to-r from-[#D4AF37] to-[#AA7C11] shadow-lg shadow-amber-900/30 hover:scale-105 active:scale-95 transition-all duration-300"
-            >
-              <span className="relative z-10">{primaryCtaText}</span>
-              {ripples.map((ripple) => (
-                <span
-                  key={ripple.id}
-                  style={{
-                    top: ripple.y,
-                    left: ripple.x,
-                    width: ripple.size,
-                    height: ripple.size,
-                  }}
-                  className="absolute rounded-full bg-white/40 pointer-events-none animate-ping opacity-60"
-                />
-              ))}
-            </a>
+            <div className="relative">
+              <LuxuryPrimaryButton href={primaryCtaLink} onClick={createRipple}>
+                <span className="relative z-10">{primaryCtaText}</span>
+                {ripples.map((ripple) => (
+                  <span
+                    key={ripple.id}
+                    style={{
+                      top: ripple.y,
+                      left: ripple.x,
+                      width: ripple.size,
+                      height: ripple.size,
+                    }}
+                    className="absolute rounded-full bg-white/40 pointer-events-none animate-ping opacity-60"
+                  />
+                ))}
+              </LuxuryPrimaryButton>
+            </div>
 
-            {/* Secondary Translucent Glass CTA */}
-            <a
-              href={secondaryCtaLink}
-              className="inline-flex items-center justify-center px-8 py-4 rounded-full text-xs font-medium tracking-wider text-[#FBF8F3] border border-[#D4AF37]/40 hover:bg-white/5 backdrop-blur-md transition-all duration-300 hover:border-[#D4AF37]"
-            >
+            <LuxurySecondaryButton href={secondaryCtaLink}>
               {secondaryCtaText}
-            </a>
+            </LuxurySecondaryButton>
           </motion.div>
         </motion.div>
 
-        {/* ================= RIGHT COLUMN: Architectural Couture Showcase ================= */}
-        <div className="lg:col-span-5 relative flex items-center justify-center pt-6 lg:pt-0">
+        {/* ================= RIGHT COLUMN: The Architectural Arch (5 Cols) ================= */}
+        <div className="lg:col-span-5 relative flex items-center justify-center">
           
-          {/* Ambient Golden Halo Backlight */}
-          <div className="absolute -inset-6 bg-gradient-to-tr from-[#D4AF37]/25 via-amber-600/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+          {/* Ambient Golden Radial Halo */}
+          <div className="absolute -inset-8 bg-gradient-to-tr from-[#D4AF37]/25 via-[#DFBF58]/15 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-          {/* Grand Royal Temple Arch Container */}
+          {/* Symmetrical Temple Arch Shape Container */}
           <motion.div
             style={{
               rotateX: modelRotateX,
@@ -263,31 +308,31 @@ export default function LuxuryHero({
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="relative w-full max-w-[340px] sm:max-w-[380px] lg:max-w-[420px] aspect-[3/4] rounded-t-[160px] rounded-b-2xl overflow-visible border border-amber-500/25 shadow-[0_20px_50px_rgba(0,0,0,0.85)] group"
+            className="relative w-full aspect-[3/4] max-w-[380px] mx-auto rounded-t-[180px] rounded-b-2xl overflow-visible border border-[#D4AF37]/30 shadow-2xl shadow-black/60 group"
           >
-            {/* Inner Arched Mask with Deep Red Crimson Backing */}
-            <div className="w-full h-full rounded-t-[160px] rounded-b-2xl overflow-hidden bg-[#3B0811] relative">
+            {/* Deep Crimson/Ruby Inner Photo Mask */}
+            <div className="w-full h-full rounded-t-[180px] rounded-b-2xl overflow-hidden bg-[#3B0811] relative">
               <img
                 src={modelImage}
-                alt="RJ Fashion Collection Haute Couture Model in Banarasi Zari Saree"
+                alt="RJ Fashion Collection Model in Zari Banarasi/Kanjivaram Saree"
                 className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700 ease-out"
                 loading="eager"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0C0A09]/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#060B18]/85 via-transparent to-transparent pointer-events-none" />
             </div>
 
-            {/* Floating Micro-Badge #1: The Signature Vault (Top Right) */}
+            {/* 21st.dev Glassmorphic Floating Micro-Card Top-Right */}
             <motion.div
               style={{ x: badge1X, y: badge1Y }}
-              className="absolute -top-4 -right-4 sm:-right-6 flex items-center gap-3 p-2.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 shadow-xl cursor-pointer hover:border-[#D4AF37]/60 transition-colors"
+              className="absolute -top-3 -right-3 sm:-right-5 bg-[#0B1528]/80 border border-white/15 backdrop-blur-md rounded-xl p-3 shadow-xl flex items-center gap-3 cursor-pointer hover:border-[#D4AF37]/60 transition-colors"
             >
               <img
-                src={kundanThumb}
+                src={vaultThumb}
                 alt="The Signature Vault - Fine Artisanal Accents"
                 className="w-10 h-10 rounded-lg object-cover border border-[#D4AF37]/40"
               />
               <div className="pr-1">
-                <p className="text-xs font-bold text-[#FBF8F3] leading-tight m-0">
+                <p className="text-xs font-bold text-white leading-tight m-0">
                   The Signature Vault
                 </p>
                 <p className="text-[10px] font-semibold text-[#D4AF37] tracking-wider uppercase mt-0.5 mb-0">
@@ -296,19 +341,19 @@ export default function LuxuryHero({
               </div>
             </motion.div>
 
-            {/* Floating Micro-Badge #2: 100% Certified Authentic (Bottom Left) */}
+            {/* 21st.dev Glassmorphic Floating Micro-Card Bottom-Left */}
             <motion.div
               style={{ x: badge2X, y: badge2Y }}
-              className="absolute -bottom-5 -left-4 sm:-left-6 flex items-center gap-3 p-2.5 px-3.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 shadow-xl hover:border-[#D4AF37]/60 transition-colors"
+              className="absolute -bottom-4 -left-3 sm:-left-5 bg-[#0B1528]/80 border border-white/15 backdrop-blur-md rounded-xl p-3 shadow-xl flex items-center gap-3 hover:border-[#D4AF37]/60 transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#8C7326] flex items-center justify-center text-black font-extrabold text-xs shadow-inner">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#D4AF37] to-[#8C7326] flex items-center justify-center text-[#0A1128] font-extrabold text-xs shadow-inner">
                 ✦
               </div>
               <div>
-                <p className="text-xs font-bold text-[#FBF8F3] leading-tight m-0">
+                <p className="text-xs font-bold text-white leading-tight m-0">
                   100% Certified Authentic
                 </p>
-                <p className="text-[10px] font-medium text-[#C5A880] tracking-wide mt-0.5 mb-0">
+                <p className="text-[10px] font-medium text-slate-300 tracking-wide mt-0.5 mb-0">
                   Artisanal Couture & Fine Finishing
                 </p>
               </div>
@@ -318,47 +363,63 @@ export default function LuxuryHero({
 
       </div>
 
-      {/* ================= INTEGRATED VALUE PROPOSITION BAR ================= */}
-      <div className="relative z-10 w-full bg-white/[0.03] backdrop-blur-md border-t border-white/10 py-5 px-6 lg:px-12 mt-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+      {/* ================= INTEGRATED VALUE STRIP (BOTTOM DOCK) ================= */}
+      <div className="relative z-10 bg-[#060B18]/90 backdrop-blur-md border-t border-white/10 py-5 w-full">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
           
+          {/* Card 1: 100% Certified Authentic */}
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/25 flex items-center justify-center text-[#D4AF37] shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide m-0">100% Certified Authentic</h4>
-              <p className="text-[11px] text-[#C5A880] font-normal m-0 mt-0.5">Pure Kanjivaram Silks & Royal Kundan</p>
+              <p className="text-xs text-slate-400 font-normal m-0 mt-0.5">Pure Kanjivaram Silks & Royal Kundan</p>
             </div>
           </div>
 
+          {/* Card 2: Complimentary Shipping */}
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/25 flex items-center justify-center text-[#D4AF37] shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="3" width="15" height="13" />
+                <polygon points="16 8 20 8 23 11 23 16 16 8" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+              </svg>
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide m-0">Complimentary Shipping</h4>
-              <p className="text-[11px] text-[#C5A880] font-normal m-0 mt-0.5">Pan-India express delivery on orders above ₹999</p>
+              <p className="text-xs text-slate-400 font-normal m-0 mt-0.5">Pan-India express delivery on orders above ₹999</p>
             </div>
           </div>
 
+          {/* Card 3: Secure Checkout */}
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/25 flex items-center justify-center text-[#D4AF37] shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide m-0">Secure Checkout</h4>
-              <p className="text-[11px] text-[#C5A880] font-normal m-0 mt-0.5">Direct UPI, Net Banking, Cards & Gateway</p>
+              <p className="text-xs text-slate-400 font-normal m-0 mt-0.5">Direct UPI, Net Banking, Cards & Verified Gateway</p>
             </div>
           </div>
 
+          {/* Card 4: Boutique Concierge */}
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/10 border border-[#D4AF37]/25 flex items-center justify-center text-[#D4AF37] shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
             </div>
             <div>
               <h4 className="text-xs font-bold text-white tracking-wide m-0">Boutique Concierge</h4>
-              <p className="text-[11px] text-[#C5A880] font-normal m-0 mt-0.5">Personal styling assistance via WhatsApp</p>
+              <p className="text-xs text-slate-400 font-normal m-0 mt-0.5">Personal styling & order assistance via WhatsApp</p>
             </div>
           </div>
 
@@ -366,4 +427,6 @@ export default function LuxuryHero({
       </div>
     </section>
   );
-}
+};
+
+export default LuxuryHero;

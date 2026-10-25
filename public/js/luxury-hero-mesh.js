@@ -30,9 +30,9 @@
 
       // Deep dark luxury background
       const baseGrad = ctx.createLinearGradient(0, 0, width, height);
-      baseGrad.addColorStop(0, '#0A0A0C');
-      baseGrad.addColorStop(0.5, '#0E0E12');
-      baseGrad.addColorStop(1, '#070709');
+      baseGrad.addColorStop(0, '#070D1E');
+      baseGrad.addColorStop(0.5, '#0A1128');
+      baseGrad.addColorStop(1, '#060B18');
       ctx.fillStyle = baseGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -42,7 +42,7 @@
       const grad1 = ctx.createRadialGradient(orb1X, orb1Y, 10, orb1X, orb1Y, Math.min(width * 0.45, 420));
       grad1.addColorStop(0, 'rgba(212, 175, 55, 0.22)');
       grad1.addColorStop(0.5, 'rgba(197, 168, 128, 0.08)');
-      grad1.addColorStop(1, 'rgba(10, 10, 12, 0)');
+      grad1.addColorStop(1, 'rgba(6, 11, 24, 0)');
       ctx.fillStyle = grad1;
       ctx.beginPath();
       ctx.arc(orb1X, orb1Y, Math.min(width * 0.45, 420), 0, Math.PI * 2);
@@ -53,7 +53,7 @@
       const grad2 = ctx.createRadialGradient(orb2X, orb2Y, 10, orb2X, orb2Y, Math.min(width * 0.4, 360));
       grad2.addColorStop(0, 'rgba(189, 164, 119, 0.12)');
       grad2.addColorStop(0.6, 'rgba(112, 0, 55, 0.06)');
-      grad2.addColorStop(1, 'rgba(10, 10, 12, 0)');
+      grad2.addColorStop(1, 'rgba(6, 11, 24, 0)');
       ctx.fillStyle = grad2;
       ctx.beginPath();
       ctx.arc(orb2X, orb2Y, Math.min(width * 0.4, 360), 0, Math.PI * 2);
