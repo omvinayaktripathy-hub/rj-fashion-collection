@@ -256,9 +256,6 @@ const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).r
       </div>
 
       <div class="rj-drawer-footer">
-        <div class="rj-drawer-theme-toggle" role="button" tabindex="0" onclick="if(window.toggleLuxuryStyle) window.toggleLuxuryStyle();" style="margin-bottom: 8px;">
-          <span id="rj-mobile-style-text">✦ Style: Editorial Impact</span>
-        </div>
         <div class="rj-drawer-theme-toggle" role="button" tabindex="0" onclick="if(window.toggleTheme) window.toggleTheme();">
           <span>◐ Switch Dark / Light Theme</span>
         </div>

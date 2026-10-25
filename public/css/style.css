@@ -6325,3 +6325,208 @@ body.style-editorial-impact {
   background: linear-gradient(90deg, #d4af37, #bf953f);
   box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
 }
+
+
+/* =========================================================================
+   ARTISANAL CRAFTSMANSHIP GALLERY & COLLECTION ENHANCEMENTS
+   ========================================================================= */
+.craftsmanship-gallery-section {
+  position: relative;
+  background: #0A0A0C;
+  color: #FFFFFF;
+  padding: 64px 16px 80px 16px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.craftsmanship-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 22px;
+  max-width: 1240px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .craftsmanship-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .craftsmanship-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+}
+
+.craft-card {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0E0E12;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  aspect-ratio: 4 / 4.6;
+  min-height: 380px;
+  transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  box-sizing: border-box;
+}
+
+.craft-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.65);
+  box-shadow: 0 0 32px rgba(212, 175, 55, 0.22);
+}
+
+.craft-card-img-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #121217;
+}
+
+.craft-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.craft-card:hover .craft-card-img {
+  transform: scale(1.08);
+}
+
+.craft-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 55%, rgba(0, 0, 0, 0.1) 100%);
+  pointer-events: none;
+}
+
+.craft-card-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.craft-tag {
+  align-self: flex-start;
+  background: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: #E6CA85;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  margin-bottom: 10px;
+}
+
+.craft-title {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0 0 8px 0;
+  line-height: 1.25;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  transition: color 0.3s ease;
+}
+
+.craft-card:hover .craft-title {
+  color: #F8F1E4;
+}
+
+.craft-desc {
+  font-size: 0.82rem;
+  color: #B5ACA3;
+  line-height: 1.5;
+  margin: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Atmospheric Background Video & Reveal */
+.hero-bg-media-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-ambient-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.16;
+  filter: contrast(1.1) saturate(0.85);
+}
+
+.hero-ambient-mesh-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 10, 12, 0.65) 0%, rgba(10, 10, 12, 0.9) 100%);
+}
+
+.hero-reveal-word {
+  display: inline-block;
+  opacity: 0;
+  animation: heroWordReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heroWordReveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Horizontal Swipe Pill Container for Signature Tabs */
+@media (max-width: 860px) {
+  .collection-tabs-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    padding: 6px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .collection-tabs-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+  .col-tab-btn {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    padding: 8px 16px !important;
+    font-size: 0.78rem !important;
+  }
+}

@@ -326,7 +326,7 @@ export default function LuxuryHero({
                   100% Certified Authentic
                 </p>
                 <p className="text-[10px] sm:text-xs font-medium text-[#c5a880] tracking-wide mt-0.5">
-                  Pure Mulberry Silks & Zari
+                  Artisanal Couture & Fine Finishing
                 </p>
               </div>
             </motion.div>

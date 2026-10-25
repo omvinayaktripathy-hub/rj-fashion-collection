@@ -327,7 +327,7 @@ export const HeroSection = ({
                   100% Certified Authentic
                 </p>
                 <p className="text-[10px] sm:text-xs font-medium text-amber-200/80 tracking-wide mt-0.5">
-                  Pure Mulberry Silks &amp; Zari
+                  Artisanal Couture & Fine Finishing
                 </p>
               </div>
             </motion.div>
