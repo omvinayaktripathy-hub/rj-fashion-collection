@@ -139,6 +139,10 @@ function resolveDeliveryAddress() {
         </div>
         <div style="color: var(--deliv-text-secondary); font-size: 0.95rem; line-height: 1.6;">
           ${activeAddressData.text || `${activeAddressData.house_flat || ''}, ${activeAddressData.street || ''}, ${activeAddressData.city || ''}, ${activeAddressData.state || ''} - ${activeAddressData.pin_code || ''}`}
+        <div style="margin-top: 8px; font-size: 0.8rem; font-weight: 600; color: #0F382A; display: flex; align-items: center; gap: 6px;">
+          <span>🚚</span>
+          <span>Arrives in 3–5 Business Days via Express Air</span>
+        </div>
         </div>
       </div>
     `;

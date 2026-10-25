@@ -252,9 +252,9 @@
       transition: all 0.3s;
     }
     .stepper-nav-step.active .stepper-nav-circle {
-      background: var(--primary-gradient);
+      background: #111111;
       color: #ffffff;
-      border-color: var(--primary);
+      border-color: #111111;
       animation: pulseGlow 2s infinite;
     }
     [data-theme="dark"] .stepper-nav-step.active .stepper-nav-circle,
@@ -265,7 +265,7 @@
       animation: pulseGlow 2s infinite;
     }
     .stepper-nav-step.completed .stepper-nav-circle {
-      background: #10b981;
+      background: #0F382A;
       color: #ffffff;
       border-color: #10b981;
     }
@@ -276,7 +276,7 @@
       background: var(--deliv-card-border);
     }
     .stepper-nav-line.completed {
-      background: #10b981;
+      background: #0F382A;
     }
 
     /* Live Dispatch Countdown Banner */
@@ -508,7 +508,7 @@
 
     /* Big Confirm Button with Shimmer Sweep */
     .confirm-order-btn {
-      background: linear-gradient(90deg, #700037 0%, #910047 30%, #b8005b 50%, #910047 70%, #700037 100%);
+      background: #111111 !important; border-radius: 8px !important;
       background-size: 200% 100%;
       animation: shimmerSweep 3.5s infinite linear;
       color: #ffffff;
@@ -719,6 +719,16 @@
       border: 1px dashed #700037 !important;
       color: #18181b !important;
     }
+  
+    @keyframes skeletonShimmer {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+    .checkout-skeleton-shimmer {
+      animation: skeletonShimmer 1.5s infinite ease-in-out;
+    }
+  
   </style>
 </head>
 <body>
@@ -773,17 +783,17 @@
     <div class="stepper-nav">
       <a href="/cart.html" class="stepper-nav-step completed" title="Return to Cart">
         <span class="stepper-nav-circle">✓</span>
-        <span>1. Bag & Cart</span>
+        <span>01 Bag & Cart</span>
       </a>
       <div class="stepper-nav-line completed"></div>
       <a href="/delivery.html" class="stepper-nav-step completed" title="Change Address">
         <span class="stepper-nav-circle">✓</span>
-        <span>2. Delivery Address</span>
+        <span>02 Shipping Details</span>
       </a>
       <div class="stepper-nav-line completed"></div>
       <div class="stepper-nav-step active">
-        <span class="stepper-nav-circle">3</span>
-        <span>3. Payment & Review</span>
+        <span class="stepper-nav-circle">03</span>
+        <span>03 Review & Payment</span>
       </div>
     </div>
   </div>
@@ -807,7 +817,11 @@
           </div>
 
           <div class="checkout-card-body" id="confirmed-address-content">
-            <p style="color: var(--deliv-text-muted); margin: 0;">Loading delivery address...</p>
+            <div class="checkout-skeleton-shimmer" style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="width: 35%; height: 16px; background: rgba(0,0,0,0.08); border-radius: 4px;"></div>
+    <div style="width: 75%; height: 14px; background: rgba(0,0,0,0.06); border-radius: 4px;"></div>
+    <div style="width: 50%; height: 14px; background: rgba(0,0,0,0.04); border-radius: 4px;"></div>
+  </div>
           </div>
         </div>
 
@@ -965,7 +979,11 @@
         <div class="fk-price-card anim-fade-in anim-delay-2" id="fk-summary-card">
           <div class="fk-price-header">PRICE DETAILS</div>
           <div class="fk-price-body" id="checkout-price-body">
-            <p style="color: var(--deliv-text-muted); margin: 0;">Calculating summary...</p>
+            <div class="checkout-skeleton-shimmer" style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="width: 100%; height: 16px; background: rgba(0,0,0,0.08); border-radius: 4px;"></div>
+    <div style="width: 80%; height: 16px; background: rgba(0,0,0,0.06); border-radius: 4px;"></div>
+    <div style="width: 100%; height: 22px; background: rgba(0,0,0,0.1); border-radius: 4px;"></div>
+  </div>
           </div>
           
           <div style="padding: 18px 22px; background: var(--deliv-selected-bg); border-top: 1px solid var(--deliv-card-border); border-radius: 0 0 8px 8px;">
