@@ -2,3 +2,4 @@ export * from './ShopByDepartment';
 export * from './LuxuryFlagshipExperience';
 export * from './LuxuryHero';
 export * from './PromotionalCountdown';
+export * from './AccountDashboard';
