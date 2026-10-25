@@ -256,7 +256,7 @@ function initSchema() {
       launch_date TEXT DEFAULT '2026-11-15T10:00:00',
       spotlight_badge TEXT DEFAULT 'Curated Bridal Atelier',
       spotlight_title TEXT DEFAULT 'The Royal Heritage Edit',
-      spotlight_desc TEXT DEFAULT 'Heirloom Kanjivaram silks woven with 24k gold zari and imperial bridal ensembles handcrafted for modern royalty.',
+      spotlight_desc TEXT DEFAULT 'Heirloom Kanjivaram silks woven with pure gold zari and imperial bridal ensembles handcrafted for modern royalty.',
       spotlight_image TEXT DEFAULT 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=1200&q=85',
       spotlight_link TEXT DEFAULT '/shop.html?category=sarees',
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP

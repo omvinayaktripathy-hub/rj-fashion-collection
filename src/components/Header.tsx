@@ -109,21 +109,21 @@ export const UPDATED_11_CATEGORIES: NavCategory[] = [
     megaMenu: {
       columns: [
         {
-          title: 'Heritage Silks & Sarees',
+          title: 'Heritage Silks',
           links: [
             { label: 'Kanjivaram Silk Sarees', href: '/shop.html?category=sarees&subcategory=kanjivaram' },
-            { label: 'Banarasi Brocade Sarees', href: '/shop.html?category=sarees&subcategory=banarasi' },
-            { label: 'Organza Floral Silks', href: '/shop.html?category=sarees&subcategory=organza' },
-            { label: 'Royal Bridal Lehengas', href: '/shop.html?category=lehengas' }
+            { label: 'Banarasi Woven Sarees', href: '/shop.html?category=sarees&subcategory=banarasi' },
+            { label: 'Tussar & Raw Silk', href: '/shop.html?category=sarees&subcategory=tussar' },
+            { label: 'Chanderi Zari Sarees', href: '/shop.html?category=sarees&subcategory=chanderi' }
           ]
         },
         {
-          title: 'Kurtis & Ensembles',
+          title: 'Contemporary & Festive',
           links: [
-            { label: 'Lucknowi Chikankari', href: '/shop.html?category=kurtis&subcategory=chikankari' },
-            { label: 'Anarkali Kurta Sets', href: '/shop.html?category=kurtis&subcategory=anarkali' },
-            { label: 'Indo-Western Dresses', href: '/shop.html?category=dresses&subcategory=indo-western' },
-            { label: 'Ethnic Co-ord Sets', href: '/shop.html?category=dresses&subcategory=co-ords' }
+            { label: 'Organza Floral Sarees', href: '/shop.html?category=sarees&subcategory=organza' },
+            { label: 'Embroidered Georgette', href: '/shop.html?category=sarees&subcategory=georgette' },
+            { label: 'Ready to Wear Sarees', href: '/shop.html?category=sarees&subcategory=ready-to-wear' },
+            { label: 'Lightweight Chiffon', href: '/shop.html?category=sarees&subcategory=chiffon' }
           ]
         }
       ],

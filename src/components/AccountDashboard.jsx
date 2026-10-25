@@ -320,7 +320,7 @@ export const AccountDashboard = ({
             </div>
 
             {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full lg:w-auto">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full lg:w-auto">
               <div className="flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-xl bg-black/40 border border-white/5 backdrop-blur-md">
                 <span className="text-xl sm:text-2xl font-serif font-extrabold text-white">
                   {orders.length}
@@ -343,14 +343,6 @@ export const AccountDashboard = ({
                 </span>
                 <span className="text-[10px] sm:text-xs font-bold text-[#A8A199] tracking-wider uppercase mt-1">
                   Addresses
-                </span>
-              </div>
-              <div className="flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-xl bg-black/40 border border-amber-400/20 backdrop-blur-md">
-                <span className="text-xl sm:text-2xl font-serif font-extrabold text-amber-300">
-                  {user.loyaltyPoints}
-                </span>
-                <span className="text-[10px] sm:text-xs font-bold text-amber-200/80 tracking-wider uppercase mt-1">
-                  Royale Pts
                 </span>
               </div>
             </div>
