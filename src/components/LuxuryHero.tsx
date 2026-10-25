@@ -34,8 +34,8 @@ interface Ripple {
 export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
   brandName = "RJ FASHION COLLECTION",
   headline = "STYLE THAT SPEAKS WITHOUT WORDS",
-  subtext = "Discover timeless silhouettes, authentic handloom weaves, and contemporary Indian couture. An exquisite curation by RJ Fashion Collection.",
-  primaryCtaText = "EXPLORE COLLECTION →",
+  subtext = "Curated contemporary ethnic wear, trendy fashion, and modern statement accessories.",
+  primaryCtaText = "EXPLORE COLLECTION ->",
   secondaryCtaText = "DISCOVER NEW ARRIVALS",
   primaryCtaLink = "/shop.html",
   secondaryCtaLink = "/shop.html?newArrival=true",
@@ -98,7 +98,7 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
       ctx.clearRect(0, 0, width, height);
 
       const baseGrad = ctx.createLinearGradient(0, 0, width, height);
-      baseGrad.addColorStop(0, '#0d0d0f');
+      baseGrad.addColorStop(0, '#0A0A0C');
       baseGrad.addColorStop(0.5, '#121217');
       baseGrad.addColorStop(1, '#0a0a0c');
       ctx.fillStyle = baseGrad;
@@ -183,7 +183,7 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative w-full min-h-[92vh] flex items-center justify-center overflow-hidden bg-[#0d0d0f] text-white px-4 sm:px-6 lg:px-12 py-16 lg:py-24 selection:bg-[#c5a880] selection:text-black"
+      className="relative w-full min-h-[92vh] flex items-center justify-center overflow-hidden bg-[#0A0A0C] text-white px-4 sm:px-6 lg:px-12 py-16 lg:py-24 selection:bg-[#c5a880] selection:text-black"
     >
       <canvas
         ref={canvasRef}
@@ -272,10 +272,10 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
               transformStyle: 'preserve-3d',
             }}
             animate={{
-              y: [0, -14, 0],
+              y: [0, -12, 0],
             }}
             transition={{
-              duration: 5.5,
+              duration: 6,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
@@ -303,10 +303,10 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
               />
               <div className="pr-2">
                 <p className="text-xs sm:text-sm font-bold text-[#f7f2ea] leading-tight">
-                  The Kundan Vault
+                  Fashion Jewelry Vault
                 </p>
                 <p className="text-[10px] sm:text-xs font-semibold text-[#d4af37] tracking-wider uppercase mt-0.5">
-                  24K Gold Accents
+                  Premium Brass & Kundan Polish
                 </p>
               </div>
             </motion.div>
@@ -321,10 +321,10 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-bold text-[#ffffff] leading-tight">
-                  100% Certified Handloom
+                  Premium Quality
                 </p>
                 <p className="text-[10px] sm:text-xs font-medium text-[#c5a880] tracking-wide mt-0.5">
-                  Pure Mulberry Silk &amp; Zari
+                  Handpicked Fabrics & Fine Stitching
                 </p>
               </div>
             </motion.div>

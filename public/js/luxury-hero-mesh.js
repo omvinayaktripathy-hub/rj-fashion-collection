@@ -30,9 +30,9 @@
 
       // Deep dark luxury background
       const baseGrad = ctx.createLinearGradient(0, 0, width, height);
-      baseGrad.addColorStop(0, '#0d0d0f');
-      baseGrad.addColorStop(0.5, '#121217');
-      baseGrad.addColorStop(1, '#09090b');
+      baseGrad.addColorStop(0, '#0A0A0C');
+      baseGrad.addColorStop(0.5, '#0E0E12');
+      baseGrad.addColorStop(1, '#070709');
       ctx.fillStyle = baseGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -40,9 +40,9 @@
       const orb1X = width * 0.72 + Math.sin(step) * 50;
       const orb1Y = height * 0.42 + Math.cos(step * 0.8) * 40;
       const grad1 = ctx.createRadialGradient(orb1X, orb1Y, 10, orb1X, orb1Y, Math.min(width * 0.45, 420));
-      grad1.addColorStop(0, 'rgba(212, 175, 55, 0.18)');
+      grad1.addColorStop(0, 'rgba(212, 175, 55, 0.22)');
       grad1.addColorStop(0.5, 'rgba(197, 168, 128, 0.08)');
-      grad1.addColorStop(1, 'rgba(13, 13, 15, 0)');
+      grad1.addColorStop(1, 'rgba(10, 10, 12, 0)');
       ctx.fillStyle = grad1;
       ctx.beginPath();
       ctx.arc(orb1X, orb1Y, Math.min(width * 0.45, 420), 0, Math.PI * 2);
@@ -53,7 +53,7 @@
       const grad2 = ctx.createRadialGradient(orb2X, orb2Y, 10, orb2X, orb2Y, Math.min(width * 0.4, 360));
       grad2.addColorStop(0, 'rgba(189, 164, 119, 0.12)');
       grad2.addColorStop(0.6, 'rgba(112, 0, 55, 0.06)');
-      grad2.addColorStop(1, 'rgba(13, 13, 15, 0)');
+      grad2.addColorStop(1, 'rgba(10, 10, 12, 0)');
       ctx.fillStyle = grad2;
       ctx.beginPath();
       ctx.arc(orb2X, orb2Y, Math.min(width * 0.4, 360), 0, Math.PI * 2);
