@@ -17,6 +17,14 @@ const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).r
 
   let currentProduct = null;
   let currentFile = null;
+  let webcamStream = null;
+  let activeTryonMode = 'webcam';
+  let garmentScale = 100;
+  let garmentOpacity = 90;
+  let garmentPosX = 0;
+  let garmentPosY = 20;
+  let isGarmentFlipped = false;
+  let selectedTryonSize = 'M';
   let currentToken = null;
   let isProcessing = false;
   let statusInterval = null;
@@ -51,8 +59,8 @@ const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).r
             <div class="rj-tryon-brand-wrap">
               <div class="rj-tryon-brand-icon">✨</div>
               <div class="rj-tryon-title-wrap">
-                <h3 id="rjTryonTitle">✨ AI Virtual Dressing Room</h3>
-                <p id="rjTryonSubtitle">Simulate fit and drape in real-time.</p>
+                <h3 id="rjTryonTitle">✨ AI Couture Dressing Room • Live Simulation</h3>
+                <p id="rjTryonSubtitle">Interactive real-time garment drape for selected couture</p>
               </div>
             </div>
             <button type="button" class="rj-tryon-close-btn" id="rjTryonClose" aria-label="Close Dressing Room">&times;</button>
@@ -683,7 +691,19 @@ const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).r
     }
   }
 
+  function stopWebcamStream() {
+    if (webcamStream) {
+      try {
+        webcamStream.getTracks().forEach(t => t.stop());
+      } catch (_) {}
+      webcamStream = null;
+    }
+    const video = document.getElementById('rjTryonVideo');
+    if (video) video.srcObject = null;
+  }
+
   function closeTryonModal() {
+    stopWebcamStream();
     const modal = document.getElementById('rjTryonModal');
     if (modal) {
       modal.classList.remove('active');

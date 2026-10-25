@@ -881,3 +881,176 @@
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+
+/* =====================================================================
+   LIVE AR WEBCAM & INTERACTIVE DRAPE CONTROLS (AR FASHION TECH)
+   ===================================================================== */
+
+.rj-tryon-mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(6, 10, 20, 0.7);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.rj-tryon-mode-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #c9adb9;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rj-tryon-mode-tab.active {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(180, 83, 9, 0.35);
+}
+
+.rj-tryon-ar-stage {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  max-height: 60vh;
+  background: #03060e;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  touch-action: none;
+}
+
+.rj-tryon-webcam-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+  display: block;
+}
+
+.rj-tryon-webcam-video.unmirrored {
+  transform: none;
+}
+
+.rj-tryon-garment-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 0.15s ease;
+}
+
+.rj-tryon-garment-layer:active {
+  cursor: grabbing;
+}
+
+.rj-tryon-garment-layer img {
+  max-width: 360px;
+  max-height: 400px;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.7));
+}
+
+.rj-tryon-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(11, 19, 36, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.rj-tryon-slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rj-tryon-slider-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.rj-tryon-slider-val {
+  font-family: monospace;
+  color: #f59e0b;
+}
+
+.rj-tryon-range-input {
+  width: 100%;
+  height: 6px;
+  border-radius: 4px;
+  background: #1f2937;
+  accent-color: #d97706;
+  cursor: pointer;
+}
+
+.rj-tryon-size-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.rj-tryon-size-pill {
+  min-width: 34px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rj-tryon-size-pill.active {
+  background: #d97706;
+  color: #000;
+  border-color: #f59e0b;
+  transform: scale(1.05);
+}
+
+.rj-tryon-watermark-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, transparent, rgba(3, 6, 14, 0.85));
+  font-size: 0.72rem;
+  color: #d4af37;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}

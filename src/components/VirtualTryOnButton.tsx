@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { AIVirtualTryOnModal, TryOnProduct } from './AIVirtualTryOnModal';
+import { LiveVirtualTryOnModal, TryOnProduct } from './LiveVirtualTryOnModal';
 
 export interface VirtualTryOnButtonProps {
   product?: TryOnProduct | null;
@@ -15,19 +15,19 @@ export const VirtualTryOnButton: React.FC<VirtualTryOnButtonProps> = ({
   className = '',
   onAddToCartWithFit
 }) => {
-  const [isTryOnModalOpen, setIsTryOnModalOpen] = useState<boolean>(false);
+  const [isTryOnOpen, setIsTryOnOpen] = useState<boolean>(false);
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsTryOnModalOpen(true);
+    setIsTryOnOpen(true);
     if (onOpen) onOpen();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      setIsTryOnModalOpen(true);
+      setIsTryOnOpen(true);
       if (onOpen) onOpen();
     }
   };
@@ -40,7 +40,7 @@ export const VirtualTryOnButton: React.FC<VirtualTryOnButtonProps> = ({
           role="button"
           tabIndex={0}
           aria-haspopup="dialog"
-          aria-expanded={isTryOnModalOpen}
+          aria-expanded={isTryOnOpen}
           aria-label="AI Virtual Dressing Room — Try On in Real-Time"
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -55,17 +55,17 @@ export const VirtualTryOnButton: React.FC<VirtualTryOnButtonProps> = ({
 
           {/* Bold Tracked Text */}
           <span className="truncate">
-            AI VIRTUAL DRESSING ROOM — TRY ON IN REAL-TIME
+            ✨ AI VIRTUAL DRESSING ROOM — TRY ON IN REAL-TIME
           </span>
         </button>
       </div>
 
-      {/* Interactive Try-On Modal */}
-      <AIVirtualTryOnModal
-        isOpen={isTryOnModalOpen}
-        onClose={() => setIsTryOnModalOpen(false)}
+      {/* Live Interactive Virtual Try-On Modal */}
+      <LiveVirtualTryOnModal
+        isOpen={isTryOnOpen}
+        onClose={() => setIsTryOnOpen(false)}
         product={product}
-        onAddToCartWithFit={onAddToCartWithFit}
+        onAddToCart={onAddToCartWithFit}
       />
     </>
   );
