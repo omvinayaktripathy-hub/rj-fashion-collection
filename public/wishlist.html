@@ -4,13 +4,13 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>My Wishlist - RJ Fashion Collection</title>
-  <meta name="description" content="Save and organize your favorite designer sarees, lehengas, and ethnic outfits in your RJ Fashion Collection Wishlist.">
+  <title>My Saved Collection & Wishlist - RJ Fashion Collection</title>
+  <meta name="description" content="View and manage your curated RJ Fashion Collection wishlist. Handcrafted royal bridal sarees, festive kurtis, and designer jewelry saved for celebrations.">
   <!-- Open Graph / WhatsApp / Facebook Preview -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="RJ Fashion Collection">
-  <meta property="og:title" content="My Wishlist - RJ Fashion Collection">
-  <meta property="og:description" content="Save and organize your favorite designer sarees, lehengas, and ethnic outfits in your RJ Fashion Collection Wishlist.">
+  <meta property="og:title" content="My Saved Collection - RJ Fashion Collection">
+  <meta property="og:description" content="View and manage your curated RJ Fashion Collection wishlist. Handcrafted royal bridal sarees, festive kurtis, and designer jewelry saved for celebrations.">
   <meta property="og:image" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
   <meta property="og:image:secure_url" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
   <meta property="og:image:type" content="image/jpeg">
@@ -20,9 +20,10 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="My Wishlist - RJ Fashion Collection">
-  <meta name="twitter:description" content="Save and organize your favorite designer sarees, lehengas, and ethnic outfits in your RJ Fashion Collection Wishlist.">
+  <meta name="twitter:title" content="My Saved Collection - RJ Fashion Collection">
+  <meta name="twitter:description" content="View and manage your curated RJ Fashion Collection wishlist. Handcrafted royal bridal sarees, festive kurtis, and designer jewelry saved for celebrations.">
   <meta name="twitter:image" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
+
   <script>
     // Instant Theme Controller - zero delay, zero external dependencies
     window.applyTheme = function(theme) {
@@ -83,14 +84,14 @@
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261025-01">
   <link rel="stylesheet" href="/css/style.css?v=20261025-01">
   <link rel="stylesheet" href="/css/responsive.css?v=20261025-01">
 </head>
-<body>
+<body class="wishlist-body">
 
-    <!-- Premium Luxury Announcement Bar -->
+  <!-- Premium Luxury Announcement Bar -->
   <aside class="top-bar" id="announcement-bar" aria-label="Announcement">
     <div class="top-bar-inner">
       <span class="top-bar-brand">RJ FASHION COLLECTION</span>
@@ -111,13 +112,13 @@
   <!-- Site Header -->
   <header class="site-header">
     <div class="container header-main">
-      <a href="/" class="brand-logo">
+      <a href="/" class="brand-logo" aria-label="RJ Fashion Collection Home">
         <span class="logo-title">RJ Fashion Collection</span>
       </a>
 
       <div class="header-search">
         <form class="header-search-form" action="/shop.html" method="GET">
-          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <input type="text" name="search" placeholder="Search for bridal sarees, kurtis, jewelry..." autocomplete="off">
           <button type="submit" title="Search">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
@@ -129,7 +130,6 @@
 
       <div class="header-actions">
         <!-- Luxury Interactive Dark Mode Toggle Slider -->
-                
         <div class="theme-switch-container" onclick="toggleTheme()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}" role="switch" aria-checked="false" tabindex="0" title="Toggle Dark/Light Mode">
           <span class="theme-label-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
           <span class="theme-mode-text">Dark Mode</span>
@@ -144,8 +144,8 @@
           </a>
         </div>
 
-        <a href="/wishlist.html" class="action-btn" title="My Wishlist">
-          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Wishlist</span>
+        <a href="/wishlist.html" class="action-btn active" title="My Wishlist">
+          <span><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" style="vertical-align: -2px; margin-right: 4px; color: #dc2626;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Wishlist</span>
           <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
         </a>
 
@@ -156,7 +156,7 @@
       </div>
     </div>
 
-            <nav class="main-nav">
+    <nav class="main-nav">
       <div class="container">
         <ul class="nav-links">
           <li><a href="/">Home</a></li>
@@ -172,30 +172,139 @@
     </nav>
   </header>
 
-  <!-- Wishlist Content -->
-  <main class="container" style="padding-top: 30px; padding-bottom: 60px;">
-    <div class="section-header">
-      <div>
-        <h1 class="section-title">My Wishlist</h1>
-        <span id="wishlist-count-display" style="font-size: 0.85rem; color: var(--muted);">Loading...</span>
+  <!-- Main Luxury Wishlist Wrapper -->
+  <main class="wishlist-page-wrapper">
+    <div class="container" style="max-width: 1320px; padding-top: 24px; padding-bottom: 70px;">
+
+      <!-- Breadcrumbs -->
+      <nav class="wishlist-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-active">Saved Collection</span>
+      </nav>
+
+      <!-- 1. Editorial Header & Action Control Bar -->
+      <section class="wishlist-header-control" aria-label="Wishlist Controls">
+        <div class="wishlist-title-row">
+          <div class="wishlist-headline-block">
+            <div class="wishlist-tagline">
+              <span class="sparkle-icon">✨</span>
+              <span>CURATED CLIENT SELECTION</span>
+            </div>
+            <div class="wishlist-title-wrap">
+              <h1 class="wishlist-main-title">My Saved Collection</h1>
+              <span id="wishlist-count-display" class="wishlist-count-capsule">Loading...</span>
+            </div>
+          </div>
+
+          <!-- Bulk Actions Bar -->
+          <div class="wishlist-bulk-actions" id="wishlist-bulk-actions" style="display: none;">
+            <button type="button" class="btn btn-luxury-primary btn-move-all" onclick="moveAllWishlistToCart()" id="btn-move-all-cart">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+              <span>Move All to Bag</span>
+            </button>
+            <button type="button" class="btn-clear-wishlist" onclick="confirmClearWishlist()" title="Clear all saved pieces">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Clear All</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Pills & Quick-Sort Bar -->
+        <div class="wishlist-filter-sort-bar" id="wishlist-filter-sort-bar" style="display: none;">
+          <!-- Horizontal Swipeable Category Filter Pills -->
+          <div class="wishlist-category-pills" role="tablist" aria-label="Category Filters">
+            <button type="button" class="wishlist-cat-pill active" data-category="all" onclick="filterWishlistCategory('all', this)">
+              All Items
+            </button>
+            <button type="button" class="wishlist-cat-pill" data-category="sarees" onclick="filterWishlistCategory('sarees', this)">
+              Sarees & Couture
+            </button>
+            <button type="button" class="wishlist-cat-pill" data-category="dresses" onclick="filterWishlistCategory('dresses', this)">
+              Kurtis & Lehengas
+            </button>
+            <button type="button" class="wishlist-cat-pill" data-category="jewelry" onclick="filterWishlistCategory('jewelry', this)">
+              Jewellery
+            </button>
+            <button type="button" class="wishlist-cat-pill" data-category="accessories" onclick="filterWishlistCategory('accessories', this)">
+              Bags & Gifts
+            </button>
+            <button type="button" class="wishlist-cat-pill" data-category="sale" onclick="filterWishlistCategory('sale', this)">
+              On Sale
+            </button>
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div class="wishlist-sort-wrapper">
+            <label for="wishlist-sort-select" class="sort-label">Sort by:</label>
+            <div class="sort-select-wrap">
+              <select id="wishlist-sort-select" onchange="sortWishlistItems(this.value)" aria-label="Sort Wishlist Items">
+                <option value="recent">Recently Saved</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="discount">Highest Discount</option>
+              </select>
+              <svg class="sort-select-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Minimalist Curated Empty Wishlist State -->
+      <div id="wishlist-empty-state" class="wishlist-empty-editorial" style="display: none;">
+        <div class="empty-heart-icon-wrap">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </div>
+        <div class="empty-text-block">
+          <h2 class="empty-headline">Your Wishlist is Empty</h2>
+          <p class="empty-subtext">
+            Explore our latest arrivals and save your favorite royal bridal silhouettes, statement jewellery, and handcrafted ethnic wear for upcoming celebrations.
+          </p>
+        </div>
+        <div class="empty-cta-wrap">
+          <a href="/shop.html?newArrival=true" class="btn btn-luxury-primary">
+            <span>Discover New Arrivals</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Empty Wishlist State -->
-    <div id="wishlist-empty-state" class="empty-state" style="display: none; max-width: 540px; margin: 40px auto;">
-      <div class="empty-state-icon"></div>
-      <h3>Your Wishlist is Empty</h3>
-      <p>Save items you love by clicking on the heart icon while browsing our luxury fashion catalog.</p>
-      <a href="/shop.html" class="btn btn-primary">EXPLORE DESIGNS</a>
-    </div>
+      <!-- 3. Editorial Product Card Architecture Grid -->
+      <div class="wishlist-editorial-grid" id="wishlist-grid">
+        <!-- Rendered via public/js/wishlist.js -->
+        <div class="wishlist-shimmer-container">
+          <div class="shimmer-card"></div>
+          <div class="shimmer-card"></div>
+          <div class="shimmer-card"></div>
+          <div class="shimmer-card"></div>
+        </div>
+      </div>
 
-    <!-- Wishlist Products Grid -->
-    <div class="product-grid" id="wishlist-grid">
-      <!-- Populated via wishlist.js -->
     </div>
   </main>
 
-  <!-- Site Footer (NO returns, NO newsletter, NO admin login) -->
+  <!-- Clear All Confirmation Modal -->
+  <div id="clear-wishlist-modal" class="modal-backdrop-luxury" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="clear-modal-title">
+    <div class="modal-card-luxury">
+      <div class="modal-icon-badge">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      </div>
+      <h3 id="clear-modal-title" class="modal-luxury-title">Clear Saved Collection?</h3>
+      <p class="modal-luxury-desc">Are you sure you want to remove all saved items from your wishlist? This action cannot be undone.</p>
+      <div class="modal-luxury-actions">
+        <button type="button" class="btn btn-danger-action" onclick="executeClearWishlist()">
+          Yes, Clear All
+        </button>
+        <button type="button" class="btn btn-ghost-action" onclick="closeClearWishlistModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
   <footer class="site-footer">
     <div class="container footer-top">
       <div class="footer-grid">
@@ -206,7 +315,7 @@
             <p style="margin-bottom: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><strong>Store Address:</strong> RJ FASHION COLLECTION, ODISHA, Jharsuguda, Sarbhal, Zipcode - 768201</p>
             <p style="margin-bottom: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><strong>Phone:</strong> <a href="tel:+917894093586" style="color: #e2e8f0; font-weight: 600; text-decoration: none;">+91 7894093586</a></p>
             <p style="margin-bottom: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg><strong>Email:</strong> <a href="mailto:rjfashioncollection@gmail.com" style="color: #e2e8f0; text-decoration: none;">rjfashioncollection@gmail.com</a></p>
-            <p style="margin-bottom: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><strong>Available:</strong> Mon to Sat (10:00 AM  5:00 PM)</p>
+            <p style="margin-bottom: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><strong>Available:</strong> Mon to Sat (10:00 AM – 5:00 PM)</p>
           </div>
         </div>
         <div class="footer-col">
@@ -241,13 +350,13 @@
     </div>
     <div class="container footer-bottom">
       <div>&copy; 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
-      <div style="color: #64748b;">100% Secure Checkout  Authentic Products</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
     </div>
   </footer>
 
   <!-- Mobile Bottom Navigation -->
-    <div class="bottom-nav">
-    <a href="/" class="bottom-nav-item active">
+  <div class="bottom-nav">
+    <a href="/" class="bottom-nav-item">
       <span class="bottom-nav-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       </span>
@@ -259,9 +368,9 @@
       </span>
       <span>Categories</span>
     </a>
-    <a href="/wishlist.html" class="bottom-nav-item">
+    <a href="/wishlist.html" class="bottom-nav-item active">
       <span class="bottom-nav-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" style="color: #dc2626;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         <span class="bottom-badge wishlist-count-badge" style="display: none;">0</span>
       </span>
       <span>Wishlist</span>
@@ -281,17 +390,18 @@
     </a>
   </div>
 
-  <script src="/js/app.js?v=20261025-01"></script>
-  <script src="/js/wishlist.js"></script>
-    <!-- Floating WhatsApp VIP Concierge Button -->
-  <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20your%20luxury%20collection." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" aria-label="Chat with RJ Fashion Concierge on WhatsApp" title="Chat on WhatsApp with RJ Fashion Concierge">
+  <!-- Floating WhatsApp VIP Concierge Button -->
+  <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20my%20saved%20wishlist%20items." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" aria-label="Chat with RJ Fashion Concierge on WhatsApp" title="Chat on WhatsApp with RJ Fashion Concierge">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
       <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.03C9.34 7.03 9.03 7.1 8.77 7.38C8.52 7.66 7.8 8.33 7.8 9.71C7.8 11.08 8.8 12.41 8.94 12.6C9.08 12.79 10.9 15.6 13.69 16.8C16.01 17.8 16.49 17.6 17.02 17.55C17.55 17.5 18.73 16.85 18.97 16.16C19.22 15.48 19.22 14.89 19.14 14.77C19.07 14.65 18.89 14.58 18.61 14.44C18.33 14.3 16.98 13.63 16.73 13.54C16.48 13.45 16.3 13.4 16.11 13.68C15.93 13.96 15.4 14.58 15.24 14.77C15.08 14.96 14.92 14.98 14.64 14.84C14.36 14.7 13.47 14.41 12.41 13.47C11.59 12.74 11.03 11.83 10.87 11.55C10.71 11.27 10.85 11.12 10.99 10.98C11.12 10.85 11.28 10.64 11.42 10.47C11.56 10.3 11.61 10.18 11.7 10C11.8 9.81 11.75 9.65 11.68 9.51C11.61 9.37 11.05 8.01 10.82 7.45C10.6 6.91 10.37 6.99 10.2 6.98C10.04 6.97 9.85 6.97 9.67 6.97L9.53 7.03Z"/>
     </svg>
     <span class="whatsapp-label">WhatsApp Concierge</span>
   </a>
+
+  <script src="/js/app.js?v=20261025-01"></script>
+  <script src="/js/wishlist.js?v=20261025-01"></script>
   <script src="/js/mobile-nav.js?v=20261025-01" defer></script>
   <script src="/js/analytics.js" defer></script>
-<script src="/js/shadcn-ui.js?v=20261025-01" defer></script>
+  <script src="/js/shadcn-ui.js?v=20261025-01" defer></script>
 </body>
 </html>
