@@ -280,7 +280,7 @@ function renderAddressesList() {
             ${isSelected ? `
               <div class="addr-proceed-dock">
                 <button type="button" class="proceed-btn" onclick="confirmAddressAndProceed(event, ${Number(addr.id)})">
-                  <span>DELIVER TO THIS ADDRESS & PROCEED TO PAYMENT</span>
+                  <span>DELIVER TO THIS ADDRESS & PROCEED</span>
                   <span style="font-size: 1.1rem; line-height: 1;">➔</span>
                 </button>
               </div>
@@ -308,7 +308,7 @@ function openEditAddress(e, id) {
   const submitBtn = document.getElementById('deliv-save-btn');
 
   if (formTitle) formTitle.textContent = 'Edit Delivery Address';
-  if (submitBtn) submitBtn.textContent = 'UPDATE & DELIVER TO THIS ADDRESS ➔';
+  if (submitBtn) submitBtn.textContent = 'UPDATE & DELIVER TO THIS ADDRESS →';
 
   document.getElementById('deliv-name').value = addr.full_name || '';
   document.getElementById('deliv-phone').value = addr.phone || '';
@@ -390,7 +390,7 @@ function toggleNewAddressForm() {
   if (isClosed) {
     editingAddressId = null;
     if (formTitle) formTitle.textContent = 'Add New Delivery Address';
-    if (submitBtn) submitBtn.textContent = 'SAVE & DELIVER TO THIS ADDRESS ➔';
+    if (submitBtn) submitBtn.textContent = 'SAVE & DELIVER TO THIS ADDRESS →';
     prefillNewAddressForm();
     formBox.style.display = 'block';
     formBox.scrollIntoView({ behavior: 'smooth' });

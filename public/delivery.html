@@ -103,7 +103,7 @@
       --deliv-text-secondary: #52525b;
       --deliv-text-muted: #71717a;
       --deliv-selected-bg: #fdfaf6;
-      --deliv-selected-border: #700037;
+      --deliv-selected-border: #C5A880;
       --deliv-input-bg: #ffffff;
       --deliv-input-border: #d4d4d8;
     }
@@ -184,9 +184,9 @@
       transition: all 0.3s;
     }
     .stepper-nav-step.active .stepper-nav-circle {
-      background: var(--primary-gradient);
+      background: #111111;
       color: #ffffff;
-      border-color: var(--primary);
+      border-color: #111111;
       box-shadow: 0 0 12px rgba(112, 0, 55, 0.4);
     }
     [data-theme="dark"] .stepper-nav-step.active .stepper-nav-circle,
@@ -197,9 +197,9 @@
       box-shadow: 0 0 12px rgba(197, 155, 39, 0.4);
     }
     .stepper-nav-step.completed .stepper-nav-circle {
-      background: #10b981;
+      background: #0F382A;
       color: #ffffff;
-      border-color: #10b981;
+      border-color: #0F382A;
     }
     .stepper-nav-line {
       flex: 1;
@@ -274,10 +274,10 @@
       transform: translateY(-1px);
     }
     .addr-select-item.selected {
-      border-color: var(--deliv-selected-border);
-      background: var(--deliv-selected-bg);
-      border-left: 5px solid var(--deliv-selected-border);
-      box-shadow: 0 4px 16px rgba(112, 0, 55, 0.1);
+      border: 1.5px solid #C5A880 !important;
+      background: #FDFBF7 !important;
+      border-radius: 12px !important;
+      box-shadow: 0 4px 16px rgba(197, 168, 128, 0.15) !important;
     }
     [data-theme="dark"] .addr-select-item.selected,
     .dark-theme .addr-select-item.selected {
@@ -336,8 +336,9 @@
       color: var(--deliv-text-secondary);
     }
     .addr-tag.default-tag {
-      background: rgba(16, 185, 129, 0.15);
-      color: #10b981;
+      background: #FAF4EB !important;
+      color: #8C6D37 !important;
+      border: 1px solid rgba(197, 168, 128, 0.4) !important;
     }
     .addr-phone-chip {
       color: var(--deliv-text-secondary);
@@ -380,38 +381,39 @@
 
     /* Action Buttons */
     .proceed-btn {
-      background: var(--primary-gradient);
-      color: #ffffff;
-      border: none;
-      border-radius: 4px;
-      padding: 15px 32px;
-      font-weight: 800;
-      font-size: 0.96rem;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(112, 0, 55, 0.35);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.25s ease;
-      text-transform: uppercase;
+      background: #111111 !important;
+      color: #ffffff !important;
+      border: none !important;
+      border-radius: 8px !important;
+      padding: 14px 28px !important;
+      font-weight: 600 !important;
+      font-size: 0.85rem !important;
+      letter-spacing: 1px !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      transition: all 0.25s ease !important;
+      text-transform: uppercase !important;
     }
     .proceed-btn:hover {
-      background: #8b0044;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(112, 0, 55, 0.45);
+      background: #000000 !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
     }
     .toggle-add-btn {
       display: inline-flex;
       align-items: center;
       gap: 10px;
       padding: 14px 20px;
-      border: 1.5px dashed var(--gold);
-      border-radius: 8px;
-      background: var(--deliv-card-bg);
-      color: var(--gold);
-      font-weight: 700;
-      font-size: 0.95rem;
+      border: 1.5px solid #d4d4d8;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #111111;
+      font-weight: 600;
+      font-size: 0.88rem;
+      letter-spacing: 0.5px;
       cursor: pointer;
       width: 100%;
       justify-content: center;
@@ -419,8 +421,8 @@
       margin-top: 10px;
     }
     .toggle-add-btn:hover {
-      background: var(--deliv-selected-bg);
-      transform: translateY(-1px);
+      border-color: #111111;
+      background: #fafafa;
     }
 
     /* Order Items Shipment Preview */
@@ -686,17 +688,17 @@
     <div class="stepper-nav">
       <a href="/cart.html" class="stepper-nav-step completed" title="Return to Cart">
         <span class="stepper-nav-circle">✓</span>
-        <span>1. Bag & Cart</span>
+        <span>01 Bag & Cart</span>
       </a>
       <div class="stepper-nav-line completed"></div>
       <div class="stepper-nav-step active">
-        <span class="stepper-nav-circle">2</span>
-        <span>2. Delivery Address</span>
+        <span class="stepper-nav-circle">02</span>
+        <span>02 Delivery Address</span>
       </div>
       <div class="stepper-nav-line"></div>
       <div class="stepper-nav-step">
-        <span class="stepper-nav-circle">3</span>
-        <span>3. Payment & Review</span>
+        <span class="stepper-nav-circle">03</span>
+        <span>03 Payment & Review</span>
       </div>
     </div>
   </div>
@@ -861,7 +863,7 @@
                 <span class="deliv-guarantee-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
                 <div>
                   <div class="deliv-guarantee-title">100% Transit Insured</div>
-                  <div class="deliv-guarantee-desc">Every luxury saree and jewelry piece is fully insured against damage or loss.</div>
+                  <div class="deliv-guarantee-desc">Every luxury parcel is fully insured against damage or loss in transit.</div>
                 </div>
               </div>
               <div class="deliv-guarantee-item">
