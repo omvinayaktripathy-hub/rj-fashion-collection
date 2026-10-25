@@ -5,3 +5,4 @@ export * from './PromotionalCountdown';
 export * from './AccountDashboard';
 export * from './WishlistPage';
 export * from './CartPage';
+export * from './Footer';
