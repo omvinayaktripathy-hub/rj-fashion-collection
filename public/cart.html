@@ -7,13 +7,13 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Shopping Cart - RJ Fashion Collection</title>
-  <meta name="description" content="Review your luxury ethnic wear selections and proceed to secure checkout at RJ Fashion Collection.">
+  <title>Shopping Bag - RJ Fashion Collection</title>
+  <meta name="description" content="Review your luxury ethnic wear selections, bridal sarees, and designer jewelry with complimentary express delivery at RJ Fashion Collection.">
   <!-- Open Graph / WhatsApp / Facebook Preview -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="RJ Fashion Collection">
-  <meta property="og:title" content="Shopping Cart - RJ Fashion Collection">
-  <meta property="og:description" content="Review your luxury ethnic wear selections and proceed to secure checkout at RJ Fashion Collection.">
+  <meta property="og:title" content="Shopping Bag - RJ Fashion Collection">
+  <meta property="og:description" content="Review your luxury ethnic wear selections, bridal sarees, and designer jewelry with complimentary express delivery at RJ Fashion Collection.">
   <meta property="og:image" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
   <meta property="og:image:secure_url" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
   <meta property="og:image:type" content="image/jpeg">
@@ -23,9 +23,10 @@
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Shopping Cart - RJ Fashion Collection">
-  <meta name="twitter:description" content="Review your luxury ethnic wear selections and proceed to secure checkout at RJ Fashion Collection.">
+  <meta name="twitter:title" content="Shopping Bag - RJ Fashion Collection">
+  <meta name="twitter:description" content="Review your luxury ethnic wear selections, bridal sarees, and designer jewelry with complimentary express delivery at RJ Fashion Collection.">
   <meta name="twitter:image" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
+
   <script>
     // Instant Theme Controller - zero delay, zero external dependencies
     window.applyTheme = function(theme) {
@@ -86,66 +87,14 @@
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261025-01">
   <link rel="stylesheet" href="/css/style.css?v=20261025-01">
   <link rel="stylesheet" href="/css/responsive.css?v=20261025-01">
-  <style>
-    /* Flipkart-style Cart Elements */
-    .fk-cart-delivery-bar {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    }
-    .fk-cart-items-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-      overflow: hidden;
-    }
-    .fk-cart-bottom-bar {
-      background: #ffffff;
-      border-top: 1px solid #f0f0f0;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
-    }
-    .fk-place-order-btn {
-      background: #fb641b;
-      color: #ffffff;
-      font-size: 1rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 14px 44px;
-      border-radius: 2px;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-      transition: background 0.2s ease;
-      display: inline-block;
-    }
-    .fk-place-order-btn:hover {
-      background: #e65100;
-    }
-  </style>
 </head>
-<body>
+<body class="cart-body">
 
-    <!-- Premium Luxury Announcement Bar -->
+  <!-- Premium Luxury Announcement Bar -->
   <aside class="top-bar" id="announcement-bar" aria-label="Announcement">
     <div class="top-bar-inner">
       <span class="top-bar-brand">RJ FASHION COLLECTION</span>
@@ -166,25 +115,24 @@
   <!-- Site Header -->
   <header class="site-header">
     <div class="container header-main">
-      <a href="/" class="brand-logo">
+      <a href="/" class="brand-logo" aria-label="RJ Fashion Collection Home">
         <span class="logo-title">RJ Fashion Collection</span>
       </a>
 
       <div class="header-search">
         <form class="header-search-form" action="/shop.html" method="GET">
-          <input type="text" name="search" placeholder="Search for products, brands and more" autocomplete="off">
+          <input type="text" name="search" placeholder="Search for bridal sarees, kurtis, jewelry..." autocomplete="off">
           <button type="submit" title="Search">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" x2="16.65" y2="16.65"></line>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
           </button>
         </form>
       </div>
 
       <div class="header-actions">
-        <!-- Luxury Interactive Dark Mode Toggle Slider -->
-                
+        <!-- Interactive Theme Switcher -->
         <div class="theme-switch-container" onclick="toggleTheme()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTheme();}" role="switch" aria-checked="false" tabindex="0" title="Toggle Dark/Light Mode">
           <span class="theme-label-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
           <span class="theme-mode-text">Dark Mode</span>
@@ -195,7 +143,7 @@
 
         <div class="auth-nav-slot">
           <a href="/login.html" class="action-btn">
-            <span>Login</span>
+            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Login</span>
           </a>
         </div>
 
@@ -204,92 +152,285 @@
           <span class="action-badge wishlist-count-badge" style="display: none;">0</span>
         </a>
 
-        <a href="/cart.html" class="action-btn" title="Shopping Cart">
+        <a href="/cart.html" class="action-btn active" title="Shopping Cart">
           <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg> Cart</span>
           <span class="action-badge cart-count-badge" style="display: none;">0</span>
         </a>
       </div>
     </div>
+
+    <nav class="main-nav">
+      <div class="container">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/shop.html?category=sarees">Sarees</a></li>
+          <li><a href="/shop.html?category=kurtis">Kurtis</a></li>
+          <li><a href="/shop.html?category=dresses">Dresses</a></li>
+          <li><a href="/shop.html?category=jewelry">Jewellery</a></li>
+          <li><a href="/shop.html?category=accessories">Bags & Gifts</a></li>
+          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
+        </ul>
+      </div>
+    </nav>
   </header>
 
-  <!-- Cart Content -->
-  <main class="container" style="padding-top: 24px; padding-bottom: 60px;">
-    
-    <!-- Empty State -->
-    <div id="cart-empty-state" class="empty-state" style="display: none; max-width: 600px; margin: 40px auto;">
-      <div class="empty-state-icon">&#128717;&#65039;</div>
-      <h3>Your Shopping Cart is Empty</h3>
-      <p>Explore our exquisite designer sarees, royal jewelry, and designer festive outfits to start shopping.</p>
-      <a href="/shop.html" class="btn btn-primary" style="padding: 12px 32px;">SHOP NOW</a>
-    </div>
+  <!-- Main Shopping Bag Container -->
+  <main class="cart-page-wrapper">
+    <div class="container" style="max-width: 1320px; padding-top: 24px; padding-bottom: 80px;">
 
-    <!-- Active Cart Layout -->
-    <div class="fk-checkout-layout" id="cart-page-layout">
-      <!-- Left Column: Cart Items -->
-      <div>
-        <!-- Flipkart-style Deliver To Header Bar -->
-        <div class="fk-cart-delivery-bar" id="cart-delivery-bar">
-          <div style="font-size: 0.9rem; color: #212121; display: flex; align-items: center; gap: 8px;">
-            <span></span>
-            <span>Deliver to: <strong id="cart-pincode-display">Select Delivery Address</strong></span>
-          </div>
-          <a href="/delivery.html" class="fk-change-btn" style="text-decoration: none;">Change</a>
+      <!-- Breadcrumbs -->
+      <nav class="cart-breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-active">Shopping Bag</span>
+      </nav>
+
+      <!-- Page Headline & Value Tag -->
+      <div class="cart-header-row">
+        <div class="cart-title-block">
+          <h1 class="cart-main-title">Shopping Bag</h1>
+          <span class="cart-items-counter-badge" id="cart-heading-count">0</span>
         </div>
-
-        <!-- Cart Items Card -->
-        <div class="fk-cart-items-card">
-          <div style="padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="font-size: 1.1rem; font-weight: 700; color: #212121; margin: 0;">RJ Fashion Collection (<span id="cart-heading-count">0</span>)</h2>
-            <span style="font-size: 0.82rem; color: #878787;">Certified Authentic RJ Fashion</span>
-          </div>
-
-          <div id="cart-items-list">
-            <p style="color: var(--muted); padding: 30px; text-align: center;">Loading your cart items...</p>
-          </div>
-
-          <!-- Bottom CTA Bar (Sticky Flipkart Style) -->
-          <div class="fk-cart-bottom-bar">
-            <button type="button" onclick="handleCartProceedCheckout()" class="fk-place-order-btn" style="border: none; cursor: pointer; text-decoration: none;">
-              PLACE ORDER
-            </button>
-          </div>
+        <div class="cart-header-guarantee">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>100% Certified Designer Guarantee</span>
         </div>
       </div>
 
-      <!-- Right Column: Flipkart-style Price Details Aside -->
-      <aside>
+      <!-- Refined Empty Bag State -->
+      <div id="cart-empty-state" class="cart-empty-editorial" style="display: none;">
+        <div class="empty-bag-icon-wrap">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <div class="empty-text-block">
+          <h2 class="empty-headline">Your Shopping Bag is Empty</h2>
+          <p class="empty-subtext">
+            Discover our royal bridal silks, festive ensembles, and statement jewelry to find the perfect silhouette for your celebrations.
+          </p>
+        </div>
+        <div class="empty-cta-wrap">
+          <a href="/shop.html?newArrival=true" class="btn btn-luxury-primary">
+            <span>Explore New Arrivals</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        </div>
+      </div>
 
-        <!-- Luxury Gifting Option Card -->
-        <div class="fk-gifting-card" style="background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow-sm);">
-          <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer;">
-            <input type="checkbox" id="gift-wrap-checkbox" onchange="toggleGiftOption(this)" style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary);">
-            <div>
-              <div style="font-weight: 700; font-size: 0.95rem; color: var(--dark); display: flex; align-items: center; gap: 6px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c5a059" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
-                <span>Add Luxury Gift Packaging &amp; Greeting Card</span>
+      <!-- Active Cart Layout (2-Column Desktop Grid / Sticky Mobile Drawer) -->
+      <div class="cart-editorial-layout" id="cart-page-layout">
+        
+        <!-- LEFT COLUMN: Items List, Shipping Bar, Gifting, Upsell (65%) -->
+        <div class="cart-left-column">
+
+          <!-- Dynamic Free Shipping Progress Bar Widget -->
+          <div class="cart-shipping-progress-card" id="cart-shipping-card">
+            <div class="shipping-progress-info">
+              <div class="shipping-icon-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
               </div>
-              <p style="font-size: 0.8rem; color: var(--muted); margin: 4px 0 0 0;">Complimentary premium gold-ribbon box with a personalized festive greeting message.</p>
+              <div class="shipping-progress-msg" id="shipping-progress-msg">
+                Calculating delivery privileges...
+              </div>
+              <span class="shipping-progress-percent" id="shipping-progress-percent">0%</span>
             </div>
-          </label>
-          <div id="gift-message-box" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border);">
-            <textarea id="gift-message-text" oninput="saveGiftMessage(this.value)" placeholder="Write your personalized gift message here (optional)..." rows="2" maxlength="200" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.85rem; font-family: inherit; background: var(--bg-subtle); outline: none;"></textarea>
+            <div class="shipping-progress-track">
+              <div class="shipping-progress-fill" id="shipping-progress-fill" style="width: 0%;"></div>
+            </div>
           </div>
+
+          <!-- Deliver To Address Strip -->
+          <div class="cart-delivery-address-strip" id="cart-delivery-bar">
+            <div class="address-snippet-left">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <span>Deliver to: <strong id="cart-pincode-display">Select Delivery Address</strong></span>
+            </div>
+            <a href="/delivery.html" class="address-change-link">Change</a>
+          </div>
+
+          <!-- Cart Items Container -->
+          <div class="cart-items-card-wrapper">
+            <div class="cart-items-card-header">
+              <h2 class="cart-seller-title">RJ Fashion Boutique</h2>
+              <span class="cart-auth-verified-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Certified Authentic Boutique</span>
+              </span>
+            </div>
+
+            <!-- List of Cart Rows -->
+            <div id="cart-items-list" class="cart-items-list-flow">
+              <p style="padding: 30px; text-align: center; color: var(--muted-foreground);">Loading your bag items...</p>
+            </div>
+          </div>
+
+          <!-- Luxury Gifting & Calligraphy Greeting Drawer -->
+          <div class="cart-luxury-gifting-card">
+            <label class="gifting-checkbox-label">
+              <input type="checkbox" id="gift-wrap-checkbox" onchange="toggleGiftOption(this)">
+              <div class="gifting-content-block">
+                <div class="gifting-title-row">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                  <span>Complimentary Luxury Gift Packaging & Greeting Card</span>
+                </div>
+                <p class="gifting-desc">
+                  Includes signature gold-ribbon keepsake box and a personalized royal festive greeting card.
+                </p>
+              </div>
+            </label>
+
+            <div id="gift-message-box" class="gifting-message-drawer" style="display: none;">
+              <textarea id="gift-message-text" oninput="saveGiftMessage(this.value)" placeholder="Write your personalized celebration greeting here (optional)..." rows="2" maxlength="200"></textarea>
+            </div>
+          </div>
+
+          <!-- Upsell / "Complete Your Look" Carousel -->
+          <div class="cart-upsell-section">
+            <div class="upsell-header-row">
+              <div>
+                <h3 class="upsell-section-title">Complete Your Royal Look</h3>
+                <p class="upsell-section-subtitle">Handcrafted accessories curated to pair with your ensemble.</p>
+              </div>
+              <span class="sparkle-icon">✨</span>
+            </div>
+
+            <div class="cart-upsell-scroll-track" id="cart-upsell-track">
+              <!-- Item 1: Potli -->
+              <div class="upsell-card">
+                <div class="upsell-img-wrap">
+                  <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80" alt="Silk Potli Clutch" loading="lazy">
+                </div>
+                <div class="upsell-meta">
+                  <span class="upsell-cat">ACCESSORIES</span>
+                  <h4 class="upsell-title">Raw Silk Potli with Pearls</h4>
+                  <div class="upsell-price">₹1,299</div>
+                </div>
+                <button type="button" class="btn-upsell-add" onclick="quickAddAccessory(101, 'Raw Silk Potli with Pearls', 1299, 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80')">
+                  + Quick Add
+                </button>
+              </div>
+
+              <!-- Item 2: Kundan Earrings -->
+              <div class="upsell-card">
+                <div class="upsell-img-wrap">
+                  <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80" alt="Kundan Earrings" loading="lazy">
+                </div>
+                <div class="upsell-meta">
+                  <span class="upsell-cat">JEWELLERY</span>
+                  <h4 class="upsell-title">Brass Kundan Drop Earrings</h4>
+                  <div class="upsell-price">₹899</div>
+                </div>
+                <button type="button" class="btn-upsell-add" onclick="quickAddAccessory(102, 'Brass Kundan Drop Earrings', 899, 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80')">
+                  + Quick Add
+                </button>
+              </div>
+
+              <!-- Item 3: Pearl Choker -->
+              <div class="upsell-card">
+                <div class="upsell-img-wrap">
+                  <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400&q=80" alt="Pearl Choker" loading="lazy">
+                </div>
+                <div class="upsell-meta">
+                  <span class="upsell-cat">JEWELLERY</span>
+                  <h4 class="upsell-title">Multi-Strand Pearl Choker</h4>
+                  <div class="upsell-price">₹1,699</div>
+                </div>
+                <button type="button" class="btn-upsell-add" onclick="quickAddAccessory(103, 'Multi-Strand Pearl Choker', 1699, 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=400&q=80')">
+                  + Quick Add
+                </button>
+              </div>
+
+              <!-- Item 4: Luxury Sunglasses -->
+              <div class="upsell-card">
+                <div class="upsell-img-wrap">
+                  <img src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=400&q=80" alt="Cat-Eye Sunglasses" loading="lazy">
+                </div>
+                <div class="upsell-meta">
+                  <span class="upsell-cat">EYEWEAR</span>
+                  <h4 class="upsell-title">Cat-Eye UV400 Acetate Shades</h4>
+                  <div class="upsell-price">₹1,499</div>
+                </div>
+                <button type="button" class="btn-upsell-add" onclick="quickAddAccessory(104, 'Cat-Eye UV400 Acetate Shades', 1499, 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=400&q=80')">
+                  + Quick Add
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div class="fk-price-card" id="cart-summary-box">
-          <div class="fk-price-header">PRICE DETAILS</div>
-          <div class="fk-price-body">
-            <p style="color: var(--muted); margin: 0;">Calculating summary...</p>
+
+        <!-- RIGHT COLUMN: Sticky Order Summary & Checkout (35%) -->
+        <aside class="cart-right-column">
+          <div class="cart-summary-sticky-card" id="cart-summary-box">
+            <h2 class="summary-card-title">Order Summary</h2>
+
+            <!-- Promo Code Input Form -->
+            <div class="cart-promo-section">
+              <form id="cart-coupon-form" onsubmit="applyCartCoupon(event)" class="promo-input-row">
+                <div class="promo-field-wrap">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                  <input type="text" id="coupon-code-input" placeholder="Enter Promo Code" autocomplete="off">
+                </div>
+                <button type="submit" class="btn-promo-apply">Apply</button>
+              </form>
+              <div id="applied-coupon-pill-wrap" style="display: none; margin-top: 8px;"></div>
+            </div>
+
+            <!-- Price Breakdown Flow -->
+            <div class="cart-price-breakdown" id="cart-price-breakdown">
+              <p style="color: var(--muted-foreground); margin: 0; font-size: 0.85rem;">Calculating summary...</p>
+            </div>
+
+            <!-- Primary Checkout Button -->
+            <button type="button" onclick="handleCartProceedCheckout()" class="btn btn-luxury-checkout" id="btn-proceed-checkout">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Proceed to Checkout</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+
+            <!-- Trust & Payment Badges -->
+            <div class="cart-trust-badges-block">
+              <div class="payment-icons-row">
+                <span>VISA</span>
+                <span>•</span>
+                <span>MASTERCARD</span>
+                <span>•</span>
+                <span>UPI INTENT</span>
+                <span>•</span>
+                <span>NET BANKING</span>
+                <span>•</span>
+                <span>COD</span>
+              </div>
+              <p class="trust-guarantee-note">
+                🔒 256-Bit SSL Encrypted Checkout • 100% Authentic Designer Silhouettes
+              </p>
+            </div>
           </div>
-          <div class="fk-trust-badge">
-            
-            <div>Safe and Secure Payments. Easy checkout. 100% Authentic Designer Wear.</div>
-          </div>
-        </div>
-      </aside>
+        </aside>
+
+      </div>
+
     </div>
   </main>
 
-  <!-- Site Footer (NO returns, NO newsletter, NO admin login) -->
+  <!-- Pinned Fixed Mobile Bottom Sticky Checkout Bar (Zero-Scroll Purchasing) -->
+  <div class="mobile-sticky-checkout-bar" id="mobile-sticky-checkout-bar" style="display: none;">
+    <div class="sticky-bar-total-info">
+      <span class="sticky-bar-label">Total Amount</span>
+      <strong class="sticky-bar-price" id="mobile-sticky-total-price">₹0</strong>
+    </div>
+    <button type="button" onclick="handleCartProceedCheckout()" class="btn-mobile-checkout">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <span>Checkout</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </button>
+  </div>
+
+  <!-- Site Footer -->
   <footer class="site-footer">
     <div class="container footer-top">
       <div class="footer-grid">
@@ -300,7 +441,7 @@
             <p style="margin-bottom: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><strong>Store Address:</strong> RJ FASHION COLLECTION, ODISHA, Jharsuguda, Sarbhal, Zipcode - 768201</p>
             <p style="margin-bottom: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><strong>Phone:</strong> <a href="tel:+917894093586" style="color: #e2e8f0; font-weight: 600; text-decoration: none;">+91 7894093586</a></p>
             <p style="margin-bottom: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg><strong>Email:</strong> <a href="mailto:rjfashioncollection@gmail.com" style="color: #e2e8f0; text-decoration: none;">rjfashioncollection@gmail.com</a></p>
-            <p style="margin-bottom: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><strong>Available:</strong> Mon to Sat (10:00 AM  5:00 PM)</p>
+            <p style="margin-bottom: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><strong>Available:</strong> Mon to Sat (10:00 AM – 5:00 PM)</p>
           </div>
         </div>
         <div class="footer-col">
@@ -335,7 +476,7 @@
     </div>
     <div class="container footer-bottom">
       <div>&copy; 2026 RJ Fashion Collection. All rights reserved. Crafted with elegance for Indian celebrations.</div>
-      <div style="color: #64748b;">100% Secure Checkout  Authentic Products</div>
+      <div style="color: #64748b;">100% Secure Checkout • Authentic Products</div>
     </div>
   </footer>
 
@@ -352,6 +493,6 @@
   </a>
   <script src="/js/mobile-nav.js?v=20261025-01" defer></script>
   <script src="/js/analytics.js" defer></script>
-<script src="/js/shadcn-ui.js?v=20261025-01" defer></script>
+  <script src="/js/shadcn-ui.js?v=20261025-01" defer></script>
 </body>
 </html>

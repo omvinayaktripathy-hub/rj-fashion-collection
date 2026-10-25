@@ -4,3 +4,4 @@ export * from './LuxuryHero';
 export * from './PromotionalCountdown';
 export * from './AccountDashboard';
 export * from './WishlistPage';
+export * from './CartPage';

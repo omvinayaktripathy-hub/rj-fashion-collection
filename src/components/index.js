@@ -4,3 +4,4 @@ export * from './LuxuryHero.jsx';
 export * from './PromotionalCountdown.jsx';
 export * from './AccountDashboard.jsx';
 export * from './WishlistPage.jsx';
+export * from './CartPage.jsx';
