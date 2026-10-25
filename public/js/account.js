@@ -199,12 +199,6 @@ async function loadUserOrders(filter = 'all') {
       if (totalOrdersEl) totalOrdersEl.textContent = `${totalOrdersCount} ${totalOrdersCount === 1 ? 'Order' : 'Orders'}`;
       if (sidebarBadge) sidebarBadge.textContent = String(totalOrdersCount);
 
-      // Calculate Royale Points dynamically (Base 1,000 + 10% of total spent)
-      const totalSpent = data.orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
-      const points = 1000 + Math.floor(totalSpent / 10);
-      const pointsEl = document.getElementById('stat-royale-points');
-      if (pointsEl) pointsEl.textContent = points.toLocaleString('en-IN');
-
       renderOrdersList(filter);
     } else {
       renderOrdersList('empty');

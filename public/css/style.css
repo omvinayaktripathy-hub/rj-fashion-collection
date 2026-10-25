@@ -7086,11 +7086,11 @@ body.style-editorial-impact {
   opacity: 0.4;
 }
 
-/* 4 Quick Stat Capsules */
+/* 3 Quick Stat Capsules (Orders, Wishlist, Addresses) */
 .account-stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   margin-top: 26px;
   padding-top: 24px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
@@ -7145,15 +7145,10 @@ body.style-editorial-impact {
   background: rgba(16, 185, 129, 0.1);
   color: #059669;
 }
-.stat-icon-points {
-  background: rgba(212, 175, 55, 0.15);
-  color: #b38b22;
-}
 
 .dark-theme .stat-icon-orders, [data-theme="dark"] .stat-icon-orders { color: #60a5fa; }
 .dark-theme .stat-icon-wishlist, [data-theme="dark"] .stat-icon-wishlist { color: #f87171; }
 .dark-theme .stat-icon-addresses, [data-theme="dark"] .stat-icon-addresses { color: #34d399; }
-.dark-theme .stat-icon-points, [data-theme="dark"] .stat-icon-points { color: #e5c158; }
 
 .stat-value {
   font-size: 1.15rem;
@@ -8495,7 +8490,7 @@ body.style-editorial-impact {
     display: flex;
   }
   .account-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
   .account-security-split-grid {
     grid-template-columns: 1fr;
@@ -8515,7 +8510,7 @@ body.style-editorial-impact {
     justify-content: center;
   }
   .account-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 10px;
     padding-top: 18px;
     margin-top: 18px;
