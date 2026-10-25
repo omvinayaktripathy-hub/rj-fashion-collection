@@ -2195,11 +2195,14 @@ button {
 /* ==========================================================================
    REFINED LUXURY BALANCED 5-COLUMN FOOTER
    ========================================================================== */
+/* ==========================================================================
+   REFINED LUXURY BALANCED 4-COLUMN LIGHT IVORY FOOTER
+   ========================================================================== */
 .site-footer {
-  background: #0d0d0d !important;
-  color: #9CA3AF;
+  background: #FDFBF7 !important;
+  color: #555555;
   margin-top: auto;
-  border-top: 1px solid #222222;
+  border-top: 1px solid #E5E0D8;
   font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'Inter', sans-serif;
   width: 100%;
   box-sizing: border-box;
@@ -2207,23 +2210,25 @@ button {
 
 [data-theme="dark"] .site-footer,
 .dark-theme .site-footer {
-  background: #080808 !important;
-  border-top: 1px solid #1a1a1a !important;
+  background: #161616 !important;
+  border-top: 1px solid #262626 !important;
+  color: #A1A1AA !important;
 }
 
 .footer-top {
-  padding: 64px 0 40px;
+  padding: 56px 0 0;
   box-sizing: border-box;
 }
 
 .footer-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1.4fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 40px;
   align-items: start;
   box-sizing: border-box;
 }
 
+/* Column 1: Brand Profile */
 .footer-brand {
   min-width: 0;
 }
@@ -2231,39 +2236,89 @@ button {
 .footer-brand h3,
 .footer-brand-title {
   font-family: 'Playfair Display', Georgia, serif;
-  color: #ffffff;
-  font-size: 1.4rem;
+  color: #8C6D3F;
+  font-size: 1.35rem;
   margin: 0 0 12px 0;
-  letter-spacing: 1.2px;
-  background: linear-gradient(135deg, #D4AF37 0%, #E5C158 50%, #B38B22 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
   font-weight: 700;
+}
+
+[data-theme="dark"] .footer-brand h3,
+[data-theme="dark"] .footer-brand-title,
+.dark-theme .footer-brand h3,
+.dark-theme .footer-brand-title {
+  color: #D4AF37;
 }
 
 .footer-brand p,
 .footer-brand-desc {
   font-size: 0.86rem;
   line-height: 1.65;
-  color: #9CA3AF;
+  color: #555555;
   margin: 0 0 18px 0;
-  max-width: 440px;
 }
 
-/* Contact Card */
-.footer-contact-card {
-  border-top: 1px solid #222222;
-  padding-top: 16px;
+[data-theme="dark"] .footer-brand p,
+[data-theme="dark"] .footer-brand-desc,
+.dark-theme .footer-brand p,
+.dark-theme .footer-brand-desc {
+  color: #A1A1AA;
+}
+
+/* Social Row */
+.footer-social-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-social-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #D5CFBF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555555;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: #FFFFFF;
+}
+
+.footer-social-icon:hover {
+  color: #000000;
+  border-color: #8C6D3F;
+  background: #F4EFE6;
+  transform: translateY(-2px);
+}
+
+[data-theme="dark"] .footer-social-icon,
+.dark-theme .footer-social-icon {
+  background: #1E1E1E;
+  border-color: #333333;
+  color: #A1A1AA;
+}
+
+[data-theme="dark"] .footer-social-icon:hover,
+.dark-theme .footer-social-icon:hover {
+  background: #262626;
+  border-color: #D4AF37;
+  color: #FFFFFF;
+}
+
+/* Column 2: Store & Concierge Details */
+.footer-contact-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   font-size: 0.82rem;
-  color: #9CA3AF;
+  color: #555555;
 }
 
-[data-theme="dark"] .footer-contact-card,
-.dark-theme .footer-contact-card {
-  border-top-color: #1a1a1a;
+[data-theme="dark"] .footer-contact-list,
+.dark-theme .footer-contact-list {
+  color: #A1A1AA;
 }
 
 .contact-card-item {
@@ -2275,35 +2330,58 @@ button {
 }
 
 .contact-svg-icon {
-  color: #C5A880;
+  color: #8C6D3F;
   flex-shrink: 0;
   margin-top: 2px;
 }
 
+[data-theme="dark"] .contact-svg-icon,
+.dark-theme .contact-svg-icon {
+  color: #C5A880;
+}
+
 .contact-link {
-  color: #E5E7EB;
+  color: #1A1A1A;
   text-decoration: none;
+  font-weight: 500;
   transition: color 0.2s ease;
 }
 
 .contact-link:hover {
-  color: #D4AF37;
+  color: #8C6D3F;
   text-decoration: underline;
 }
 
-/* Columns */
+[data-theme="dark"] .contact-link,
+.dark-theme .contact-link {
+  color: #E5E7EB;
+}
+
+[data-theme="dark"] .contact-link:hover,
+.dark-theme .contact-link:hover {
+  color: #D4AF37;
+}
+
+/* Columns 3 & 4: Links */
 .footer-col {
   min-width: 0;
 }
 
 .footer-col h4,
 .footer-col-title {
-  color: #C5A880;
+  color: #1A1A1A;
   font-size: 0.78rem;
   font-weight: 800;
   margin: 0 0 18px 0;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+}
+
+[data-theme="dark"] .footer-col h4,
+[data-theme="dark"] .footer-col-title,
+.dark-theme .footer-col h4,
+.dark-theme .footer-col-title {
+  color: #E5E7EB;
 }
 
 .footer-links {
@@ -2321,106 +2399,42 @@ button {
 
 .footer-links li a {
   font-size: 0.84rem;
-  color: #9CA3AF;
+  color: #555555;
   text-decoration: none;
   transition: color 0.2s ease, transform 0.2s ease;
   display: inline-block;
 }
 
 .footer-links li a:hover {
-  color: #D4AF37;
+  color: #000000;
   transform: translateX(4px);
 }
 
-/* Mailing List & Socials Column (Col 5) */
-.footer-mailing-col {
-  min-width: 0;
+[data-theme="dark"] .footer-links li a,
+.dark-theme .footer-links li a {
+  color: #A1A1AA;
 }
 
-.mailing-subtitle {
-  font-size: 0.82rem;
-  color: #9CA3AF;
-  line-height: 1.5;
-  margin: 0 0 14px 0;
-}
-
-.footer-subscribe-form {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.footer-subscribe-input {
-  flex: 1;
-  background: #171717;
-  border: 1px solid #2a2a2a;
-  border-radius: 6px;
-  padding: 9px 12px;
-  font-size: 0.78rem;
-  color: #ffffff;
-  outline: none;
-  transition: border-color 0.2s ease;
-  min-width: 0;
-}
-
-.footer-subscribe-input:focus {
-  border-color: #C5A880;
-}
-
-.footer-subscribe-btn {
-  background: #C5A880;
-  color: #0d0d0d;
-  border: none;
-  border-radius: 6px;
-  padding: 0 16px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  white-space: nowrap;
-}
-
-.footer-subscribe-btn:hover {
-  background: #D4AF37;
-}
-
-/* Social Row */
-.footer-social-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.footer-social-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #262626;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9CA3AF;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  background: #121212;
-}
-
-.footer-social-icon:hover {
-  color: #D4AF37;
-  border-color: #D4AF37;
-  background: #1a1a1a;
-  transform: translateY(-2px);
+[data-theme="dark"] .footer-links li a:hover,
+.dark-theme .footer-links li a:hover {
+  color: #FFFFFF;
 }
 
 /* Bottom Bar */
 .footer-bottom {
-  border-top: 1px solid #1f1f1f;
-  background: #080808;
+  border-top: 1px solid #E5E0D8;
+  background: #F7F5F0;
   padding: 22px 0;
+  margin-top: 48px;
   font-size: 0.8rem;
-  color: #6B7280;
+  color: #777777;
+}
+
+[data-theme="dark"] .footer-bottom,
+.dark-theme .footer-bottom {
+  background: #121212;
+  border-top-color: #262626;
+  color: #888888;
 }
 
 .footer-bottom-inner {
@@ -2439,7 +2453,12 @@ button {
 }
 
 .footer-bottom a:hover {
-  color: #D4AF37;
+  color: #000000;
+}
+
+[data-theme="dark"] .footer-bottom a:hover,
+.dark-theme .footer-bottom a:hover {
+  color: #FFFFFF;
 }
 
 .footer-badges-flow {
@@ -2454,9 +2473,14 @@ button {
 }
 
 .secure-checkout-tag {
-  color: #9CA3AF;
+  color: #555555;
   display: inline-flex;
   align-items: center;
+}
+
+[data-theme="dark"] .secure-checkout-tag,
+.dark-theme .secure-checkout-tag {
+  color: #A1A1AA;
 }
 
 .payment-method-pills {
@@ -2469,13 +2493,20 @@ button {
 .pay-pill {
   padding: 2px 7px;
   border-radius: 4px;
-  background: #1a1a1a;
-  border: 1px solid #2d2d2d;
+  background: #EFE9DE;
+  border: 1px solid #DCD4C4;
   font-size: 0.65rem;
   font-weight: 800;
-  color: #E5E7EB;
+  color: #333333;
   letter-spacing: 0.06em;
   user-select: none;
+}
+
+[data-theme="dark"] .pay-pill,
+.dark-theme .pay-pill {
+  background: #222222;
+  border-color: #333333;
+  color: #E5E7EB;
 }
 
 /* Footer Responsive Media Queries */
@@ -2484,18 +2515,12 @@ button {
     grid-template-columns: repeat(2, 1fr);
     gap: 36px;
   }
-  .footer-brand {
-    grid-column: span 2;
-  }
 }
 
 @media (max-width: 640px) {
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 32px;
-  }
-  .footer-brand {
-    grid-column: span 1;
   }
   .footer-bottom-inner {
     flex-direction: column;
@@ -2504,12 +2529,6 @@ button {
   }
   .footer-badges-flow {
     justify-content: center;
-  }
-  .footer-subscribe-form {
-    flex-direction: column;
-  }
-  .footer-subscribe-btn {
-    padding: 10px 16px;
   }
 }
 
