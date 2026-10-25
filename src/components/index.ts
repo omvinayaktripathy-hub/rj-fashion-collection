@@ -9,4 +9,5 @@ export * from './Footer';
 export * from './Header';
 export * from './ProductCard';
 export * from './AIVirtualTryOnModal';
+export * from './AIVirtualDressingRoomModal';
 export * from './VirtualTryOnButton';

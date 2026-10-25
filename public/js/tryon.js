@@ -51,8 +51,8 @@ const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).r
             <div class="rj-tryon-brand-wrap">
               <div class="rj-tryon-brand-icon">✨</div>
               <div class="rj-tryon-title-wrap">
-                <h3 id="rjTryonTitle">Royal AI Virtual Dressing Room</h3>
-                <p>Preview authentic Indian apparel drape tailored to your posture</p>
+                <h3 id="rjTryonTitle">✨ AI Virtual Dressing Room</h3>
+                <p id="rjTryonSubtitle">Simulate fit and drape in real-time.</p>
               </div>
             </div>
             <button type="button" class="rj-tryon-close-btn" id="rjTryonClose" aria-label="Close Dressing Room">&times;</button>
@@ -640,13 +640,13 @@ const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).r
   // Public API: Open Virtual Try-On Modal
   function openTryonModal(product) {
     if (!tryonSettings.enabled) {
-      alert('Virtual Try-On is currently undergoing scheduled maintenance.');
+      showToast('Virtual Try-On is currently undergoing scheduled maintenance.');
       return;
     }
 
     currentProduct = product || window.currentProduct;
     if (!currentProduct) {
-      alert('Please select a clothing product first.');
+      showToast('Please select a clothing product first.');
       return;
     }
 
@@ -658,6 +658,10 @@ const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).r
     const thumbEl = document.getElementById('rjTryonProductThumb');
 
     if (nameEl) nameEl.textContent = currentProduct.name;
+    const subtitleEl = document.getElementById('rjTryonSubtitle');
+    if (subtitleEl && currentProduct && currentProduct.name) {
+      subtitleEl.textContent = 'Simulate fit and drape for ' + currentProduct.name + ' in real-time.';
+    }
     if (priceEl) priceEl.textContent = typeof window.formatPrice === 'function' ? window.formatPrice(currentProduct.price) : `₹${currentProduct.price}`;
     if (thumbEl && currentProduct.image) thumbEl.src = currentProduct.image;
 

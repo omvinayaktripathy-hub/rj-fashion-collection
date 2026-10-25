@@ -1321,7 +1321,7 @@ function handleOpenTryonStudio(event) {
       if (typeof window.openRjTryonStudio === 'function') {
         window.openRjTryonStudio(prod);
       } else {
-        alert('Opening Virtual Dressing Room...');
+        console.warn('AI Virtual Dressing Room studio initialization pending...');
       }
     }, 150);
   }
