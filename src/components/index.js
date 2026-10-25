@@ -6,3 +6,4 @@ export * from './AccountDashboard.jsx';
 export * from './WishlistPage.jsx';
 export * from './CartPage.jsx';
 export * from './Footer.jsx';
+export * from './Header.jsx';

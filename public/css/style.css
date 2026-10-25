@@ -338,8 +338,10 @@ button {
 .nav-links {
   display: flex;
   align-items: center;
+  justify-content: center;
   list-style: none;
-  gap: 28px;
+  gap: 32px;
+  width: 100%;
   padding: 0;
   margin: 0;
   position: relative;
@@ -10157,4 +10159,41 @@ body.style-editorial-impact {
   .cart-price-remove-wrap {
     gap: 12px;
   }
+}
+
+
+/* ===================================================================
+   LUXURY CENTERED HEADER & BALANCED NAVIGATION OVERRIDES
+   =================================================================== */
+.main-nav .container {
+  display: flex;
+  justify-content: center;
+}
+
+.nav-links {
+  justify-content: center !important;
+  gap: 34px !important;
+  width: 100% !important;
+}
+
+.nav-links > li > a {
+  font-size: 0.78rem !important;
+  letter-spacing: 0.12em !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  padding: 14px 2px !important;
+}
+
+.nav-links > li > a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: currentColor;
+}
+
+.top-bar-inner {
+  justify-content: space-between !important;
 }
