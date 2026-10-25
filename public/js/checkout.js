@@ -10,6 +10,13 @@ let countdownInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initCheckoutPage();
+  const notesInput = document.getElementById('order-delivery-notes');
+  if (notesInput) {
+    notesInput.addEventListener('input', () => {
+      const counter = document.getElementById('delivery-notes-count');
+      if (counter) counter.textContent = String(notesInput.value.length) + ' / 200';
+    });
+  }
   // dispatch countdown disabled
 
   // Payment radio card styling & animated toggle
@@ -232,6 +239,11 @@ function renderPriceDetails(cart) {
   const totalDiscount = baseDiscount + appliedDiscount;
   const finalTotal = Math.max(0, itemsTotal - appliedDiscount);
   currentCartTotal = finalTotal;
+
+  const confirmBtnLabel = document.getElementById('confirm-order-btn-label');
+  if (confirmBtnLabel) {
+    confirmBtnLabel.textContent = 'PAY & COMPLETE ORDER • ' + formatPrice(finalTotal);
+  }
 
   priceBody.innerHTML = `
     <div class="fk-price-row">
@@ -510,4 +522,15 @@ async function handleStripeCallback(sessionId, orderNumber) {
     showToast('Failed to verify Stripe payment confirmation.', 'error');
   }
   return false;
+}
+
+
+function toggleDeliveryInstructions() {
+  const drawer = document.getElementById('delivery-instructions-drawer');
+  const arrow = document.getElementById('delivery-instructions-arrow');
+  if (drawer) {
+    const isHidden = drawer.style.display === 'none' || !drawer.style.display;
+    drawer.style.display = isHidden ? 'block' : 'none';
+    if (arrow) arrow.textContent = isHidden ? '▴' : '▾';
+  }
 }

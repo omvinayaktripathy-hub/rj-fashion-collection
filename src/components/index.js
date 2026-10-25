@@ -13,4 +13,5 @@ export * from './AIVirtualDressingRoomModal.jsx';
 export * from './LiveVirtualTryOnModal.jsx';
 export * from './DeliveryAddressStep.jsx';
 export * from './CheckoutPaymentStep.jsx';
+export * from './PaymentOptionsStep.jsx';
 export * from './VirtualTryOnButton.jsx';
