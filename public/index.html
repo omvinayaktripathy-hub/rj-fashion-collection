@@ -1397,25 +1397,6 @@
     <span class="whatsapp-label">WhatsApp Concierge</span>
   </a>
   <script>
-    // Live Countdown Timer Engine
-    function initCountdown(targetDateStr) {
-      const target = targetDateStr ? new Date(targetDateStr).getTime() : (Date.now() + 18 * 24 * 60 * 60 * 1000);
-      function update() {
-        const now = Date.now();
-        const diff = Math.max(0, target - now);
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-        if (document.getElementById('cd-days')) document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
-        if (document.getElementById('cd-hours')) document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
-        if (document.getElementById('cd-mins')) document.getElementById('cd-mins').textContent = String(mins).padStart(2, '0');
-        if (document.getElementById('cd-secs')) document.getElementById('cd-secs').textContent = String(secs).padStart(2, '0');
-      }
-      update();
-      setInterval(update, 1000);
-    }
 
     // Dynamic Campaign Fetcher
     async function loadCampaignData() {
@@ -1440,12 +1421,10 @@
             if (c.hero_image && document.getElementById('hero-main-img')) {
               document.getElementById('hero-main-img').src = c.hero_image;
             }
-            initCountdown(c.launch_date);
             return;
           }
         }
       } catch (_) {}
-      initCountdown('2026-11-15T10:00:00');
     }
 
     document.addEventListener('DOMContentLoaded', loadCampaignData);
