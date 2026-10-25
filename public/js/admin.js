@@ -3712,8 +3712,8 @@ function previewCampaignModal() {
         <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(18,16,19,0.92); border: 1px solid rgba(197,160,89,0.4); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; gap: 8px;">
           <img src="${secImg}" style="width: 32px; height: 40px; object-fit: cover; border-radius: 4px;">
           <div>
-            <div style="font-weight: 700; font-size: 0.78rem; color: #fff;">The Kundan Vault</div>
-            <div style="font-size: 0.68rem; color: #c5a059; font-weight: 700;">24K GOLD ACCENTS</div>
+            <div style="font-weight: 700; font-size: 0.78rem; color: #fff;">The Signature Vault</div>
+            <div style="font-size: 0.68rem; color: #c5a059; font-weight: 700;">FINE ARTISANAL ACCENTS</div>
           </div>
         </div>
       </div>
@@ -3753,7 +3753,7 @@ async function loadAdminReviews() {
   // Fallback demo reviews for empty store
   currentReviews = [
     { id: 1, user_name: 'Ananya Deshmukh', rating: 5, comment: 'The Kanjivaram zari work is absolutely breathtaking. Pure royal elegance!', product_name: 'Royal Kanjivaram Pure Silk Saree', created_at: new Date().toISOString(), verified: 1 },
-    { id: 2, user_name: 'Pooja Singhania', rating: 5, comment: 'The Kundan choker arrived in luxury velvet packaging. Truly heirloom quality.', product_name: 'Heritage 24k Gold Plated Kundan Choker', created_at: new Date().toISOString(), verified: 1 }
+    { id: 2, user_name: 'Pooja Singhania', rating: 5, comment: 'The Kundan choker arrived in luxury velvet packaging. Truly heirloom quality.', product_name: 'Heritage Gold Finished Kundan Choker', created_at: new Date().toISOString(), verified: 1 }
   ];
   renderReviewsTable(currentReviews);
 }

@@ -15,7 +15,7 @@ import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 export default function LuxuryHero({
   brandName = "RJ FASHION COLLECTION",
   headline = "STYLE THAT SPEAKS WITHOUT WORDS",
-  subtext = "Curated contemporary ethnic wear, trendy fashion, and modern statement accessories.",
+  subtext = "Discover timeless silhouettes, authentic artisanal weaves, and contemporary Indian couture. An exquisite curation by RJ Fashion Collection.",
   primaryCtaText = "EXPLORE COLLECTION →",
   secondaryCtaText = "DISCOVER NEW ARRIVALS",
   primaryCtaLink = "/shop.html",
@@ -272,7 +272,7 @@ export default function LuxuryHero({
               transformStyle: 'preserve-3d',
             }}
             animate={{
-              y: [0, -12, 0],
+              y: [-8, 8, -8],
             }}
             transition={{
               duration: 6,
@@ -293,27 +293,27 @@ export default function LuxuryHero({
               <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0f]/80 via-transparent to-transparent pointer-events-none" />
             </div>
 
-            {/* Glassmorphic Badge #1: Fashion Jewelry Vault (Top Right) */}
+            {/* Glassmorphic Badge #1: The Signature Vault (Top Right) */}
             <motion.div
               style={{ x: badge1X, y: badge1Y }}
               className="absolute -top-5 -right-4 sm:-right-6 flex items-center gap-3 p-2.5 sm:p-3 rounded-2xl bg-[#141211]/75 backdrop-blur-xl border border-[#d4af37]/45 shadow-[0_12px_32px_rgba(0,0,0,0.55)] cursor-pointer hover:border-[#d4af37] transition-colors"
             >
               <img
                 src={kundanThumb}
-                alt="Kundan Vault 24K"
+                alt="The Signature Vault - Fine Artisanal Accents"
                 className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover border border-[#d4af37]/40"
               />
               <div className="pr-2">
                 <p className="text-xs sm:text-sm font-bold text-[#f7f2ea] leading-tight">
-                  Fashion Jewelry Vault
+                  The Signature Vault
                 </p>
                 <p className="text-[10px] sm:text-xs font-semibold text-[#d4af37] tracking-wider uppercase mt-0.5">
-                  Premium Brass & Kundan Polish
+                  Fine Artisanal Accents
                 </p>
               </div>
             </motion.div>
 
-            {/* Glassmorphic Badge #2: Premium Quality (Bottom Left) */}
+            {/* Glassmorphic Badge #2: 100% Certified Authentic (Bottom Left) */}
             <motion.div
               style={{ x: badge2X, y: badge2Y }}
               className="absolute -bottom-6 -left-4 sm:-left-6 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#141211]/80 backdrop-blur-xl border border-white/20 shadow-[0_12px_32px_rgba(0,0,0,0.55)] hover:border-[#d4af37]/60 transition-colors"
@@ -323,10 +323,10 @@ export default function LuxuryHero({
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-bold text-[#ffffff] leading-tight">
-                  Premium Quality
+                  100% Certified Authentic
                 </p>
                 <p className="text-[10px] sm:text-xs font-medium text-[#c5a880] tracking-wide mt-0.5">
-                  Handpicked Fabrics & Fine Stitching
+                  Pure Mulberry Silks & Zari
                 </p>
               </div>
             </motion.div>

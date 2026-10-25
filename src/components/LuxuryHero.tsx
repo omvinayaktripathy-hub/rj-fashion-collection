@@ -34,7 +34,7 @@ interface Ripple {
 export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
   brandName = "RJ FASHION COLLECTION",
   headline = "STYLE THAT SPEAKS WITHOUT WORDS",
-  subtext = "Curated contemporary ethnic wear, trendy fashion, and modern statement accessories.",
+  subtext = "Discover timeless silhouettes, authentic artisanal weaves, and contemporary Indian couture. An exquisite curation by RJ Fashion Collection.",
   primaryCtaText = "EXPLORE COLLECTION →",
   secondaryCtaText = "DISCOVER NEW ARRIVALS",
   primaryCtaLink = "/shop.html",
@@ -272,7 +272,7 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
               transformStyle: 'preserve-3d',
             }}
             animate={{
-              y: [0, -12, 0],
+              y: [-8, 8, -8],
             }}
             transition={{
               duration: 6,
@@ -298,15 +298,15 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
             >
               <img
                 src={kundanThumb}
-                alt="Kundan Vault 24K"
+                alt="The Signature Vault - Fine Artisanal Accents"
                 className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover border border-[#d4af37]/40"
               />
               <div className="pr-2">
                 <p className="text-xs sm:text-sm font-bold text-[#f7f2ea] leading-tight">
-                  Fashion Jewelry Vault
+                  The Signature Vault
                 </p>
                 <p className="text-[10px] sm:text-xs font-semibold text-[#d4af37] tracking-wider uppercase mt-0.5">
-                  Premium Brass & Kundan Polish
+                  Fine Artisanal Accents
                 </p>
               </div>
             </motion.div>
@@ -321,10 +321,10 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
               </div>
               <div>
                 <p className="text-xs sm:text-sm font-bold text-[#ffffff] leading-tight">
-                  Premium Quality
+                  100% Certified Authentic
                 </p>
                 <p className="text-[10px] sm:text-xs font-medium text-[#c5a880] tracking-wide mt-0.5">
-                  Handpicked Fabrics & Fine Stitching
+                  Pure Mulberry Silks & Zari
                 </p>
               </div>
             </motion.div>

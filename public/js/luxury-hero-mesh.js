@@ -77,7 +77,7 @@
     // 3D Mouse Parallax Tracking
     const modelFrame = document.querySelector('.hero-model-arched-frame');
     const badgeKundan = document.querySelector('.card-kundan');
-    const badgeHandloom = document.querySelector('.card-handloom');
+    const badgeAuthentic = document.querySelector('.card-authentic');
 
     if (modelFrame && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
       let targetX = 0, targetY = 0;
@@ -107,8 +107,8 @@
         if (badgeKundan) {
           badgeKundan.style.transform = `translate3d(${curX * 14}px, ${curY * 12}px, 20px)`;
         }
-        if (badgeHandloom) {
-          badgeHandloom.style.transform = `translate3d(${-curX * 16}px, ${-curY * 14}px, 20px)`;
+        if (badgeAuthentic) {
+          badgeAuthentic.style.transform = `translate3d(${-curX * 16}px, ${-curY * 14}px, 20px)`;
         }
 
         requestAnimationFrame(updateParallax);

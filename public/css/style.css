@@ -5798,7 +5798,7 @@ body.style-editorial-impact {
   border: 1px solid rgba(212, 175, 55, 0.4);
 }
 
-.card-handloom {
+.card-authentic {
   bottom: -20px;
   left: -20px;
   border-color: rgba(255, 255, 255, 0.22);
@@ -5865,7 +5865,7 @@ body.style-editorial-impact {
     top: -12px;
     right: 0px;
   }
-  .card-handloom {
+  .card-authentic {
     bottom: -16px;
     left: 0px;
   }
@@ -5939,7 +5939,7 @@ body.style-editorial-impact {
     top: -8px;
     right: -4px;
   }
-  .card-handloom {
+  .card-authentic {
     bottom: -10px;
     left: -4px;
   }
