@@ -1334,11 +1334,12 @@ button {
 
 /* Product Card Actions */
 .product-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: center;
   gap: 8px;
   border-top: 1px solid var(--border-subtle);
-  padding-top: 14px;
+  padding-top: 10px;
+  margin-top: auto;
 }
 
 .btn-card {
@@ -10751,6 +10752,20 @@ body.style-editorial-impact {
   background: #F4F4F5;
   color: #52525B;
   border: 1px solid #E4E4E7;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.product-size-chip:hover {
+  border-color: #111111;
+  color: #111111;
+}
+
+.product-size-chip.selected {
+  background: #111111 !important;
+  color: #FFFFFF !important;
+  border-color: #111111 !important;
 }
 
 [data-theme="dark"] .product-size-chip,
@@ -10758,6 +10773,19 @@ body.style-editorial-impact {
   background: #202028;
   color: #A1A1AA;
   border-color: #2E2E3A;
+}
+
+[data-theme="dark"] .product-size-chip:hover,
+.dark-theme .product-size-chip:hover {
+  border-color: #C5A880;
+  color: #FFFFFF;
+}
+
+[data-theme="dark"] .product-size-chip.selected,
+.dark-theme .product-size-chip.selected {
+  background: #C5A880 !important;
+  color: #0B1120 !important;
+  border-color: #C5A880 !important;
 }
 
 .product-rating {
@@ -10808,53 +10836,148 @@ body.style-editorial-impact {
   color: #DC2626;
 }
 
-/* Single Elegant Action Button */
-.btn-luxury-add {
-  width: 100%;
-  padding: 11px 16px;
-  border-radius: 8px;
-  background: #111111;
-  color: #FFFFFF !important;
-  font-weight: 700;
-  font-size: 0.74rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: 1px solid #111111;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s ease;
-  box-sizing: border-box;
+/* Dual Action Buttons Container & Buttons */
+.product-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: auto !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #F5F5F5 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+[data-theme="dark"] .product-actions,
+.dark-theme .product-actions {
+  border-top: 1px solid #27272A !important;
+}
+
+/* Button 1: ADD TO BAG (Secondary / Outline / Muted) */
+.btn-card-add,
+.btn-luxury-add {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 10px 8px !important;
+  border-radius: 8px !important;
+  border: 1px solid #171717 !important;
+  color: #171717 !important;
+  background: transparent !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+.btn-card-add:hover,
+.btn-luxury-add:hover {
+  background: #F5F5F5 !important;
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .btn-card-add,
+.dark-theme .btn-card-add,
 [data-theme="dark"] .btn-luxury-add,
 .dark-theme .btn-luxury-add {
-  background: #F4F4F5 !important;
-  color: #111111 !important;
-  border-color: #F4F4F5 !important;
+  border-color: #D4D4D8 !important;
+  color: #F4F4F5 !important;
+  background: transparent !important;
 }
 
-.btn-luxury-add:hover {
-  background: #000000;
-  border-color: #000000;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-}
-
+[data-theme="dark"] .btn-card-add:hover,
+.dark-theme .btn-card-add:hover,
 [data-theme="dark"] .btn-luxury-add:hover,
 .dark-theme .btn-luxury-add:hover {
-  background: #FFFFFF !important;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
+/* Button 2: BUY NOW (Primary / High-Intent / Solid Obsidian) */
+.btn-card-buy {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 10px 8px !important;
+  border-radius: 8px !important;
+  border: 1px solid #111111 !important;
+  background: #111111 !important;
+  color: #FFFFFF !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  box-sizing: border-box !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+
+.btn-card-buy:hover {
+  background: #262626 !important;
+  border-color: #262626 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="dark"] .btn-card-buy,
+.dark-theme .btn-card-buy {
+  background: #F4F4F5 !important;
+  border-color: #F4F4F5 !important;
+  color: #111111 !important;
+}
+
+[data-theme="dark"] .btn-card-buy:hover,
+.dark-theme .btn-card-buy:hover {
+  background: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Disabled & Out-of-Stock States */
+.btn-card-add:disabled,
+.btn-card-buy:disabled,
 .btn-luxury-add:disabled {
+  opacity: 0.45 !important;
   background: #E5E7EB !important;
-  color: #9CA3AF !important;
   border-color: #E5E7EB !important;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  color: #9CA3AF !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .btn-card-add:disabled,
+.dark-theme .btn-card-add:disabled,
+[data-theme="dark"] .btn-card-buy:disabled,
+.dark-theme .btn-card-buy:disabled {
+  background: #27272A !important;
+  border-color: #27272A !important;
+  color: #71717A !important;
+}
+
+@media (max-width: 360px) {
+  .btn-card-add,
+  .btn-card-buy,
+  .btn-luxury-add {
+    font-size: 10px !important;
+    padding: 9px 4px !important;
+    gap: 3px !important;
+    letter-spacing: 0.02em !important;
+  }
 }
 
 /* 3. Dual Editorial Banners */

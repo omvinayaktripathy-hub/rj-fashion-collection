@@ -7,3 +7,4 @@ export * from './WishlistPage';
 export * from './CartPage';
 export * from './Footer';
 export * from './Header';
+export * from './ProductCard';

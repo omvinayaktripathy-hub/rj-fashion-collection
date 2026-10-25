@@ -116,8 +116,8 @@ function createProductCard(p) {
         </h3>
 
         ${displaySizes.length > 0 ? `
-          <div class="product-card-sizes" title="Available Sizes">
-            ${displaySizes.map(sz => `<span class="product-size-chip">${escapeHtml(sz)}</span>`).join('')}
+          <div class="product-card-sizes" title="Select Size">
+            ${displaySizes.map((sz, idx) => `<span class="product-size-chip ${idx === 0 ? 'selected' : ''}" data-size="${escapeHtml(sz)}" onclick="selectCardSize('${escapeHtml(String(p.id))}', '${escapeHtml(sz)}', this, event)">${escapeHtml(sz)}</span>`).join('')}
           </div>
         ` : ''}
 
@@ -133,14 +133,25 @@ function createProductCard(p) {
         </div>
 
         <div class="product-actions">
-          <button class="btn-luxury-add"
-            onclick="addToCart('${escapeHtml(String(p.id))}')"
-            ${isOutOfStock ? 'disabled' : ''}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;">
+          <button class="btn-card-add"
+            onclick="handleCardAddToCart('${escapeHtml(String(p.id))}', event)"
+            ${isOutOfStock ? 'disabled' : ''}
+            title="${isOutOfStock ? 'Item out of stock' : 'Add to Shopping Bag'}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;">
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <path d="M16 10a4 4 0 0 1-8 0"></path>
-            </svg>${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO BAG'}
+            </svg>
+            <span>${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO BAG'}</span>
+          </button>
+          <button class="btn-card-buy"
+            onclick="handleCardBuyNow('${escapeHtml(String(p.id))}', event)"
+            ${isOutOfStock ? 'disabled' : ''}
+            title="${isOutOfStock ? 'Item out of stock' : 'Proceed directly to checkout'}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:4px;">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>BUY NOW</span>
           </button>
         </div>
       </div>
@@ -148,13 +159,90 @@ function createProductCard(p) {
   `;
 }
 
-// Quick Buy
-async function quickBuy(productId) {
-  const added = await addToCart(productId);
-  if (added) {
-    window.location.href = '/delivery.html';
+// Select Card Size
+function selectCardSize(productId, size, el, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const card = el ? el.closest('.product-card') : document.querySelector(`.product-card[data-id="${productId}"]`);
+  if (card) {
+    card.setAttribute('data-selected-size', size);
+    card.querySelectorAll('.product-size-chip').forEach(c => c.classList.remove('selected'));
+    if (el) el.classList.add('selected');
   }
 }
+
+// Card Add To Bag Handler
+async function handleCardAddToCart(productId, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const card = event && event.target ? event.target.closest('.product-card') : document.querySelector(`.product-card[data-id="${productId}"]`);
+  let selectedSize = card ? card.getAttribute('data-selected-size') : null;
+
+  if (!selectedSize) {
+    let p = null;
+    if (window.catalogProducts && Array.isArray(window.catalogProducts)) {
+      p = window.catalogProducts.find(item => String(item.id) === String(productId));
+    }
+    if (p && p.available_sizes) {
+      let sizes = [];
+      if (Array.isArray(p.available_sizes)) sizes = p.available_sizes;
+      else if (typeof p.available_sizes === 'string' && p.available_sizes.startsWith('[')) {
+        try { sizes = JSON.parse(p.available_sizes); } catch (_) {}
+      }
+      if (sizes.length > 0) {
+        selectedSize = String(sizes[0]).replace(/\s*\(.*\)/, '').trim();
+      }
+    }
+  }
+
+  await addToCart(productId, 1, selectedSize || 'Free Size');
+}
+
+// Card Buy Now Handler - Instant Direct Checkout Flow
+async function handleCardBuyNow(productId, event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  const card = event && event.target ? event.target.closest('.product-card') : document.querySelector(`.product-card[data-id="${productId}"]`);
+  let selectedSize = card ? card.getAttribute('data-selected-size') : null;
+
+  if (!selectedSize) {
+    let p = null;
+    if (window.catalogProducts && Array.isArray(window.catalogProducts)) {
+      p = window.catalogProducts.find(item => String(item.id) === String(productId));
+    }
+    if (p && p.available_sizes) {
+      let sizes = [];
+      if (Array.isArray(p.available_sizes)) sizes = p.available_sizes;
+      else if (typeof p.available_sizes === 'string' && p.available_sizes.startsWith('[')) {
+        try { sizes = JSON.parse(p.available_sizes); } catch (_) {}
+      }
+      if (sizes.length > 0) {
+        selectedSize = String(sizes[0]).replace(/\s*\(.*\)/, '').trim();
+      }
+    }
+  }
+
+  const added = await addToCart(productId, 1, selectedSize || 'Free Size');
+  if (added) {
+    window.location.href = '/checkout.html';
+  }
+}
+
+// Quick Buy
+async function quickBuy(productId) {
+  return handleCardBuyNow(productId);
+}
+
+window.selectCardSize = selectCardSize;
+window.handleCardAddToCart = handleCardAddToCart;
+window.handleCardBuyNow = handleCardBuyNow;
+window.quickBuy = quickBuy;
 
 // ================= QUICK VIEW MODAL CONTROLLER =================
 let currentQuickViewProduct = null;
