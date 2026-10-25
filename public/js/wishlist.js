@@ -380,18 +380,27 @@ async function moveToCartFromWishlist(productId) {
     if (typeof addToCart === 'function') {
       added = await addToCart(productId, 1, chosenSize);
     } else {
-      // Direct LocalStorage fallback
-      let cart = JSON.parse(localStorage.getItem('rjfc_cart') || '[]');
+      // Direct LocalStorage fallback with unified key synchronization
+      const raw = localStorage.getItem('rjfc_cart') || localStorage.getItem('rjfc_local_cart') || localStorage.getItem('rjfc_react_cart');
+      let cart = raw ? JSON.parse(raw) : [];
       if (product) {
         cart.push({
           id: product.id,
+          product_id: product.id,
+          cart_id: `cart_${Date.now()}_${product.id}`,
           name: product.name,
           price: product.price,
           image: product.image,
           quantity: 1,
           size: chosenSize
         });
-        localStorage.setItem('rjfc_cart', JSON.stringify(cart));
+        const json = JSON.stringify(cart);
+        ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach(k => {
+          localStorage.setItem(k, json);
+          try { sessionStorage.setItem(k, json); } catch (_) {}
+        });
+        window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: cart } }));
+        window.dispatchEvent(new Event('storage'));
         added = true;
       }
     }

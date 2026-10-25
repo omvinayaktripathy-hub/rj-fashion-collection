@@ -134,7 +134,8 @@ export const ProductCard = ({
       } else if (typeof window !== 'undefined' && window.addToCart) {
         await window.addToCart(product.id, 1, sizeToUse);
       } else if (typeof window !== 'undefined') {
-        const cart = JSON.parse(localStorage.getItem('rjfc_cart') || '[]');
+        const raw = localStorage.getItem('rjfc_cart') || localStorage.getItem('rjfc_local_cart') || localStorage.getItem('rjfc_react_cart');
+        const cart = raw ? JSON.parse(raw) : [];
         const existing = cart.find((i) => String(i.product_id) === String(product.id) && i.size === sizeToUse);
         if (existing) {
           existing.quantity = (existing.quantity || 1) + 1;
@@ -142,6 +143,7 @@ export const ProductCard = ({
           cart.push({
             id: Date.now(),
             product_id: product.id,
+            cart_id: `cart_${Date.now()}_${product.id}`,
             name: product.name,
             price: product.price,
             original_price: product.original_price || product.price,
@@ -153,7 +155,16 @@ export const ProductCard = ({
             stock: product.stock ?? 99
           });
         }
-        localStorage.setItem('rjfc_cart', JSON.stringify(cart));
+        const json = JSON.stringify(cart);
+        ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach((k) => {
+          localStorage.setItem(k, json);
+          try { sessionStorage.setItem(k, json); } catch (_) {}
+        });
+        window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: cart } }));
+        window.dispatchEvent(new Event('storage'));
+        if (typeof window.updateCartCount === 'function') {
+          window.updateCartCount();
+        }
       }
 
       setJustAdded(true);
@@ -185,7 +196,8 @@ export const ProductCard = ({
       if (typeof window !== 'undefined' && window.addToCart) {
         await window.addToCart(product.id, 1, sizeToUse);
       } else if (typeof window !== 'undefined') {
-        const cart = JSON.parse(localStorage.getItem('rjfc_cart') || '[]');
+        const raw = localStorage.getItem('rjfc_cart') || localStorage.getItem('rjfc_local_cart') || localStorage.getItem('rjfc_react_cart');
+        const cart = raw ? JSON.parse(raw) : [];
         const existing = cart.find((i) => String(i.product_id) === String(product.id) && i.size === sizeToUse);
         if (existing) {
           existing.quantity = (existing.quantity || 1) + 1;
@@ -193,6 +205,7 @@ export const ProductCard = ({
           cart.push({
             id: Date.now(),
             product_id: product.id,
+            cart_id: `cart_${Date.now()}_${product.id}`,
             name: product.name,
             price: product.price,
             original_price: product.original_price || product.price,
@@ -204,7 +217,16 @@ export const ProductCard = ({
             stock: product.stock ?? 99
           });
         }
-        localStorage.setItem('rjfc_cart', JSON.stringify(cart));
+        const json = JSON.stringify(cart);
+        ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach((k) => {
+          localStorage.setItem(k, json);
+          try { sessionStorage.setItem(k, json); } catch (_) {}
+        });
+        window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: cart } }));
+        window.dispatchEvent(new Event('storage'));
+        if (typeof window.updateCartCount === 'function') {
+          window.updateCartCount();
+        }
       }
 
       // 3. Immediately redirect user straight to the checkout/cart page for instant payment

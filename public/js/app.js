@@ -169,22 +169,34 @@ async function updateCartCount() {
     const res = await fetch(`${API_BASE}/cart`);
     if (res.ok) {
       const data = await res.json();
-      if (data.success) {
-        count = data.itemCount || 0;
+      if (data && data.success && typeof data.itemCount === 'number') {
+        count = data.itemCount;
       }
     } else {
       throw new Error();
     }
   } catch (err) {
     try {
-      const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
-      count = local.reduce((s, i) => s + (i.quantity || 1), 0);
+      const local = getLocalCartSafe();
+      count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
     } catch(e) {}
   }
+
+  // Gracefully fallback to local storage if API returned 0 but user has local items
+  if (count === 0) {
+    try {
+      const local = getLocalCartSafe();
+      if (Array.isArray(local) && local.length > 0) {
+        count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
+      }
+    } catch (_) {}
+  }
+
   document.querySelectorAll('.cart-count-badge').forEach(badge => {
     badge.textContent = count;
     badge.style.display = count > 0 ? 'inline-flex' : 'none';
   });
+  return count;
 }
 
 async function updateWishlistCount() {
@@ -209,44 +221,63 @@ async function updateWishlistCount() {
   });
 }
 
-// Helper to retrieve local cart across all storage mechanisms
+// Helper to retrieve local cart across all storage mechanisms (rjfc_cart, rjfc_local_cart, rjfc_react_cart)
 function getLocalCartSafe() {
-  try {
-    const raw = localStorage.getItem('rjfc_local_cart');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    }
-  } catch (_) {}
+  const keys = ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
+  for (const key of keys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+  }
 
-  try {
-    const sRaw = sessionStorage.getItem('rjfc_local_cart');
-    if (sRaw) {
-      const parsed = JSON.parse(sRaw);
-      if (Array.isArray(parsed)) return parsed;
-    }
-  } catch (_) {}
+  for (const key of keys) {
+    try {
+      const sRaw = sessionStorage.getItem(key);
+      if (sRaw) {
+        const parsed = JSON.parse(sRaw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+  }
 
-  if (typeof window !== 'undefined' && Array.isArray(window._rjfc_memory_cart)) {
+  if (typeof window !== 'undefined' && Array.isArray(window._rjfc_memory_cart) && window._rjfc_memory_cart.length > 0) {
     return window._rjfc_memory_cart;
   }
   return [];
 }
 
-// Helper to save local cart across all storage mechanisms
+// Helper to save local cart across all storage mechanisms and broadcast update events
 function saveLocalCartSafe(cartArray) {
   if (!Array.isArray(cartArray)) cartArray = [];
   if (typeof window !== 'undefined') {
     window._rjfc_memory_cart = cartArray;
   }
+  const json = JSON.stringify(cartArray);
+  const keys = ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
+  keys.forEach(k => {
+    try { localStorage.setItem(k, json); } catch (_) {}
+    try { sessionStorage.setItem(k, json); } catch (_) {}
+  });
+
   try {
-    localStorage.setItem('rjfc_local_cart', JSON.stringify(cartArray));
-  } catch (e1) {
-    console.warn('localStorage save warning:', e1);
-  }
-  try {
-    sessionStorage.setItem('rjfc_local_cart', JSON.stringify(cartArray));
+    window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: cartArray } }));
+    window.dispatchEvent(new Event('storage'));
   } catch (_) {}
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('rjfc_cart_updated', function() {
+    updateCartCount();
+  });
+  window.addEventListener('storage', function(e) {
+    if (e.key && e.key.includes('cart')) {
+      updateCartCount();
+    }
+  });
 }
 
 // Synchronous fast product finder

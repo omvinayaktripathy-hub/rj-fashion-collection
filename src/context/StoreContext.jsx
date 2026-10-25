@@ -70,6 +70,85 @@ const DEFAULT_INITIAL_CART = [
   }
 ];
 
+export const CART_STORAGE_KEYS = ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
+
+export function normalizeStoreCartItem(item, idx = 0) {
+  if (!item || typeof item !== 'object') return null;
+  const pId = item.id || item.product_id || `item_${idx + 1}`;
+  const cId = item.cart_id || `cart_${pId}_${item.selected_size || item.size || 'default'}`;
+  const price = Number(item.price) || 0;
+  const originalPrice = Number(item.original_price || item.originalPrice || price);
+  const discount = Number(item.discount) || (originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0);
+  const size = item.selected_size || item.size || 'Free Size';
+
+  return {
+    id: pId,
+    cart_id: cId,
+    name: item.name || item.title || 'Artisanal Ensemble',
+    brand: item.brand || 'RJ Fashion Collection',
+    category: item.category || item.category_name || item.department || 'Luxury Couture',
+    price,
+    original_price: originalPrice,
+    discount,
+    rating: Number(item.rating) || 4.9,
+    reviews_count: Number(item.reviews_count) || 28,
+    image: item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || '/images/placeholder.jpg',
+    quantity: Math.max(1, Number(item.quantity) || 1),
+    selected_size: size,
+    stock: item.stock !== undefined ? Number(item.stock) : 99
+  };
+}
+
+export function readUnifiedCartFromStorage() {
+  if (typeof window === 'undefined') return null;
+  for (const key of CART_STORAGE_KEYS) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const normalized = parsed.map(normalizeStoreCartItem).filter(Boolean);
+          if (normalized.length > 0) return normalized;
+        }
+      }
+    } catch (_) {}
+  }
+  for (const key of CART_STORAGE_KEYS) {
+    try {
+      const sRaw = sessionStorage.getItem(key);
+      if (sRaw) {
+        const parsed = JSON.parse(sRaw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const normalized = parsed.map(normalizeStoreCartItem).filter(Boolean);
+          if (normalized.length > 0) return normalized;
+        }
+      }
+    } catch (_) {}
+  }
+  return null;
+}
+
+export function writeUnifiedCartToStorage(cartItems) {
+  if (typeof window === 'undefined') return;
+  const json = JSON.stringify(cartItems);
+  for (const key of CART_STORAGE_KEYS) {
+    try { localStorage.setItem(key, json); } catch (_) {}
+    try { sessionStorage.setItem(key, json); } catch (_) {}
+  }
+  if (window._rjfc_memory_cart) {
+    window._rjfc_memory_cart = cartItems;
+  }
+  try {
+    window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: cartItems } }));
+    window.dispatchEvent(new Event('storage'));
+  } catch (_) {}
+  try {
+    if (typeof window.updateCartCount === 'function') {
+      window.updateCartCount();
+    }
+  } catch (_) {}
+}
+
 /* =========================================================================
    REACT CONTEXT & PROVIDER
    ========================================================================= */
@@ -123,22 +202,50 @@ export const StoreProvider = ({ children }) => {
 
   // 3. Cart State
   const [cart, setCart] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const local = localStorage.getItem('rjfc_react_cart');
-      if (local) {
-        try {
-          return JSON.parse(local);
-        } catch (_) {}
-      }
-    }
+    const stored = readUnifiedCartFromStorage();
+    if (stored && stored.length > 0) return stored;
     return DEFAULT_INITIAL_CART;
   });
 
+  const cartRef = React.useRef(cart);
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('rjfc_react_cart', JSON.stringify(cart));
-    }
+    cartRef.current = cart;
   }, [cart]);
+
+  // Synchronize cart changes across all storage keys and fire update events
+  useEffect(() => {
+    writeUnifiedCartToStorage(cart);
+  }, [cart]);
+
+  // Listen for storage / cross-tab / cross-component cart updates in real-time
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleExternalCartUpdate = () => {
+      try {
+        const stored = readUnifiedCartFromStorage();
+        if (stored) {
+          if (JSON.stringify(stored) !== JSON.stringify(cartRef.current)) {
+            setCart(stored);
+          }
+        }
+      } catch (_) {}
+    };
+
+    window.addEventListener('rjfc_cart_updated', handleExternalCartUpdate);
+    window.addEventListener('storage', handleExternalCartUpdate);
+    return () => {
+      window.removeEventListener('rjfc_cart_updated', handleExternalCartUpdate);
+      window.removeEventListener('storage', handleExternalCartUpdate);
+    };
+  }, []);
+
+  const syncCartFromStorage = useCallback(() => {
+    const stored = readUnifiedCartFromStorage();
+    if (stored) {
+      setCart(stored);
+    }
+  }, []);
 
   const [promoCode, setPromoCode] = useState('GRANDRJ');
 
@@ -348,6 +455,8 @@ export const StoreProvider = ({ children }) => {
       applyPromoCode,
       removePromoCode,
       clearCart,
+      setCart,
+      syncCartFromStorage,
       wishlist,
       wishlistCount,
       isInWishlist,
@@ -395,6 +504,8 @@ export const StoreProvider = ({ children }) => {
       applyPromoCode,
       removePromoCode,
       clearCart,
+      setCart,
+      syncCartFromStorage,
       wishlist,
       wishlistCount,
       isInWishlist,

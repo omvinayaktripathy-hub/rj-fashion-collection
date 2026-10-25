@@ -2,13 +2,24 @@
 // Perfectly styled to match the "/wishlist" ("My Saved Collection") visual identity
 const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
 
+const UNIFIED_CART_KEYS = ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
+
 let appliedCartCoupon = null;
 
 // Initialize coupon from storage if previously saved
 try {
-  const savedCoupon = sessionStorage.getItem('rjfc_cart_coupon') || localStorage.getItem('rjfc_cart_coupon');
+  const savedCoupon = sessionStorage.getItem('rjfc_cart_coupon') || localStorage.getItem('rjfc_cart_coupon') || sessionStorage.getItem('rjfc_cart_promo_code') || localStorage.getItem('rjfc_cart_promo_code');
   if (savedCoupon) {
-    appliedCartCoupon = JSON.parse(savedCoupon);
+    if (savedCoupon.startsWith('{')) {
+      appliedCartCoupon = JSON.parse(savedCoupon);
+    } else {
+      appliedCartCoupon = {
+        code: savedCoupon,
+        discount_type: 'fixed',
+        discount_value: 500,
+        discount_amount: 500
+      };
+    }
   }
 } catch (_) {}
 
@@ -17,6 +28,103 @@ function formatPriceSafe(amount) {
     return formatPrice(amount);
   }
   return '₹' + Number(amount || 0).toLocaleString('en-IN');
+}
+
+// Normalize a cart item from any backend or local format
+function normalizeCartItemSafe(item, idx = 0) {
+  if (!item || typeof item !== 'object') return null;
+  const pId = item.id || item.product_id || `item_${idx + 1}`;
+  const cId = item.cart_id || `cart_${pId}_${item.selected_size || item.size || 'default'}`;
+  const price = Number(item.price) || 0;
+  const originalPrice = Number(item.original_price || item.originalPrice || price);
+  const discount = Number(item.discount) || (originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0);
+  const size = item.selected_size || item.size || 'Free Size';
+  const color = item.color || item.colorway || 'Signature Tone';
+  const category = item.category || item.category_name || item.department || 'Luxury Couture';
+  const image = item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || '/images/placeholder.jpg';
+  const quantity = Math.max(1, Number(item.quantity) || 1);
+  const stock = item.stock !== undefined ? Number(item.stock) : 99;
+
+  return {
+    id: pId,
+    product_id: pId,
+    cart_id: cId,
+    name: item.name || item.title || 'Artisanal Ensemble',
+    category,
+    price,
+    original_price: originalPrice,
+    originalPrice,
+    discount,
+    image,
+    quantity,
+    size,
+    selected_size: size,
+    color,
+    sku: item.sku || `RJ-${String(pId).padStart(4, '0')}`,
+    stock
+  };
+}
+
+// Read unified cart from all storage mechanisms
+function getUnifiedLocalCart() {
+  for (const key of UNIFIED_CART_KEYS) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const normalized = parsed.map(normalizeCartItemSafe).filter(Boolean);
+          if (normalized.length > 0) return normalized;
+        }
+      }
+    } catch (_) {}
+  }
+
+  for (const key of UNIFIED_CART_KEYS) {
+    try {
+      const sRaw = sessionStorage.getItem(key);
+      if (sRaw) {
+        const parsed = JSON.parse(sRaw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const normalized = parsed.map(normalizeCartItemSafe).filter(Boolean);
+          if (normalized.length > 0) return normalized;
+        }
+      }
+    } catch (_) {}
+  }
+
+  if (typeof window !== 'undefined' && Array.isArray(window._rjfc_memory_cart) && window._rjfc_memory_cart.length > 0) {
+    return window._rjfc_memory_cart.map(normalizeCartItemSafe).filter(Boolean);
+  }
+
+  return [];
+}
+
+// Save unified cart to all storage mechanisms and notify other components
+function saveUnifiedLocalCart(cartArray) {
+  if (!Array.isArray(cartArray)) cartArray = [];
+  const normalized = cartArray.map(normalizeCartItemSafe).filter(Boolean);
+  const json = JSON.stringify(normalized);
+
+  if (typeof window !== 'undefined') {
+    window._rjfc_memory_cart = normalized;
+  }
+
+  for (const key of UNIFIED_CART_KEYS) {
+    try { localStorage.setItem(key, json); } catch (_) {}
+    try { sessionStorage.setItem(key, json); } catch (_) {}
+  }
+
+  try {
+    window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: normalized } }));
+    window.dispatchEvent(new Event('storage'));
+  } catch (_) {}
+
+  try {
+    if (typeof updateCartCount === 'function') {
+      updateCartCount();
+    }
+  } catch (_) {}
 }
 
 async function loadCart() {
@@ -33,39 +141,29 @@ async function loadCart() {
   const appliedPillWrap = document.getElementById('applied-coupon-pill-wrap');
   const mobileStickyBar = document.getElementById('mobile-sticky-checkout-bar');
   const mobileStickyPrice = document.getElementById('mobile-sticky-total-price');
+  const btnProceed = document.getElementById('btn-proceed-checkout');
 
   if (!container) return;
 
   try {
     // 1. Load Cart Data (API with graceful localStorage fallback)
-    let data = null;
+    let items = [];
     try {
       const res = await fetch(`${API_BASE}/cart`);
       if (res.ok) {
         const apiData = await res.json();
         if (apiData && apiData.success && Array.isArray(apiData.items) && apiData.items.length > 0) {
-          data = apiData;
+          items = apiData.items.map(normalizeCartItemSafe).filter(Boolean);
+          // Mirror active server session to local storage
+          saveUnifiedLocalCart(items);
         }
       }
     } catch (_) {}
 
-    // Fallback to localStorage if API returned nothing or failed
-    if (!data || !data.items || data.items.length === 0) {
-      try {
-        const local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || sessionStorage.getItem('rjfc_local_cart') || '[]');
-        const count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
-        const subtotal = local.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
-        data = {
-          success: true,
-          items: local,
-          itemCount: count,
-          subtotal: subtotal,
-          total: subtotal
-        };
-      } catch (_) {}
+    // Fallback to unified localStorage if API returned nothing or was empty
+    if (!items || items.length === 0) {
+      items = getUnifiedLocalCart();
     }
-
-    const items = (data && Array.isArray(data.items)) ? data.items : [];
 
     // Empty State Check
     if (items.length === 0) {
@@ -73,6 +171,13 @@ async function loadCart() {
       if (emptyState) emptyState.style.display = 'block';
       if (mobileStickyBar) mobileStickyBar.style.display = 'none';
       if (headingCount) headingCount.textContent = '[ 0 Items ]';
+      if (subtotalDisplay) subtotalDisplay.textContent = '₹0';
+      if (totalDisplay) totalDisplay.textContent = '₹0';
+      if (btnProceed) {
+        btnProceed.disabled = true;
+        btnProceed.style.opacity = '0.5';
+        btnProceed.style.cursor = 'not-allowed';
+      }
       if (typeof updateCartCount === 'function') updateCartCount();
       return;
     }
@@ -81,21 +186,26 @@ async function loadCart() {
     if (cartLayout) cartLayout.style.display = 'grid';
     if (emptyState) emptyState.style.display = 'none';
     if (mobileStickyBar) mobileStickyBar.style.display = 'flex';
+    if (btnProceed) {
+      btnProceed.disabled = false;
+      btnProceed.style.opacity = '1';
+      btnProceed.style.cursor = 'pointer';
+    }
 
-    const itemCount = data.itemCount || items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
-    const subtotal = data.subtotal || items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
+    const itemCount = items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
+    const subtotal = items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
 
     if (headingCount) headingCount.textContent = `[ ${itemCount} ${itemCount === 1 ? 'Item' : 'Items'} ]`;
 
     // 2. Render Minimalist Product Cards with 3:4 Aspect Ratio
     container.innerHTML = items.map((item, index) => {
-      const itemId = item.id || item.product_id;
+      const itemId = item.cart_id || item.id || item.product_id;
       const prodId = item.product_id || item.id;
       const qty = Number(item.quantity) || 1;
       const price = Number(item.price) || 0;
       const linePrice = price * qty;
       const stock = Number(item.stock) || 99;
-      const selectedSize = item.size || 'Free Size';
+      const selectedSize = item.selected_size || item.size || 'Free Size';
       const colorway = item.color || item.colorway || 'Signature Tone';
       const category = item.category || 'Luxury Couture';
 
@@ -144,7 +254,7 @@ async function loadCart() {
 
     // 3. Calculate Shipping & Promo Code
     const isComplimentary = subtotal >= 999;
-    const shippingFee = isComplimentary ? 0 : 49;
+    const shippingFee = subtotal === 0 || isComplimentary ? 0 : 49;
 
     let couponDiscountAmount = 0;
     if (appliedCartCoupon) {
@@ -166,7 +276,7 @@ async function loadCart() {
 
     if (shippingDisplay) {
       if (isComplimentary) {
-        shippingDisplay.innerHTML = `<span class="shipping-complimentary-tag">Complimentary</span>`;
+        shippingDisplay.innerHTML = `<span class="shipping-complimentary-tag" style="color: #059669; font-weight: 600;">Complimentary</span>`;
       } else {
         shippingDisplay.textContent = formatPriceSafe(shippingFee);
       }
@@ -187,9 +297,9 @@ async function loadCart() {
       if (appliedCartCoupon && couponDiscountAmount > 0) {
         appliedPillWrap.style.display = 'flex';
         appliedPillWrap.innerHTML = `
-          <div class="applied-coupon-tag">
+          <div class="applied-coupon-tag" style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #059669; background: rgba(5, 150, 105, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(5, 150, 105, 0.2);">
             <span>🏷️ ${escapeHtml(appliedCartCoupon.code)} Applied (−${formatPriceSafe(couponDiscountAmount)})</span>
-            <button type="button" class="btn-tag-remove" onclick="removeCartCoupon()" title="Remove coupon">✕</button>
+            <button type="button" class="btn-tag-remove" onclick="removeCartCoupon()" title="Remove coupon" style="background: none; border: none; cursor: pointer; color: #059669; margin-left: 4px;">✕</button>
           </div>
         `;
       } else {
@@ -218,26 +328,22 @@ async function changeCartQty(cartItemId, newQty) {
     return;
   }
 
-  // 1. Server sync
+  // 1. Server sync (non-blocking)
   try {
-    await fetch(`${API_BASE}/cart/${cartItemId}`, {
+    fetch(`${API_BASE}/cart/${cartItemId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ quantity: newQty })
-    });
+    }).catch(() => {});
   } catch (_) {}
 
-  // 2. LocalStorage sync
+  // 2. Unified storage sync
   try {
-    const local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || sessionStorage.getItem('rjfc_local_cart') || '[]');
-    const item = local.find(i => String(i.id) === String(cartItemId) || String(i.product_id) === String(cartItemId));
+    const local = getUnifiedLocalCart();
+    const item = local.find(i => String(i.cart_id) === String(cartItemId) || String(i.id) === String(cartItemId) || String(i.product_id) === String(cartItemId));
     if (item) {
       item.quantity = Number(newQty);
-      if (typeof saveLocalCartSafe === 'function') {
-        saveLocalCartSafe(local);
-      } else {
-        localStorage.setItem('rjfc_local_cart', JSON.stringify(local));
-      }
+      saveUnifiedLocalCart(local);
     }
   } catch (_) {}
 
@@ -258,20 +364,16 @@ function animateAndRemoveCartItem(cartItemId) {
 }
 
 async function executeRemoveCartItem(cartItemId) {
-  // 1. Server remove
+  // 1. Server remove (non-blocking)
   try {
-    await fetch(`${API_BASE}/cart/${cartItemId}`, { method: 'DELETE' });
+    fetch(`${API_BASE}/cart/${cartItemId}`, { method: 'DELETE' }).catch(() => {});
   } catch (_) {}
 
-  // 2. LocalStorage remove
+  // 2. Unified storage remove
   try {
-    let local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || sessionStorage.getItem('rjfc_local_cart') || '[]');
-    local = local.filter(i => String(i.id) !== String(cartItemId) && String(i.product_id) !== String(cartItemId));
-    if (typeof saveLocalCartSafe === 'function') {
-      saveLocalCartSafe(local);
-    } else {
-      localStorage.setItem('rjfc_local_cart', JSON.stringify(local));
-    }
+    let local = getUnifiedLocalCart();
+    local = local.filter(i => String(i.cart_id) !== String(cartItemId) && String(i.id) !== String(cartItemId) && String(i.product_id) !== String(cartItemId));
+    saveUnifiedLocalCart(local);
   } catch (_) {}
 
   await loadCart();
@@ -282,11 +384,11 @@ const removeCartItem = animateAndRemoveCartItem;
 
 async function moveToWishlistFromCart(productId, cartItemId) {
   try {
-    await fetch(`${API_BASE}/wishlist/toggle`, {
+    fetch(`${API_BASE}/wishlist/toggle`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ productId })
-    });
+    }).catch(() => {});
   } catch (_) {}
 
   try {
@@ -310,7 +412,7 @@ async function applyCartCoupon(e) {
 
   let subtotal = 0;
   try {
-    const local = typeof getLocalCartSafe === 'function' ? getLocalCartSafe() : JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
+    const local = getUnifiedLocalCart();
     subtotal = local.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
   } catch (_) {}
 
@@ -369,12 +471,17 @@ async function applyCartCoupon(e) {
     try {
       sessionStorage.setItem('rjfc_cart_coupon', JSON.stringify(appliedCartCoupon));
       localStorage.setItem('rjfc_cart_coupon', JSON.stringify(appliedCartCoupon));
+      sessionStorage.setItem('rjfc_cart_promo_code', appliedCartCoupon.code);
+      localStorage.setItem('rjfc_cart_promo_code', appliedCartCoupon.code);
     } catch (_) {}
     if (input) input.value = '';
     await loadCart();
+    if (typeof showToast === 'function') {
+      showToast(`Promo code "${appliedCartCoupon.code}" applied successfully!`, 'success');
+    }
   } else {
     if (typeof showToast === 'function') {
-      showToast('Invalid promo code or minimum order amount not met', 'error');
+      showToast('Invalid promo code or minimum spend requirement not met', 'error');
     }
   }
 }
@@ -384,6 +491,8 @@ function removeCartCoupon() {
   try {
     sessionStorage.removeItem('rjfc_cart_coupon');
     localStorage.removeItem('rjfc_cart_coupon');
+    sessionStorage.removeItem('rjfc_cart_promo_code');
+    localStorage.removeItem('rjfc_cart_promo_code');
   } catch (_) {}
   loadCart();
 }
@@ -410,5 +519,19 @@ window.moveToWishlistFromCart = moveToWishlistFromCart;
 window.applyCartCoupon = applyCartCoupon;
 window.removeCartCoupon = removeCartCoupon;
 window.handleCartProceedCheckout = handleCartProceedCheckout;
+window.getUnifiedLocalCart = getUnifiedLocalCart;
+window.saveUnifiedLocalCart = saveUnifiedLocalCart;
+
+// Real-time synchronization listeners
+if (typeof window !== 'undefined') {
+  window.addEventListener('rjfc_cart_updated', function() {
+    loadCart();
+  });
+  window.addEventListener('storage', function(e) {
+    if (e.key && (e.key.includes('cart') || e.key.includes('promo'))) {
+      loadCart();
+    }
+  });
+}
 
 document.addEventListener('DOMContentLoaded', loadCart);

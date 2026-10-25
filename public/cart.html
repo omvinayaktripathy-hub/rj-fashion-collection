@@ -78,12 +78,36 @@
       }
     } catch(e){}
 
+    // Fast initial cart layout state to eliminate empty box flicker
+    (function() {
+      try {
+        var raw = localStorage.getItem('rjfc_cart') || localStorage.getItem('rjfc_local_cart') || localStorage.getItem('rjfc_react_cart');
+        var parsed = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          document.documentElement.classList.add('cart-initially-empty');
+        } else {
+          document.documentElement.classList.add('cart-initially-has-items');
+        }
+      } catch (_) {}
+    })();
+
     document.addEventListener('DOMContentLoaded', function() {
       var isDark = document.documentElement.getAttribute('data-theme') === 'dark' || document.documentElement.classList.contains('dark-theme');
       if (isDark && document.body) document.body.classList.add('dark-theme');
       window.updateAllThemeToggles(isDark ? 'dark' : 'light');
     });
   </script>
+  <style>
+    html.cart-initially-empty #cart-page-layout { display: none !important; }
+    html.cart-initially-empty #cart-empty-state { display: block !important; }
+    @keyframes cartShimmerPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.25; }
+    }
+    .cart-skeleton-shimmer {
+      animation: cartShimmerPulse 1.4s ease-in-out infinite;
+    }
+  </style>
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -439,7 +463,23 @@
 
           <div class="cart-items-card-wrapper">
             <div id="cart-items-list" class="cart-items-list-flow">
-              <!-- Dynamically rendered by cart.js -->
+              <!-- Animated Luxury Shimmer Skeleton for Initial Loading -->
+              <div class="cart-item-card cart-skeleton-shimmer" style="opacity: 0.7;">
+                <div class="cart-item-media">
+                  <div style="width: 105px; height: 140px; background: rgba(180, 160, 130, 0.15); border-radius: 8px;"></div>
+                </div>
+                <div class="cart-item-info" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; padding: 4px 0;">
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="width: 80px; height: 10px; background: rgba(180, 160, 130, 0.25); border-radius: 4px;"></div>
+                    <div style="width: 220px; height: 18px; background: rgba(180, 160, 130, 0.2); border-radius: 4px;"></div>
+                    <div style="width: 130px; height: 12px; background: rgba(180, 160, 130, 0.15); border-radius: 4px;"></div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px;">
+                    <div style="width: 70px; height: 26px; background: rgba(180, 160, 130, 0.2); border-radius: 6px;"></div>
+                    <div style="width: 90px; height: 16px; background: rgba(180, 160, 130, 0.2); border-radius: 4px;"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

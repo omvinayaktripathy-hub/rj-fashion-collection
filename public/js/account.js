@@ -413,12 +413,16 @@ function reorderItems(orderId) {
 
   try {
     let cart = [];
-    const stored = localStorage.getItem('rjfc_cart');
-    if (stored) cart = JSON.parse(stored);
+    const stored = localStorage.getItem('rjfc_cart') || localStorage.getItem('rjfc_local_cart') || localStorage.getItem('rjfc_react_cart');
+    if (stored) {
+      try { cart = JSON.parse(stored); } catch (_) {}
+    }
 
     order.items.forEach(item => {
       cart.push({
         id: item.product_id || Date.now(),
+        product_id: item.product_id || Date.now(),
+        cart_id: `cart_${Date.now()}_${item.product_id}`,
         name: item.product_name,
         price: item.price,
         image: item.product_image,
@@ -427,7 +431,13 @@ function reorderItems(orderId) {
       });
     });
 
-    localStorage.setItem('rjfc_cart', JSON.stringify(cart));
+    const json = JSON.stringify(cart);
+    ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach(k => {
+      try { localStorage.setItem(k, json); } catch (_) {}
+      try { sessionStorage.setItem(k, json); } catch (_) {}
+    });
+    window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: cart } }));
+    window.dispatchEvent(new Event('storage'));
     if (typeof showToast === 'function') {
       showToast('Items added to your bag! Redirecting to cart...', 'success');
     }
