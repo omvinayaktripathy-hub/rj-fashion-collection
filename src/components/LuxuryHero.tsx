@@ -35,7 +35,7 @@ export const LuxuryHero: React.FC<LuxuryHeroProps> = ({
   brandName = "RJ FASHION COLLECTION",
   headline = "STYLE THAT SPEAKS WITHOUT WORDS",
   subtext = "Curated contemporary ethnic wear, trendy fashion, and modern statement accessories.",
-  primaryCtaText = "EXPLORE COLLECTION ->",
+  primaryCtaText = "EXPLORE COLLECTION →",
   secondaryCtaText = "DISCOVER NEW ARRIVALS",
   primaryCtaLink = "/shop.html",
   secondaryCtaLink = "/shop.html?newArrival=true",
