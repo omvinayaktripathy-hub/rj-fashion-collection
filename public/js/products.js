@@ -90,14 +90,14 @@ function createProductCard(p) {
   return `
     <div class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" data-id="${p.id}">
       <div class="product-image-wrap">
-        <a href="/product.html?id=${p.id}">
+        <a href="/product.html?id=${p.id}" class="product-img-link">
           <img class="product-primary-img" src="${p.image}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'">
           ${hoverImg ? `<img class="product-hover-img" src="${hoverImg}" alt="${escapeHtml(p.name)} alternate angle" loading="lazy">` : ''}
         </a>
         ${p.discount > 0 ? `<span class="badge-discount">${p.discount}% OFF</span>` : ''}
-        ${isOutOfStock ? `<span class="badge-out-of-stock">OUT OF STOCK</span>` : (isLowStock ? `<span class="badge-stock" style="background:#d97706; color:#ffffff;">Only ${p.stock} left</span>` : '')}
-        <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist('${escapeHtml(String(p.id))}', this)" title="Add to Wishlist" style="${isWishlisted ? 'color:var(--primary);' : ''}">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        ${isOutOfStock ? `<span class="badge-out-of-stock">OUT OF STOCK</span>` : (isLowStock ? `<span class="badge-stock">Only ${p.stock} left</span>` : '')}
+        <button class="wishlist-toggle-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist('${escapeHtml(String(p.id))}', this)" title="${isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}" aria-label="Wishlist">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="${isWishlisted ? '#ef4444' : 'none'}" stroke="${isWishlisted ? '#ef4444' : '#111111'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </button>
@@ -105,13 +105,11 @@ function createProductCard(p) {
       </div>
 
       <div class="product-details">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <span class="product-brand" style="margin-bottom: 0;">${escapeHtml(p.brand || 'RJ Collection')}</span>
+        <div class="product-card-meta-row">
+          <span class="product-brand">${escapeHtml(p.brand || 'RJ COLLECTION')}</span>
           ${isOutOfStock 
             ? `<span class="stock-status-pill stock-pill-out"><span class="status-dot dot-out"></span>Sold Out</span>` 
-            : (isLowStock 
-                ? `<span class="stock-status-pill stock-pill-low"><span class="status-dot dot-low"></span>Only ${p.stock} left</span>` 
-                : `<span class="stock-status-pill stock-pill-in"><span class="status-dot dot-in"></span>In Stock</span>`)}
+            : `<span class="stock-status-pill stock-pill-in"><span class="status-dot dot-in"></span>In Stock</span>`}
         </div>
         <h3 class="product-title">
           <a href="/product.html?id=${p.id}" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</a>
@@ -124,32 +122,25 @@ function createProductCard(p) {
         ` : ''}
 
         <div class="product-rating">
-          <span class="rating-badge">&#9733; ${p.rating ? Number(p.rating).toFixed(1) : '4.5'}</span>
-          <span class="rating-count">(${p.reviews_count || 12})</span>
+          <span class="rating-badge">&#9733; ${p.rating ? Number(p.rating).toFixed(1) : '4.8'}</span>
+          <span class="rating-count">(${p.reviews_count || 32})</span>
         </div>
 
         <div class="product-price-row">
           <span class="price-current">${formatPrice(p.price)}</span>
           ${p.original_price > p.price ? `<span class="price-original">${formatPrice(p.original_price)}</span>` : ''}
-          ${p.discount > 0 ? `<span class="price-discount">${p.discount}% off</span>` : ''}
+          ${p.discount > 0 ? `<span class="price-discount">${p.discount}% OFF</span>` : ''}
         </div>
 
         <div class="product-actions">
-          <button class="btn btn-card btn-outline-primary"
+          <button class="btn-luxury-add"
             onclick="addToCart('${escapeHtml(String(p.id))}')"
             ${isOutOfStock ? 'disabled' : ''}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;">
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <path d="M16 10a4 4 0 0 1-8 0"></path>
-            </svg>${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-          </button>
-          <button class="btn btn-card btn-primary"
-            onclick="quickBuy('${escapeHtml(String(p.id))}')"
-            ${isOutOfStock ? 'disabled' : ''}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:4px;">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-            </svg>${isOutOfStock ? 'Sold Out' : 'Buy Now'}
+            </svg>${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO BAG'}
           </button>
         </div>
       </div>
