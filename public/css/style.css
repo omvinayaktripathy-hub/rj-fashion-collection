@@ -10197,3 +10197,95 @@ body.style-editorial-impact {
 .top-bar-inner {
   justify-content: space-between !important;
 }
+
+
+/* ===================================================================
+   11 CATEGORIES EDITORIAL NAVIGATION OVERRIDES
+   =================================================================== */
+.main-nav .container {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.main-nav .container::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-links {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  list-style: none !important;
+  gap: 22px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative !important;
+  width: auto !important;
+  min-width: max-content !important;
+}
+
+@media (min-width: 1024px) {
+  .nav-links {
+    gap: 26px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .nav-links {
+    gap: 30px !important;
+  }
+}
+
+.nav-links > li {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.nav-links > li > a {
+  font-size: 0.75rem !important;
+  letter-spacing: 0.12em !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  color: #374151 !important;
+  padding: 12px 2px !important;
+  transition: color 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.nav-links > li > a:hover {
+  color: #000000 !important;
+}
+
+[data-theme="dark"] .nav-links > li > a,
+.dark-theme .nav-links > li > a {
+  color: #d1d5db !important;
+}
+
+[data-theme="dark"] .nav-links > li > a:hover,
+.dark-theme .nav-links > li > a:hover {
+  color: #ffffff !important;
+}
+
+.nav-links > li > a.nav-highlight {
+  color: #8C6D3F !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="dark"] .nav-links > li > a.nav-highlight,
+.dark-theme .nav-links > li > a.nav-highlight {
+  color: #C5A880 !important;
+}
+
+.nav-highlight-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #C5A880;
+  display: inline-block;
+  margin-right: 4px;
+}

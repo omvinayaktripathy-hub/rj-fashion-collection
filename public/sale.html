@@ -296,17 +296,220 @@
       </div>
     </div>
 
-    <nav class="main-nav">
+        <!-- Navigation Bar (11 Categories: Home, Girls, Women, Boy, Man, Jewellery, Sunglass, Bags, Wallet, Gifts, New Arrivals) -->
+    <nav class="main-nav" aria-label="Category Navigation">
       <div class="container">
         <ul class="nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/shop.html">Shop</a></li>
-          <li><a href="/shop.html?category=sarees">Sarees</a></li>
-          <li><a href="/shop.html?category=kurtis">Kurtis</a></li>
-          <li><a href="/shop.html?category=dresses">Dresses</a></li>
-          <li><a href="/shop.html?category=jewelry">Jewellery</a></li>
-          <li><a href="/shop.html?newArrival=true">New Arrivals</a></li>
-          <li><a href="/shop.html?category=accessories">Bags & Gifts</a></li>
+          <li><a href="/" class="active">Home</a></li>
+          <li class="has-mega-menu">
+            <a href="/shop.html?category=kids-ethnic&gender=girls" class="nav-dept-link">
+              Girls <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 1l4 4 4-4"/></svg>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Festive &amp; Traditional</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=kids-ethnic&search=lehenga">Embroidered Lehengas</a></li>
+                      <li><a href="/shop.html?category=kids-ethnic&search=anarkali">Anarkali &amp; Sharara Sets</a></li>
+                      <li><a href="/shop.html?category=kids-ethnic&search=silk">Silk Pavadais &amp; Kurtis</a></li>
+                      <li><a href="/shop.html?category=kids-ethnic&search=festive">Festive Party Wear</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Celebration Dresses</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=kids-western&search=gown">Sequin Net Gowns</a></li>
+                      <li><a href="/shop.html?category=kids-western&search=frock">Flared Princess Frocks</a></li>
+                      <li><a href="/shop.html?category=kids-western&search=fusion">Indo-Western Fusion</a></li>
+                      <li><a href="/shop.html?category=kids-western&search=party">Tiered Party Frocks</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">Little Royals</span>
+                    <img src="https://images.unsplash.com/photo-1621786030685-2c8c4a4e1017?auto=format&fit=crop&w=200&q=80" alt="Girls Edit" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Girls Festive Coutures</h4>
+                    <p class="mega-promo-sub">Intricate zardozi and gentle fabrics curated for little celebrations.</p>
+                    <a href="/shop.html?category=kids-ethnic&gender=girls" class="mega-promo-btn">Shop Girls</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="has-mega-menu">
+            <a href="/shop.html?department=women" class="nav-dept-link">
+              Women <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 1l4 4 4-4"/></svg>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Heritage Silks &amp; Sarees</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=sarees&subcategory=kanjivaram">Kanjivaram Silk Sarees</a></li>
+                      <li><a href="/shop.html?category=sarees&subcategory=banarasi">Banarasi Brocade Sarees</a></li>
+                      <li><a href="/shop.html?category=sarees&subcategory=organza">Organza Floral Silks</a></li>
+                      <li><a href="/shop.html?category=lehengas">Royal Bridal Lehengas</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Kurtis &amp; Ensembles</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=kurtis&subcategory=chikankari">Lucknowi Chikankari</a></li>
+                      <li><a href="/shop.html?category=kurtis&subcategory=anarkali">Anarkali Kurta Sets</a></li>
+                      <li><a href="/shop.html?category=dresses&subcategory=indo-western">Indo-Western Dresses</a></li>
+                      <li><a href="/shop.html?category=dresses&subcategory=co-ords">Ethnic Co-ord Sets</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">The Atelier</span>
+                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80" alt="Women Edit" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Women’s Signature Edit</h4>
+                    <p class="mega-promo-sub">Grand bridal silhouettes and pure zari weaves for royal celebrations.</p>
+                    <a href="/shop.html?department=women" class="mega-promo-btn">Explore Women</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="has-mega-menu">
+            <a href="/shop.html?category=kids-ethnic&gender=boys" class="nav-dept-link">
+              Boy <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 1l4 4 4-4"/></svg>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Royal Ethnic Wear</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=kids-ethnic&search=kurta">Kurta Pyjama Sets</a></li>
+                      <li><a href="/shop.html?category=kids-ethnic&search=dhoti">Silk Dhoti Kurta Sets</a></li>
+                      <li><a href="/shop.html?category=kids-ethnic&search=jacket">Nehru &amp; Bundi Jackets</a></li>
+                      <li><a href="/shop.html?category=kids-ethnic&search=sherwani">Little Sherwani Sets</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Celebration Formals</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=kids-western&search=blazer">Indo-Western Blazers</a></li>
+                      <li><a href="/shop.html?category=kids-western&search=waistcoat">Party Waistcoat Sets</a></li>
+                      <li><a href="/shop.html?category=kids-western&search=cotton">Festive Cotton Sets</a></li>
+                      <li><a href="/shop.html?category=kids-western&search=suit">Classic Formal Suits</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">Young Royals</span>
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80" alt="Boy Edit" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Boys Festive Regalia</h4>
+                    <p class="mega-promo-sub">Bespoke tailoring and breathable linens for young celebrations.</p>
+                    <a href="/shop.html?category=kids-ethnic&gender=boys" class="mega-promo-btn">Shop Boy</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="has-mega-menu">
+            <a href="/shop.html?category=men-ethnic" class="nav-dept-link">
+              Man <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 1l4 4 4-4"/></svg>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Traditional Couture</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=men-ethnic&search=sherwani">Royal Wedding Sherwanis</a></li>
+                      <li><a href="/shop.html?category=men-ethnic&search=kurta">Raw Silk Kurta Pajamas</a></li>
+                      <li><a href="/shop.html?category=men-ethnic&search=jacket">Brocade Bundi Jackets</a></li>
+                      <li><a href="/shop.html?category=men-ethnic&search=bandhgala">Bandhgala Jodhpuri Suits</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Modern Occasion</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=men-ethnic&search=linen">Linen Kurta Sets</a></li>
+                      <li><a href="/shop.html?category=men-western&search=blazer">Festive Tuxedos &amp; Blazers</a></li>
+                      <li><a href="/shop.html?category=men-ethnic&search=achkan">Indo-Western Achkans</a></li>
+                      <li><a href="/shop.html?category=men-ethnic&search=waistcoat">Embroidered Waistcoats</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">Bespoke Men</span>
+                    <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=200&q=80" alt="Man Edit" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Men’s Festive Atelier</h4>
+                    <p class="mega-promo-sub">Regal cuts, heirloom embroideries, and structured bridal fits.</p>
+                    <a href="/shop.html?category=men-ethnic" class="mega-promo-btn">Explore Man</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="has-mega-menu">
+            <a href="/shop.html?category=jewelry" class="nav-dept-link">
+              Jewellery <svg class="nav-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 1l4 4 4-4"/></svg>
+            </a>
+            <div class="mega-menu-dropdown">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Heritage Adornments</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=jewelry&subcategory=kundan">Royal Kundan Chokers</a></li>
+                      <li><a href="/shop.html?category=jewelry&subcategory=polki">Polki Bridal Sets</a></li>
+                      <li><a href="/shop.html?category=jewelry&subcategory=temple-jewellery">Temple Jewellery Sets</a></li>
+                      <li><a href="/shop.html?category=jewelry&subcategory=meenakari">Meenakari Enamel Sets</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-menu-section">
+                    <span class="mega-section-title">Fine Accents</span>
+                    <ul class="mega-menu-list">
+                      <li><a href="/shop.html?category=jewelry&subcategory=jhumkas">Chandbalis &amp; Jhumkas</a></li>
+                      <li><a href="/shop.html?category=jewelry&subcategory=bangles">Kadas &amp; Gold Bangles</a></li>
+                      <li><a href="/shop.html?category=jewelry&subcategory=maang-tikka">Maang Tikkas &amp; Mathapattis</a></li>
+                      <li><a href="/shop.html?category=jewelry&subcategory=rings">Cocktail Statement Rings</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-col">
+                  <div class="mega-promo-box">
+                    <span class="mega-promo-badge">The Vault</span>
+                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80" alt="Jewellery Edit" class="mega-promo-img">
+                    <h4 class="mega-promo-title">Royal Jewellery Vault</h4>
+                    <p class="mega-promo-sub">Artisanal antique finish adornments for celebrations.</p>
+                    <a href="/shop.html?category=jewelry" class="mega-promo-btn">Explore Jewellery</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li><a href="/shop.html?category=accessories&search=sunglasses">Sunglass</a></li>
+          <li><a href="/shop.html?category=accessories&search=bags">Bags</a></li>
+          <li><a href="/shop.html?category=accessories&search=wallets">Wallet</a></li>
+          <li><a href="/shop.html?category=accessories&search=gifts">Gifts</a></li>
+          <li>
+            <a href="/shop.html?newArrival=true" class="nav-highlight">
+              <span class="nav-highlight-dot" aria-hidden="true"></span>New Arrivals
+            </a>
+          </li>
         </ul>
       </div>
     </nav>
