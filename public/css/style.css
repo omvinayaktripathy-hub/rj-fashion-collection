@@ -7139,18 +7139,19 @@ body.style-editorial-impact {
   border-color: #141418;
 }
 
+.account-patron-pill,
 .account-tier-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
   border-radius: 9999px;
-  padding: 3px 12px;
-  font-size: 0.68rem;
-  font-weight: 800;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
   letter-spacing: 0.8px;
-  color: #b38b22;
+  color: #0F382A;
   margin-bottom: 6px;
 }
 .dark-theme .account-tier-pill,

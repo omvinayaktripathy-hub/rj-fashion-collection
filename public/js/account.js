@@ -186,14 +186,35 @@ async function loadUserOrders(filter = 'all') {
   if (!container) return;
 
   try {
-    const res = await fetch(`${API_BASE}/orders`);
-    const data = await res.json();
+    let orders = [];
+    try {
+      const local = localStorage.getItem('rj_orders');
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) orders = parsed;
+      }
+    } catch (_) {}
 
-    if (data.success && Array.isArray(data.orders)) {
-      currentAccountOrders = data.orders;
+    try {
+      const res = await fetch(`${API_BASE}/orders`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.orders)) {
+        const existingIds = new Set(orders.map(o => String(o.id || o.order_number)));
+        for (const o of data.orders) {
+          const oId = String(o.id || o.order_number);
+          if (!existingIds.has(oId)) {
+            orders.push(o);
+            existingIds.add(oId);
+          }
+        }
+      }
+    } catch (_) {}
+
+    if (orders.length > 0) {
+      currentAccountOrders = orders;
 
       // Update stat counters
-      const totalOrdersCount = data.orders.length;
+      const totalOrdersCount = orders.length;
       const totalOrdersEl = document.getElementById('stat-total-orders');
       const sidebarBadge = document.getElementById('sidebar-order-badge');
       if (totalOrdersEl) totalOrdersEl.textContent = `${totalOrdersCount} ${totalOrdersCount === 1 ? 'Order' : 'Orders'}`;
@@ -459,8 +480,10 @@ function loadWishlistPreview() {
 
   try {
     let wishlist = [];
-    const stored = localStorage.getItem('rjfc_wishlist');
-    if (stored) wishlist = JSON.parse(stored);
+    const stored = localStorage.getItem('rj_fashion_wishlist') || localStorage.getItem('rjfc_wishlist') || localStorage.getItem('rjfc_react_wishlist');
+    if (stored) {
+      try { wishlist = JSON.parse(stored); } catch (_) {}
+    }
 
     const count = wishlist.length;
     const statEl = document.getElementById('stat-wishlist-count');
@@ -519,7 +542,10 @@ async function loadAccountAddresses() {
     if (data.success && Array.isArray(data.addresses) && data.addresses.length > 0) {
       const count = data.addresses.length;
       const statEl = document.getElementById('stat-addresses-count');
-      if (statEl) statEl.textContent = `${count} ${count === 1 ? 'Location' : 'Locations'}`;
+      const defAddr = data.addresses.find(a => a.is_default || a.isDefault) || data.addresses[0];
+      if (statEl) {
+        statEl.textContent = defAddr ? `${defAddr.city || ''} • ${defAddr.pin_code || defAddr.pinCode || ''}` : `${count} Locations`;
+      }
 
       container.innerHTML = data.addresses.map((addr, idx) => `
         <div class="luxury-address-card ${idx === 0 ? 'is-default' : ''}">

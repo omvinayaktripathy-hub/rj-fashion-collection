@@ -217,7 +217,7 @@ const AppContent = () => {
 
         {/* Account Dashboard */}
         {activeTab === 'account' && (
-          <AccountDashboard />
+          <AccountDashboard onExploreCatalog={() => navigateTo('home')} />
         )}
       </main>
 
