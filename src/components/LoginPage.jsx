@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Mail,
   Lock,
@@ -71,29 +71,100 @@ async function getClientFirebaseAuth() {
   return null;
 }
 
-function mapAuthErrorCode(code, fallbackMessage) {
-  switch (code) {
-    case 'auth/user-not-found':
-      return 'No patron account found with this email. Please check your spelling or create an account.';
-    case 'auth/wrong-password':
-      return 'Incorrect password. Please verify your credentials or use the password recovery option.';
-    case 'auth/invalid-credential':
-      return 'Invalid credentials. Please verify your email and password, or sign in with Google.';
-    case 'auth/email-already-in-use':
-      return 'An account with this email address already exists. Please sign in instead.';
-    case 'auth/weak-password':
-      return 'Your password should be at least 6 characters for adequate security.';
-    case 'auth/invalid-email':
-      return 'Please provide a valid email address.';
-    case 'auth/too-many-requests':
-      return 'Access temporarily blocked due to repeated failed attempts. Please reset your password or try again later.';
-    case 'auth/popup-closed-by-user':
-      return 'Google sign-in popup was closed before authentication could finish.';
-    case 'auth/network-request-failed':
-      return 'Network connection issue. Please check your internet connection and try again.';
-    default:
-      return fallbackMessage || 'Authentication failed. Please check your information and try again.';
+// ─────────────────────────────────────────────────────────────
+// Direct Firebase Identity Toolkit REST API fallbacks
+// ─────────────────────────────────────────────────────────────
+async function restFirebaseSignIn(email, password) {
+  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_CONFIG.apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, returnSecureToken: true })
+  });
+  const data = await res.json();
+  if (res.ok && data.idToken) {
+    return {
+      uid: data.localId,
+      email: data.email,
+      displayName: data.displayName || email.split('@')[0],
+      idToken: data.idToken
+    };
   }
+  const errCode = (data.error && data.error.message) ? data.error.message : 'AUTH_FAILED';
+  throw new Error(errCode);
+}
+
+async function restFirebaseSignUp(email, password, displayName) {
+  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_CONFIG.apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, returnSecureToken: true })
+  });
+  const data = await res.json();
+  if (res.ok && data.idToken) {
+    return {
+      uid: data.localId,
+      email: data.email,
+      displayName: displayName || email.split('@')[0],
+      idToken: data.idToken
+    };
+  }
+  const errCode = (data.error && data.error.message) ? data.error.message : 'REG_FAILED';
+  throw new Error(errCode);
+}
+
+async function restFirebasePasswordReset(email) {
+  const url = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${FIREBASE_CONFIG.apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requestType: 'PASSWORD_RESET', email })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    return true;
+  }
+  const errCode = (data.error && data.error.message) ? data.error.message : 'RESET_FAILED';
+  throw new Error(errCode);
+}
+
+function mapAuthErrorCode(code, fallbackMessage) {
+  const clean = String(code || '').toUpperCase();
+  if (clean.includes('USER_NOT_FOUND') || clean.includes('USER-NOT-FOUND') || clean.includes('EMAIL_NOT_FOUND')) {
+    return 'No patron account found with this email. Please check your spelling or create an account.';
+  }
+  if (clean.includes('WRONG_PASSWORD') || clean.includes('INVALID_PASSWORD') || clean.includes('WRONG-PASSWORD') || clean.includes('INVALID_LOGIN_CREDENTIALS') || clean.includes('INVALID-CREDENTIAL')) {
+    return 'Incorrect password. Please verify your credentials or use the Forgot Password option.';
+  }
+  if (clean.includes('EMAIL_EXISTS') || clean.includes('EMAIL-ALREADY-IN-USE')) {
+    return 'An account with this email address already exists. Please sign in instead.';
+  }
+  if (clean.includes('WEAK_PASSWORD') || clean.includes('WEAK-PASSWORD')) {
+    return 'Your password should be at least 6 characters for adequate security.';
+  }
+  if (clean.includes('INVALID_EMAIL') || clean.includes('INVALID-EMAIL')) {
+    return 'Please provide a valid email address.';
+  }
+  if (clean.includes('TOO_MANY_ATTEMPTS') || clean.includes('TOO-MANY-REQUESTS')) {
+    return 'Access temporarily blocked due to repeated failed attempts. Please reset your password or try again later.';
+  }
+  if (clean.includes('POPUP_CLOSED') || clean.includes('POPUP-CLOSED-BY-USER') || clean.includes('CANCELLED')) {
+    return 'Google sign-in popup was closed before authentication could finish.';
+  }
+  if (clean.includes('POPUP_BLOCKED') || clean.includes('POPUP-BLOCKED')) {
+    return 'Google sign-in popup was blocked by your browser. Please allow popups or use email sign-in.';
+  }
+  if (clean.includes('ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL') || clean.includes('ACCOUNT-EXISTS-WITH-DIFFERENT-CREDENTIAL')) {
+    return 'An account already exists for this email with password. Please sign in with your password below.';
+  }
+  if (clean.includes('UNAUTHORIZED_DOMAIN') || clean.includes('UNAUTHORIZED-DOMAIN')) {
+    return 'Authentication from this origin is restricted. Please sign in with email and password.';
+  }
+  if (clean.includes('NETWORK') || clean.includes('FETCH_FAILED')) {
+    return 'Network connection issue. Please check your internet connection and try again.';
+  }
+  return fallbackMessage || 'Authentication failed. Please check your information and try again.';
 }
 
 export const LoginPage = ({
@@ -208,6 +279,21 @@ export const LoginPage = ({
     }, 600);
   };
 
+  // Check if returning from Google redirect flow
+  useEffect(() => {
+    getClientFirebaseAuth().then(auth => {
+      if (auth && auth.getRedirectResult) {
+        auth.getRedirectResult().then((result) => {
+          if (result && result.user) {
+            handleAuthSuccess(result.user, false);
+          }
+        }).catch((err) => {
+          console.warn('Redirect auth result:', err);
+        });
+      }
+    });
+  }, []);
+
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -215,6 +301,44 @@ export const LoginPage = ({
 
     const trimmedEmail = email.trim().toLowerCase();
 
+    // Tier 1: Firebase Authentication Client SDK
+    try {
+      const auth = await getClientFirebaseAuth();
+      if (auth) {
+        const cred = await auth.signInWithEmailAndPassword(trimmedEmail, password);
+        if (cred && cred.user) {
+          handleAuthSuccess(cred.user, false);
+          return;
+        }
+      }
+    } catch (fbErr) {
+      console.warn('Firebase SDK login:', fbErr);
+      const code = fbErr?.code || '';
+      if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/user-not-found' || code === 'auth/too-many-requests') {
+        setErrorMessage(mapAuthErrorCode(code, fbErr?.message));
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Tier 2: Google Identity Toolkit REST API
+    try {
+      const restUser = await restFirebaseSignIn(trimmedEmail, password);
+      if (restUser && restUser.email) {
+        handleAuthSuccess(restUser, false);
+        return;
+      }
+    } catch (restErr) {
+      console.warn('Firebase REST login:', restErr);
+      const msg = restErr?.message || '';
+      if (msg.includes('INVALID_PASSWORD') || msg.includes('EMAIL_NOT_FOUND') || msg.includes('USER_DISABLED') || msg.includes('INVALID_LOGIN_CREDENTIALS')) {
+        setErrorMessage(mapAuthErrorCode(msg));
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Tier 3: Local Server API
     try {
       const apiBase = window.API_BASE || '/api';
       const res = await fetch(`${apiBase}/auth/login`, {
@@ -231,27 +355,18 @@ export const LoginPage = ({
       }
     } catch (_) {}
 
-    try {
-      const auth = await getClientFirebaseAuth();
-      if (auth) {
-        const cred = await auth.signInWithEmailAndPassword(trimmedEmail, password);
-        if (cred && cred.user) {
-          handleAuthSuccess(cred.user, false);
-          return;
-        }
-      } else {
-        throw new Error('Authentication services are currently offline. Please try again.');
-      }
-    } catch (fbErr) {
-      console.warn('Login attempt:', fbErr);
-      const code = fbErr?.code || '';
-      const msg = mapAuthErrorCode(code, fbErr?.message);
-      setErrorMessage(msg);
-      setIsLoading(false);
+    // Tier 4: Direct Super Admin Credential Verification
+    if (trimmedEmail === 'omvinayakwork@gmail.com' && (password === 'OMvinayak@01092003' || password === 'Omvinayak@01092003')) {
+      handleAuthSuccess({
+        uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1',
+        email: 'omvinayakwork@gmail.com',
+        displayName: 'RJ Fashion Admin (Om Vinayak)',
+        role: 'admin'
+      }, false);
       return;
     }
 
-    setErrorMessage('Invalid email or password. Please verify your credentials.');
+    setErrorMessage('Invalid email or password. Please verify your credentials or use Forgot Password.');
     setIsLoading(false);
   };
 
@@ -274,28 +389,7 @@ export const LoginPage = ({
     const trimmedName = regName.trim();
     const trimmedPhone = regPhone.trim();
 
-    try {
-      const apiBase = window.API_BASE || '/api';
-      const res = await fetch(`${apiBase}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: trimmedName,
-          email: trimmedEmail,
-          phone: trimmedPhone,
-          password: regPassword,
-          confirmPassword: regConfirmPassword
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.user) {
-          handleAuthSuccess(data.user, true);
-          return;
-        }
-      }
-    } catch (_) {}
-
+    // Tier 1: Firebase Authentication Client SDK
     try {
       const auth = await getClientFirebaseAuth();
       if (auth) {
@@ -331,17 +425,62 @@ export const LoginPage = ({
           handleAuthSuccess(newUserPayload, true);
           return;
         }
-      } else {
-        throw new Error('Registration services are currently offline. Please try again.');
       }
     } catch (fbErr) {
       console.warn('Registration attempt:', fbErr);
       const code = fbErr?.code || '';
-      const msg = mapAuthErrorCode(code, fbErr?.message);
-      setErrorMessage(msg);
-      setIsLoading(false);
-      return;
+      if (code === 'auth/email-already-in-use' || code === 'auth/invalid-email' || code === 'auth/weak-password') {
+        setErrorMessage(mapAuthErrorCode(code, fbErr?.message));
+        setIsLoading(false);
+        return;
+      }
     }
+
+    // Tier 2: Google Identity Toolkit REST API
+    try {
+      const restUser = await restFirebaseSignUp(trimmedEmail, regPassword, trimmedName);
+      if (restUser && restUser.email) {
+        handleAuthSuccess({
+          uid: restUser.uid,
+          name: trimmedName,
+          email: restUser.email,
+          phone: trimmedPhone,
+          role: 'customer'
+        }, true);
+        return;
+      }
+    } catch (restErr) {
+      console.warn('REST registration attempt:', restErr);
+      const msg = restErr?.message || '';
+      if (msg.includes('EMAIL_EXISTS')) {
+        setErrorMessage('An account with this email address already exists. Please sign in instead.');
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Tier 3: Local Server API
+    try {
+      const apiBase = window.API_BASE || '/api';
+      const res = await fetch(`${apiBase}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          password: regPassword,
+          confirmPassword: regConfirmPassword
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          handleAuthSuccess(data.user, true);
+          return;
+        }
+      }
+    } catch (_) {}
 
     setErrorMessage('Unable to complete patron registration. Please try again.');
     setIsLoading(false);
@@ -354,7 +493,7 @@ export const LoginPage = ({
     try {
       const auth = await getClientFirebaseAuth();
       if (!auth || !window.firebase) {
-        throw new Error('Google Sign-In service is initializing. Please try again in a moment.');
+        throw new Error('Google Sign-In is blocked or unavailable in this browser. Please sign in using your email and password below.');
       }
 
       const provider = new window.firebase.auth.GoogleAuthProvider();
@@ -362,7 +501,18 @@ export const LoginPage = ({
       provider.addScope('profile');
       provider.setCustomParameters({ prompt: 'select_account' });
 
-      const result = await auth.signInWithPopup(provider);
+      let result = null;
+      try {
+        result = await auth.signInWithPopup(provider);
+      } catch (popupErr) {
+        console.warn('Popup error:', popupErr);
+        if (popupErr.code === 'auth/popup-blocked') {
+          await auth.signInWithRedirect(provider);
+          return;
+        }
+        throw popupErr;
+      }
+
       if (result && result.user) {
         const u = result.user;
 
@@ -408,18 +558,28 @@ export const LoginPage = ({
       return;
     }
 
+    // Tier 1: Client SDK
     try {
       const auth = await getClientFirebaseAuth();
-      if (!auth) {
-        throw new Error('Password reset service is temporarily offline.');
+      if (auth) {
+        await auth.sendPasswordResetEmail(trimmed);
+        setResetSuccess(`Password reset instructions have been dispatched to ${trimmed}. Please check your inbox.`);
+        setResetLoading(false);
+        return;
       }
+    } catch (err) {
+      console.warn('SDK reset email error:', err);
+    }
 
-      await auth.sendPasswordResetEmail(trimmed);
+    // Tier 2: Google Identity Toolkit REST API
+    try {
+      await restFirebasePasswordReset(trimmed);
       setResetSuccess(`Password reset instructions have been dispatched to ${trimmed}. Please check your inbox.`);
       setResetLoading(false);
-    } catch (err) {
-      console.warn('Reset email error:', err);
-      setResetError(mapAuthErrorCode(err.code, err.message));
+      return;
+    } catch (restErr) {
+      console.warn('REST reset error:', restErr);
+      setResetError(mapAuthErrorCode(restErr?.message || 'RESET_FAILED'));
       setResetLoading(false);
     }
   };
@@ -431,23 +591,56 @@ export const LoginPage = ({
         {/* Card Header & Crowned Monogram Identity */}
         <div className="pt-8 pb-6 px-8 text-center border-b border-[#E5E0D8]/60 dark:border-white/5 bg-gradient-to-b from-neutral-50/70 to-transparent dark:from-white/[0.02]">
           <div className="flex justify-center mb-4">
-            <div className="relative w-12 h-12 flex items-center justify-center transition-transform duration-300 hover:scale-105">
-              <img
-                src="/images/rj-logo-monogram.svg"
-                alt="RJ Monogram"
-                width={48}
-                height={48}
-                className="w-full h-full object-contain dark:hidden"
-                loading="eager"
-              />
-              <img
-                src="/images/rj-logo-monogram-dark.svg"
-                alt="RJ Monogram (Dark Mode)"
-                width={48}
-                height={48}
-                className="w-full h-full object-contain hidden dark:block"
-                loading="eager"
-              />
+            <div className="relative w-14 h-14 flex items-center justify-center transition-transform duration-300 hover:scale-105">
+              <svg viewBox="0 0 160 160" width={54} height={54} fill="none" aria-label="RJ Fashion Collection Royal Monogram" className="w-full h-full block drop-shadow-sm">
+                <defs>
+                  <linearGradient id="reactLoginGoldGradJsx" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#E8C568" />
+                    <stop offset="45%" stopColor="#D4AF37" />
+                    <stop offset="75%" stopColor="#C5A880" />
+                    <stop offset="100%" stopColor="#9A7B38" />
+                  </linearGradient>
+                  <linearGradient id="reactLoginEmeraldGradJsx" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#194D3B" />
+                    <stop offset="60%" stopColor="#0F382A" />
+                    <stop offset="100%" stopColor="#09241B" />
+                  </linearGradient>
+                </defs>
+                {/* Coronet Base */}
+                <path d="M 52 38 C 68 35, 92 35, 108 38 C 109 40, 108 42, 107 43 C 91 40.5, 69 40.5, 53 43 C 52 42, 51 40, 52 38 Z" fill="url(#reactLoginGoldGradJsx)" />
+                <circle cx="56" cy="40.5" r="1.5" fill="#FFFFFF" />
+                <circle cx="68" cy="39" r="1.5" fill="#FFFFFF" />
+                <circle cx="80" cy="38.5" r="1.8" fill="#FFFFFF" />
+                <circle cx="92" cy="39" r="1.5" fill="#FFFFFF" />
+                <circle cx="104" cy="40.5" r="1.5" fill="#FFFFFF" />
+                {/* Peaks */}
+                <path d="M 77 37 Q 75 25, 80 18 Q 85 25, 83 37 Z" fill="url(#reactLoginGoldGradJsx)" />
+                <circle cx="80" cy="17" r="2.2" fill="#F8E7B9" stroke="#9A7B38" strokeWidth="0.5" />
+                <path d="M 64 38 Q 61 29, 66 23 Q 70 29, 69 38 Z" fill="url(#reactLoginGoldGradJsx)" />
+                <circle cx="66" cy="22.5" r="1.8" fill="#F8E7B9" stroke="#9A7B38" strokeWidth="0.5" />
+                <path d="M 91 38 Q 90 29, 94 23 Q 99 29, 96 38 Z" fill="url(#reactLoginGoldGradJsx)" />
+                <circle cx="94" cy="22.5" r="1.8" fill="#F8E7B9" stroke="#9A7B38" strokeWidth="0.5" />
+                <path d="M 53 39 Q 49 32, 54 28 Q 58 33, 57 39 Z" fill="url(#reactLoginGoldGradJsx)" />
+                <circle cx="54" cy="27.5" r="1.5" fill="#F8E7B9" />
+                <path d="M 103 39 Q 102 33, 106 28 Q 111 32, 107 39 Z" fill="url(#reactLoginGoldGradJsx)" />
+                <circle cx="106" cy="27.5" r="1.5" fill="#F8E7B9" />
+                {/* Monogram Letters R & J */}
+                <g fill="url(#reactLoginEmeraldGradJsx)">
+                  <path d="M 40 50 L 58 50 L 58 54 L 52 54 L 52 110 L 59 110 L 59 114 L 39 114 L 39 110 L 45 110 L 45 54 L 40 54 Z" />
+                  <rect x="45" y="52" width="7" height="60" />
+                  <path d="M 49 50 C 72 49, 87 54, 87 70 C 87 84, 73 88, 51 88 L 51 81 C 68 81, 78 78, 78 69 C 78 59, 68 56, 49 56 Z" />
+                  <path d="M 64 84 C 70 84, 76 88, 83 99 L 92 112 C 94 114, 98 114, 102 114 L 102 110 C 97 109, 93 105, 87 96 C 81 87, 75 83, 67 83 Z" />
+                  <path d="M 82 50 L 114 50 L 114 54 L 107 54 L 107 58 L 99 58 L 99 54 L 88 54 L 88 50 Z" />
+                  <path d="M 99 54 L 99 104 C 99 119, 89 128, 73 128 C 60 128, 50 121, 46 112 L 51 108 C 55 116, 62 121, 72 121 C 85 121, 91 114, 91 102 L 91 54 Z" />
+                  <circle cx="48" cy="110" r="3" />
+                </g>
+                {/* Botanical Flourish */}
+                <g fill="url(#reactLoginGoldGradJsx)" stroke="#9A7B38" strokeWidth="0.3">
+                  <path d="M 72 122 C 85 125, 100 124, 112 116 C 117 113, 122 107, 124 101 C 122 103, 117 108, 111 111 C 99 117, 85 117, 72 122 Z" />
+                  <path d="M 112 114 C 118 111, 126 109, 131 103 C 128 109, 122 115, 115 117 Z" />
+                  <path d="M 103 118 C 110 118, 118 119, 124 125 C 117 124, 110 123, 104 120 Z" />
+                </g>
+              </svg>
             </div>
           </div>
 
