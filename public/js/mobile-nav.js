@@ -1,4 +1,4 @@
-const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
+var escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
 /**
  * RJ FASHION COLLECTION - LUXURY MOBILE NAVIGATION DRAWER & MOTION CONTROLLER
  * Full touch gesture support, accordion categories, live badge sync & bulletproof iOS scroll locking.

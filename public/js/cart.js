@@ -1,6 +1,6 @@
 // RJ FASHION COLLECTION - SHOPPING BAG CONTROLLER
 // Perfectly styled to match the "/wishlist" ("My Saved Collection") visual identity
-const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
+var escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
 
 const UNIFIED_CART_KEYS = ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
 

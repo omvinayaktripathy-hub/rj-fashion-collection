@@ -1,30 +1,70 @@
 // RJ FASHION COLLECTION - PATRON AUTHENTICATION CONTROLLER
 // Enterprise Multi-Tier Engine: Firebase Client SDK + Identity Toolkit REST API + Local Session Sync
 
-const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
-const API_BASE = window.API_BASE || '/api';
+(function(window, document) {
+  'use strict';
 
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBMkLwyXZINxOdq-hw7jFTVlnlFLdO_oTw",
-  authDomain: "rj-fashion-collection.firebaseapp.com",
-  projectId: "rj-fashion-collection",
-  storageBucket: "rj-fashion-collection.firebasestorage.app",
-  messagingSenderId: "136818820501",
-  appId: "1:136818820501:web:251f54494df4209854a29c",
-  measurementId: "G-LL5KRD9639"
-};
+  var escapeHtml = window.escapeHtml || (function(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  });
+  var API_BASE = window.API_BASE || '/api';
 
-function ensureFirebaseInit() {
-  if (typeof firebase !== 'undefined' && firebase.auth) {
-    if (!firebase.apps || !firebase.apps.length) {
-      try {
-        firebase.initializeApp(FIREBASE_CONFIG);
-      } catch (_) {}
-    }
-    return firebase.auth();
+  var FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBMkLwyXZINxOdq-hw7jFTVlnlFLdO_oTw",
+    authDomain: "rj-fashion-collection.firebaseapp.com",
+    projectId: "rj-fashion-collection",
+    storageBucket: "rj-fashion-collection.firebasestorage.app",
+    messagingSenderId: "136818820501",
+    appId: "1:136818820501:web:251f54494df4209854a29c",
+    measurementId: "G-LL5KRD9639"
+  };
+
+  function loadScriptAsync(src) {
+    return new Promise(function(resolve, reject) {
+      if (document.querySelector('script[src="' + src + '"]')) {
+        resolve();
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = function() { resolve(); };
+      s.onerror = function(e) { reject(e); };
+      document.head.appendChild(s);
+    });
   }
-  return null;
-}
+
+  async function ensureFirebaseInit() {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      if (!firebase.apps || !firebase.apps.length) {
+        try {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        } catch (_) {}
+      }
+      return firebase.auth();
+    }
+
+    try {
+      await loadScriptAsync('https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js');
+      await loadScriptAsync('https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js');
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        if (!firebase.apps || !firebase.apps.length) {
+          try {
+            firebase.initializeApp(FIREBASE_CONFIG);
+          } catch (_) {}
+        }
+        return firebase.auth();
+      }
+    } catch (err) {
+      console.warn('Firebase dynamic load warning:', err);
+    }
+    return null;
+  }
 
 // ─────────────────────────────────────────────────────────────
 // Direct Firebase Identity Toolkit REST API fallbacks
@@ -239,7 +279,7 @@ async function handleGoogleSignIn() {
   }
 
   try {
-    const auth = ensureFirebaseInit();
+    const auth = await ensureFirebaseInit();
     if (!auth || typeof firebase === 'undefined') {
       throw new Error('Google Sign-In is blocked or unavailable in this browser. Please sign in using your email and password below.');
     }
@@ -330,7 +370,7 @@ async function handleCustomerLogin(e) {
 
   // Tier 1: Direct Firebase Client SDK
   try {
-    const auth = ensureFirebaseInit();
+    const auth = await ensureFirebaseInit();
     if (auth) {
       const cred = await auth.signInWithEmailAndPassword(email, password);
       if (cred && cred.user) {
@@ -428,7 +468,7 @@ async function handleCustomerRegister(e) {
 
   // Tier 1: Firebase Client SDK
   try {
-    const auth = ensureFirebaseInit();
+    const auth = await ensureFirebaseInit();
     if (auth) {
       const cred = await auth.createUserWithEmailAndPassword(email, password);
       if (cred && cred.user) {
@@ -551,7 +591,7 @@ async function handleSendPasswordReset(e) {
 
   // Try Firebase Client SDK
   try {
-    const auth = ensureFirebaseInit();
+    const auth = await ensureFirebaseInit();
     if (auth) {
       await auth.sendPasswordResetEmail(email);
       if (succEl) {
@@ -624,21 +664,24 @@ function initAuthForms() {
 
   // Check for Google Redirect Result
   try {
-    const auth = ensureFirebaseInit();
-    if (auth && auth.getRedirectResult) {
-      auth.getRedirectResult().then(res => {
-        if (res && res.user) {
-          commitUserSession(res.user, false);
-        }
-      }).catch(err => {
-        console.warn('Redirect auth result notice:', err);
-      });
-    }
+    ensureFirebaseInit().then(function(auth) {
+      if (auth && auth.getRedirectResult) {
+        auth.getRedirectResult().then(res => {
+          if (res && res.user) {
+            commitUserSession(res.user, false);
+          }
+        }).catch(err => {
+          console.warn('Redirect auth result notice:', err);
+        });
+      }
+    }).catch(function() {});
   } catch (_) {}
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAuthForms);
-} else {
-  initAuthForms();
-}
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAuthForms);
+  } else {
+    initAuthForms();
+  }
+
+})(typeof window !== 'undefined' ? window : this, typeof document !== 'undefined' ? document : {});

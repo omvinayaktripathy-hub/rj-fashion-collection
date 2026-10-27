@@ -79,6 +79,57 @@
       if (isDark && document.body) document.body.classList.add('dark-theme');
       window.updateAllThemeToggles(isDark ? 'dark' : 'light');
     });
+
+    // Immediate Tab & Modal Controllers (guaranteed zero-latency UI response)
+    window.switchAuthTab = function(tab) {
+      var loginForm = document.getElementById('login-form-box');
+      var registerForm = document.getElementById('register-form-box');
+      var loginTabBtn = document.getElementById('tab-login-btn');
+      var registerTabBtn = document.getElementById('tab-register-btn');
+      var banner = document.getElementById('auth-error-banner');
+      if (banner) banner.style.display = 'none';
+
+      if (tab === 'login') {
+        if (loginForm) loginForm.style.display = 'block';
+        if (registerForm) registerForm.style.display = 'none';
+        if (loginTabBtn) loginTabBtn.classList.add('active');
+        if (registerTabBtn) registerTabBtn.classList.remove('active');
+      } else {
+        if (loginForm) loginForm.style.display = 'none';
+        if (registerForm) registerForm.style.display = 'block';
+        if (loginTabBtn) loginTabBtn.classList.remove('active');
+        if (registerTabBtn) registerTabBtn.classList.add('active');
+      }
+    };
+
+    window.togglePasswordVisibility = function(inputId, btn) {
+      var input = document.getElementById(inputId);
+      if (!input) return;
+      var isPassword = input.getAttribute('type') === 'password';
+      input.setAttribute('type', isPassword ? 'text' : 'password');
+      if (btn) {
+        btn.innerHTML = isPassword
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      }
+    };
+
+    window.openResetPasswordModal = function() {
+      var modal = document.getElementById('reset-password-modal');
+      var err = document.getElementById('reset-modal-error');
+      var succ = document.getElementById('reset-modal-success');
+      var emailInput = document.getElementById('reset-email');
+      var loginEmail = document.getElementById('login-email');
+      if (err) err.style.display = 'none';
+      if (succ) succ.style.display = 'none';
+      if (emailInput && loginEmail) emailInput.value = loginEmail.value.trim();
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.closeResetPasswordModal = function() {
+      var modal = document.getElementById('reset-password-modal');
+      if (modal) modal.style.display = 'none';
+    };
   </script>
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -759,7 +810,7 @@
             <div class="form-group-auth">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <label for="login-password" style="margin: 0;">Password</label>
-                <a href="#" onclick="openResetPasswordModal(); return false;" style="font-size: 0.75rem; color: #8C6D3F; text-decoration: none; font-weight: 600;">Forgot Password?</a>
+                <a href="javascript:void(0);" onclick="openResetPasswordModal(); return false;" style="font-size: 0.75rem; color: #8C6D3F; text-decoration: none; font-weight: 600;">Forgot Password?</a>
               </div>
               <div class="auth-input-wrapper">
                 <input type="password" id="login-password" required placeholder="Enter confidential password" autocomplete="current-password">
@@ -776,7 +827,7 @@
           </form>
 
           <div style="margin-top: 20px; text-align: center; font-size: 0.8rem; color: #6b7280;">
-            New patron? <a href="#" onclick="switchAuthTab('register'); return false;" style="color: #111111; font-weight: 700; text-decoration: underline;">Create an account</a>
+            New patron? <a href="javascript:void(0);" onclick="switchAuthTab('register'); return false;" style="color: #111111; font-weight: 700; text-decoration: underline;">Create an account</a>
           </div>
         </div>
 
@@ -828,7 +879,7 @@
           </form>
 
           <div style="margin-top: 20px; text-align: center; font-size: 0.8rem; color: #6b7280;">
-            Already registered? <a href="#" onclick="switchAuthTab('login'); return false;" style="color: #111111; font-weight: 700; text-decoration: underline;">Sign In</a>
+            Already registered? <a href="javascript:void(0);" onclick="switchAuthTab('login'); return false;" style="color: #111111; font-weight: 700; text-decoration: underline;">Sign In</a>
           </div>
         </div>
 
@@ -998,7 +1049,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="/js/app.js?v=20261025-01"></script>
-  <script src="/js/auth.js"></script>
+  <script src="/js/auth.js?v=20261027-02"></script>
     <!-- Floating WhatsApp VIP Concierge Button -->
   <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20your%20luxury%20collection." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" aria-label="Chat with RJ Fashion Concierge on WhatsApp" title="Chat on WhatsApp with RJ Fashion Concierge">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
