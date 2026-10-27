@@ -149,11 +149,105 @@ export function writeUnifiedCartToStorage(cartItems) {
   } catch (_) {}
 }
 
+export const WISHLIST_STORAGE_KEY = 'rj_fashion_wishlist';
+export const LEGACY_WISHLIST_KEYS = ['rjfc_wishlist', 'rjfc_react_wishlist', 'wishlist'];
+
+export function normalizeStoreWishlistItem(item, idx = 0) {
+  if (!item) return null;
+  if (typeof item === 'string' || typeof item === 'number') {
+    return {
+      id: item,
+      name: `Artisanal Ensemble #${item}`,
+      category: 'Luxury Couture',
+      price: 2999,
+      original_price: 4999,
+      discount: 40,
+      image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+      stock: 5,
+      rating: 4.9
+    };
+  }
+  if (typeof item === 'object') {
+    const pId = item.id || item.product_id || `wish_${idx + 1}`;
+    const price = Number(item.price) || 0;
+    const originalPrice = Number(item.original_price || item.originalPrice || price);
+    const discount = Number(item.discount) || (originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0);
+
+    return {
+      id: pId,
+      name: item.name || item.title || 'Artisanal Ensemble',
+      brand: item.brand || 'RJ Fashion Collection',
+      category: item.category || item.category_name || item.department || 'Luxury Couture',
+      price,
+      original_price: originalPrice,
+      discount,
+      rating: Number(item.rating) || 4.9,
+      reviews_count: Number(item.reviews_count) || 24,
+      image: item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+      stock: item.stock !== undefined ? Number(item.stock) : 5,
+      badge: item.badge || (discount >= 30 ? 'Special' : undefined),
+      available_sizes: item.available_sizes || item.availableSizes || ['Free Size']
+    };
+  }
+  return null;
+}
+
+export function readUnifiedWishlistFromStorage() {
+  if (typeof window === 'undefined') return [];
+  try {
+    const primary = localStorage.getItem(WISHLIST_STORAGE_KEY);
+    if (primary) {
+      const parsed = JSON.parse(primary);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(normalizeStoreWishlistItem).filter(Boolean);
+      }
+    }
+  } catch (_) {}
+
+  for (const key of LEGACY_WISHLIST_KEYS) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(normalizeStoreWishlistItem).filter(Boolean);
+        }
+      }
+    } catch (_) {}
+  }
+  return [];
+}
+
+export function writeUnifiedWishlistToStorage(items) {
+  if (typeof window === 'undefined') return;
+  const json = JSON.stringify(items);
+  try {
+    localStorage.setItem(WISHLIST_STORAGE_KEY, json);
+    sessionStorage.setItem(WISHLIST_STORAGE_KEY, json);
+  } catch (_) {}
+  for (const key of LEGACY_WISHLIST_KEYS) {
+    try {
+      localStorage.setItem(key, json);
+      sessionStorage.setItem(key, json);
+    } catch (_) {}
+  }
+  try {
+    window.dispatchEvent(new Event('wishlist-updated'));
+    window.dispatchEvent(new CustomEvent('rjfc_wishlist_updated', { detail: { items } }));
+    window.dispatchEvent(new Event('storage'));
+  } catch (_) {}
+  try {
+    if (typeof window.updateWishlistCount === 'function') {
+      window.updateWishlistCount();
+    }
+  } catch (_) {}
+}
+
 /* =========================================================================
    REACT CONTEXT & PROVIDER
    ========================================================================= */
 
-const StoreContext = createContext(undefined);
+export const StoreContext = createContext(undefined);
 
 export const StoreProvider = ({ children }) => {
   // 1. Dark Mode
@@ -272,29 +366,50 @@ export const StoreProvider = ({ children }) => {
 
   // 4. Wishlist State
   const [wishlist, setWishlist] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const local = localStorage.getItem('rjfc_react_wishlist');
-      if (local) {
-        try {
-          return JSON.parse(local);
-        } catch (_) {}
-      }
-    }
-    return [];
+    return readUnifiedWishlistFromStorage();
   });
 
+  const wishlistRef = React.useRef(wishlist);
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('rjfc_react_wishlist', JSON.stringify(wishlist));
-    }
+    wishlistRef.current = wishlist;
   }, [wishlist]);
+
+  // Synchronize whenever wishlist state changes
+  useEffect(() => {
+    writeUnifiedWishlistToStorage(wishlist);
+  }, [wishlist]);
+
+  // Listen for storage / cross-tab / cross-component wishlist updates in real-time
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleExternalWishlistUpdate = () => {
+      try {
+        const stored = readUnifiedWishlistFromStorage();
+        if (JSON.stringify(stored) !== JSON.stringify(wishlistRef.current)) {
+          setWishlist(stored);
+        }
+      } catch (_) {}
+    };
+
+    window.addEventListener('wishlist-updated', handleExternalWishlistUpdate);
+    window.addEventListener('rjfc_wishlist_updated', handleExternalWishlistUpdate);
+    window.addEventListener('storage', handleExternalWishlistUpdate);
+
+    return () => {
+      window.removeEventListener('wishlist-updated', handleExternalWishlistUpdate);
+      window.removeEventListener('rjfc_wishlist_updated', handleExternalWishlistUpdate);
+      window.removeEventListener('storage', handleExternalWishlistUpdate);
+    };
+  }, []);
 
   const wishlistCount = wishlist.length;
 
-  const isInWishlist = useCallback(
+  const isItemInWishlist = useCallback(
     (productId) => wishlist.some((p) => String(p.id) === String(productId)),
     [wishlist]
   );
+  const isInWishlist = isItemInWishlist;
 
   // 5. Addresses & Checkout
   const [addresses, setAddresses] = useState(DEFAULT_ADDRESSES);
@@ -389,21 +504,36 @@ export const StoreProvider = ({ children }) => {
   }, []);
 
   // Wishlist Handlers
-  const toggleWishlist = useCallback((product) => {
+  const addToWishlist = useCallback((product) => {
     setWishlist((prev) => {
-      const exists = prev.some((p) => String(p.id) === String(product.id));
-      if (exists) {
-        showToast(`Removed "${product.name}" from saved looks.`, 'info');
-        return prev.filter((p) => String(p.id) !== String(product.id));
-      }
-      showToast(`Saved "${product.name}" to your royal wishlist!`, 'success');
+      if (prev.some((p) => String(p.id) === String(product.id))) return prev;
+      showToast('Added to Your Saved Collection', 'success');
       return [...prev, product];
     });
   }, [showToast]);
 
   const removeFromWishlist = useCallback((productId) => {
-    setWishlist((prev) => prev.filter((p) => String(p.id) !== String(productId)));
-    showToast('Removed from saved looks.', 'info');
+    setWishlist((prev) => {
+      showToast('Removed from Wishlist', 'info');
+      return prev.filter((p) => String(p.id) !== String(productId));
+    });
+  }, [showToast]);
+
+  const toggleWishlist = useCallback((product) => {
+    setWishlist((prev) => {
+      const exists = prev.some((p) => String(p.id) === String(product.id));
+      if (exists) {
+        showToast('Removed from Wishlist', 'info');
+        return prev.filter((p) => String(p.id) !== String(product.id));
+      }
+      showToast('Added to Your Saved Collection', 'success');
+      return [...prev, product];
+    });
+  }, [showToast]);
+
+  const clearWishlist = useCallback(() => {
+    setWishlist([]);
+    showToast('Saved collection cleared.', 'info');
   }, [showToast]);
 
   // Address Handlers
@@ -460,8 +590,12 @@ export const StoreProvider = ({ children }) => {
       wishlist,
       wishlistCount,
       isInWishlist,
+      isItemInWishlist,
       toggleWishlist,
+      addToWishlist,
       removeFromWishlist,
+      clearWishlist,
+      setWishlist,
       user,
       isAuthenticated,
       login,
@@ -509,8 +643,12 @@ export const StoreProvider = ({ children }) => {
       wishlist,
       wishlistCount,
       isInWishlist,
+      isItemInWishlist,
       toggleWishlist,
+      addToWishlist,
       removeFromWishlist,
+      clearWishlist,
+      setWishlist,
       user,
       isAuthenticated,
       login,

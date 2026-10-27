@@ -1,18 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useContext, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart,
   ShoppingBag,
   Trash2,
   ArrowRight,
-  Filter,
-  Check,
-  Bell,
   Sparkles,
   AlertCircle,
-  ChevronDown,
   X,
+  Check
 } from 'lucide-react';
+import { StoreContext, ProductItem } from '../context';
 
 /* =========================================================================
    TYPE DEFINITIONS
@@ -40,13 +38,16 @@ export interface WishlistProduct {
   categoryLabel?: string;
   price: number;
   originalPrice?: number;
+  original_price?: number;
   discount?: number;
   stock: number;
   image: string;
   secondaryImage?: string;
+  additional_images?: string[] | string;
   availableSizes?: string[];
+  available_sizes?: string[] | string;
   selectedSize?: string;
-  badge?: 'Low Stock' | 'Sale' | 'Trending' | 'New Season';
+  badge?: string;
   addedAt?: string;
 }
 
@@ -57,166 +58,248 @@ export interface WishlistPageProps {
   onMoveAllToCart?: (products: WishlistProduct[]) => void;
   onClearAll?: () => void;
   onExploreCatalog?: () => void;
+  onAddToCart?: (product: ProductItem, size?: string) => void;
 }
 
 /* =========================================================================
-   MOCK EDITORIAL HIGH-FASHION WISHLIST DATA
+   HELPER UTILITIES
    ========================================================================= */
 
-export const DEFAULT_WISHLIST_ITEMS: WishlistProduct[] = [
-  {
-    id: 1,
-    name: 'Royal Kanjivaram Pure Silk Zari Saree',
-    brand: 'RJ SIGNATURE',
-    category: 'sarees',
-    categoryLabel: 'Sarees & Couture',
-    price: 3499,
-    originalPrice: 6999,
-    discount: 50,
-    stock: 2, // Low stock cue
-    image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
-    secondaryImage: 'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80',
-    availableSizes: ['Free Size (5.5m + Blouse)'],
-    selectedSize: 'Free Size (5.5m + Blouse)',
-    badge: 'Low Stock',
-    addedAt: '2026-10-24T10:00:00Z',
-  },
-  {
-    id: 2,
-    name: 'Crimson Velvet Bridal Lehenga with Zardozi Work',
-    brand: 'RJ ROYAL HERITAGE',
-    category: 'dresses',
-    categoryLabel: 'Kurtis & Lehengas',
-    price: 8999,
-    originalPrice: 14999,
-    discount: 40,
-    stock: 5,
-    image: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80',
-    secondaryImage: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
-    availableSizes: ['XS', 'S', 'M', 'L', 'Custom'],
-    selectedSize: 'M',
-    badge: 'Trending',
-    addedAt: '2026-10-23T14:30:00Z',
-  },
-  {
-    id: 3,
-    name: 'Handcrafted Kundan Polki Choker & Jhumka Ensemble',
-    brand: 'RJ JEWELS VAULT',
-    category: 'jewelry',
-    categoryLabel: 'Jewellery & Chokers',
-    price: 2499,
-    originalPrice: 4999,
-    discount: 50,
-    stock: 8,
-    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80',
-    secondaryImage: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80',
-    availableSizes: ['Standard Choker Fit'],
-    selectedSize: 'Standard Choker Fit',
-    badge: 'Sale',
-    addedAt: '2026-10-22T09:15:00Z',
-  },
-  {
-    id: 4,
-    name: 'Midnight Black Embroidered Sherwani Tuxedo Ensemble',
-    brand: 'RJ BESPOKE MEN',
-    category: 'dresses',
-    categoryLabel: 'Kurtis & Lehengas',
-    price: 6499,
-    originalPrice: 9999,
-    discount: 35,
-    stock: 0, // Out of stock cue
-    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80',
-    secondaryImage: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
-    availableSizes: ['38', '40', '42', '44'],
-    selectedSize: '40',
-    addedAt: '2026-10-21T18:00:00Z',
-  },
-  {
-    id: 5,
-    name: 'Artisan Raw Silk Potli Clutch with Pearl Tassels',
-    brand: 'RJ ACCESSORIES',
-    category: 'accessories',
-    categoryLabel: 'Bags & Gifts',
-    price: 1299,
-    originalPrice: 1999,
-    discount: 35,
-    stock: 12,
-    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80',
-    secondaryImage: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=800&q=80',
-    availableSizes: ['One Size'],
-    selectedSize: 'One Size',
-    badge: 'New Season',
-    addedAt: '2026-10-20T11:45:00Z',
-  },
-  {
-    id: 6,
-    name: 'Emerald Floral Printed Georgette Anarkali Suit',
-    brand: 'RJ SIGNATURE',
-    category: 'dresses',
-    categoryLabel: 'Kurtis & Lehengas',
-    price: 2899,
-    originalPrice: 4499,
-    discount: 36,
-    stock: 1, // High urgency cue
-    image: 'https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=800&q=80',
-    secondaryImage: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
-    availableSizes: ['XS', 'S', 'M', 'L'],
-    selectedSize: 'S',
-    badge: 'Low Stock',
-    addedAt: '2026-10-19T16:20:00Z',
-  },
-];
+function formatIndianPrice(amount: number): string {
+  if (typeof amount !== 'number' || isNaN(amount)) return '₹0';
+  return '₹' + Math.round(amount).toLocaleString('en-IN');
+}
+
+function parseSizesList(sizesInput?: string[] | string): string[] {
+  if (!sizesInput) return ['Free Size'];
+  if (Array.isArray(sizesInput)) {
+    const list = sizesInput.map(s => String(s).replace(/\s*\(.*\)/, '').trim()).filter(Boolean);
+    return list.length > 0 ? list : ['Free Size'];
+  }
+  if (typeof sizesInput === 'string') {
+    const trimmed = sizesInput.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          const list = parsed.map(s => String(s).replace(/\s*\(.*\)/, '').trim()).filter(Boolean);
+          return list.length > 0 ? list : ['Free Size'];
+        }
+      } catch (_) {}
+    }
+    const list = trimmed.split(',').map(s => s.replace(/\s*\(.*\)/, '').trim()).filter(Boolean);
+    return list.length > 0 ? list : ['Free Size'];
+  }
+  return ['Free Size'];
+}
+
+function normalizeWishlistProduct(item: any, idx = 0): WishlistProduct | null {
+  if (!item) return null;
+  if (typeof item === 'string' || typeof item === 'number') {
+    return {
+      id: item,
+      name: `Artisanal Ensemble #${item}`,
+      brand: 'RJ COLLECTION',
+      category: 'sarees',
+      categoryLabel: 'Sarees & Couture',
+      price: 2999,
+      originalPrice: 4999,
+      original_price: 4999,
+      discount: 40,
+      stock: 5,
+      image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+      availableSizes: ['Free Size'],
+      selectedSize: 'Free Size'
+    };
+  }
+
+  const pId = item.id || item.product_id || `wish_${idx + 1}`;
+  const price = Number(item.price) || 0;
+  const originalPrice = Number(item.originalPrice || item.original_price || price);
+  const discount = Number(item.discount) || (originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0);
+  const sizes = parseSizesList(item.availableSizes || item.available_sizes);
+  const cat = String(item.category || item.category_name || item.department || 'sarees').toLowerCase();
+
+  return {
+    id: pId,
+    name: item.name || item.title || 'Artisanal Ensemble',
+    brand: item.brand || 'RJ COLLECTION',
+    category: cat.includes('saree') ? 'sarees' : cat.includes('jewel') ? 'jewelry' : cat.includes('dress') || cat.includes('kurti') ? 'dresses' : 'accessories',
+    categoryLabel: item.categoryLabel || item.category || 'Luxury Couture',
+    price,
+    originalPrice,
+    original_price: originalPrice,
+    discount,
+    stock: item.stock !== undefined ? Number(item.stock) : 5,
+    image: item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
+    secondaryImage: item.secondaryImage || (Array.isArray(item.additional_images) && item.additional_images[0]),
+    availableSizes: sizes,
+    selectedSize: item.selectedSize || sizes[0] || 'Free Size',
+    badge: item.badge || (discount >= 30 ? 'Sale' : undefined),
+    addedAt: item.addedAt || new Date().toISOString()
+  };
+}
+
+function readLocalWishlistFallback(): WishlistProduct[] {
+  if (typeof window === 'undefined') return [];
+  const keys = ['rj_fashion_wishlist', 'rjfc_wishlist', 'rjfc_react_wishlist', 'wishlist'];
+  for (const k of keys) {
+    try {
+      const raw = localStorage.getItem(k);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const list = parsed.map(normalizeWishlistProduct).filter(Boolean) as WishlistProduct[];
+          if (list.length > 0) return list;
+        }
+      }
+    } catch (_) {}
+  }
+  return [];
+}
 
 /* =========================================================================
    MAIN COMPONENT: WishlistPage
    ========================================================================= */
 
 export const WishlistPage: React.FC<WishlistPageProps> = ({
-  initialItems = DEFAULT_WISHLIST_ITEMS,
+  initialItems,
   onMoveToCart,
   onRemoveItem,
   onMoveAllToCart,
   onClearAll,
   onExploreCatalog,
+  onAddToCart,
 }) => {
-  const [items, setItems] = useState<WishlistProduct[]>(initialItems);
+  const store = useContext(StoreContext);
+
+  // Sync internal items from StoreContext or storage fallback
+  const resolveCurrentItems = useCallback((): WishlistProduct[] => {
+    if (store && Array.isArray(store.wishlist)) {
+      return store.wishlist.map(normalizeWishlistProduct).filter(Boolean) as WishlistProduct[];
+    }
+    if (initialItems && initialItems.length > 0) {
+      return initialItems;
+    }
+    return readLocalWishlistFallback();
+  }, [store, initialItems]);
+
+  const [items, setItems] = useState<WishlistProduct[]>(resolveCurrentItems);
   const [activeCategory, setActiveCategory] = useState<WishlistCategory>('all');
   const [activeSort, setActiveSort] = useState<WishlistSort>('recent');
-  const [selectedSizes, setSelectedSizes] = useState<Record<string | number, string>>(() => {
-    const initial: Record<string | number, string> = {};
-    initialItems.forEach((item) => {
-      if (item.selectedSize) {
-        initial[item.id] = item.selectedSize;
-      } else if (item.availableSizes && item.availableSizes.length > 0) {
-        initial[item.id] = item.availableSizes[0];
-      }
-    });
-    return initial;
-  });
-  const [hoveredCardId, setHoveredCardId] = useState<string | number | null>(null);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string | number, string>>({});
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [movingIds, setMovingIds] = useState<Record<string | number, boolean>>({});
 
-  // Trigger Toast Helper
+  // Sync with store wishlist changes
+  useEffect(() => {
+    if (store && Array.isArray(store.wishlist)) {
+      setItems(store.wishlist.map(normalizeWishlistProduct).filter(Boolean) as WishlistProduct[]);
+    }
+  }, [store?.wishlist]);
+
+  // Real-time listener for cross-tab and cross-component updates
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleSync = () => {
+      setItems(resolveCurrentItems());
+    };
+
+    window.addEventListener('wishlist-updated', handleSync);
+    window.addEventListener('rjfc_wishlist_updated', handleSync);
+    window.addEventListener('storage', handleSync);
+
+    return () => {
+      window.removeEventListener('wishlist-updated', handleSync);
+      window.removeEventListener('rjfc_wishlist_updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, [resolveCurrentItems]);
+
+  // Toast feedback helper
   const triggerToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    if (store?.showToast) {
+      store.showToast(msg, 'info');
+    } else {
+      setToastMessage(msg);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
   };
 
   // Handle Remove Item
   const handleRemove = (productId: string | number) => {
-    setItems((prev) => prev.filter((p) => p.id !== productId));
-    triggerToast('Item removed from saved collection');
+    if (store) {
+      store.removeFromWishlist(productId);
+    } else {
+      setItems((prev) => {
+        const next = prev.filter((p) => String(p.id) !== String(productId));
+        try {
+          const json = JSON.stringify(next);
+          localStorage.setItem('rj_fashion_wishlist', json);
+          localStorage.setItem('rjfc_wishlist', JSON.stringify(next.map(i => String(i.id))));
+          localStorage.setItem('rjfc_react_wishlist', json);
+          window.dispatchEvent(new Event('wishlist-updated'));
+          window.dispatchEvent(new Event('storage'));
+        } catch (_) {}
+        return next;
+      });
+      triggerToast('Item removed from saved collection');
+    }
     if (onRemoveItem) onRemoveItem(productId);
   };
 
   // Handle Move Item to Bag
-  const handleMoveToCart = (product: WishlistProduct) => {
+  const handleMoveToCart = async (product: WishlistProduct) => {
     if (product.stock <= 0) return;
-    const size = selectedSizes[product.id] || product.availableSizes?.[0] || 'Standard';
-    setItems((prev) => prev.filter((p) => p.id !== product.id));
-    triggerToast(`Moved "${product.name}" (${size}) to your shopping bag`);
-    if (onMoveToCart) onMoveToCart(product, size);
+    const size = selectedSizes[product.id] || product.selectedSize || product.availableSizes?.[0] || 'Free Size';
+
+    setMovingIds(prev => ({ ...prev, [product.id]: true }));
+
+    try {
+      if (store) {
+        store.addToCart(product as any, size, 1);
+        store.removeFromWishlist(product.id);
+      } else if (onAddToCart) {
+        onAddToCart(product as any, size);
+        handleRemove(product.id);
+      } else if (onMoveToCart) {
+        onMoveToCart(product, size);
+        handleRemove(product.id);
+      } else if (typeof window !== 'undefined') {
+        // Direct local storage fallback
+        const raw = localStorage.getItem('rjfc_cart') || localStorage.getItem('rjfc_local_cart') || localStorage.getItem('rjfc_react_cart');
+        const cart = raw ? JSON.parse(raw) : [];
+        cart.push({
+          id: Date.now(),
+          product_id: product.id,
+          cart_id: `cart_${Date.now()}_${product.id}`,
+          name: product.name,
+          price: product.price,
+          original_price: product.originalPrice || product.price,
+          discount: product.discount || 0,
+          image: product.image,
+          brand: product.brand || 'RJ Collection',
+          size,
+          quantity: 1,
+          stock: product.stock
+        });
+        const cartJson = JSON.stringify(cart);
+        ['rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach(k => {
+          localStorage.setItem(k, cartJson);
+        });
+        window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: cart } }));
+        window.dispatchEvent(new Event('storage'));
+        if (typeof (window as any).updateCartCount === 'function') {
+          (window as any).updateCartCount();
+        }
+        handleRemove(product.id);
+        triggerToast(`Moved "${product.name}" (${size}) to your shopping bag`);
+      }
+    } finally {
+      setMovingIds(prev => ({ ...prev, [product.id]: false }));
+    }
   };
 
   // Handle Move All In-Stock to Bag
@@ -226,14 +309,47 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
       triggerToast('No in-stock items available to move to cart');
       return;
     }
-    setItems((prev) => prev.filter((p) => p.stock <= 0));
+    inStockItems.forEach(item => {
+      const size = selectedSizes[item.id] || item.selectedSize || item.availableSizes?.[0] || 'Free Size';
+      if (store) {
+        store.addToCart(item as any, size, 1);
+        store.removeFromWishlist(item.id);
+      } else if (onAddToCart) {
+        onAddToCart(item as any, size);
+      }
+    });
+
+    if (!store) {
+      const remaining = items.filter(p => p.stock <= 0);
+      setItems(remaining);
+      try {
+        const json = JSON.stringify(remaining);
+        localStorage.setItem('rj_fashion_wishlist', json);
+        localStorage.setItem('rjfc_wishlist', JSON.stringify(remaining.map(i => String(i.id))));
+        localStorage.setItem('rjfc_react_wishlist', json);
+        window.dispatchEvent(new Event('wishlist-updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch (_) {}
+    }
+
     triggerToast(`Moved ${inStockItems.length} items to your shopping bag`);
     if (onMoveAllToCart) onMoveAllToCart(inStockItems);
   };
 
   // Handle Clear All Wishlist Items
   const handleClearAll = () => {
-    setItems([]);
+    if (store) {
+      store.clearWishlist();
+    } else {
+      setItems([]);
+      try {
+        localStorage.removeItem('rj_fashion_wishlist');
+        localStorage.setItem('rjfc_wishlist', '[]');
+        localStorage.setItem('rjfc_react_wishlist', '[]');
+        window.dispatchEvent(new Event('wishlist-updated'));
+        window.dispatchEvent(new Event('storage'));
+      } catch (_) {}
+    }
     setShowClearConfirm(false);
     triggerToast('Your saved collection has been cleared');
     if (onClearAll) onClearAll();
@@ -284,14 +400,22 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
     { id: 'sale', label: 'On Sale' },
   ];
 
+  const handleExploreCatalog = () => {
+    if (onExploreCatalog) {
+      onExploreCatalog();
+    } else if (typeof window !== 'undefined') {
+      window.location.href = '/shop.html?newArrival=true';
+    }
+  };
+
   return (
-    <div className="w-full min-h-screen bg-[#F8F8F7] text-[#111111] dark:bg-[#0D0D0F] dark:text-[#F5EFEB] font-sans selection:bg-[#D4AF37] selection:text-black py-8 sm:py-12 px-4 sm:px-6 lg:px-12 box-border transition-colors duration-300">
+    <div className="w-full min-h-screen bg-[#FDFBF7] text-[#111111] dark:bg-[#0A0A0C] dark:text-[#F5EFEB] font-sans selection:bg-[#D4AF37] selection:text-black py-8 sm:py-12 px-4 sm:px-6 lg:px-12 box-border transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* =========================================================================
             1. PAGE HEADER & CONTROL BAR
             ========================================================================= */}
-        <header className="space-y-6 border-b border-[#E5E5E5] dark:border-white/10 pb-8">
+        <header className="space-y-6 border-b border-neutral-200/80 dark:border-white/10 pb-8">
           {/* Breadcrumbs */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#78716C] dark:text-[#A8A29E]">
             <a href="/" className="hover:text-[#111111] dark:hover:text-white transition-colors">Home</a>
@@ -306,12 +430,12 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Curated Client Selection</span>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight text-inherit">
                   My Saved Collection
                 </h1>
-                <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-[#111111] text-white dark:bg-[#D4AF37] dark:text-black transition-colors">
-                  {items.length} {items.length === 1 ? 'Item' : 'Items'}
+                <span className="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-xs font-semibold bg-[#111111] text-white dark:bg-[#D4AF37] dark:text-black transition-colors font-mono shadow-sm">
+                  [ {items.length} {items.length === 1 ? 'Item' : 'Items'} ]
                 </span>
               </div>
             </div>
@@ -322,7 +446,7 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
                 <button
                   type="button"
                   onClick={handleMoveAllToCart}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#111111] text-white hover:bg-[#2B2520] dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#E5C158] transition-all shadow-sm hover:shadow"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#111111] text-white hover:bg-neutral-800 dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#E5C158] transition-all shadow-sm hover:shadow"
                 >
                   <ShoppingBag className="w-4 h-4" />
                   <span>Move All to Bag</span>
@@ -350,10 +474,10 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
                     key={cat.id}
                     type="button"
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                    className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                       activeCategory === cat.id
-                        ? 'bg-[#111111] text-white dark:bg-white dark:text-[#111111] shadow-sm font-semibold'
-                        : 'bg-white dark:bg-[#141418] border border-[#E5E5E5] dark:border-white/10 text-[#57534E] dark:text-[#A8A29E] hover:border-[#111111] dark:hover:border-white'
+                        ? 'bg-[#111111] text-white dark:bg-[#D4AF37] dark:text-black shadow-sm'
+                        : 'bg-white dark:bg-[#141418] border border-neutral-200/80 dark:border-white/10 text-neutral-600 dark:text-neutral-400 hover:border-black dark:hover:border-white'
                     }`}
                   >
                     {cat.label}
@@ -361,218 +485,180 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
                 ))}
               </div>
 
-              {/* Sort Dropdown */}
-              <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                <span className="text-xs font-medium text-[#78716C] dark:text-[#A8A29E]">Sort by:</span>
-                <div className="relative inline-block">
-                  <select
-                    value={activeSort}
-                    onChange={(e) => setActiveSort(e.target.value as WishlistSort)}
-                    aria-label="Sort Wishlist Items"
-                    className="appearance-none bg-white dark:bg-[#141418] border border-[#E5E5E5] dark:border-white/10 rounded-lg px-3 py-2 pr-8 text-xs font-semibold text-[#111111] dark:text-white cursor-pointer focus:outline-none focus:border-[#D4AF37]"
-                  >
-                    <option value="recent">Recently Saved</option>
-                    <option value="price_asc">Price: Low to High</option>
-                    <option value="price_desc">Price: High to Low</option>
-                    <option value="discount">Highest Discount</option>
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#78716C]" />
-                </div>
+              {/* Sort Selector */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs uppercase tracking-wider text-neutral-500 font-semibold">Sort By:</span>
+                <select
+                  value={activeSort}
+                  onChange={(e) => setActiveSort(e.target.value as WishlistSort)}
+                  className="text-xs font-semibold bg-white dark:bg-[#141418] border border-neutral-200/80 dark:border-white/10 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#D4AF37] transition-colors"
+                >
+                  <option value="recent">Recently Added</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                  <option value="discount">Biggest Discount</option>
+                </select>
               </div>
             </div>
           )}
         </header>
 
         {/* =========================================================================
-            2. PRODUCT CARD ARCHITECTURE (Editorial High-Fashion Grid)
+            2. PRODUCT CARDS GRID (Luxury 4-Column Responsive Layout)
             ========================================================================= */}
         {filteredAndSortedItems.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto px-4 md:px-6 py-8">
             <AnimatePresence>
               {filteredAndSortedItems.map((product) => {
                 const isOutOfStock = product.stock <= 0;
-                const isLowStock = product.stock > 0 && product.stock <= 3;
-                const activeSize = selectedSizes[product.id] || product.availableSizes?.[0] || 'Free Size';
-                const isHovered = hoveredCardId === product.id;
+                const isLowStock = !isOutOfStock && product.stock <= 3;
+                const activeSize = selectedSizes[product.id] || product.selectedSize || product.availableSizes?.[0] || 'Free Size';
+                const isMoving = !!movingIds[product.id];
 
                 return (
                   <motion.article
                     key={product.id}
                     layout
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.25 }}
-                    onMouseEnter={() => setHoveredCardId(product.id)}
-                    onMouseLeave={() => setHoveredCardId(null)}
-                    className="group relative flex flex-col bg-white dark:bg-[#141418] border border-[#E5E5E5] dark:border-white/10 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                    className="group relative flex flex-col justify-between bg-white dark:bg-[#141418] border border-neutral-200/80 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-[#D4AF37]/50 transition-all duration-300"
                   >
-                    {/* Vertical Fashion Image Container (3:4 ratio) */}
-                    <div className="relative w-full aspect-[3/4] overflow-hidden bg-[#F1EDE6] dark:bg-[#19191F]">
-                      <a href={`/product.html?id=${product.id}`} className="block w-full h-full">
-                        {/* Primary Image */}
+                    {/* Media Container (3:4 Portrait Ratio) */}
+                    <div className="relative w-full aspect-[3/4] bg-[#F7F4F0] dark:bg-neutral-900 overflow-hidden">
+                      <a
+                        href={`/product.html?id=${product.id}`}
+                        className="block w-full h-full relative overflow-hidden"
+                        title={product.name}
+                      >
                         <img
                           src={product.image}
                           alt={product.name}
                           loading="lazy"
-                          className={`w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${
-                            isOutOfStock ? 'grayscale opacity-60' : ''
-                          }`}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src =
+                              'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80';
+                          }}
                         />
-
-                        {/* Secondary Lookbook Shot (Hover Crossfade) */}
-                        {product.secondaryImage && !isOutOfStock && (
-                          <img
-                            src={product.secondaryImage}
-                            alt={`${product.name} alternate view`}
-                            loading="lazy"
-                            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${
-                              isHovered ? 'opacity-100 scale-105' : 'opacity-0'
-                            }`}
-                          />
-                        )}
                       </a>
 
-                      {/* Top-Left Editorial Badges */}
-                      <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
-                        {isOutOfStock ? (
-                          <span className="px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-black/80 text-white backdrop-blur-md">
-                            Out of Stock
-                          </span>
-                        ) : (
-                          <>
-                            {product.badge && (
-                              <span
-                                className={`px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${
-                                  product.badge === 'Low Stock'
-                                    ? 'bg-[#B91C1C]/90 text-white'
-                                    : product.badge === 'Sale'
-                                    ? 'bg-[#111111]/90 text-white dark:bg-[#D4AF37]/90 dark:text-black'
-                                    : 'bg-[#059669]/90 text-white'
-                                }`}
-                              >
-                                {product.badge}
-                              </span>
-                            )}
-                            {product.discount && product.discount > 0 && !product.badge && (
-                              <span className="px-2.5 py-1 rounded-sm text-[10px] font-bold uppercase tracking-wider bg-[#111111]/90 text-white dark:bg-[#D4AF37]/90 dark:text-black backdrop-blur-md">
-                                {product.discount}% OFF
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-
-                      {/* Top-Right Quick Remove Heart Button */}
+                      {/* Top-Right Remove Button (X) */}
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleRemove(product.id);
-                        }}
-                        aria-label={`Remove ${product.name} from wishlist`}
-                        title="Remove from Saved Collection"
-                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 dark:bg-[#141418]/90 text-[#DC2626] dark:text-[#F87171] hover:bg-white dark:hover:bg-[#19191F] flex items-center justify-center shadow-md backdrop-blur-sm transition-transform hover:scale-110 active:scale-95 z-10"
+                        onClick={() => handleRemove(product.id)}
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/85 dark:bg-neutral-900/85 backdrop-blur-md flex items-center justify-center text-neutral-600 hover:text-red-600 dark:text-neutral-300 dark:hover:text-red-400 transition-colors shadow-sm z-10 hover:scale-110"
+                        aria-label="Remove from Wishlist"
+                        title="Remove from saved collection"
                       >
-                        <Heart className="w-4 h-4 fill-current stroke-current" />
+                        <X className="w-4 h-4" />
                       </button>
 
-                      {/* Out of Stock Grayscale Overlay Banner */}
-                      {isOutOfStock && (
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center p-4">
-                          <button
-                            type="button"
-                            onClick={() => triggerToast(`Notification requested: We'll email you when "${product.name}" is restocked.`)}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold bg-white/95 text-black hover:bg-white shadow-lg backdrop-blur-md transition-transform hover:scale-105"
-                          >
-                            <Bell className="w-3.5 h-3.5" />
-                            <span>Notify When Restocked</span>
-                          </button>
-                        </div>
-                      )}
+                      {/* Badges */}
+                      <div className="absolute top-3 left-3 flex flex-col gap-1 z-10">
+                        {product.discount && product.discount > 0 && (
+                          <span className="bg-red-600 text-white text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase shadow-sm">
+                            {product.discount}% OFF
+                          </span>
+                        )}
+                        {isOutOfStock ? (
+                          <span className="bg-neutral-900/90 text-white text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase backdrop-blur-sm">
+                            Sold Out
+                          </span>
+                        ) : isLowStock ? (
+                          <span className="bg-amber-600/90 text-white text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase backdrop-blur-sm">
+                            Only {product.stock} left
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
 
-                    {/* Card Editorial Details */}
-                    <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-3">
-                      {/* Subtitle / Collection */}
-                      <span className="text-[11px] font-bold uppercase tracking-widest text-[#8C827A] dark:text-[#A8A29E]">
-                        {product.brand || 'RJ SIGNATURE'}
+                    {/* Card Content */}
+                    <div className="flex flex-col flex-1 p-4 gap-2.5">
+                      {/* Gold Category Tag */}
+                      <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#B38B22] dark:text-[#D4AF37]">
+                        {product.categoryLabel || product.category || 'Luxury Couture'}
                       </span>
 
-                      {/* Product Headline */}
-                      <h3 className="text-sm font-medium text-inherit line-clamp-2 leading-snug">
-                        <a href={`/product.html?id=${product.id}`} className="hover:underline">
+                      {/* Product Title */}
+                      <h3 className="font-serif text-sm font-semibold text-inherit line-clamp-2 leading-snug min-h-[38px]">
+                        <a
+                          href={`/product.html?id=${product.id}`}
+                          className="hover:text-[#D4AF37] transition-colors"
+                          title={product.name}
+                        >
                           {product.name}
                         </a>
                       </h3>
 
-                      {/* Pricing Row */}
+                      {/* Price & Discount */}
                       <div className="flex items-baseline gap-2 pt-0.5">
-                        <span className="text-base font-bold text-inherit">
-                          ₹{product.price.toLocaleString('en-IN')}
+                        <span className="text-base font-bold text-inherit font-mono tracking-tight">
+                          {formatIndianPrice(product.price)}
                         </span>
                         {product.originalPrice && product.originalPrice > product.price && (
-                          <span className="text-xs text-[#78716C] dark:text-[#A8A29E] line-through">
-                            ₹{product.originalPrice.toLocaleString('en-IN')}
+                          <span className="text-xs text-neutral-400 line-through font-mono">
+                            {formatIndianPrice(product.originalPrice)}
                           </span>
                         )}
                         {product.discount && product.discount > 0 && (
-                          <span className="text-[11px] font-bold text-[#059669] dark:text-[#34D399]">
+                          <span className="text-[11px] font-bold text-red-600 dark:text-red-400">
                             ({product.discount}% off)
                           </span>
                         )}
                       </div>
 
-                      {/* Size Selector Pills (Inline Interactive) */}
-                      {product.availableSizes && product.availableSizes.length > 0 && (
-                        <div className="pt-1 space-y-1.5">
-                          <div className="flex items-center justify-between text-[11px] text-[#78716C] dark:text-[#A8A29E]">
-                            <span>Size:</span>
-                            <span className="font-semibold text-inherit">{activeSize}</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {product.availableSizes.map((size) => (
-                              <button
-                                key={size}
-                                type="button"
-                                onClick={() => handleSizeSelect(product.id, size)}
-                                className={`px-2.5 py-1 rounded text-[11px] font-medium border transition-colors ${
-                                  activeSize === size
-                                    ? 'bg-[#111111] text-white border-[#111111] dark:bg-[#D4AF37] dark:text-black dark:border-[#D4AF37] font-bold'
-                                    : 'bg-white dark:bg-[#141418] border-[#E5E5E5] dark:border-white/10 text-[#57534E] dark:text-[#A8A29E] hover:border-black dark:hover:border-white'
-                                }`}
-                              >
-                                {size}
-                              </button>
-                            ))}
-                          </div>
+                      {/* Size Selector Pills (if variants exist) */}
+                      {product.availableSizes && product.availableSizes.length > 1 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {product.availableSizes.slice(0, 4).map((size) => (
+                            <button
+                              key={size}
+                              type="button"
+                              onClick={() => handleSizeSelect(product.id, size)}
+                              className={`text-[10px] font-semibold px-2 py-0.5 rounded transition-all ${
+                                activeSize === size
+                                  ? 'bg-[#111111] text-white dark:bg-[#D4AF37] dark:text-black shadow-xs font-bold'
+                                  : 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                              }`}
+                            >
+                              {size}
+                            </button>
+                          ))}
                         </div>
                       )}
 
-                      {/* Stock & Scarcity Urgency Cue */}
+                      {/* Scarcity Alert */}
                       {isLowStock && (
-                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#B91C1C] dark:text-[#F87171] pt-0.5">
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400 pt-0.5">
                           <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                           <span>Only {product.stock} left in stock — order soon</span>
                         </div>
                       )}
 
-                      {/* Spacer to push CTA to bottom */}
+                      {/* Push CTA to card bottom */}
                       <div className="flex-1" />
 
-                      {/* Move to Bag CTA Button */}
+                      {/* Full-Width CTA: MOVE TO BAG */}
                       <button
                         type="button"
-                        disabled={isOutOfStock}
+                        disabled={isOutOfStock || isMoving}
                         onClick={() => handleMoveToCart(product)}
-                        className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                        className={`w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
                           isOutOfStock
-                            ? 'bg-[#E5E5E5] text-[#A8A29E] dark:bg-white/5 dark:text-white/30 cursor-not-allowed'
-                            : 'bg-[#111111] text-white hover:bg-[#2B2520] dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#E5C158] shadow-sm hover:shadow active:scale-[0.99]'
+                            ? 'bg-neutral-200 text-neutral-400 dark:bg-white/5 dark:text-neutral-500 cursor-not-allowed'
+                            : 'bg-[#111111] text-white hover:bg-neutral-800 dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#E5C158] shadow-sm hover:shadow active:scale-[0.99]'
                         }`}
                       >
-                        <ShoppingBag className="w-4 h-4" />
-                        <span>{isOutOfStock ? 'Sold Out' : 'Move to Bag'}</span>
+                        {isMoving ? (
+                          <span className="animate-pulse">MOVING...</span>
+                        ) : (
+                          <>
+                            <ShoppingBag className="w-4 h-4" />
+                            <span>{isOutOfStock ? 'Sold Out' : 'MOVE TO BAG'}</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </motion.article>
@@ -582,18 +668,18 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
           </div>
         ) : (
           /* =========================================================================
-              3. EMPTY WISHLIST STATE (Minimalist Editorial Aesthetic)
+              3. EMPTY WISHLIST STATE (Refined Minimalist Editorial Aesthetic)
               ========================================================================= */
           <div className="py-20 px-4 text-center max-w-lg mx-auto space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-full bg-[#111111]/5 dark:bg-white/5 border border-[#E5E5E5] dark:border-white/10 flex items-center justify-center text-[#78716C] dark:text-[#A8A29E]">
-              <Heart className="w-9 h-9 stroke-[1.2]" />
+            <div className="w-20 h-20 mx-auto rounded-full border-2 border-[#D4AF37] flex items-center justify-center text-[#D4AF37] bg-[#D4AF37]/5 shadow-sm">
+              <Heart className="w-9 h-9 stroke-[1.5]" />
             </div>
 
             <div className="space-y-2">
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-inherit">
                 Your Wishlist is Empty
               </h2>
-              <p className="text-sm text-[#78716C] dark:text-[#A8A29E] leading-relaxed">
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 max-w-md mx-auto leading-relaxed">
                 Explore our latest arrivals and save your favorite royal bridal silhouettes, statement jewellery, and handcrafted ethnic wear for upcoming celebrations.
               </p>
             </div>
@@ -601,14 +687,10 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
             <div className="pt-2">
               <button
                 type="button"
-                onClick={() => {
-                  if (onExploreCatalog) onExploreCatalog();
-                  else window.location.href = '/shop.html?newArrival=true';
-                }}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#111111] text-white hover:bg-[#2B2520] dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#E5C158] transition-all shadow-md hover:shadow-lg"
+                onClick={handleExploreCatalog}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#111111] text-white hover:bg-neutral-800 dark:bg-[#D4AF37] dark:text-black dark:hover:bg-[#E5C158] transition-all shadow-md hover:shadow-lg"
               >
-                <span>Discover New Arrivals</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>DISCOVER NEW ARRIVALS →</span>
               </button>
             </div>
           </div>
@@ -626,16 +708,16 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md bg-white dark:bg-[#141418] border border-[#E5E5E5] dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-5"
+              className="w-full max-w-md bg-white dark:bg-[#141418] border border-neutral-200/80 dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-5"
             >
               <div className="flex justify-between items-start">
-                <div className="w-10 h-10 rounded-full bg-[#DC2626]/10 text-[#DC2626] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
                   <Trash2 className="w-5 h-5" />
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowClearConfirm(false)}
-                  className="text-[#78716C] hover:text-[#111111] dark:hover:text-white"
+                  className="text-neutral-500 hover:text-black dark:hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -643,25 +725,25 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
 
               <div className="space-y-1.5">
                 <h3 className="text-lg font-bold font-serif text-inherit">Clear Saved Collection?</h3>
-                <p className="text-xs text-[#78716C] dark:text-[#A8A29E] leading-relaxed">
+                <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">
                   Are you sure you want to remove all {items.length} items from your wishlist? This action cannot be undone.
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleClearAll}
-                  className="flex-1 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#DC2626] text-white hover:bg-[#B91C1C] transition-colors"
-                >
-                  Yes, Clear All
-                </button>
+              <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowClearConfirm(false)}
-                  className="flex-1 py-2.5 rounded-lg text-xs font-semibold text-[#57534E] dark:text-[#A8A29E] border border-[#E5E5E5] dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  className="px-4 py-2 rounded-lg text-xs font-semibold text-neutral-600 hover:text-black dark:text-neutral-400 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                 >
                   Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  className="px-5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 text-white transition-colors shadow-sm"
+                >
+                  Clear Collection
                 </button>
               </div>
             </motion.div>
@@ -669,18 +751,16 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
         )}
       </AnimatePresence>
 
-      {/* =========================================================================
-          5. MICRO-TOAST NOTIFICATION
-          ========================================================================= */}
+      {/* Standalone Toast Notice */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 right-6 z-50 max-w-sm px-4 py-3 rounded-xl bg-[#111111] text-white dark:bg-white dark:text-[#111111] shadow-2xl flex items-center gap-3 text-xs font-medium"
+            className="fixed bottom-6 right-6 z-50 bg-[#111111] text-white dark:bg-white dark:text-black px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold flex items-center gap-2 border border-neutral-700"
           >
-            <Check className="w-4 h-4 text-[#D4AF37] dark:text-[#B38B22] shrink-0" />
+            <Check className="w-4 h-4 text-emerald-500" />
             <span>{toastMessage}</span>
           </motion.div>
         )}

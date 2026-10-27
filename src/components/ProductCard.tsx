@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useContext, useEffect } from 'react';
+import { StoreContext } from '../context';
 import { Heart, ShoppingBag, Zap, Eye, Star, Check } from 'lucide-react';
 
 /* =========================================================================
@@ -103,9 +104,72 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const parsedSizes = useMemo(() => parseSizesList(product.available_sizes), [product.available_sizes]);
   const defaultSize = parsedSizes.length > 0 ? parsedSizes[0] : 'Free Size';
 
+  const store = useContext(StoreContext);
+
   // State
   const [selectedSize, setSelectedSize] = useState<string>(defaultSize);
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(initialWishlisted);
+
+  const isProductInWishlist = useMemo(() => {
+    if (store) {
+      return store.isInWishlist(product.id);
+    }
+    if (typeof window !== 'undefined') {
+      try {
+        const primary = localStorage.getItem('rj_fashion_wishlist');
+        if (primary) {
+          const parsed = JSON.parse(primary);
+          if (Array.isArray(parsed) && parsed.some(p => String(p.id || p) === String(product.id))) {
+            return true;
+          }
+        }
+        const legacy = localStorage.getItem('rjfc_wishlist');
+        if (legacy) {
+          const parsed = JSON.parse(legacy);
+          if (Array.isArray(parsed) && parsed.some(p => String(p.id || p) === String(product.id))) {
+            return true;
+          }
+        }
+      } catch (_) {}
+    }
+    return initialWishlisted;
+  }, [store, product.id, initialWishlisted]);
+
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(isProductInWishlist);
+
+  useEffect(() => {
+    setIsWishlisted(isProductInWishlist);
+  }, [isProductInWishlist]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleSync = () => {
+      if (store) {
+        setIsWishlisted(store.isInWishlist(product.id));
+      } else {
+        try {
+          const primary = localStorage.getItem('rj_fashion_wishlist');
+          if (primary) {
+            const parsed = JSON.parse(primary);
+            setIsWishlisted(Array.isArray(parsed) && parsed.some(p => String(p.id || p) === String(product.id)));
+            return;
+          }
+          const legacy = localStorage.getItem('rjfc_wishlist');
+          if (legacy) {
+            const parsed = JSON.parse(legacy);
+            setIsWishlisted(Array.isArray(parsed) && parsed.some(p => String(p.id || p) === String(product.id)));
+          }
+        } catch (_) {}
+      }
+    };
+    window.addEventListener('wishlist-updated', handleSync);
+    window.addEventListener('rjfc_wishlist_updated', handleSync);
+    window.addEventListener('storage', handleSync);
+    return () => {
+      window.removeEventListener('wishlist-updated', handleSync);
+      window.removeEventListener('rjfc_wishlist_updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
+  }, [store, product.id]);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isBuying, setIsBuying] = useState<boolean>(false);
   const [justAdded, setJustAdded] = useState<boolean>(false);
@@ -127,19 +191,54 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     e.stopPropagation();
     const nextState = !isWishlisted;
     setIsWishlisted(nextState);
-    if (onWishlistToggle) {
-      onWishlistToggle(product, nextState);
+
+    if (store) {
+      store.toggleWishlist(product as any);
     } else if (typeof window !== 'undefined') {
       try {
-        const local = JSON.parse(localStorage.getItem('rjfc_wishlist') || '[]');
-        const pIdStr = String(product.id);
-        const updated = nextState
-          ? Array.from(new Set([...local, pIdStr]))
-          : local.filter((id: string) => String(id) !== pIdStr);
-        localStorage.setItem('rjfc_wishlist', JSON.stringify(updated));
+        let items = [];
+        try {
+          items = JSON.parse(localStorage.getItem('rj_fashion_wishlist') || '[]');
+        } catch (_) {}
+        if (!Array.isArray(items)) items = [];
+
+        if (nextState) {
+          if (!items.some(i => String(i.id || i) === String(product.id))) {
+            items.push(product);
+          }
+        } else {
+          items = items.filter(i => String(i.id || i) !== String(product.id));
+        }
+
+        const json = JSON.stringify(items);
+        localStorage.setItem('rj_fashion_wishlist', json);
+        try { sessionStorage.setItem('rj_fashion_wishlist', json); } catch (_) {}
+
+        // Mirror legacy keys
+        const idList = items.map(i => String(i.id || i));
+        localStorage.setItem('rjfc_wishlist', JSON.stringify(idList));
+        localStorage.setItem('rjfc_react_wishlist', json);
+
+        window.dispatchEvent(new Event('wishlist-updated'));
+        window.dispatchEvent(new CustomEvent('rjfc_wishlist_updated', { detail: { items } }));
+        window.dispatchEvent(new Event('storage'));
+
+        if (typeof window.showToast === 'function') {
+          window.showToast(
+            nextState ? 'Added to Your Saved Collection' : 'Removed from Wishlist',
+            nextState ? 'success' : 'info'
+          );
+        }
+        if (typeof window.updateWishlistCount === 'function') {
+          window.updateWishlistCount();
+        }
       } catch (_) {}
     }
-  }, [isWishlisted, onWishlistToggle, product]);
+
+    if (onWishlistToggle) {
+      onWishlistToggle(product, nextState);
+    }
+  }, [isWishlisted, store, product, onWishlistToggle]);
 
   // Handle Quick View
   const handleQuickViewClick = useCallback((e: React.MouseEvent) => {
@@ -339,14 +438,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           type="button"
           onClick={handleWishlistClick}
           aria-label={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm backdrop-blur-md ${
+          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm backdrop-blur-md z-10 ${
             isWishlisted
-              ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-500'
-              : 'bg-white/85 dark:bg-neutral-900/85 text-neutral-800 dark:text-neutral-200 hover:text-rose-500 hover:scale-110'
+              ? 'bg-rose-50 dark:bg-rose-950/80 text-rose-600'
+              : 'bg-white/85 dark:bg-neutral-900/85 text-neutral-700 hover:text-black dark:text-neutral-300 dark:hover:text-white hover:scale-110'
           }`}
         >
           <Heart
-            className={`w-4 h-4 transition-transform duration-200 ${isWishlisted ? 'fill-rose-500 stroke-rose-500 scale-110' : ''}`}
+            className={`w-4 h-4 transition-transform duration-200 ${
+              isWishlisted ? 'fill-rose-600 text-rose-600 scale-110' : 'text-neutral-700 hover:text-black'
+            }`}
           />
         </button>
 

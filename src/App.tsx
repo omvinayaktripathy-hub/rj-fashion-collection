@@ -10,6 +10,7 @@ import {
   CartPage,
   DeliveryAddressStep,
   PaymentOptionsStep,
+  CheckoutPage,
   AccountDashboard,
   AIVirtualTryOnModal,
   Footer
@@ -104,7 +105,7 @@ const AppContent: React.FC = () => {
     user
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'shop' | 'cart' | 'wishlist' | 'account' | 'delivery' | 'payment'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'shop' | 'cart' | 'wishlist' | 'account' | 'delivery' | 'payment' | 'checkout'>('home');
 
   // Handle navigation
   const navigateTo = (tab: typeof activeTab) => {
@@ -205,13 +206,12 @@ const AppContent: React.FC = () => {
           />
         )}
 
-        {/* Checkout Step 3: Payment Options */}
-        {activeTab === 'payment' && (
-          <PaymentOptionsStep
+        {/* Checkout Step 3: Payment Options & Full Review */}
+        {(activeTab === 'payment' || activeTab === 'checkout') && (
+          <CheckoutPage
+            onBackToCart={() => navigateTo('cart')}
             onBackToAddress={() => navigateTo('delivery')}
-            onPlaceOrder={async () => {
-              navigateTo('home');
-            }}
+            onOrderSuccess={() => navigateTo('account')}
           />
         )}
 

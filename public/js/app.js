@@ -199,6 +199,20 @@ async function updateCartCount() {
   return count;
 }
 
+function getLocalWishlistSafe() {
+  const keys = ['rj_fashion_wishlist', 'rjfc_wishlist', 'rjfc_react_wishlist', 'wishlist'];
+  for (const key of keys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (_) {}
+  }
+  return [];
+}
+
 async function updateWishlistCount() {
   let count = 0;
   try {
@@ -211,7 +225,7 @@ async function updateWishlistCount() {
     }
   } catch (_) {
     try {
-      const local = JSON.parse(localStorage.getItem('rjfc_wishlist') || '[]');
+      const local = getLocalWishlistSafe();
       count = local.length;
     } catch (_) {}
   }
@@ -478,24 +492,37 @@ async function addToCart(productId, quantity = 1, size = 'Free Size') {
 
 // Global Toggle Wishlist
 async function toggleWishlist(productId, btnElement) {
-  let isSaved = btnElement && btnElement.classList.contains('active');
-  let localIds = [];
-  try {
-    localIds = JSON.parse(localStorage.getItem('rjfc_wishlist') || '[]');
-  } catch (_) {}
+  let isSaved = btnElement && (btnElement.classList.contains('active') || btnElement.getAttribute('data-active') === 'true');
+  let localList = getLocalWishlistSafe();
+  const exists = localList.some(item => {
+    const id = typeof item === 'object' ? (item.id || item.product_id) : item;
+    return String(id) === String(productId);
+  });
 
-  if (isSaved || localIds.some(id => String(id) === String(productId))) {
+  if (isSaved || exists) {
     // Remove
     try {
       await fetch(`${API_BASE}/wishlist/${productId}`, { method: 'DELETE' });
     } catch (_) {}
-    localIds = localIds.filter(id => String(id) !== String(productId));
-    localStorage.setItem('rjfc_wishlist', JSON.stringify(localIds));
+    const updated = localList.filter(item => {
+      const id = typeof item === 'object' ? (item.id || item.product_id) : item;
+      return String(id) !== String(productId);
+    });
+    const json = JSON.stringify(updated);
+    ['rj_fashion_wishlist', 'rjfc_react_wishlist', 'wishlist'].forEach(k => {
+      try { localStorage.setItem(k, json); } catch (_) {}
+    });
+    try {
+      localStorage.setItem('rjfc_wishlist', JSON.stringify(updated.map(i => typeof i === 'object' ? (i.id || i.product_id) : i)));
+    } catch (_) {}
     if (btnElement) {
       btnElement.classList.remove('active');
+      btnElement.removeAttribute('data-active');
       btnElement.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
     }
     showToast('Removed from wishlist', 'info');
+    window.dispatchEvent(new Event('wishlist-updated'));
+    window.dispatchEvent(new Event('storage'));
     updateWishlistCount();
   } else {
     // Add
@@ -506,15 +533,27 @@ async function toggleWishlist(productId, btnElement) {
         body: JSON.stringify({ productId })
       });
     } catch (_) {}
-    if (!localIds.some(id => String(id) === String(productId))) {
-      localIds.push(productId);
-      localStorage.setItem('rjfc_wishlist', JSON.stringify(localIds));
+    let prodObj = { id: productId, name: `Artisanal Ensemble #${productId}`, price: 2999 };
+    if (typeof resolveProductById === 'function') {
+      const resolved = await resolveProductById(productId);
+      if (resolved) prodObj = resolved;
     }
+    localList.push(prodObj);
+    const json = JSON.stringify(localList);
+    ['rj_fashion_wishlist', 'rjfc_react_wishlist', 'wishlist'].forEach(k => {
+      try { localStorage.setItem(k, json); } catch (_) {}
+    });
+    try {
+      localStorage.setItem('rjfc_wishlist', JSON.stringify(localList.map(i => typeof i === 'object' ? (i.id || i.product_id) : i)));
+    } catch (_) {}
     if (btnElement) {
       btnElement.classList.add('active');
+      btnElement.setAttribute('data-active', 'true');
       btnElement.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>';
     }
     showToast('Added to Wishlist!', 'success');
+    window.dispatchEvent(new Event('wishlist-updated'));
+    window.dispatchEvent(new Event('storage'));
     updateWishlistCount();
   }
 }
@@ -1107,3 +1146,8 @@ window.addEventListener('scroll', () => {
     }
   }
 }, { passive: true });
+
+
+// Live sync for wishlist count across windows & contexts
+window.addEventListener('wishlist-updated', updateWishlistCount);
+window.addEventListener('rjfc_wishlist_updated', updateWishlistCount);

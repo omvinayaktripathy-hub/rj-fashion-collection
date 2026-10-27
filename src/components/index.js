@@ -15,3 +15,5 @@ export * from './DeliveryAddressStep.jsx';
 export * from './CheckoutPaymentStep.jsx';
 export * from './PaymentOptionsStep.jsx';
 export * from './VirtualTryOnButton.jsx';
+
+export * from './CheckoutPage.jsx';

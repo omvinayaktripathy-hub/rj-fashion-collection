@@ -46,25 +46,57 @@ async function loadWishlist() {
   // 2. Fallback to localStorage (Firebase static hosting or guest session)
   if (items === null) {
     try {
-      const savedIds = JSON.parse(localStorage.getItem('rjfc_wishlist') || '[]');
-      if (savedIds.length === 0) {
+      const keys = ['rj_fashion_wishlist', 'rjfc_wishlist', 'rjfc_react_wishlist', 'wishlist'];
+      let rawList = null;
+      for (const k of keys) {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              rawList = parsed;
+              break;
+            }
+          } catch (_) {}
+        }
+      }
+
+      if (!rawList || rawList.length === 0) {
         items = [];
       } else {
-        items = [];
-        for (const sid of savedIds) {
-          let prod = null;
-          if (typeof resolveProductById === 'function') {
-            prod = await resolveProductById(sid);
+        const objectItems = rawList.filter(i => i && typeof i === 'object' && (i.name || i.title));
+        if (objectItems.length === rawList.length) {
+          items = objectItems.map(p => ({
+            id: p.id || p.product_id,
+            name: p.name || p.title || 'Artisanal Ensemble',
+            brand: p.brand || 'RJ COLLECTION',
+            category: p.category || 'sarees',
+            category_id: p.category_id || 1,
+            price: Number(p.price) || 0,
+            original_price: Number(p.original_price || p.originalPrice || p.price),
+            discount: Number(p.discount) || 0,
+            stock: p.stock !== undefined ? Number(p.stock) : 5,
+            image: p.image || p.thumbnail || '/images/placeholder.jpg',
+            available_sizes: Array.isArray(p.available_sizes) ? p.available_sizes : (Array.isArray(p.availableSizes) ? p.availableSizes : ['Free Size'])
+          }));
+        } else {
+          const idList = rawList.map(i => (typeof i === 'object' ? (i.id || i.product_id) : i));
+          items = [];
+          for (const sid of idList) {
+            let prod = null;
+            if (typeof resolveProductById === 'function') {
+              prod = await resolveProductById(sid);
+            }
+            if (prod) items.push(prod);
           }
-          if (prod) items.push(prod);
-        }
-        if (items.length === 0) {
-          try {
-            const pRes = await fetch('/data/products.json');
-            const pData = await pRes.json();
-            const allProducts = pData.products || [];
-            items = allProducts.filter(p => savedIds.some(id => String(id) === String(p.id)));
-          } catch (_) {}
+          if (items.length === 0) {
+            try {
+              const pRes = await fetch('/data/products.json');
+              const pData = await pRes.json();
+              const allProducts = pData.products || [];
+              items = allProducts.filter(p => idList.some(id => String(id) === String(p.id)));
+            } catch (_) {}
+          }
         }
       }
     } catch (e) {
@@ -330,11 +362,26 @@ async function removeFromWishlist(productId) {
     await fetch(`${API_BASE}/wishlist/${productId}`, { method: 'DELETE' });
   } catch (_) {}
 
-  // Update local storage
+  // Update local storage across all keys
   try {
-    let savedIds = JSON.parse(localStorage.getItem('rjfc_wishlist') || '[]');
-    savedIds = savedIds.filter(id => String(id) !== String(productId));
-    localStorage.setItem('rjfc_wishlist', JSON.stringify(savedIds));
+    const keys = ['rj_fashion_wishlist', 'rjfc_wishlist', 'rjfc_react_wishlist', 'wishlist'];
+    for (const k of keys) {
+      try {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          let parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            parsed = parsed.filter(i => {
+              const id = typeof i === 'object' ? (i.id || i.product_id) : i;
+              return String(id) !== String(productId);
+            });
+            localStorage.setItem(k, JSON.stringify(parsed));
+          }
+        }
+      } catch (_) {}
+    }
+    window.dispatchEvent(new Event('wishlist-updated'));
+    window.dispatchEvent(new Event('storage'));
   } catch (_) {}
 
   // Remove from current memory array
@@ -518,3 +565,14 @@ function notifyStock(productName) {
 window.notifyStock = notifyStock;
 
 document.addEventListener('DOMContentLoaded', loadWishlist);
+
+
+// Synchronize on external wishlist changes
+window.addEventListener('wishlist-updated', function() {
+  loadWishlist();
+});
+window.addEventListener('storage', function(e) {
+  if (['rj_fashion_wishlist', 'rjfc_wishlist', 'rjfc_react_wishlist'].includes(e.key)) {
+    loadWishlist();
+  }
+});

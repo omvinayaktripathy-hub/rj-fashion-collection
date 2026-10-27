@@ -10,6 +10,7 @@ import {
   CartPage,
   DeliveryAddressStep,
   PaymentOptionsStep,
+  CheckoutPage,
   AccountDashboard,
   AIVirtualTryOnModal,
   Footer
@@ -205,13 +206,12 @@ const AppContent = () => {
           />
         )}
 
-        {/* Checkout Step 3: Payment Options */}
-        {activeTab === 'payment' && (
-          <PaymentOptionsStep
+        {/* Checkout Step 3: Payment Options & Full Review */}
+        {(activeTab === 'payment' || activeTab === 'checkout') && (
+          <CheckoutPage
+            onBackToCart={() => navigateTo('cart')}
             onBackToAddress={() => navigateTo('delivery')}
-            onPlaceOrder={async () => {
-              navigateTo('home');
-            }}
+            onOrderSuccess={() => navigateTo('account')}
           />
         )}
 

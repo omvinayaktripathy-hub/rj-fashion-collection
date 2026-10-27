@@ -145,7 +145,9 @@ async function runSecuritySuite() {
   pass("Cryptographically strong anti-CSRF token generated (SHA-256 / 32 bytes hex)");
 
   // Ensure product has stock for CSRF test
-  const testProdId = 1;
+  const prodsRes = await request('GET', '/api/products');
+  const inStockProd = (prodsRes.json?.products || []).find(p => p.stock > 0);
+  const testProdId = inStockProd ? inStockProd.id : 1;
 
   // Cross-site forged request (Sec-Fetch-Site: cross-site) must be blocked
   const forgedReq = await request('POST', '/api/cart', {

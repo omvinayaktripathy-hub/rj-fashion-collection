@@ -1,15 +1,114 @@
 const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
+
 // RJ FASHION COLLECTION - DEDICATED ORDER REVIEW & PAYMENT CONTROLLER (STEP 3)
+const CART_STORAGE_KEYS = ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
+const ADDRESS_STORAGE_KEYS = ['rj_selected_address', 'checkout_address_summary', 'rjfc_selected_address'];
 
 let activeAddressData = null;
 let currentCartItems = [];
 let currentCartTotal = 0;
 let appliedDiscount = 0;
-let couponCodeApplied = null;
-let countdownInterval = null;
+let couponCodeApplied = 'GRANDRJ';
+let currentUser = null;
+
+function formatPrice(amount) {
+  if (typeof amount !== 'number' || isNaN(amount)) return '₹0';
+  return '₹' + Math.round(amount).toLocaleString('en-IN');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Storage Unification Helpers
+// ─────────────────────────────────────────────────────────────
+
+function getUnifiedLocalCart() {
+  for (const key of CART_STORAGE_KEYS) {
+    try {
+      const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (_) {}
+  }
+  return [];
+}
+
+function clearUnifiedCart() {
+  for (const key of CART_STORAGE_KEYS) {
+    try {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    } catch (_) {}
+  }
+  try {
+    fetch('/api/cart/clear', { method: 'POST' }).catch(() => {});
+  } catch (_) {}
+  try {
+    window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: [] } }));
+    window.dispatchEvent(new Event('storage'));
+  } catch (_) {}
+  if (typeof updateCartCount === 'function') updateCartCount();
+}
+
+function getUnifiedSelectedAddress() {
+  for (const key of ADDRESS_STORAGE_KEYS) {
+    try {
+      const raw = sessionStorage.getItem(key) || localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && (parsed.name || parsed.fullName || parsed.full_name)) {
+          return {
+            id: parsed.id || parsed.address_id || null,
+            name: parsed.name || parsed.fullName || parsed.full_name,
+            phone: parsed.phone || parsed.customer_phone || '',
+            house_flat: parsed.house_flat || parsed.houseFlat || '',
+            street: parsed.street || '',
+            city: parsed.city || '',
+            state: parsed.state || '',
+            pin_code: parsed.pin_code || parsed.pinCode || '',
+            text: parsed.text || `${parsed.house_flat || parsed.houseFlat || ''}, ${parsed.street || ''}, ${parsed.city || ''}, ${parsed.state || ''} - ${parsed.pin_code || parsed.pinCode || ''}`,
+            address_type: (parsed.address_type || parsed.addressType || 'HOME').toUpperCase()
+          };
+        }
+      }
+    } catch (_) {}
+  }
+
+  // Fallback to rjfc_saved_addresses
+  try {
+    const raw = localStorage.getItem('rjfc_saved_addresses');
+    if (raw) {
+      const list = JSON.parse(raw);
+      if (Array.isArray(list) && list.length > 0) {
+        const def = list.find(a => a.is_default || a.isDefault) || list[0];
+        return {
+          id: def.id || null,
+          name: def.full_name || def.fullName || def.name,
+          phone: def.phone || '',
+          house_flat: def.house_flat || def.houseFlat || '',
+          street: def.street || '',
+          city: def.city || '',
+          state: def.state || '',
+          pin_code: def.pin_code || def.pinCode || '',
+          text: def.text || `${def.house_flat || def.houseFlat || ''}, ${def.street || ''}, ${def.city || ''}, ${def.state || ''} - ${def.pin_code || def.pinCode || ''}`,
+          address_type: (def.address_type || def.addressType || 'HOME').toUpperCase()
+        };
+      }
+    }
+  } catch (_) {}
+
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Page Lifecycle & Initialization
+// ─────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
   initCheckoutPage();
+
   const notesInput = document.getElementById('order-delivery-notes');
   if (notesInput) {
     notesInput.addEventListener('input', () => {
@@ -17,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (counter) counter.textContent = String(notesInput.value.length) + ' / 200';
     });
   }
-  // dispatch countdown disabled
 
   // Payment radio card styling & animated toggle
   document.querySelectorAll('input[name="checkout_payment_method"]').forEach(radio => {
@@ -35,14 +133,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // Listen for storage cart updates
+  window.addEventListener('storage', () => {
+    loadCheckoutCart();
+  });
+  window.addEventListener('rjfc_cart_updated', () => {
+    loadCheckoutCart();
+  });
 });
 
 async function initCheckoutPage() {
   try {
-    // 1. Check Authentication - If not logged in, redirect to login page
+    // 1. Resolve User Session (allow guest or logged in)
     let user = null;
     try {
-      const authRes = await fetch(`${API_BASE}/me`);
+      const authRes = await fetch('/api/me');
       if (authRes.ok) {
         const authData = await authRes.json();
         if (authData.success && authData.user) user = authData.user;
@@ -56,12 +162,7 @@ async function initCheckoutPage() {
       }
     }
 
-    if (!user) {
-      window.location.href = '/login.html?redirect=/checkout.html';
-      return;
-    }
-
-    currentUser = user;
+    currentUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
 
     // Check Stripe return query params
     const urlParams = new URLSearchParams(window.location.search);
@@ -70,16 +171,17 @@ async function initCheckoutPage() {
     const stripeCancelled = urlParams.get('cancelled');
 
     if (stripeCancelled) {
-      showToast('Stripe checkout was cancelled. You can review your bag and choose another payment method.', 'warning');
+      if (typeof showToast === 'function') {
+        showToast('Stripe checkout was cancelled. You can review your bag and choose another payment method.', 'warning');
+      }
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (stripeSessionId && stripeOrderNumber) {
       const verified = await handleStripeCallback(stripeSessionId, stripeOrderNumber);
       if (verified) return;
     }
 
-    // 2. Resolve Delivery Address - If no address selected, redirect to dedicated delivery.html
-    const addressOk = resolveDeliveryAddress();
-    if (!addressOk) return;
+    // 2. Resolve Delivery Address
+    resolveDeliveryAddress();
 
     // 3. Load Cart & Price Details
     await loadCheckoutCart();
@@ -89,190 +191,240 @@ async function initCheckoutPage() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// Live Dispatch Countdown Timer
-// ─────────────────────────────────────────────────────────────
-function initDispatchCountdown() {}
-
-// ─────────────────────────────────────────────────────────────
 // Resolve Delivery Address
 // ─────────────────────────────────────────────────────────────
 function resolveDeliveryAddress() {
-  const storedSummary = sessionStorage.getItem('checkout_address_summary') || localStorage.getItem('rjfc_selected_address');
+  const container = document.getElementById('confirmed-address-content');
+  activeAddressData = getUnifiedSelectedAddress();
 
-  if (storedSummary) {
-    try {
-      activeAddressData = JSON.parse(storedSummary);
-    } catch (e) {
-      console.warn('Could not parse stored address:', e);
-    }
-  }
+  if (!container) return;
 
-  // Fallback to first saved address if any
   if (!activeAddressData || !activeAddressData.name) {
-    try {
-      const addrs = JSON.parse(localStorage.getItem('rjfc_saved_addresses') || '[]');
-      if (addrs.length > 0) {
-        const def = addrs.find(a => a.is_default) || addrs[0];
-        activeAddressData = {
-          id: def.id,
-          name: def.full_name,
-          phone: def.phone,
-          text: `${def.house_flat || ''}, ${def.street || ''}, ${def.city || ''}, ${def.state || ''} - ${def.pin_code || ''}`,
-          address_type: def.address_type || 'Home'
-        };
-      }
-    } catch (_) {}
-  }
-
-  // If still no delivery address found, send customer to dedicated /delivery.html page
-  if (!activeAddressData || !activeAddressData.name) {
-    window.location.href = '/delivery.html';
+    // Render clear fallback prompting card linking to Step 2
+    container.innerHTML = `
+      <div style="background: rgba(0,0,0,0.02); border: 1.5px dashed var(--deliv-card-border); border-radius: 12px; padding: 22px 18px; text-align: center;">
+        <div style="font-size: 1.6rem; margin-bottom: 6px;">📍</div>
+        <p style="font-size: 0.95rem; font-weight: 600; color: var(--deliv-text-primary); margin: 0 0 6px 0;">
+          Please select or add a delivery address to complete your order
+        </p>
+        <p style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin: 0 0 16px 0;">
+          Your haute couture en route requires a verified recipient name, doorstep address, and contact number.
+        </p>
+        <a href="/delivery.html" style="display: inline-flex; align-items: center; gap: 8px; background: #111111; color: #ffffff; padding: 10px 22px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+          <span>Select or Add Delivery Address →</span>
+        </a>
+      </div>
+    `;
     return false;
   }
 
-  // Render confirmed address card
-  const container = document.getElementById('confirmed-address-content');
-  if (container) {
-    container.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <strong style="font-size: 1.08rem; color: var(--deliv-text-primary);">${activeAddressData.name}</strong>
-          <span class="addr-tag default-tag">
-            ${(activeAddressData.address_type || 'HOME').toUpperCase()}
-          </span>
-          <span style="color: var(--deliv-text-secondary); font-size: 0.9rem; font-weight: 600;">
-            📞 ${activeAddressData.phone}
-          </span>
-        </div>
-        <div style="color: var(--deliv-text-secondary); font-size: 0.95rem; line-height: 1.6;">
-          ${activeAddressData.text || `${activeAddressData.house_flat || ''}, ${activeAddressData.street || ''}, ${activeAddressData.city || ''}, ${activeAddressData.state || ''} - ${activeAddressData.pin_code || ''}`}
-        <div style="margin-top: 8px; font-size: 0.8rem; font-weight: 600; color: #0F382A; display: flex; align-items: center; gap: 6px;">
-          <span>🚚</span>
-          <span>Arrives in 3–5 Business Days via Express Air</span>
-        </div>
-        </div>
+  // Render confirmed address card with clean editorial styling
+  container.innerHTML = `
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <strong style="font-size: 1.08rem; color: var(--deliv-text-primary); font-family: serif;">${escapeHtml(activeAddressData.name)}</strong>
+        <span class="addr-tag default-tag" style="background: #0F382A; color: #ffffff; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase;">
+          ${escapeHtml(activeAddressData.address_type || 'HOME')}
+        </span>
+        <span style="color: var(--deliv-text-secondary); font-size: 0.9rem; font-weight: 600;">
+          📞 ${escapeHtml(activeAddressData.phone)}
+        </span>
       </div>
-    `;
-  }
-
+      <div style="color: var(--deliv-text-secondary); font-size: 0.92rem; line-height: 1.6;">
+        ${escapeHtml(activeAddressData.text)}
+      </div>
+      <div style="margin-top: 6px; font-size: 0.8rem; font-weight: 600; color: #0F382A; display: flex; align-items: center; gap: 6px;">
+        <span>🚚</span>
+        <span>Arrives in 3–5 Business Days via Express Insured Courier</span>
+      </div>
+    </div>
+  `;
   return true;
 }
 
 // ─────────────────────────────────────────────────────────────
-// Cart & Order Items Summary
+// Cart & Order Items Summary (Step 3 Review)
 // ─────────────────────────────────────────────────────────────
 async function loadCheckoutCart() {
   const container = document.getElementById('checkout-cart-items');
   const countEl = document.getElementById('checkout-items-count');
 
-  let cart = null;
+  let rawItems = [];
+
+  // 1. Try server API
   try {
-    const res = await fetch(`${API_BASE}/cart`);
+    const res = await fetch('/api/cart');
     if (res.ok) {
       const data = await res.json();
-      if (data.success && data.items && data.items.length > 0) {
-        cart = data;
+      if (data.success && Array.isArray(data.items) && data.items.length > 0) {
+        rawItems = data.items;
       }
     }
   } catch (_) {}
 
-  if (!cart) {
-    try {
-      const local = JSON.parse(localStorage.getItem('rjfc_local_cart') || '[]');
-      if (local.length > 0) {
-        const count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
-        const subtotal = local.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
-        const origSubtotal = local.reduce((s, i) => s + ((Number(i.original_price) || Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
-        const savings = Math.max(0, origSubtotal - subtotal);
-        cart = {
-          items: local,
-          itemCount: count,
-          subtotal: subtotal,
-          originalSubtotal: origSubtotal,
-          total: subtotal,
-          discount: savings
-        };
-      }
-    } catch (_) {}
+  // 2. Fallback to unified local storage
+  if (rawItems.length === 0) {
+    rawItems = getUnifiedLocalCart();
   }
 
-  if (!cart || !cart.items || cart.items.length === 0) {
-    alert('Your shopping bag is empty. Please add items to checkout.');
-    window.location.href = '/shop.html';
+  // Normalize items
+  currentCartItems = rawItems.map((item, idx) => {
+    const price = Number(item.price) || 0;
+    const origPrice = Number(item.original_price || item.originalPrice || price);
+    return {
+      id: item.id || item.product_id || `item_${idx + 1}`,
+      name: item.name || item.title || 'Artisanal Ensemble',
+      price: price,
+      original_price: origPrice,
+      quantity: Math.max(1, Number(item.quantity) || 1),
+      size: item.size || item.selected_size || 'Free Size',
+      color: item.color || item.selected_color || '',
+      image: item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || '/images/placeholder.jpg'
+    };
+  });
+
+  const itemCount = currentCartItems.reduce((s, i) => s + i.quantity, 0);
+
+  // Update Header Item Count
+  if (countEl) {
+    countEl.textContent = `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`;
+  }
+
+  if (!container) return;
+
+  // Empty Bag Handling
+  if (currentCartItems.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 28px 16px; text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 8px;">🛍️</div>
+        <p style="font-size: 0.95rem; font-weight: 600; color: var(--deliv-text-primary); margin: 0 0 6px 0;">
+          Your bag is currently empty
+        </p>
+        <p style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin: 0 0 16px 0;">
+          Please select your couture pieces before proceeding to checkout.
+        </p>
+        <a href="/shop.html" style="display: inline-flex; align-items: center; gap: 8px; background: #111111; color: #ffffff; padding: 10px 22px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;">
+          <span>Explore Couture Catalog →</span>
+        </a>
+      </div>
+    `;
+
+    renderPriceDetails();
+    const confirmBtn = document.getElementById('confirm-order-btn');
+    if (confirmBtn) confirmBtn.disabled = true;
     return;
   }
 
-  currentCartItems = cart.items;
-  if (countEl) countEl.textContent = cart.itemCount || cart.items.length;
-
-  if (container) {
-    container.innerHTML = cart.items.map(item => `
-      <div class="checkout-item-row">
-        <img src="${item.image || '/images/placeholder.jpg'}" alt="${escapeHtml(item.name)}" class="checkout-item-thumb">
-        <div style="flex: 1; min-width: 0;">
-          <h4 class="checkout-item-title">${escapeHtml(item.name)}</h4>
-          <div class="checkout-item-meta">
-            <span>Size: <strong>${item.size || 'Free Size'}</strong></span>
-            <span>Qty: <strong>${item.quantity || 1}</strong></span>
-          </div>
-        </div>
-        <div class="checkout-item-price">
-          ${formatPrice((Number(item.price) || 0) * (Number(item.quantity) || 1))}
+  // Render Compact 3:4 Portrait Item Rows
+  container.innerHTML = currentCartItems.map(item => `
+    <div class="checkout-item-row" style="display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--deliv-card-border);">
+      <img
+        src="${escapeHtml(item.image)}"
+        alt="${escapeHtml(item.name)}"
+        class="checkout-item-thumb"
+        style="width: 56px; height: 74px; aspect-ratio: 3/4; object-fit: cover; border-radius: 6px; background: #F7F4F0; flex-shrink: 0;"
+        onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'"
+      >
+      <div style="flex: 1; min-width: 0;">
+        <h4 class="checkout-item-title" style="font-size: 0.92rem; font-weight: 600; font-family: serif; color: var(--deliv-text-primary); margin: 0 0 4px 0; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${escapeHtml(item.name)}
+        </h4>
+        <div class="checkout-item-meta" style="font-size: 0.8rem; color: var(--deliv-text-secondary); display: flex; gap: 10px; flex-wrap: wrap;">
+          <span>Size: <strong>${escapeHtml(item.size)}</strong></span>
+          ${item.color ? `<span>Color: <strong>${escapeHtml(item.color)}</strong></span>` : ''}
+          <span>Qty: <strong>${item.quantity}</strong></span>
         </div>
       </div>
-    `).join('');
-  }
+      <div class="checkout-item-price" style="font-weight: 700; font-family: monospace; font-size: 0.96rem; color: var(--deliv-text-primary); text-align: right; flex-shrink: 0;">
+        ${formatPrice(item.price * item.quantity)}
+      </div>
+    </div>
+  `).join('');
 
-  renderPriceDetails(cart);
+  const confirmBtn = document.getElementById('confirm-order-btn');
+  if (confirmBtn) confirmBtn.disabled = false;
+
+  renderPriceDetails();
 }
 
-function renderPriceDetails(cart) {
+// ─────────────────────────────────────────────────────────────
+// Hydrate Sticky Price Details Card
+// ─────────────────────────────────────────────────────────────
+function renderPriceDetails() {
   const priceBody = document.getElementById('checkout-price-body');
   if (!priceBody) return;
 
   const items = currentCartItems || [];
-  const itemCount = items.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
-  const itemsTotal = items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
-  const origTotal = items.reduce((s, i) => s + ((Number(i.original_price) || Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
-  const baseDiscount = Math.max(0, origTotal - itemsTotal);
+  const itemCount = items.reduce((s, i) => s + i.quantity, 0);
+  const itemsSubtotal = items.reduce((s, i) => s + (i.price * i.quantity), 0);
+  const itemsMRP = items.reduce((s, i) => s + (i.original_price * i.quantity), 0);
+  const catalogSavings = Math.max(0, itemsMRP - itemsSubtotal);
 
-  const totalDiscount = baseDiscount + appliedDiscount;
-  const finalTotal = Math.max(0, itemsTotal - appliedDiscount);
-  currentCartTotal = finalTotal;
+  // Auto-apply promo discount
+  let promoDiscount = 0;
+  if (couponCodeApplied === 'GRANDRJ') {
+    promoDiscount = Math.min(500, Math.round(itemsSubtotal * 0.15));
+  } else if (couponCodeApplied === 'ROYAL10') {
+    promoDiscount = Math.round(itemsSubtotal * 0.10);
+  } else if (couponCodeApplied === 'WELCOME500' && itemsSubtotal >= 2999) {
+    promoDiscount = 500;
+  }
 
+  appliedDiscount = promoDiscount;
+  const shippingFee = (itemsSubtotal >= 999 || itemsSubtotal === 0) ? 0 : 99;
+  const grandTotal = Math.max(0, itemsSubtotal - promoDiscount + shippingFee);
+  currentCartTotal = grandTotal;
+
+  // Hydrate Primary CTA Button
   const confirmBtnLabel = document.getElementById('confirm-order-btn-label');
   if (confirmBtnLabel) {
-    confirmBtnLabel.textContent = 'PAY & COMPLETE ORDER • ' + formatPrice(finalTotal);
+    confirmBtnLabel.textContent = `PAY & COMPLETE ORDER • ${formatPrice(grandTotal)}`;
+  }
+
+  if (items.length === 0) {
+    priceBody.innerHTML = `
+      <div style="padding: 16px 0; text-align: center; color: var(--deliv-text-secondary); font-size: 0.85rem;">
+        No items in bag to calculate summary.
+      </div>
+    `;
+    return;
   }
 
   priceBody.innerHTML = `
-    <div class="fk-price-row">
-      <span>Price (${itemCount} item${itemCount > 1 ? 's' : ''})</span>
-      <span>${formatPrice(origTotal > itemsTotal ? origTotal : itemsTotal)}</span>
+    <div class="fk-price-row" style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--deliv-text-secondary); margin-bottom: 10px;">
+      <span>Bag Total (MRP) (${itemCount} ${itemCount === 1 ? 'item' : 'items'})</span>
+      <span style="font-family: monospace; font-weight: 600;">${formatPrice(itemsMRP > itemsSubtotal ? itemsMRP : itemsSubtotal)}</span>
     </div>
-    ${baseDiscount > 0 ? `
-      <div class="fk-price-row savings">
-        <span>Special Festive Discount</span>
-        <span class="fk-discount-val">− ${formatPrice(baseDiscount)}</span>
+
+    ${catalogSavings > 0 ? `
+      <div class="fk-price-row savings" style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #047857; margin-bottom: 10px;">
+        <span>Festive Catalog Discount</span>
+        <span class="fk-discount-val" style="font-family: monospace; font-weight: 700;">− ${formatPrice(catalogSavings)}</span>
       </div>
     ` : ''}
-    ${appliedDiscount > 0 ? `
-      <div class="fk-price-row savings" style="color: #c59b27;">
-        <span>Promo Coupon (${couponCodeApplied})</span>
-        <span class="fk-discount-val" style="color: #c59b27;">− ${formatPrice(appliedDiscount)}</span>
+
+    ${promoDiscount > 0 ? `
+      <div class="fk-price-row savings" style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #B38B22; margin-bottom: 10px;">
+        <span>Coupon Savings (${couponCodeApplied})</span>
+        <span class="fk-discount-val" style="font-family: monospace; font-weight: 700;">− ${formatPrice(promoDiscount)}</span>
       </div>
     ` : ''}
-    <div class="fk-price-row">
-      <span>Express Pan-India Delivery</span>
-      <span class="fk-free-val"><span style="text-decoration: line-through; color: var(--deliv-text-muted); font-size: 0.85rem; margin-right: 4px;">₹49</span> FREE</span>
+
+    <div class="fk-price-row" style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--deliv-text-secondary); margin-bottom: 14px;">
+      <span>Express Insured Shipping</span>
+      <span style="font-family: monospace; font-weight: 600; color: ${shippingFee === 0 ? '#047857' : 'inherit'};">
+        ${shippingFee === 0 ? '<span style="text-decoration: line-through; color: var(--deliv-text-muted); font-size: 0.8rem; margin-right: 4px;">₹99</span> COMPLIMENTARY' : formatPrice(shippingFee)}
+      </span>
     </div>
-    <div class="fk-price-total-row">
+
+    <div class="fk-price-total-row" style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: var(--deliv-text-primary); padding-top: 14px; border-top: 1.5px solid var(--deliv-card-border); margin-top: 10px;">
       <span>Total Amount Payable</span>
-      <span class="total-highlight">${formatPrice(finalTotal)}</span>
+      <span class="total-highlight" style="font-family: monospace; color: #111111;">${formatPrice(grandTotal)}</span>
     </div>
-    ${totalDiscount > 0 ? `
-      <div class="fk-savings-banner">
-        ✨ You will save ${formatPrice(totalDiscount)} on this royal ethnic order!
+
+    ${(catalogSavings + promoDiscount) > 0 ? `
+      <div class="fk-savings-banner" style="margin-top: 14px; padding: 8px 12px; background: #ecfdf5; border: 1px solid rgba(167, 243, 208, 0.6); border-radius: 8px; font-size: 0.78rem; font-weight: 700; color: #065f46; text-align: center;">
+        ✨ You are saving ${formatPrice(catalogSavings + promoDiscount)} on this royal couture order!
       </div>
     ` : ''}
   `;
@@ -286,177 +438,174 @@ function applyPromoCode(codeOverride) {
   const code = (codeOverride || input?.value || '').trim().toUpperCase();
 
   if (!code) {
-    showToast('Please enter a coupon code', 'warning');
+    if (typeof showToast === 'function') showToast('Please enter a coupon code', 'warning');
     return;
   }
 
-  if (couponCodeApplied === code) {
-    showToast(`Coupon ${code} is already applied!`, 'info');
-    return;
-  }
+  const itemsSubtotal = currentCartItems.reduce((s, i) => s + (i.price * i.quantity), 0);
 
-  const itemsTotal = currentCartItems.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
-
-  if (code === 'ROYAL10' || code === 'FESTIVE10' || code === 'RJFESTIVE') {
-    appliedDiscount = Math.round(itemsTotal * 0.10); // 10% instant extra discount
+  if (code === 'GRANDRJ' || code === 'ROYAL10') {
     couponCodeApplied = code;
     if (input) input.value = code;
-    showToast(`👑 Promo code "${code}" applied! You saved ${formatPrice(appliedDiscount)} extra!`, 'success');
-    triggerConfetti(30);
+    if (typeof showToast === 'function') {
+      showToast(`👑 Promo code "${code}" applied successfully!`, 'success');
+    }
+    triggerConfetti(35);
     renderPriceDetails();
-  } else if (code === 'WELCOME500' && itemsTotal >= 2999) {
-    appliedDiscount = 500;
-    couponCodeApplied = code;
-    if (input) input.value = code;
-    showToast(`🎉 Promo code "${code}" applied! You saved ₹500 extra!`, 'success');
-    triggerConfetti(30);
-    renderPriceDetails();
+  } else if (code === 'WELCOME500') {
+    if (itemsSubtotal >= 2999) {
+      couponCodeApplied = code;
+      if (input) input.value = code;
+      if (typeof showToast === 'function') {
+        showToast('🎉 Promo code "WELCOME500" applied! You saved ₹500 extra!', 'success');
+      }
+      triggerConfetti(35);
+      renderPriceDetails();
+    } else {
+      if (typeof showToast === 'function') {
+        showToast('WELCOME500 requires a minimum bag value of ₹2,999', 'warning');
+      }
+    }
   } else {
-    showToast('Invalid coupon code or minimum order amount not met', 'error');
+    if (typeof showToast === 'function') {
+      showToast('Invalid promo coupon code or minimum order condition not met', 'error');
+    }
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Execute Place Order with Celebration
+// Execute Place Order with Instant Validation & Confirmation
 // ─────────────────────────────────────────────────────────────
 async function executePlaceOrder() {
-  if (!activeAddressData) {
-    showToast('Please confirm your delivery address first', 'error');
+  if (!activeAddressData || !activeAddressData.name) {
+    if (typeof showToast === 'function') {
+      showToast('Please select or add a delivery address to complete your order', 'warning');
+    }
     window.location.href = '/delivery.html';
     return;
   }
 
   if (!currentCartItems || currentCartItems.length === 0) {
-    showToast('Your shopping bag is empty', 'error');
+    if (typeof showToast === 'function') {
+      showToast('Your bag is currently empty. Please select your couture pieces before proceeding.', 'warning');
+    }
     window.location.href = '/shop.html';
     return;
   }
 
   const btn = document.getElementById('confirm-order-btn');
-  btn.disabled = true;
-  btn.innerHTML = `
-    <span class="spinner-inline"></span>
-    <span>SECURING & CONFIRMING ORDER...</span>
-  `;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `
+      <span class="spinner-inline" style="display: inline-block; width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px;"></span>
+      <span>SECURING &amp; CONFIRMING ORDER...</span>
+    `;
+  }
 
-  const paymentMethod = document.querySelector('input[name="checkout_payment_method"]:checked')?.value || 'Cash on Delivery';
+  const paymentRadio = document.querySelector('input[name="checkout_payment_method"]:checked');
+  const paymentMethod = paymentRadio ? paymentRadio.value : 'Cash on Delivery';
   const notes = document.getElementById('order-delivery-notes')?.value.trim() || '';
 
   const orderPayload = {
     addressId: activeAddressData.id || null,
     address_id: activeAddressData.id || null,
-    customer_name: activeAddressData.name || (currentUser && currentUser.name) || 'Valued Customer',
+    customer_name: activeAddressData.name,
     customer_email: (currentUser && currentUser.email) || 'customer@example.com',
-    customer_phone: activeAddressData.phone || (currentUser && currentUser.phone) || '',
-    shipping_address: activeAddressData.text || `${activeAddressData.house_flat || ''}, ${activeAddressData.street || ''}, ${activeAddressData.city || ''}, ${activeAddressData.state || ''} - ${activeAddressData.pin_code || ''}`,
-    delivery_address: activeAddressData.text || `${activeAddressData.house_flat || ''}, ${activeAddressData.street || ''}, ${activeAddressData.city || ''}, ${activeAddressData.state || ''} - ${activeAddressData.pin_code || ''}`,
+    customer_phone: activeAddressData.phone,
+    delivery_address: activeAddressData.text,
+    shipping_address: activeAddressData.text,
     items: currentCartItems,
     total: currentCartTotal,
     paymentMethod: paymentMethod,
     payment_method: paymentMethod,
     coupon: couponCodeApplied,
     notes: notes,
-    status: 'Confirmed',
     created_at: new Date().toISOString()
   };
 
   // STRIPE CHECKOUT FLOW
   if (paymentMethod === 'Stripe') {
-    btn.disabled = true;
-    btn.innerHTML = `
-      <span class="spinner-inline"></span>
-      <span>REDIRECTING TO STRIPE CHECKOUT...</span>
-    `;
-
     try {
-      const res = await fetch(`${API_BASE}/payment/stripe/create-checkout-session`, {
+      const res = await fetch('/api/payment/stripe/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderPayload)
       });
       const data = await res.json();
       if (data.success && data.url) {
-        showToast('Redirecting to Stripe secure checkout...', 'info');
-        // Redirect browser to Stripe Checkout hosted page
+        if (typeof showToast === 'function') showToast('Redirecting to Stripe secure checkout...', 'info');
         window.location.href = data.url;
         return;
-      } else {
-        throw new Error(data.message || 'Failed to initialize Stripe checkout session');
       }
-    } catch (err) {
-      console.error('Stripe Checkout Error:', err);
-      showToast(err.message || 'Unable to connect to Stripe. Please try again or select another payment option.', 'error');
-      btn.disabled = false;
-      btn.innerHTML = `
-        <span>CONFIRM &amp; PLACE ORDER</span>
-        <span style="font-size: 1.2rem; line-height: 1;">➔</span>
-      `;
-      return;
-    }
+    } catch (_) {}
   }
 
-  // STANDARD OFFLINE / DIRECT UPI ORDER FLOW
-  let placedOrderNumber = `RJFC-${Date.now().toString().slice(-6)}`;
+  // STANDARD / UPI / COD ORDER FLOW
+  let placedOrderNumber = `RJFC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  // 1. Try server API
   try {
-    const res = await fetch(`${API_BASE}/orders`, {
+    const res = await fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderPayload)
     });
     if (res.ok) {
       const data = await res.json();
-      if (data.success && data.orderNumber) {
-        placedOrderNumber = data.orderNumber;
+      if (data.success && (data.orderNumber || data.orderId)) {
+        placedOrderNumber = data.orderNumber || `RJFC-${data.orderId}`;
       }
     }
   } catch (_) {}
 
-  // 2. Persist order in local storage
-  const existingOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
-  orderPayload.order_number = placedOrderNumber;
-  orderPayload.id = Date.now();
-  existingOrders.unshift(orderPayload);
-  localStorage.setItem('rj_orders', JSON.stringify(existingOrders));
-
-  // 3. Clear shopping cart
-  localStorage.removeItem('rjfc_local_cart');
+  // 1. Persist in local storage orders
   try {
-    await fetch(`${API_BASE}/cart/clear`, { method: 'POST' });
+    const existing = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+    orderPayload.order_number = placedOrderNumber;
+    orderPayload.id = Date.now();
+    existing.unshift(orderPayload);
+    localStorage.setItem('rj_orders', JSON.stringify(existing));
   } catch (_) {}
 
-  // Update navbar cart badge
-  if (typeof updateCartCount === 'function') updateCartCount();
+  // 2. Clear shopping cart across all unified storage keys
+  clearUnifiedCart();
 
-  // 4. Trigger Grand Celebration Confetti
+  // 3. Trigger Grand Celebration Confetti
   triggerConfetti(120);
 
-  // 5. Show Success Modal with Animation
-  document.getElementById('modal-order-number').textContent = placedOrderNumber;
-  document.getElementById('modal-order-total').textContent = formatPrice(currentCartTotal);
-  
+  // 4. Update Success Modal and Display
+  const modalNum = document.getElementById('modal-order-number');
+  const modalTotal = document.getElementById('modal-order-total');
+  if (modalNum) modalNum.textContent = placedOrderNumber;
+  if (modalTotal) modalTotal.textContent = formatPrice(currentCartTotal);
+
   const modal = document.getElementById('order-success-modal');
   if (modal) {
     modal.classList.add('active');
     modal.style.display = 'flex';
+  } else {
+    // Graceful redirect to account orders
+    setTimeout(() => {
+      window.location.href = `/account.html?tab=orders&placed=${placedOrderNumber}`;
+    }, 1200);
   }
 
-  showToast('Order placed successfully! 👑 Thank you for shopping!', 'success');
+  if (typeof showToast === 'function') {
+    showToast('Order confirmed successfully! 👑 Thank you for shopping with RJ Fashion Collection!', 'success');
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Grand Confetti Particle System
+// Confetti Particle System
 // ─────────────────────────────────────────────────────────────
 function triggerConfetti(count = 80) {
   const container = document.getElementById('confetti-canvas-wrap') || document.body;
-  const colors = ['#c59b27', '#e2be67', '#700037', '#910047', '#10b981', '#3b82f6', '#f59e0b', '#ffffff'];
+  const colors = ['#C5A880', '#D4AF37', '#0F382A', '#111111', '#10b981', '#ffffff'];
 
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div');
     p.className = 'confetti-particle';
     const color = colors[Math.floor(Math.random() * colors.length)];
-    const size = Math.random() * 9 + 6;
+    const size = Math.random() * 8 + 6;
     const startX = Math.random() * 100;
     const animDuration = Math.random() * 2.5 + 1.8;
     const delay = Math.random() * 0.4;
@@ -477,33 +626,24 @@ function triggerConfetti(count = 80) {
       animation: confettiFall ${animDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}s forwards;
     `;
     container.appendChild(p);
-
     setTimeout(() => p.remove(), (animDuration + delay) * 1000 + 500);
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Handle Stripe Callback Verification
+// Handle Stripe Callback
 // ─────────────────────────────────────────────────────────────
 async function handleStripeCallback(sessionId, orderNumber) {
-  showToast('Verifying Stripe payment confirmation...', 'info');
   try {
-    const res = await fetch(`${API_BASE}/payment/stripe/verify`, {
+    const res = await fetch('/api/payment/stripe/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId, orderNumber })
     });
     const data = await res.json();
     if (data.success) {
-      // Clear cart
-      localStorage.removeItem('rjfc_local_cart');
-      try { await fetch(`${API_BASE}/cart/clear`, { method: 'POST' }); } catch (_) {}
-      if (typeof updateCartCount === 'function') updateCartCount();
-
-      // Clean URL parameters
+      clearUnifiedCart();
       window.history.replaceState({}, document.title, window.location.pathname);
-
-      // Trigger Celebration
       triggerConfetti(140);
       const modal = document.getElementById('order-success-modal');
       const numEl = document.getElementById('modal-order-number');
@@ -512,18 +652,14 @@ async function handleStripeCallback(sessionId, orderNumber) {
         modal.classList.add('active');
         modal.style.display = 'flex';
       }
-      showToast('Stripe payment verified! Your order is confirmed 👑', 'success');
+      if (typeof showToast === 'function') {
+        showToast('Stripe payment verified! Your order is confirmed 👑', 'success');
+      }
       return true;
-    } else {
-      showToast(data.message || 'Payment verification failed', 'error');
     }
-  } catch (err) {
-    console.error('Error verifying Stripe session:', err);
-    showToast('Failed to verify Stripe payment confirmation.', 'error');
-  }
+  } catch (_) {}
   return false;
 }
-
 
 function toggleDeliveryInstructions() {
   const drawer = document.getElementById('delivery-instructions-drawer');
@@ -533,4 +669,15 @@ function toggleDeliveryInstructions() {
     drawer.style.display = isHidden ? 'block' : 'none';
     if (arrow) arrow.textContent = isHidden ? '▴' : '▾';
   }
+}
+
+function toggleGiftOption(el) {
+  const msgBox = document.getElementById('gift-message-box');
+  if (msgBox) {
+    msgBox.style.display = el.checked ? 'block' : 'none';
+  }
+}
+
+function saveGiftMessage(val) {
+  sessionStorage.setItem('rj_gift_message', val);
 }

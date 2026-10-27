@@ -15,3 +15,5 @@ export * from './DeliveryAddressStep';
 export * from './CheckoutPaymentStep';
 export * from './PaymentOptionsStep';
 export * from './VirtualTryOnButton';
+
+export * from './CheckoutPage';
