@@ -91,60 +91,276 @@
     .auth-card {
       max-width: 440px;
       margin: 40px auto 60px;
-      background: var(--bg-card);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #E5E0D8;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
       overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    [data-theme="dark"] .auth-card {
+      background: #141418;
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .auth-header-lockup {
+      padding: 32px 24px 24px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(245, 243, 239, 0.6) 0%, transparent 100%);
+      border-bottom: 1px solid #E5E0D8;
+    }
+    [data-theme="dark"] .auth-header-lockup {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+    .auth-monogram {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .auth-monogram:hover {
+      transform: scale(1.05);
+    }
+    .auth-monogram-dark {
+      display: none;
+    }
+    [data-theme="dark"] .auth-monogram-light {
+      display: none;
+    }
+    [data-theme="dark"] .auth-monogram-dark {
+      display: block;
+    }
+    .auth-pre-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #C5A880;
+      margin-bottom: 4px;
+    }
+    .auth-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #111111;
+      margin: 0 0 8px;
+      line-height: 1.2;
+    }
+    [data-theme="dark"] .auth-title {
+      color: #ffffff;
+    }
+    .auth-subtitle {
+      font-size: 0.8rem;
+      color: #6b7280;
+      line-height: 1.45;
+      margin: 0;
+    }
+    [data-theme="dark"] .auth-subtitle {
+      color: #9ca3af;
     }
     .auth-tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-page);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid #E5E0D8;
+      background: #faf9f6;
+    }
+    [data-theme="dark"] .auth-tabs {
+      border-color: rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.2);
     }
     .auth-tab-btn {
-      flex: 1;
-      padding: 16px;
+      padding: 14px;
       font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--muted);
-      border-bottom: 2px solid transparent;
-      transition: var(--transition);
+      font-size: 0.8rem;
+      color: #6b7280;
+      border: none;
+      background: transparent;
+      cursor: pointer;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.1em;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    [data-theme="dark"] .auth-tab-btn {
+      color: #9ca3af;
     }
     .auth-tab-btn.active {
-      color: var(--primary);
-      border-bottom-color: var(--primary);
-      background: var(--bg-card);
+      color: #111111;
+      background: #ffffff;
+    }
+    [data-theme="dark"] .auth-tab-btn.active {
+      color: #ffffff;
+      background: #141418;
+    }
+    .auth-tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #C5A880;
     }
     .auth-body {
-      padding: 30px;
+      padding: 28px;
+    }
+    .auth-error-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      margin-bottom: 20px;
+    }
+    [data-theme="dark"] .auth-error-banner {
+      background: rgba(153, 27, 27, 0.2);
+      border-color: rgba(248, 113, 113, 0.3);
+      color: #fca5a5;
     }
     .form-group-auth {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
     .form-group-auth label {
       display: block;
-      font-size: 0.82rem;
+      font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.08em;
       color: #374151;
       margin-bottom: 6px;
     }
-    .form-group-auth input {
-      width: 100%;
-      padding: 11px 14px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.92rem;
-      outline: none;
-      transition: var(--transition);
+    [data-theme="dark"] .form-group-auth label {
+      color: #d1d5db;
     }
-    .form-group-auth input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(122, 0, 60, 0.1);
+    .auth-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .auth-input-wrapper input {
+      width: 100%;
+      padding: 11px 40px 11px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      outline: none;
+      background: #ffffff;
+      color: #111111;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    [data-theme="dark"] .auth-input-wrapper input {
+      background: #1e1e24;
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #f3f4f6;
+    }
+    .auth-input-wrapper input:focus {
+      border-color: #111111;
+      box-shadow: 0 0 0 2px rgba(197, 168, 128, 0.2);
+    }
+    [data-theme="dark"] .auth-input-wrapper input:focus {
+      border-color: #C5A880;
+    }
+    .auth-eye-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      padding: 6px;
+      cursor: pointer;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+    }
+    .auth-eye-btn:hover {
+      color: #4b5563;
+    }
+    [data-theme="dark"] .auth-eye-btn:hover {
+      color: #e5e7eb;
+    }
+    .btn-atelier-primary {
+      width: 100%;
+      padding: 13px 18px;
+      background: #111111;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-atelier-primary:hover {
+      background: #000000;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+    .btn-atelier-primary:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .auth-trust-dock {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #E5E0D8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      font-size: 0.72rem;
+      color: #9ca3af;
+    }
+    [data-theme="dark"] .auth-trust-dock {
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+    .auth-trust-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    /* Reset Password Modal */
+    .reset-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .reset-modal-card {
+      background: #ffffff;
+      border: 1px solid #E5E0D8;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 380px;
+      padding: 24px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+    [data-theme="dark"] .reset-modal-card {
+      background: #18181e;
+      border-color: rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
@@ -438,29 +654,63 @@
   <!-- Main Content: Login & Register -->
   <main class="container">
     <div class="auth-card">
+      
+      <!-- Crowned Atelier Identity Header -->
+      <div class="auth-header-lockup">
+        <div class="auth-monogram-wrap">
+          <img
+            src="/images/rj-logo-monogram.svg"
+            alt="RJ Monogram"
+            width="48"
+            height="48"
+            class="auth-monogram auth-monogram-light"
+            loading="eager"
+          />
+          <img
+            src="/images/rj-logo-monogram-dark.svg"
+            alt="RJ Monogram"
+            width="48"
+            height="48"
+            class="auth-monogram auth-monogram-dark"
+            loading="eager"
+          />
+        </div>
+        <div class="auth-pre-title">THE ROYAL BRIDAL HOUSE</div>
+        <h1 class="auth-title">WELCOME TO THE ATELIER</h1>
+        <p class="auth-subtitle">Sign in to access your curated orders, saved looks, and bridal concierge services.</p>
+      </div>
+
+      <!-- Dual Navigation Tabs -->
       <div class="auth-tabs">
         <button id="tab-login-btn" class="auth-tab-btn active" onclick="switchAuthTab('login')">Sign In</button>
-        <button id="tab-register-btn" class="auth-tab-btn" onclick="switchAuthTab('register')">Register</button>
+        <button id="tab-register-btn" class="auth-tab-btn" onclick="switchAuthTab('register')">Create Account</button>
       </div>
 
       <div class="auth-body">
+        <!-- Inline Error Banner -->
+        <div id="auth-error-banner" class="auth-error-banner" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="auth-error-text" style="flex: 1;"></span>
+          <button type="button" onclick="hideAuthError()" style="background: none; border: none; cursor: pointer; color: inherit; padding: 0 4px; font-weight: bold;">✕</button>
+        </div>
+
         <!-- 1-Click Google Sign-In -->
         <div style="margin-bottom: 20px;">
-          <button type="button" id="google-signin-btn" onclick="handleGoogleSignIn()" style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 12px 16px; background: #ffffff; border: 1px solid #dadce0; border-radius: 6px; font-weight: 600; font-size: 0.95rem; color: #3c4043; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-            <svg width="20" height="20" viewBox="0 0 24 24">
+          <button type="button" id="google-signin-btn" onclick="handleGoogleSignIn()" style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 12px 16px; background: #ffffff; border: 1px solid #d1d5db; border-radius: 10px; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.05em; color: #111111; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+            <svg width="18" height="18" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
               <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
               <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
-            <span>Continue with Google</span>
+            <span>CONTINUE WITH GOOGLE</span>
           </button>
         </div>
 
         <div style="display: flex; align-items: center; margin: 18px 0;">
-          <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
-          <span style="padding: 0 12px; font-size: 0.76rem; color: #9ca3af; font-weight: 700; letter-spacing: 0.5px;">OR WITH EMAIL</span>
-          <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
+          <div style="flex: 1; height: 1px; background: #E5E0D8;"></div>
+          <span style="padding: 0 12px; font-size: 0.72rem; color: #9ca3af; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">OR WITH EMAIL</span>
+          <div style="flex: 1; height: 1px; background: #E5E0D8;"></div>
         </div>
 
         <!-- Sign In Form -->
@@ -468,21 +718,32 @@
           <form id="customer-login-form">
             <div class="form-group-auth">
               <label for="login-email">Email Address</label>
-              <input type="email" id="login-email" required placeholder="name@example.com" autocomplete="email">
+              <div class="auth-input-wrapper">
+                <input type="email" id="login-email" required placeholder="patron@example.com" autocomplete="email">
+              </div>
             </div>
 
             <div class="form-group-auth">
-              <label for="login-password">Password</label>
-              <input type="password" id="login-password" required placeholder="Enter your password" autocomplete="current-password">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label for="login-password" style="margin: 0;">Password</label>
+                <a href="#" onclick="openResetPasswordModal(); return false;" style="font-size: 0.75rem; color: #8C6D3F; text-decoration: none; font-weight: 600;">Forgot Password?</a>
+              </div>
+              <div class="auth-input-wrapper">
+                <input type="password" id="login-password" required placeholder="Enter confidential password" autocomplete="current-password">
+                <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('login-password', this)" aria-label="Toggle password">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
 
-            <button type="submit" id="customer-login-submit" class="btn btn-primary btn-block" style="padding: 12px; margin-top: 10px;">
-              SIGN IN
+            <button type="submit" id="customer-login-submit" class="btn-atelier-primary" style="margin-top: 14px;">
+              <span>SIGN IN TO ATELIER</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </form>
 
-          <div style="margin-top: 20px; text-align: center; font-size: 0.85rem; color: var(--muted);">
-            New customer? <a href="#" onclick="switchAuthTab('register'); return false;" style="color: var(--primary); font-weight: 700;">Create an account</a>
+          <div style="margin-top: 20px; text-align: center; font-size: 0.8rem; color: #6b7280;">
+            New patron? <a href="#" onclick="switchAuthTab('register'); return false;" style="color: #111111; font-weight: 700; text-decoration: underline;">Create an account</a>
           </div>
         </div>
 
@@ -491,41 +752,93 @@
           <form id="customer-register-form">
             <div class="form-group-auth">
               <label for="reg-name">Full Name</label>
-              <input type="text" id="reg-name" required placeholder="e.g. Priya Sharma">
+              <div class="auth-input-wrapper">
+                <input type="text" id="reg-name" required placeholder="e.g. Maharani Gayatri">
+              </div>
             </div>
 
             <div class="form-group-auth">
               <label for="reg-email">Email Address</label>
-              <input type="email" id="reg-email" required placeholder="priya@example.com">
+              <div class="auth-input-wrapper">
+                <input type="email" id="reg-email" required placeholder="patron@example.com">
+              </div>
             </div>
 
             <div class="form-group-auth">
-              <label for="reg-phone">Phone Number</label>
-              <input type="tel" id="reg-phone" placeholder="+91 98765 43210">
+              <label for="reg-phone">Phone Number (Optional)</label>
+              <div class="auth-input-wrapper">
+                <input type="tel" id="reg-phone" placeholder="+91 98765 43210">
+              </div>
             </div>
 
             <div class="form-group-auth">
-              <label for="reg-password">Password (min 6 characters)</label>
-              <input type="password" id="reg-password" required minlength="6" placeholder="Create a strong password">
+              <label for="reg-password">Password (Min 6 Characters)</label>
+              <div class="auth-input-wrapper">
+                <input type="password" id="reg-password" required minlength="6" placeholder="Create confidential password">
+                <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('reg-password', this)" aria-label="Toggle password">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
             </div>
 
             <div class="form-group-auth">
               <label for="reg-confirm-password">Confirm Password</label>
-              <input type="password" id="reg-confirm-password" required minlength="6" placeholder="Repeat your password">
+              <div class="auth-input-wrapper">
+                <input type="password" id="reg-confirm-password" required minlength="6" placeholder="Repeat password to verify">
+              </div>
             </div>
 
-            <button type="submit" id="customer-register-submit" class="btn btn-primary btn-block" style="padding: 12px; margin-top: 10px;">
-              CREATE ACCOUNT
+            <button type="submit" id="customer-register-submit" class="btn-atelier-primary" style="margin-top: 14px;">
+              <span>CREATE PATRON ACCOUNT</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </form>
 
-          <div style="margin-top: 20px; text-align: center; font-size: 0.85rem; color: var(--muted);">
-            Already have an account? <a href="#" onclick="switchAuthTab('login'); return false;" style="color: var(--primary); font-weight: 700;">Sign In</a>
+          <div style="margin-top: 20px; text-align: center; font-size: 0.8rem; color: #6b7280;">
+            Already registered? <a href="#" onclick="switchAuthTab('login'); return false;" style="color: #111111; font-weight: 700; text-decoration: underline;">Sign In</a>
+          </div>
+        </div>
+
+        <!-- Security & Authenticity Trust Assurance -->
+        <div class="auth-trust-dock">
+          <div class="auth-trust-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0F382A" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>256-Bit SSL Encryption</span>
+          </div>
+          <span>•</span>
+          <div class="auth-trust-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>100% Authentic Products</span>
           </div>
         </div>
       </div>
     </div>
   </main>
+
+  <!-- Forgot Password Modal -->
+  <div id="reset-password-modal" class="reset-modal-overlay">
+    <div class="reset-modal-card">
+      <button type="button" onclick="closeResetPasswordModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #9ca3af;">✕</button>
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; margin: 0 0 6px;">Reset Password</h3>
+      <p style="font-size: 0.78rem; color: #6b7280; line-height: 1.4; margin: 0 0 16px;">Enter your registered patron email. We will dispatch instructions to securely reset your password.</p>
+      
+      <div id="reset-modal-error" style="display: none; padding: 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; font-size: 0.78rem; color: #991b1b; margin-bottom: 12px;"></div>
+      <div id="reset-modal-success" style="display: none; padding: 10px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 0.78rem; color: #065f46; margin-bottom: 12px;"></div>
+
+      <form id="reset-password-form" onsubmit="handleSendPasswordReset(event)">
+        <div class="form-group-auth" style="margin-bottom: 14px;">
+          <label for="reset-email">Email Address</label>
+          <div class="auth-input-wrapper">
+            <input type="email" id="reset-email" required placeholder="patron@example.com">
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" onclick="closeResetPasswordModal()" style="flex: 1; padding: 10px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer;">CANCEL</button>
+          <button type="submit" id="reset-submit-btn" style="flex: 1; padding: 10px; background: #111111; color: #ffffff; border: none; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">SEND LINK</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Site Footer (NO returns, NO newsletter, NO admin login) -->
         <footer class="site-footer">

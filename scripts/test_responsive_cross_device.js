@@ -27,6 +27,8 @@ const PAGES_TO_TEST = [
   { name: 'Wishlist Page', url: 'http://localhost:3000/wishlist.html' },
   { name: 'Checkout Page', url: 'http://localhost:3000/checkout.html' },
   { name: 'Delivery Page', url: 'http://localhost:3000/delivery.html' },
+  { name: 'Login Page', url: 'http://localhost:3000/login.html' },
+  { name: 'Account Dashboard', url: 'http://localhost:3000/account.html' },
   { name: 'Admin Dashboard', url: 'http://localhost:3000/admin.html' }
 ];
 

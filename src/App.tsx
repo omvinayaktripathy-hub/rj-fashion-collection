@@ -12,6 +12,7 @@ import {
   PaymentOptionsStep,
   CheckoutPage,
   AccountDashboard,
+  LoginPage,
   AIVirtualTryOnModal,
   Footer
 } from './components';
@@ -105,7 +106,7 @@ const AppContent: React.FC = () => {
     user
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<'home' | 'shop' | 'cart' | 'wishlist' | 'account' | 'delivery' | 'payment' | 'checkout'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'shop' | 'cart' | 'wishlist' | 'account' | 'delivery' | 'payment' | 'checkout' | 'login'>('home');
 
   // Handle navigation
   const navigateTo = (tab: typeof activeTab) => {
@@ -218,6 +219,14 @@ const AppContent: React.FC = () => {
         {/* Account Dashboard */}
         {activeTab === 'account' && (
           <AccountDashboard onExploreCatalog={() => navigateTo('home')} />
+        )}
+
+        {/* Patron Login & Authentication */}
+        {activeTab === 'login' && (
+          <LoginPage
+            onSuccess={() => navigateTo('account')}
+            onNavigateTo={navigateTo}
+          />
         )}
       </main>
 

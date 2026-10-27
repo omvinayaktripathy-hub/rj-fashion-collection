@@ -613,27 +613,38 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* User Account with Label "Om" */}
-            <a
-              href="/account.html"
-              className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors group"
-              title="My Account"
-            >
-              {userAvatar ? (
-                <img
-                  src={userAvatar}
-                  alt={userName}
-                  className="w-7 h-7 rounded-full object-cover border border-neutral-300 dark:border-neutral-700"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-[#F4EFE6] dark:bg-neutral-800 border border-[#D5CFBF] dark:border-neutral-700 flex items-center justify-center text-[#8C6D3F] dark:text-[#C5A880] text-xs font-bold">
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <span className="hidden md:inline-block text-xs font-semibold tracking-wide">
-                {userName}
-              </span>
-            </a>
+            {/* User Account / Sign In */}
+            {userName && userName !== 'Sign In' && userName !== 'Login' ? (
+              <a
+                href="/account.html"
+                className="flex items-center gap-2 text-neutral-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors group"
+                title="My Account"
+              >
+                {userAvatar ? (
+                  <img
+                    src={userAvatar}
+                    alt={userName}
+                    className="w-7 h-7 rounded-full object-cover border border-neutral-300 dark:border-neutral-700"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-[#F4EFE6] dark:bg-neutral-800 border border-[#D5CFBF] dark:border-neutral-700 flex items-center justify-center text-[#8C6D3F] dark:text-[#C5A880] text-xs font-bold">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="hidden md:inline-block text-xs font-semibold tracking-wide">
+                  {userName}
+                </span>
+              </a>
+            ) : (
+              <a
+                href="/login.html"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-700 hover:border-black dark:hover:border-white transition-colors"
+                title="Sign In / Register"
+              >
+                <User className="w-3.5 h-3.5 text-[#C5A880]" />
+                <span className="hidden sm:inline">Sign In</span>
+              </a>
+            )}
 
             {/* Wishlist Icon with Badge */}
             <a
@@ -936,12 +947,12 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               <a
-                href="/account.html"
+                href={userName && userName !== 'Sign In' && userName !== 'Login' ? "/account.html" : "/login.html"}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-2 py-1.5 text-neutral-800 dark:text-neutral-200 font-semibold"
               >
                 <User className="w-4 h-4 text-[#8C6D3F] dark:text-[#C5A880]" />
-                <span>My Account ({userName})</span>
+                <span>{userName && userName !== 'Sign In' && userName !== 'Login' ? `My Account (${userName})` : 'Sign In / Register'}</span>
               </a>
             </div>
 

@@ -12,6 +12,7 @@ import {
   PaymentOptionsStep,
   CheckoutPage,
   AccountDashboard,
+  LoginPage,
   AIVirtualTryOnModal,
   Footer
 } from './components';
@@ -218,6 +219,14 @@ const AppContent = () => {
         {/* Account Dashboard */}
         {activeTab === 'account' && (
           <AccountDashboard onExploreCatalog={() => navigateTo('home')} />
+        )}
+
+        {/* Patron Login & Authentication */}
+        {activeTab === 'login' && (
+          <LoginPage
+            onSuccess={() => navigateTo('account')}
+            onNavigateTo={navigateTo}
+          />
         )}
       </main>
 

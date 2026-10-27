@@ -10,9 +10,31 @@ const DEFAULT_USER = {
   email: 'omvin@example.com',
   phone: '+91 7894093586',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-  tier: 'RJ Royale VIP',
+  tier: 'Patron',
   memberSince: 'March 2026'
 };
+
+export function readStoredUser() {
+  if (typeof window === 'undefined') return DEFAULT_USER;
+  try {
+    const raw = localStorage.getItem('rj_user') || localStorage.getItem('rjfc_user');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          id: parsed.id || parsed.uid || 'usr_84920',
+          name: parsed.name || parsed.displayName || 'Om',
+          email: parsed.email || 'omvin@example.com',
+          phone: parsed.phone || parsed.phoneNumber || '+91 7894093586',
+          avatarUrl: parsed.avatarUrl || parsed.photo || parsed.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          tier: 'Patron',
+          memberSince: parsed.memberSince || 'March 2026'
+        };
+      }
+    }
+  } catch (_) {}
+  return DEFAULT_USER;
+}
 
 const DEFAULT_ADDRESSES = [
   {
@@ -271,27 +293,90 @@ export const StoreProvider = ({ children }) => {
   }, []);
 
   // 2. Auth & User
-  const [user, setUser] = useState(DEFAULT_USER);
+  const [user, setUser] = useState(() => readStoredUser());
   const isAuthenticated = !!user;
 
-  const login = useCallback((email) => {
-    setUser({
-      id: `usr_${Date.now()}`,
-      name: email.split('@')[0].toUpperCase(),
-      email,
-      phone: '+91 9876543210',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      tier: 'RJ Royale VIP',
-      memberSince: 'October 2026'
-    });
+  const login = useCallback((userData) => {
+    let newUser;
+    if (typeof userData === 'string') {
+      newUser = {
+        id: `usr_${Date.now()}`,
+        name: userData.split('@')[0].toUpperCase(),
+        email: userData,
+        phone: '+91 7894093586',
+        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        tier: 'Patron',
+        memberSince: 'March 2026'
+      };
+    } else {
+      newUser = {
+        id: userData.id || userData.uid || `usr_${Date.now()}`,
+        name: userData.name || userData.displayName || userData.email?.split('@')[0] || 'Om',
+        email: userData.email || 'omvin@example.com',
+        phone: userData.phone || '+91 7894093586',
+        avatarUrl: userData.avatarUrl || userData.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        tier: 'Patron',
+        memberSince: 'March 2026',
+        ...userData
+      };
+    }
+    setUser(newUser);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('rj_user', JSON.stringify(newUser));
+        localStorage.setItem('rjfc_user', JSON.stringify(newUser));
+        sessionStorage.setItem('rj_user', JSON.stringify(newUser));
+        sessionStorage.setItem('rjfc_user', JSON.stringify(newUser));
+        window.dispatchEvent(new CustomEvent('rjfc_user_updated', { detail: { user: newUser } }));
+        window.dispatchEvent(new Event('storage'));
+      } catch (_) {}
+    }
   }, []);
 
   const logout = useCallback(() => {
     setUser(null);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('rj_user');
+        localStorage.removeItem('rjfc_user');
+        sessionStorage.removeItem('rj_user');
+        sessionStorage.removeItem('rjfc_user');
+        window.dispatchEvent(new CustomEvent('rjfc_user_updated', { detail: { user: null } }));
+        window.dispatchEvent(new Event('storage'));
+      } catch (_) {}
+    }
   }, []);
 
   const updateProfile = useCallback((data) => {
-    setUser((prev) => (prev ? { ...prev, ...data } : null));
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...data };
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('rj_user', JSON.stringify(updated));
+          localStorage.setItem('rjfc_user', JSON.stringify(updated));
+          window.dispatchEvent(new CustomEvent('rjfc_user_updated', { detail: { user: updated } }));
+        } catch (_) {}
+      }
+      return updated;
+    });
+  }, []);
+
+  // Listen for storage / cross-tab / cross-component user updates in real-time
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleUserUpdate = () => {
+      const stored = readStoredUser();
+      setUser(stored);
+    };
+
+    window.addEventListener('rjfc_user_updated', handleUserUpdate);
+    window.addEventListener('storage', handleUserUpdate);
+    return () => {
+      window.removeEventListener('rjfc_user_updated', handleUserUpdate);
+      window.removeEventListener('storage', handleUserUpdate);
+    };
   }, []);
 
   // 3. Cart State

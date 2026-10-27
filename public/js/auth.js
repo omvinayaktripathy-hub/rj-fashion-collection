@@ -1,6 +1,8 @@
 const escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
-// RJ FASHION COLLECTION - CUSTOMER AUTHENTICATION CONTROLLER
-// Supports 1-Click Google Sign-In, Firebase Auth & Local Sessions
+// RJ FASHION COLLECTION - PATRON AUTHENTICATION CONTROLLER
+// Supports 1-Click Google Sign-In, Firebase Auth, Password Recovery & Dual-Key State Sync
+
+const API_BASE = window.API_BASE || '/api';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBMkLwyXZINxOdq-hw7jFTVlnlFLdO_oTw",
@@ -13,11 +15,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase client SDK
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+if (typeof firebase !== 'undefined' && (!firebase.apps || !firebase.apps.length)) {
   try {
     firebase.initializeApp(firebaseConfig);
   } catch (err) {
-    console.warn('Firebase client init:', err.message);
+    console.warn('Firebase client init notification:', err.message);
   }
 }
 
@@ -32,24 +34,127 @@ function switchAuthTab(tab) {
   const loginTabBtn = document.getElementById('tab-login-btn');
   const registerTabBtn = document.getElementById('tab-register-btn');
 
+  hideAuthError();
+
   if (tab === 'login') {
-    loginForm.style.display = 'block';
-    registerForm.style.display = 'none';
-    loginTabBtn.classList.add('active');
-    registerTabBtn.classList.remove('active');
+    if (loginForm) loginForm.style.display = 'block';
+    if (registerForm) registerForm.style.display = 'none';
+    if (loginTabBtn) loginTabBtn.classList.add('active');
+    if (registerTabBtn) registerTabBtn.classList.remove('active');
   } else {
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'block';
-    loginTabBtn.classList.remove('active');
-    registerTabBtn.classList.add('active');
+    if (loginForm) loginForm.style.display = 'none';
+    if (registerForm) registerForm.style.display = 'block';
+    if (loginTabBtn) loginTabBtn.classList.remove('active');
+    if (registerTabBtn) registerTabBtn.classList.add('active');
   }
 }
 
+function showAuthError(msg) {
+  const banner = document.getElementById('auth-error-banner');
+  const textEl = document.getElementById('auth-error-text');
+  if (banner && textEl) {
+    textEl.textContent = msg;
+    banner.style.display = 'flex';
+  } else if (typeof showToast === 'function') {
+    showToast(msg, 'error');
+  }
+}
+
+function hideAuthError() {
+  const banner = document.getElementById('auth-error-banner');
+  if (banner) {
+    banner.style.display = 'none';
+  }
+}
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.getAttribute('type') === 'password';
+  input.setAttribute('type', isPassword ? 'text' : 'password');
+  if (btn) {
+    btn.innerHTML = isPassword
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  }
+}
+
+function mapAuthErrorCode(code, fallbackMessage) {
+  switch (code) {
+    case 'auth/user-not-found':
+      return 'No patron account found with this email. Please check your spelling or register.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please verify your credentials or reset your password.';
+    case 'auth/invalid-credential':
+      return 'Invalid credentials provided. Please check your email and password, or sign in with Google.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email address already exists. Please sign in instead.';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters.';
+    case 'auth/invalid-email':
+      return 'Please provide a valid email address.';
+    case 'auth/too-many-requests':
+      return 'Access temporarily blocked due to repeated failed attempts. Please reset your password or try again later.';
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return 'Google sign-in popup was closed before authentication could finish.';
+    case 'auth/network-request-failed':
+      return 'Network connection issue. Please check your internet connection.';
+    default:
+      return fallbackMessage || 'Authentication failed. Please verify your information and try again.';
+  }
+}
+
+// Persist user state to all storage keys & dispatch global update events
+function commitUserSession(userObj, isNew = false) {
+  const isOwner = (userObj.email && userObj.email.toLowerCase() === 'omvinayakwork@gmail.com') || false;
+  const displayName = userObj.displayName || userObj.name || (userObj.email ? userObj.email.split('@')[0] : 'Patron');
+
+  const sessionUser = {
+    id: userObj.uid || userObj.id || 'patron-' + Date.now(),
+    uid: userObj.uid || userObj.id || 'patron-' + Date.now(),
+    name: displayName,
+    email: userObj.email || '',
+    phone: userObj.phoneNumber || userObj.phone || '',
+    role: isOwner ? 'admin' : (userObj.role || 'customer'),
+    tier: 'Patron',
+    photo: userObj.photoURL || userObj.photo || userObj.avatar || '',
+    avatar: userObj.photoURL || userObj.photo || userObj.avatar || ''
+  };
+
+  try {
+    localStorage.setItem('rj_user', JSON.stringify(sessionUser));
+    localStorage.setItem('rjfc_user', JSON.stringify(sessionUser));
+    sessionStorage.setItem('rj_user', JSON.stringify(sessionUser));
+    sessionStorage.setItem('rjfc_user', JSON.stringify(sessionUser));
+  } catch (_) {}
+
+  // Dispatch global custom event and standard storage event
+  try {
+    window.dispatchEvent(new CustomEvent('rjfc_user_updated', { detail: sessionUser }));
+    window.dispatchEvent(new Event('storage'));
+  } catch (_) {}
+
+  const welcomeMsg = isNew
+    ? `Welcome to the Atelier, ${sessionUser.name}! 👑`
+    : `Welcome back, ${sessionUser.name}! 👑`;
+  
+  if (typeof showToast === 'function') {
+    showToast(welcomeMsg, 'success');
+  }
+
+  setTimeout(() => {
+    window.location.href = getRedirectUrl();
+  }, 700);
+}
+
 // ─────────────────────────────────────────────────────────────
-// 1-Click Google Sign-In via Firebase Authentication
+// 1. Google Sign-In via Firebase Authentication
 // ─────────────────────────────────────────────────────────────
 async function handleGoogleSignIn() {
+  hideAuthError();
   const btn = document.getElementById('google-signin-btn');
+  const origHtml = btn ? btn.innerHTML : '';
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = '0.75';
@@ -64,75 +169,58 @@ async function handleGoogleSignIn() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope('email');
     provider.addScope('profile');
+    provider.setCustomParameters({ prompt: 'select_account' });
 
     const result = await firebase.auth().signInWithPopup(provider);
     const user = result.user;
 
-    const isOwner = user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com';
-    const sessionUser = {
-      id: user.uid,
-      uid: user.uid,
-      name: user.displayName || user.email.split('@')[0],
-      email: user.email,
-      phone: user.phoneNumber || '',
-      role: isOwner ? 'admin' : 'customer',
-      photo: user.photoURL || ''
-    };
-
-    localStorage.setItem('rjfc_user', JSON.stringify(sessionUser));
-    sessionStorage.setItem('rjfc_user', JSON.stringify(sessionUser));
-
-    // Save profile to Cloud Firestore
+    // Save profile to Cloud Firestore if available
     try {
       if (firebase.firestore) {
-        const db = firebase.firestore();
-        await db.collection('users').doc(user.uid).set({
+        const isOwner = user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com';
+        await firebase.firestore().collection('users').doc(user.uid).set({
           uid: user.uid,
-          name: sessionUser.name,
-          email: sessionUser.email,
-          role: sessionUser.role,
-          photo: sessionUser.photo,
+          name: user.displayName || user.email.split('@')[0],
+          email: user.email,
+          role: isOwner ? 'admin' : 'customer',
+          tier: 'Patron',
+          photo: user.photoURL || '',
           last_login: new Date().toISOString()
         }, { merge: true });
       }
     } catch (_) {}
 
-    showToast(`Welcome ${sessionUser.name}! Signed in with Google 👑`, 'success');
-    setTimeout(() => {
-      window.location.href = getRedirectUrl();
-    }, 700);
+    commitUserSession(user, false);
   } catch (error) {
-    console.error('Google Sign-In failed:', error);
-    showToast(error.message || 'Google Sign-In failed. Please try again.', 'error');
+    console.warn('Google Sign-In notice:', error);
     if (btn) {
       btn.disabled = false;
       btn.style.opacity = '1';
-      btn.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-        </svg>
-        <span>Continue with Google</span>
-      `;
+      btn.innerHTML = origHtml;
     }
+    const msg = mapAuthErrorCode(error.code, error.message);
+    showAuthError(msg);
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-// Handle Customer Email/Password Login
+// 2. Email / Password Login
 // ─────────────────────────────────────────────────────────────
 async function handleCustomerLogin(e) {
   e.preventDefault();
+  hideAuthError();
+
   const btn = document.getElementById('customer-login-submit');
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'AUTHENTICATING PATRON...';
+  }
 
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
+  const email = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  const password = document.getElementById('login-password').value || '';
 
-  // 1. Try local server API
+  // Step A: Local Server API
   try {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
@@ -142,71 +230,69 @@ async function handleCustomerLogin(e) {
     if (res.ok) {
       const data = await res.json();
       if (data.success && data.user) {
-        localStorage.setItem('rjfc_user', JSON.stringify(data.user));
-        showToast('Logged in successfully!', 'success');
-        setTimeout(() => {
-          window.location.href = getRedirectUrl();
-        }, 700);
+        commitUserSession(data.user, false);
         return;
       }
     }
   } catch (_) {}
 
-  // 2. Fallback to Firebase Authentication
+  // Step B: Firebase Authentication
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
-      const user = cred.user;
-      const isOwner = email.toLowerCase() === 'omvinayakwork@gmail.com';
-      const sessionUser = {
-        id: user.uid,
-        uid: user.uid,
-        name: user.displayName || email.split('@')[0],
-        email: user.email,
-        role: isOwner ? 'admin' : 'customer'
-      };
-      localStorage.setItem('rjfc_user', JSON.stringify(sessionUser));
-      showToast('Signed in successfully!', 'success');
-      setTimeout(() => {
-        window.location.href = getRedirectUrl();
-      }, 700);
-      return;
+      if (cred && cred.user) {
+        commitUserSession(cred.user, false);
+        return;
+      }
     } catch (fbErr) {
-      showToast(fbErr.message || 'Invalid email or password', 'error');
-      btn.disabled = false;
-      btn.textContent = 'SIGN IN';
+      console.warn('Firebase login check:', fbErr);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+      showAuthError(mapAuthErrorCode(fbErr.code, fbErr.message));
       return;
     }
   }
 
-  showToast('Invalid email or password. Please try again.', 'error');
-  btn.disabled = false;
-  btn.textContent = 'SIGN IN';
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+  }
+  showAuthError('Invalid email or password. Please verify your patron credentials.');
 }
 
 // ─────────────────────────────────────────────────────────────
-// Handle Customer Registration
+// 3. Customer Registration
 // ─────────────────────────────────────────────────────────────
 async function handleCustomerRegister(e) {
   e.preventDefault();
-  const btn = document.getElementById('customer-register-submit');
-  btn.disabled = true;
-  btn.textContent = 'Creating account...';
+  hideAuthError();
 
-  const name = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const phone = document.getElementById('reg-phone').value.trim();
-  const password = document.getElementById('reg-password').value;
-  const confirmPassword = document.getElementById('reg-confirm-password').value;
+  const name = (document.getElementById('reg-name').value || '').trim();
+  const email = (document.getElementById('reg-email').value || '').trim().toLowerCase();
+  const phone = (document.getElementById('reg-phone').value || '').trim();
+  const password = document.getElementById('reg-password').value || '';
+  const confirmPassword = document.getElementById('reg-confirm-password').value || '';
 
   if (password !== confirmPassword) {
-    showToast('Passwords do not match', 'error');
-    btn.disabled = false;
-    btn.textContent = 'CREATE ACCOUNT';
+    showAuthError('Passwords do not match. Please re-enter.');
     return;
   }
 
-  // 1. Try local server API
+  if (password.length < 6) {
+    showAuthError('Password must be at least 6 characters in length.');
+    return;
+  }
+
+  const btn = document.getElementById('customer-register-submit');
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'ENROLLING PATRON...';
+  }
+
+  // Step A: Local Server API
   try {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
@@ -216,61 +302,134 @@ async function handleCustomerRegister(e) {
     if (res.ok) {
       const data = await res.json();
       if (data.success && data.user) {
-        localStorage.setItem('rjfc_user', JSON.stringify(data.user));
-        showToast('Welcome to RJ Fashion Collection! Account created.', 'success');
-        setTimeout(() => {
-          window.location.href = getRedirectUrl();
-        }, 800);
+        commitUserSession(data.user, true);
         return;
       }
     }
   } catch (_) {}
 
-  // 2. Fallback to Firebase Authentication
+  // Step B: Firebase Authentication
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
       const user = cred.user;
-      await user.updateProfile({ displayName: name });
-      const sessionUser = {
-        id: user.uid,
-        uid: user.uid,
-        name: name,
-        email: user.email,
-        phone: phone,
-        role: 'customer'
-      };
-      localStorage.setItem('rjfc_user', JSON.stringify(sessionUser));
-
-      if (firebase.firestore) {
-        await firebase.firestore().collection('users').doc(user.uid).set({
-          uid: user.uid,
-          name,
-          email,
-          phone,
-          role: 'customer',
-          created_at: new Date().toISOString()
-        }, { merge: true });
+      if (user.updateProfile) {
+        try {
+          await user.updateProfile({ displayName: name });
+        } catch (_) {}
       }
 
-      showToast('Account created successfully! Welcome to RJ Collection.', 'success');
-      setTimeout(() => {
-        window.location.href = getRedirectUrl();
-      }, 800);
+      if (firebase.firestore) {
+        try {
+          await firebase.firestore().collection('users').doc(user.uid).set({
+            uid: user.uid,
+            name,
+            email,
+            phone,
+            role: 'customer',
+            tier: 'Patron',
+            created_at: new Date().toISOString()
+          }, { merge: true });
+        } catch (_) {}
+      }
+
+      commitUserSession({
+        uid: user.uid,
+        name,
+        email: user.email,
+        phone,
+        role: 'customer'
+      }, true);
       return;
     } catch (fbErr) {
-      showToast(fbErr.message || 'Registration failed', 'error');
-      btn.disabled = false;
-      btn.textContent = 'CREATE ACCOUNT';
+      console.warn('Firebase registration check:', fbErr);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+      showAuthError(mapAuthErrorCode(fbErr.code, fbErr.message));
       return;
     }
   }
 
-  showToast('Registration failed. Please try again.', 'error');
-  btn.disabled = false;
-  btn.textContent = 'CREATE ACCOUNT';
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+  }
+  showAuthError('Registration could not be completed. Please try again.');
 }
 
+// ─────────────────────────────────────────────────────────────
+// 4. Password Recovery Flow
+// ─────────────────────────────────────────────────────────────
+function openResetPasswordModal() {
+  const modal = document.getElementById('reset-password-modal');
+  const err = document.getElementById('reset-modal-error');
+  const succ = document.getElementById('reset-modal-success');
+  const emailInput = document.getElementById('reset-email');
+  const loginEmail = document.getElementById('login-email');
+
+  if (err) err.style.display = 'none';
+  if (succ) succ.style.display = 'none';
+  if (emailInput && loginEmail) emailInput.value = loginEmail.value.trim();
+  if (modal) modal.style.display = 'flex';
+}
+
+function closeResetPasswordModal() {
+  const modal = document.getElementById('reset-password-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function handleSendPasswordReset(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('reset-modal-error');
+  const succEl = document.getElementById('reset-modal-success');
+  const submitBtn = document.getElementById('reset-submit-btn');
+  const email = (document.getElementById('reset-email').value || '').trim().toLowerCase();
+
+  if (errEl) errEl.style.display = 'none';
+  if (succEl) succEl.style.display = 'none';
+
+  if (!email) {
+    if (errEl) {
+      errEl.textContent = 'Please enter your registered patron email.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'SENDING...';
+  }
+
+  try {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      await firebase.auth().sendPasswordResetEmail(email);
+      if (succEl) {
+        succEl.textContent = `Password reset instructions dispatched to ${email}. Please check your inbox.`;
+        succEl.style.display = 'block';
+      }
+    } else {
+      throw new Error('Authentication services are initializing.');
+    }
+  } catch (err) {
+    console.warn('Password reset notice:', err);
+    if (errEl) {
+      errEl.textContent = mapAuthErrorCode(err.code, err.message);
+      errEl.style.display = 'block';
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'SEND LINK';
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// DOM Event Listeners Initialization
+// ─────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('customer-login-form');
   const registerForm = document.getElementById('customer-register-form');
