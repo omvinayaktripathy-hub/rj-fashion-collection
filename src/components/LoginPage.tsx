@@ -642,55 +642,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div className="pt-8 pb-6 px-8 text-center border-b border-[#E5E0D8]/60 dark:border-white/5 bg-gradient-to-b from-neutral-50/70 to-transparent dark:from-white/[0.02]">
           <div className="flex justify-center mb-4">
             <div className="relative w-14 h-14 flex items-center justify-center transition-transform duration-300 hover:scale-105">
-              <svg viewBox="0 0 160 160" width={54} height={54} fill="none" aria-label="RJ Fashion Collection Royal Monogram" className="w-full h-full block drop-shadow-sm">
-                <defs>
-                  <linearGradient id="reactLoginGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#E8C568" />
-                    <stop offset="45%" stopColor="#D4AF37" />
-                    <stop offset="75%" stopColor="#C5A880" />
-                    <stop offset="100%" stopColor="#9A7B38" />
-                  </linearGradient>
-                  <linearGradient id="reactLoginEmeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#194D3B" />
-                    <stop offset="60%" stopColor="#0F382A" />
-                    <stop offset="100%" stopColor="#09241B" />
-                  </linearGradient>
-                </defs>
-                {/* Coronet Base */}
-                <path d="M 52 38 C 68 35, 92 35, 108 38 C 109 40, 108 42, 107 43 C 91 40.5, 69 40.5, 53 43 C 52 42, 51 40, 52 38 Z" fill="url(#reactLoginGoldGrad)" />
-                <circle cx="56" cy="40.5" r="1.5" fill="#FFFFFF" />
-                <circle cx="68" cy="39" r="1.5" fill="#FFFFFF" />
-                <circle cx="80" cy="38.5" r="1.8" fill="#FFFFFF" />
-                <circle cx="92" cy="39" r="1.5" fill="#FFFFFF" />
-                <circle cx="104" cy="40.5" r="1.5" fill="#FFFFFF" />
-                {/* Peaks */}
-                <path d="M 77 37 Q 75 25, 80 18 Q 85 25, 83 37 Z" fill="url(#reactLoginGoldGrad)" />
-                <circle cx="80" cy="17" r="2.2" fill="#F8E7B9" stroke="#9A7B38" strokeWidth="0.5" />
-                <path d="M 64 38 Q 61 29, 66 23 Q 70 29, 69 38 Z" fill="url(#reactLoginGoldGrad)" />
-                <circle cx="66" cy="22.5" r="1.8" fill="#F8E7B9" stroke="#9A7B38" strokeWidth="0.5" />
-                <path d="M 91 38 Q 90 29, 94 23 Q 99 29, 96 38 Z" fill="url(#reactLoginGoldGrad)" />
-                <circle cx="94" cy="22.5" r="1.8" fill="#F8E7B9" stroke="#9A7B38" strokeWidth="0.5" />
-                <path d="M 53 39 Q 49 32, 54 28 Q 58 33, 57 39 Z" fill="url(#reactLoginGoldGrad)" />
-                <circle cx="54" cy="27.5" r="1.5" fill="#F8E7B9" />
-                <path d="M 103 39 Q 102 33, 106 28 Q 111 32, 107 39 Z" fill="url(#reactLoginGoldGrad)" />
-                <circle cx="106" cy="27.5" r="1.5" fill="#F8E7B9" />
-                {/* Monogram Letters R & J */}
-                <g fill="url(#reactLoginEmeraldGrad)">
-                  <path d="M 40 50 L 58 50 L 58 54 L 52 54 L 52 110 L 59 110 L 59 114 L 39 114 L 39 110 L 45 110 L 45 54 L 40 54 Z" />
-                  <rect x="45" y="52" width="7" height="60" />
-                  <path d="M 49 50 C 72 49, 87 54, 87 70 C 87 84, 73 88, 51 88 L 51 81 C 68 81, 78 78, 78 69 C 78 59, 68 56, 49 56 Z" />
-                  <path d="M 64 84 C 70 84, 76 88, 83 99 L 92 112 C 94 114, 98 114, 102 114 L 102 110 C 97 109, 93 105, 87 96 C 81 87, 75 83, 67 83 Z" />
-                  <path d="M 82 50 L 114 50 L 114 54 L 107 54 L 107 58 L 99 58 L 99 54 L 88 54 L 88 50 Z" />
-                  <path d="M 99 54 L 99 104 C 99 119, 89 128, 73 128 C 60 128, 50 121, 46 112 L 51 108 C 55 116, 62 121, 72 121 C 85 121, 91 114, 91 102 L 91 54 Z" />
-                  <circle cx="48" cy="110" r="3" />
-                </g>
-                {/* Botanical Flourish */}
-                <g fill="url(#reactLoginGoldGrad)" stroke="#9A7B38" strokeWidth="0.3">
-                  <path d="M 72 122 C 85 125, 100 124, 112 116 C 117 113, 122 107, 124 101 C 122 103, 117 108, 111 111 C 99 117, 85 117, 72 122 Z" />
-                  <path d="M 112 114 C 118 111, 126 109, 131 103 C 128 109, 122 115, 115 117 Z" />
-                  <path d="M 103 118 C 110 118, 118 119, 124 125 C 117 124, 110 123, 104 120 Z" />
-                </g>
-              </svg>
+              <img
+                src="/images/rj-logo-monogram.svg"
+                alt="RJ Fashion Collection Official Monogram"
+                width={54}
+                height={54}
+                className="w-full h-full object-contain dark:hidden"
+                loading="eager"
+              />
+              <img
+                src="/images/rj-logo-monogram-dark.svg"
+                alt="RJ Fashion Collection Official Monogram (Dark)"
+                width={54}
+                height={54}
+                className="w-full h-full object-contain hidden dark:block"
+                loading="eager"
+              />
             </div>
           </div>
 
