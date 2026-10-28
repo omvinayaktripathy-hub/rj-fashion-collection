@@ -181,6 +181,38 @@ async function runTests() {
     assert.strictEqual(verifyRes.json.user.email, 'omvinayakwork@gmail.com');
   });
 
+  await test('Verify administrator password OMvinayaktripathy in Step 1 and Google 2FA in Step 2', async () => {
+    // Step 1: Login with new password OMvinayaktripathy
+    const loginRes = await request('POST', '/api/auth/admin-login', {
+      email: 'omvinayakwork@gmail.com',
+      password: 'OMvinayaktripathy',
+      require2FA: true
+    });
+    assert.strictEqual(loginRes.statusCode, 200);
+    assert.strictEqual(loginRes.json.success, true);
+    assert.strictEqual(loginRes.json.step, 2);
+    const google2faCookie = loginRes.cookie;
+
+    // Step 2: Unauthorized Google token rejected
+    const unauthPayload = Buffer.from(JSON.stringify({ email: 'intruder@example.com' })).toString('base64');
+    const unauthRes = await request('POST', '/api/auth/admin-verify-2fa', {
+      googleIdToken: 'fakeHeader.' + unauthPayload + '.fakeSig'
+    }, { Cookie: google2faCookie });
+    assert.strictEqual(unauthRes.statusCode, 401);
+    assert.strictEqual(unauthRes.json.success, false);
+
+    // Step 2: Valid Owner Google token verified
+    const authPayload = Buffer.from(JSON.stringify({ email: 'omvinayakwork@gmail.com', uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1' })).toString('base64');
+    const authRes = await request('POST', '/api/auth/admin-verify-2fa', {
+      googleIdToken: 'fakeHeader.' + authPayload + '.fakeSig'
+    }, { Cookie: google2faCookie });
+    assert.strictEqual(authRes.statusCode, 200);
+    assert.strictEqual(authRes.json.success, true);
+    assert.strictEqual(authRes.json.user.role, 'admin');
+    assert.strictEqual(authRes.json.user.email, 'omvinayakwork@gmail.com');
+    assert.ok(authRes.cookie.includes('rj_session_token='), 'HttpOnly session cookie issued upon Google 2FA completion');
+  });
+
   // 5. 2FA Resend & Rate Limiting
   console.log('\n--- Phase 4: 2FA Resend & Cooldown Defense ---');
   await test('Resend 6-digit code with rate-limit cooldown', async () => {

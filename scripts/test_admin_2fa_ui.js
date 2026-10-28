@@ -16,7 +16,7 @@ async function testUI() {
   ]);
 
   try {
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise(r => setTimeout(r, 1500));
     const listRes = await new Promise((r) => http.get('http://127.0.0.1:9922/json', res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => r(JSON.parse(d)));
     }));
@@ -38,11 +38,11 @@ async function testUI() {
     await send('Page.navigate', { url: 'http://localhost:3000/admin' });
     await new Promise(r => setTimeout(r, 2000));
 
-    console.log('1. Page loaded. Filling credentials in Step 1...');
+    console.log('1. Page loaded. Filling credentials in Step 1 (omvinayakwork@gmail.com / OMvinayaktripathy)...');
     await send('Runtime.evaluate', {
       expression: `
         document.getElementById('admin-email').value = 'omvinayakwork@gmail.com';
-        document.getElementById('admin-password').value = 'OMvinayak@01092003';
+        document.getElementById('admin-password').value = 'OMvinayaktripathy';
       `
     });
 
@@ -55,14 +55,14 @@ async function testUI() {
     // Check if Step 2 is now visible
     const step2Check = await send('Runtime.evaluate', {
       expression: `(() => {
-        const step1 = document.getElementById('admin-login-form');
+        const step1 = document.getElementById('admin-step1-container');
         const step2 = document.getElementById('admin-2fa-container');
-        const digits = document.querySelectorAll('.admin-otp-digit');
+        const googleBtn = document.getElementById('admin-google-2fa-btn');
         const timer = document.getElementById('admin-2fa-timer-display');
         return {
           step1Display: window.getComputedStyle(step1).display,
           step2Display: window.getComputedStyle(step2).display,
-          digitsCount: digits.length,
+          hasGoogleBtn: !!googleBtn,
           timerText: timer ? timer.textContent : ''
         };
       })()`,
@@ -70,9 +70,10 @@ async function testUI() {
     });
     console.log('Step 2 UI status:', JSON.stringify(step2Check.result.value, null, 2));
 
-    console.log('3. Authenticating with Emergency Master Key...');
+    console.log('3. Authenticating with Emergency Master Key via backup options drawer...');
     await send('Runtime.evaluate', {
       expression: `
+        toggleAdminBackupDrawer();
         toggleEmergencyKeyInput();
         document.getElementById('admin-emergency-key-input').value = 'RJFC-ROYAL-ADMIN-2026';
         submitEmergencyKey();
@@ -99,10 +100,12 @@ async function testUI() {
     ws.close();
     edge.kill();
     server.kill();
+    console.log('\n🎉 HEADLESS EDGE UI TEST PASSED WITH 100% SUCCESS!\n');
   } catch (err) {
     console.error(err);
     edge.kill();
     server.kill();
+    process.exit(1);
   }
 }
 

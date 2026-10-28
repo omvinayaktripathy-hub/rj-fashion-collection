@@ -404,135 +404,126 @@
 
       <div id="admin-login-error" style="display: none; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; text-align: center; line-height: 1.4;"></div>
 
-      <!-- Step 1: Authentication Mode Container -->
+      <!-- Step 1: Administrator Credentials Container -->
       <div id="admin-step1-container">
-        <!-- Luxury Authentication Mode Switcher -->
-        <div class="admin-auth-mode-tabs">
-          <button type="button" id="tab-google-auth-btn" class="admin-auth-tab active" onclick="switchAdminAuthMode('google')">
-            <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-            <span>Google Owner SSO</span>
-          </button>
-          <button type="button" id="tab-password-auth-btn" class="admin-auth-tab" onclick="switchAdminAuthMode('password')">
-            <svg class="tab-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            <span>Master Password</span>
-          </button>
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div class="admin-sso-badge" style="margin-bottom: 8px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>STEP 1 OF 2: ADMINISTRATOR CREDENTIALS</span>
+          </div>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0;">
+            Enter verified credentials for <strong style="color: #f1f5f9;">omvinayakwork@gmail.com</strong> to initiate Google 2-Step Verification.
+          </p>
         </div>
 
-        <!-- Mode A: Strong Google SSO (Default / Recommended) -->
-        <div id="admin-mode-google" class="admin-auth-pane">
-          <div class="admin-sso-hero">
-            <div class="admin-sso-badge">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-              <span>STRONG GOOGLE AUTHENTICATION</span>
-            </div>
-            <h4 style="font-family: var(--font-serif); color: #fff; font-size: 1.15rem; margin: 10px 0 6px;">Enterprise Owner Verification</h4>
-            <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.5; margin: 0 0 18px;">
-              Access strictly restricted to verified owner <strong style="color: #f1f5f9;">omvinayakwork@gmail.com</strong>. Protected by Google Identity, Rate Limiting, and mandatory Step 2 OTP verification.
-            </p>
+        <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 6px;">Administrator Email</label>
+            <input type="email" id="admin-email" required value="omvinayakwork@gmail.com" autocomplete="email" style="background: #0f172a; border-color: #334155; color: #fff; width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; font-size: 0.9rem;">
+          </div>
 
-            <button type="button" id="admin-google-sso-btn" onclick="handleAdminGoogleLogin()" class="admin-btn-google-luxury">
-              <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-              <span>Continue with Owner Google Account</span>
-            </button>
-
-            <div class="admin-sso-security-footer">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
-              <span>Triggers mandatory Step 2 OTP verification</span>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 6px;">Admin Password</label>
+            <div class="password-input-wrap" style="position: relative;">
+              <input type="password" id="admin-password" required placeholder="••••••••" autocomplete="current-password" style="background: #0f172a; border-color: #334155; color: #fff; width: 100%; padding: 10px 42px 10px 14px; border-radius: 8px; border: 1px solid #334155; font-size: 0.9rem;">
+              <button type="button" class="password-toggle-btn" onclick="toggleAdminPasswordVisibility()" title="Show/Hide password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94a3b8; cursor: pointer; padding: 4px;">
+                <svg id="pass-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
             </div>
           </div>
-        </div>
 
-        <!-- Mode B: Master Password Credentials Form -->
-        <div id="admin-mode-password" class="admin-auth-pane" style="display: none;">
-          <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
-            <div class="form-group">
-              <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600;">Administrator Email</label>
-              <input type="email" id="admin-email" required placeholder="omvinayakwork@gmail.com" autocomplete="email" style="background: #0f172a; border-color: #334155; color: #fff;">
-            </div>
+          <button type="submit" id="admin-login-btn" class="btn btn-primary btn-block" style="padding: 13px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px;">
+            Verify Credentials &amp; Proceed to Step 2 →
+          </button>
+        </form>
 
-            <div class="form-group">
-              <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600;">Admin Password</label>
-              <div class="password-input-wrap">
-                <input type="password" id="admin-password" required placeholder="••••••••" autocomplete="current-password" style="background: #0f172a; border-color: #334155; color: #fff; width: 100%; padding-right: 40px;">
-                <button type="button" class="password-toggle-btn" onclick="toggleAdminPasswordVisibility()" title="Show/Hide password">
-                  <svg id="pass-eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <button type="submit" id="admin-login-btn" class="btn btn-primary btn-block" style="padding: 12px; margin-top: 14px; font-weight: 700;">
-              Verify Credentials &amp; Proceed to 2FA
-            </button>
-          </form>
-        </div>
-
-        <div class="admin-auth-security-strip">
+        <div class="admin-auth-security-strip" style="margin-top: 20px; text-align: center; font-size: 0.72rem; color: #64748b; line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px;">
           <span>🛡️ 256-Bit SSL • Rate-Limited Access • HttpOnly Session Cookie • © 2026 RJ Fashion Collection</span>
         </div>
       </div>
 
-      <!-- Step 2: Two-Step Verification Form -->
+      <!-- Step 2: Two-Step Verification (Google Authentication) -->
       <div id="admin-2fa-container" style="display: none;">
-        <div class="admin-2fa-shield-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            <path d="M9 12l2 2 4-4"></path>
-          </svg>
-        </div>
+        <div class="admin-sso-hero">
+          <div class="admin-sso-badge" style="margin-bottom: 8px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>STEP 2 OF 2: GOOGLE AUTHENTICATION</span>
+          </div>
 
-        <div style="text-align: center; margin-bottom: 16px;">
-          <span style="color: var(--admin-gold); font-size: 0.72rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">Step 2 of 2: Security Verification</span>
-          <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: #fff; margin: 4px 0 6px;">Two-Step Verification</h3>
-          <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin: 0;">
-            Enter the 6-digit verification code sent to <strong id="admin-2fa-email-display" style="color: #e2e8f0;">omv***@gmail.com</strong> or from your Authenticator app.
+          <h4 style="font-family: var(--font-serif); color: #fff; font-size: 1.25rem; margin: 10px 0 6px;">Google Identity Verification</h4>
+          <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin: 0 0 18px;">
+            Credentials verified for <strong id="admin-2fa-email-display" style="color: #f1f5f9;">omvinayakwork@gmail.com</strong>.<br>
+            Complete 2-Step Verification by authenticating with your Owner Google Account:
           </p>
-        </div>
 
-        <form id="admin-2fa-form" onsubmit="handleAdmin2FASubmit(event)">
-          <div class="admin-otp-boxes" id="admin-otp-boxes">
-            <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="0" autocomplete="off" autofocus>
-            <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="1" autocomplete="off">
-            <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="2" autocomplete="off">
-            <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="3" autocomplete="off">
-            <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="4" autocomplete="off">
-            <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="5" autocomplete="off">
-          </div>
-
-          <div class="admin-2fa-timer">
-            <span>Code expires in: <strong id="admin-2fa-timer-display" style="color: #D4AF37;">05:00</strong></span>
-          </div>
-
-          <button type="submit" id="admin-2fa-verify-btn" class="btn btn-primary btn-block" style="padding: 12px; font-weight: 700; margin-bottom: 12px;">
-            Verify &amp; Access Portal
+          <button type="button" id="admin-google-2fa-btn" onclick="handleAdminGoogle2FA()" class="admin-btn-google-luxury">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+            <span>Authenticate with Google (omvinayakwork@gmail.com)</span>
           </button>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; margin-top: 14px;">
-            <button type="button" id="admin-2fa-resend-btn" onclick="handleAdmin2FAResend()" class="btn-link-gold">
-              Resend Code
-            </button>
-            <button type="button" onclick="toggleEmergencyKeyInput()" class="btn-link-gold" style="color: #94a3b8;">
-              Emergency Key
-            </button>
+          <div class="admin-2fa-timer" style="margin-top: 14px; font-size: 0.78rem; color: #94a3b8;">
+            <span>Session expires in: <strong id="admin-2fa-timer-display" style="color: #D4AF37;">05:00</strong></span>
           </div>
 
-          <!-- Emergency Master Recovery Key Drawer -->
-          <div id="admin-emergency-key-drawer" style="display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid #334155;">
-            <label style="color: #cbd5e1; font-size: 0.78rem; display: block; margin-bottom: 6px;">Master Recovery Key</label>
-            <input type="text" id="admin-emergency-key-input" placeholder="RJFC-ROYAL-ADMIN-2026" style="background: #0f172a; border-color: #334155; color: #fff; width: 100%; padding: 8px 12px; font-family: monospace; font-size: 0.85rem; border-radius: 6px; border: 1px solid #334155; text-transform: uppercase;">
-            <button type="button" onclick="submitEmergencyKey()" class="btn btn-block" style="background: #334155; color: #fff; margin-top: 8px; padding: 8px; font-size: 0.82rem;">
-              Authenticate with Emergency Key
-            </button>
+          <div class="admin-sso-security-footer" style="margin-top: 12px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            <span style="font-size: 0.76rem; color: #94a3b8;">Strictly restricted to owner omvinayakwork@gmail.com</span>
           </div>
+        </div>
 
-          <div style="text-align: center; margin-top: 18px;">
-            <a href="javascript:void(0);" onclick="returnToAdminLoginForm()" style="color: #94a3b8; font-size: 0.8rem; text-decoration: none;">
-              ← Back to Sign In
-            </a>
-          </div>
-        </form>
+        <!-- Optional Backup Drawer (6-Digit Email OTP or Emergency Key) -->
+        <div style="text-align: center; margin-top: 16px;">
+          <button type="button" onclick="toggleAdminBackupDrawer()" class="btn-link-gold" style="font-size: 0.78rem; color: #94a3b8; text-decoration: underline; background: none; border: none; cursor: pointer;">
+            Need backup option? (6-Digit OTP / Emergency Key) ▼
+          </button>
+        </div>
+
+        <div id="admin-backup-drawer" style="display: none; margin-top: 14px; padding: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid #334155; border-radius: 8px;">
+          <form id="admin-2fa-form" onsubmit="handleAdmin2FASubmit(event)">
+            <p style="font-size: 0.78rem; color: #94a3b8; margin: 0 0 10px; text-align: center;">
+              Enter 6-digit code sent to your email or from Authenticator:
+            </p>
+            <div class="admin-otp-boxes" id="admin-otp-boxes" style="margin-bottom: 12px;">
+              <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="0" autocomplete="off">
+              <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="1" autocomplete="off">
+              <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="2" autocomplete="off">
+              <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="3" autocomplete="off">
+              <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="4" autocomplete="off">
+              <input type="text" class="admin-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="5" autocomplete="off">
+            </div>
+
+            <button type="submit" id="admin-2fa-verify-btn" class="btn btn-primary btn-block" style="padding: 10px; font-weight: 700; margin-bottom: 8px; font-size: 0.85rem;">
+              Verify Code &amp; Access Portal
+            </button>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; margin-top: 8px;">
+              <button type="button" id="admin-2fa-resend-btn" onclick="handleAdmin2FAResend()" class="btn-link-gold" style="background: none; border: none; cursor: pointer; color: #D4AF37;">
+                Resend Code
+              </button>
+              <button type="button" onclick="toggleEmergencyKeyInput()" class="btn-link-gold" style="background: none; border: none; cursor: pointer; color: #94a3b8;">
+                Emergency Key
+              </button>
+            </div>
+
+            <!-- Emergency Master Recovery Key Drawer -->
+            <div id="admin-emergency-key-drawer" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #334155;">
+              <label style="color: #cbd5e1; font-size: 0.75rem; display: block; margin-bottom: 6px;">Master Recovery Key</label>
+              <input type="text" id="admin-emergency-key-input" placeholder="RJFC-ROYAL-ADMIN-2026" style="background: #0f172a; border-color: #334155; color: #fff; width: 100%; padding: 8px 12px; font-family: monospace; font-size: 0.85rem; border-radius: 6px; border: 1px solid #334155; text-transform: uppercase;">
+              <button type="button" onclick="submitEmergencyKey()" class="btn btn-block" style="background: #334155; color: #fff; margin-top: 8px; padding: 8px; font-size: 0.8rem;">
+                Authenticate with Emergency Key
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div style="text-align: center; margin-top: 18px;">
+          <a href="javascript:void(0);" onclick="returnToAdminLoginForm()" style="color: #94a3b8; font-size: 0.8rem; text-decoration: none;">
+            ← Back to Credentials Login
+          </a>
+        </div>
       </div>
 
       <div style="margin-top: 24px; text-align: center;">
@@ -1914,7 +1905,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
   <script src="/firebase-config.js?v=20261025-01"></script>
   <script src="/js/app.js?v=20261025-01"></script>
-  <script src="/js/admin.js?v=20261028-google-2fa"></script>
+  <script src="/js/admin.js?v=20261028-sequential-google-2fa"></script>
   <!-- CREATE PROMO CODE MODAL -->
   <div id="promo-modal" class="modal-backdrop">
     <div class="modal-window" style="max-width: 500px;">
