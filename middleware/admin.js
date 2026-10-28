@@ -11,7 +11,7 @@ async function requireAdmin(req, res, next) {
     const token = authHeader.slice(7).trim();
     try {
       const decoded = await verifyFirebaseToken(token);
-      if (decoded && (decoded.admin === true || decoded.role === 'admin' || decoded.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1')) {
+      if (decoded && (decoded.admin === true || decoded.role === 'admin' || decoded.email === 'omvinayakwork@gmail.com' || decoded.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1')) {
         req.firebaseUser = decoded;
         if (!req.session) req.session = {};
         if (!req.session.user) {

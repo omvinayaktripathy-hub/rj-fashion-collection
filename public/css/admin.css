@@ -1254,3 +1254,111 @@ body.admin-body {
     font-size: 16px !important;
   }
 }
+
+
+/* ===================================================================
+   ADMIN 2-STEP VERIFICATION & STRONG AUTHENTICATION STYLES
+   =================================================================== */
+.admin-2fa-shield-icon {
+  width: 58px;
+  height: 58px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.04) 70%);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.22);
+}
+
+.admin-otp-boxes {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 18px 0 14px;
+}
+
+.admin-otp-digit {
+  width: 44px;
+  height: 52px;
+  background: #0f172a;
+  border: 1.5px solid #334155;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.admin-otp-digit:focus {
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
+  background: #1e293b;
+}
+
+.admin-otp-digit.error {
+  border-color: #ef4444;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.admin-2fa-timer {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #ffffff;
+}
+
+.btn-link-gold {
+  background: none;
+  border: none;
+  color: #d4af37;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.btn-link-gold:hover {
+  opacity: 0.85;
+}
+
+.btn-link-gold:disabled {
+  color: #64748b;
+  cursor: not-allowed;
+  text-decoration: none;
+}

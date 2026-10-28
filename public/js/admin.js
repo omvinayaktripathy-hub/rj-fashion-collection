@@ -193,53 +193,120 @@ async function handleAdminGoogleLogin() {
   }
 }
 
-// Admin Login Form Submit
+// Admin Login Form Submit (Step 1: Credentials)
+let twoFactorCountdownTimer = null;
+
+function toggleAdminPasswordVisibility() {
+  const input = document.getElementById('admin-password');
+  const icon = document.getElementById('pass-eye-icon');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) {
+      icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+    }
+  } else {
+    input.type = 'password';
+    if (icon) {
+      icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+    }
+  }
+}
+
 async function handleAdminLogin(e) {
   e.preventDefault();
   const btn = document.getElementById('admin-login-btn');
   const errEl = document.getElementById('admin-login-error');
-  if (errEl) errEl.style.display = 'none';
+  if (errEl) {
+    errEl.style.display = 'none';
+    errEl.textContent = '';
+  }
 
   btn.disabled = true;
-  btn.textContent = 'Authenticating...';
+  btn.textContent = 'Verifying Credentials...';
 
   const email = (document.getElementById('admin-email').value || '').trim();
   const password = document.getElementById('admin-password').value || '';
 
-  // 1. Authenticate via Server API (validates password hash and sets secure session cookie)
+  // 1. Authenticate via Server API with Step 2 Verification Enforcement
   try {
     const res = await fetch(`${API_BASE}/auth/admin-login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-portal': 'true'
+      },
+      body: JSON.stringify({ email, password, require2FA: true })
     });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.user?.role === 'admin') {
-        adminUser = data.user;
-        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-        hideAdminLoginScreen();
-        document.getElementById('admin-topbar-username').textContent = adminUser.name;
-        showToast('Admin access granted! 👑', 'success');
-        btn.disabled = false;
-        btn.textContent = 'Sign In to Admin Portal';
-        loadDashboardStats();
-        loadAdminProducts();
-        return;
-      }
-    }
-  } catch (err) {}
 
-  // 3. Try Firebase Authentication
+    const data = await res.json().catch(() => ({}));
+
+    // Check Account Lockout
+    if (res.status === 429 || data.locked) {
+      if (errEl) {
+        errEl.innerHTML = `<strong>Account Temporarily Locked</strong><br>${escapeHtml(data.message || 'Too many failed login attempts. Please wait 15 minutes.')}`;
+        errEl.style.display = 'block';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Sign In to Admin Portal';
+      return;
+    }
+
+    // Step 2: 2-Step Verification Challenge Required
+    if (data.mfaRequired || data.step === 2) {
+      showToast('Step 1 verified! 2-Step security code sent. 📩', 'info');
+      document.getElementById('admin-login-form').style.display = 'none';
+      document.getElementById('admin-2fa-container').style.display = 'block';
+
+      const emailDisplay = document.getElementById('admin-2fa-email-display');
+      if (emailDisplay && data.maskedEmail) {
+        emailDisplay.textContent = data.maskedEmail;
+      }
+
+      start2FACountdown(data.expiresIn || 300);
+      initOtpDigitInputs();
+      btn.disabled = false;
+      btn.textContent = 'Sign In to Admin Portal';
+      return;
+    }
+
+    // Direct Login Grant (e.g. if 2FA was pre-verified or bypassed)
+    if (res.ok && data.success && data.user?.role === 'admin') {
+      adminUser = data.user;
+      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+      hideAdminLoginScreen();
+      document.getElementById('admin-topbar-username').textContent = adminUser.name;
+      showToast('Admin access granted! 👑', 'success');
+      btn.disabled = false;
+      btn.textContent = 'Sign In to Admin Portal';
+      loadDashboardStats();
+      loadAdminProducts();
+      return;
+    }
+
+    if (!res.ok) {
+      if (errEl) {
+        errEl.textContent = data.message || 'Invalid administrator credentials.';
+        errEl.style.display = 'block';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Sign In to Admin Portal';
+      return;
+    }
+  } catch (err) {
+    console.warn('Backend admin login request error, falling back to Firebase if available:', err);
+  }
+
+  // 2. Fallback: Firebase Authentication
   ensureFirebaseInitialized();
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
       const user = cred.user;
-      if (user) {
+      if (user && user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
         adminUser = {
           id: 1,
-          name: user.displayName || 'RJ Fashion Admin',
+          name: user.displayName || 'RJ Fashion Admin (Om Vinayak)',
           email: user.email,
           role: 'admin',
           uid: user.uid
@@ -247,7 +314,7 @@ async function handleAdminLogin(e) {
         sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
         hideAdminLoginScreen();
         document.getElementById('admin-topbar-username').textContent = adminUser.name;
-        showToast('Admin access granted! 👑', 'success');
+        showToast('Admin access granted via Firebase! 👑', 'success');
         btn.disabled = false;
         btn.textContent = 'Sign In to Admin Portal';
         loadDashboardStats();
@@ -272,6 +339,283 @@ async function handleAdminLogin(e) {
   btn.disabled = false;
   btn.textContent = 'Sign In to Admin Portal';
 }
+
+// ===================================================================
+// ADMIN 2-STEP VERIFICATION HANDLERS (STEP 2)
+// ===================================================================
+function initOtpDigitInputs() {
+  const digits = document.querySelectorAll('.admin-otp-digit');
+  digits.forEach(d => { d.value = ''; d.classList.remove('error'); });
+
+  if (digits[0]) {
+    setTimeout(() => digits[0].focus(), 150);
+  }
+
+  digits.forEach((input, idx) => {
+    // Remove prior event listeners by cloning
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+
+    newInput.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/[^0-9]/g, '');
+      e.target.value = val ? val[0] : '';
+      if (val && idx < digits.length - 1) {
+        document.querySelectorAll('.admin-otp-digit')[idx + 1].focus();
+      }
+      checkAutoSubmitOtp();
+    });
+
+    newInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+        document.querySelectorAll('.admin-otp-digit')[idx - 1].focus();
+      }
+    });
+
+    newInput.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+      const allBoxes = document.querySelectorAll('.admin-otp-digit');
+      for (let i = 0; i < pasteData.length; i++) {
+        if (allBoxes[i]) allBoxes[i].value = pasteData[i];
+      }
+      if (pasteData.length < 6 && allBoxes[pasteData.length]) {
+        allBoxes[pasteData.length].focus();
+      }
+      checkAutoSubmitOtp();
+    });
+  });
+}
+
+function checkAutoSubmitOtp() {
+  const code = Array.from(document.querySelectorAll('.admin-otp-digit')).map(d => d.value).join('');
+  if (code.length === 6) {
+    handleAdmin2FASubmit();
+  }
+}
+
+function start2FACountdown(durationSeconds) {
+  if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
+
+  let remaining = durationSeconds;
+  const display = document.getElementById('admin-2fa-timer-display');
+
+  const update = () => {
+    const mins = Math.floor(remaining / 60).toString().padStart(2, '0');
+    const secs = (remaining % 60).toString().padStart(2, '0');
+    if (display) display.textContent = `${mins}:${secs}`;
+
+    if (remaining <= 0) {
+      clearInterval(twoFactorCountdownTimer);
+      if (display) display.textContent = 'EXPIRED';
+      const errEl = document.getElementById('admin-login-error');
+      if (errEl) {
+        errEl.textContent = 'Verification code has expired. Please click "Resend Code" to receive a fresh code.';
+        errEl.style.display = 'block';
+      }
+    }
+    remaining--;
+  };
+
+  update();
+  twoFactorCountdownTimer = setInterval(update, 1000);
+}
+
+async function handleAdmin2FASubmit(e) {
+  if (e && e.preventDefault) e.preventDefault();
+
+  const errEl = document.getElementById('admin-login-error');
+  if (errEl) errEl.style.display = 'none';
+
+  const digits = Array.from(document.querySelectorAll('.admin-otp-digit'));
+  const code = digits.map(d => d.value).join('');
+
+  if (code.length !== 6) {
+    if (errEl) {
+      errEl.textContent = 'Please enter all 6 digits of the verification code.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  const btn = document.getElementById('admin-2fa-verify-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Verifying Code...';
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/admin-verify-2fa`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.success && data.user?.role === 'admin') {
+      if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
+      adminUser = data.user;
+      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+      hideAdminLoginScreen();
+      document.getElementById('admin-topbar-username').textContent = adminUser.name;
+      showToast('Two-Step Verification complete! Welcome, Administrator 👑', 'success');
+
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Verify & Access Portal';
+      }
+
+      loadDashboardStats();
+      loadAdminProducts();
+      return;
+    }
+
+    // Verification failed
+    digits.forEach(d => {
+      d.classList.add('error');
+      setTimeout(() => d.classList.remove('error'), 600);
+    });
+
+    if (errEl) {
+      errEl.textContent = data.message || 'Invalid verification code. Please check and try again.';
+      errEl.style.display = 'block';
+    }
+
+    // Clear boxes and focus on first box
+    digits.forEach(d => d.value = '');
+    if (digits[0]) digits[0].focus();
+
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = 'Connection error while verifying code. Please try again.';
+      errEl.style.display = 'block';
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Verify & Access Portal';
+    }
+  }
+}
+
+async function handleAdmin2FAResend() {
+  const btn = document.getElementById('admin-2fa-resend-btn');
+  const errEl = document.getElementById('admin-login-error');
+  if (errEl) errEl.style.display = 'none';
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/admin-resend-2fa`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.success) {
+      showToast('Fresh 6-digit code sent to your email! 📩', 'success');
+      start2FACountdown(data.expiresIn || 300);
+      initOtpDigitInputs();
+
+      // Enforce 30-second cooldown on the button
+      let cooldown = 30;
+      btn.disabled = true;
+      const cooldownInterval = setInterval(() => {
+        btn.textContent = `Resend in ${cooldown}s`;
+        cooldown--;
+        if (cooldown < 0) {
+          clearInterval(cooldownInterval);
+          btn.disabled = false;
+          btn.textContent = 'Resend Code';
+        }
+      }, 1000);
+    } else {
+      if (errEl) {
+        errEl.textContent = data.message || 'Could not resend code. Please try again shortly.';
+        errEl.style.display = 'block';
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Resend Code';
+      }
+    }
+  } catch (err) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Resend Code';
+    }
+  }
+}
+
+function toggleEmergencyKeyInput() {
+  const drawer = document.getElementById('admin-emergency-key-drawer');
+  if (!drawer) return;
+  drawer.style.display = drawer.style.display === 'none' ? 'block' : 'none';
+  if (drawer.style.display === 'block') {
+    const input = document.getElementById('admin-emergency-key-input');
+    if (input) input.focus();
+  }
+}
+
+async function submitEmergencyKey() {
+  const keyInput = document.getElementById('admin-emergency-key-input');
+  const errEl = document.getElementById('admin-login-error');
+  if (errEl) errEl.style.display = 'none';
+
+  const recoveryKey = (keyInput ? keyInput.value : '').trim();
+  if (!recoveryKey) {
+    if (errEl) {
+      errEl.textContent = 'Please enter your Master Recovery Key.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/admin-verify-2fa`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recoveryKey })
+    });
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok && data.success && data.user?.role === 'admin') {
+      if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
+      adminUser = data.user;
+      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+      hideAdminLoginScreen();
+      document.getElementById('admin-topbar-username').textContent = adminUser.name;
+      showToast('Authenticated via Master Recovery Key! 👑', 'success');
+      loadDashboardStats();
+      loadAdminProducts();
+      return;
+    }
+
+    if (errEl) {
+      errEl.textContent = data.message || 'Invalid Master Recovery Key.';
+      errEl.style.display = 'block';
+    }
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = 'Error verifying recovery key.';
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+function returnToAdminLoginForm() {
+  if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
+  const errEl = document.getElementById('admin-login-error');
+  if (errEl) errEl.style.display = 'none';
+
+  document.getElementById('admin-2fa-container').style.display = 'none';
+  document.getElementById('admin-login-form').style.display = 'block';
+  document.getElementById('admin-password').value = '';
+}
+
 
 // Admin Logout
 async function handleAdminLogout() {
@@ -1626,7 +1970,7 @@ async function quickUpdateStockPrompt(productId, currentStock) {
   if (newStock !== null && !isNaN(newStock)) {
     const num = Number(newStock);
     if (num < 0) {
-      alert('Stock cannot be negative');
+      showToast('Stock quantity cannot be negative', 'error');
       return;
     }
 
@@ -2492,7 +2836,7 @@ async function handleSendAdminNotification(e) {
 
 async function triggerDeviceTestNotification() {
   if (!('Notification' in window)) {
-    alert('This browser does not support desktop notifications.');
+    showToast('This browser does not support desktop notifications', 'warning');
     return;
   }
 

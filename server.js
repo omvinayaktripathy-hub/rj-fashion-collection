@@ -97,6 +97,8 @@ function createRateLimiter({ windowMs = 60000, max = 60, message = 'Too many req
 }
 
 const authLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 15 : 60, message: 'Too many authentication attempts. Please try again in a minute.' });
+const adminAuthLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: isProd ? 5 : 25, message: 'Too many administrative authentication attempts. Please try again after 15 minutes.' });
+const admin2faLimiter = createRateLimiter({ windowMs: 5 * 60 * 1000, max: isProd ? 5 : 25, message: 'Too many verification attempts. Please wait 5 minutes before trying again.' });
 const orderLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 25 : 100, message: 'Too many order requests. Please try again shortly.' });
 const apiLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 300 : 1000, message: 'Too many API requests. Please slow down.' });
 const searchLimiter = createRateLimiter({ windowMs: 60000, max: isProd ? 60 : 200, message: 'Too many search queries. Please wait a moment.' });
@@ -205,7 +207,10 @@ app.use((req, res, next) => {
     req.path === '/api/auth/register' ||
     req.path === '/api/auth/forgot-password' ||
     req.path === '/api/auth/reset-password' ||
-    req.path === '/api/auth/admin-login'
+    req.path === '/api/auth/admin-login' ||
+    req.path === '/api/auth/admin-verify-2fa' ||
+    req.path === '/api/auth/admin-resend-2fa' ||
+    req.path === '/api/auth/admin-status'
   ) {
     return next();
   }
@@ -270,7 +275,9 @@ app.use(express.static(publicDir, {
 // Apply Rate Limits & Mount API Routes
 app.use('/api', apiLimiter);
 app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/admin-login', authLimiter);
+app.use('/api/auth/admin-login', adminAuthLimiter);
+app.use('/api/auth/admin-verify-2fa', admin2faLimiter);
+app.use('/api/auth/admin-resend-2fa', admin2faLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/orders', orderLimiter);
 app.use('/api/payment', orderLimiter);

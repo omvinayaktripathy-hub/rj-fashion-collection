@@ -109,7 +109,7 @@ async function sendOrderConfirmation(order, items) {
           <!-- Footer -->
           <tr><td style="background: #fdf0f5; padding: 20px 40px; text-align: center; border-top: 1px solid #f0e6e6;">
             <p style="font-size: 13px; color: #888; margin: 0;">Questions? Contact us at <a href="mailto:support@rjfashion.com" style="color: #7a003c;">support@rjfashion.com</a></p>
-            <p style="font-size: 12px; color: #aaa; margin: 6px 0 0;">© ${new Date().getFullYear()} RJ Fashion Collection. All rights reserved.</p>
+            <p style="font-size: 12px; color: #aaa; margin: 6px 0 0;">© 2026 RJ Fashion Collection. All rights reserved.</p>
           </td></tr>
         </table>
       </td></tr>
@@ -133,4 +133,56 @@ async function sendOrderConfirmation(order, items) {
   }
 }
 
-module.exports = { sendOrderConfirmation };
+async function sendAdmin2faOtp(email, otp, ip = '') {
+  const subject = `🛡️ RJ Fashion Collection — Admin 2-Step Verification Code [${otp}]`;
+  const html = `
+  <!DOCTYPE html>
+  <html>
+  <head><meta charset="utf-8"><title>Admin 2-Step Verification</title></head>
+  <body style="margin: 0; padding: 0; background-color: #070d1e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #ffffff;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #070d1e; padding: 40px 0;">
+      <tr><td align="center">
+        <table width="560" cellpadding="0" cellspacing="0" style="background: #0b1426; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+          <tr><td style="background: #060b18; padding: 28px 36px; text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.2);">
+            <div style="font-size: 20px; font-weight: 800; color: #d4af37; letter-spacing: 2px;">RJ FASHION COLLECTION</div>
+            <div style="font-size: 11px; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px;">Private Administrative Security Gateway</div>
+          </td></tr>
+          <tr><td style="padding: 36px 40px; text-align: center;">
+            <div style="display: inline-block; padding: 8px 16px; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 20px; color: #d4af37; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px;">2-Step Verification</div>
+            <h2 style="color: #ffffff; font-size: 22px; margin: 0 0 12px; font-weight: 700;">Sign-In Security Code</h2>
+            <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6; margin: 0 0 28px;">Use the 6-digit verification code below to complete your administrator sign-in. This code is valid for <strong>5 minutes</strong>.</p>
+            <div style="background: #060b18; border: 1px solid #d4af37; border-radius: 8px; padding: 18px 24px; font-size: 34px; letter-spacing: 8px; font-weight: 800; color: #ffffff; font-family: monospace; display: inline-block; margin-bottom: 24px;">${otp}</div>
+            <p style="color: #94a3b8; font-size: 12px; line-height: 1.5; margin: 0;">Request originated from IP: <strong>${ip || 'Protected Gateway'}</strong>.<br>If you did not initiate this administrator sign-in, please reset your password immediately.</p>
+          </td></tr>
+          <tr><td style="background: #060b18; padding: 16px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); font-size: 11px; color: #64748b;">
+            © 2026 RJ Fashion Collection. Confidential Administrative Communication.
+          </td></tr>
+        </table>
+      </td></tr>
+    </table>
+  </body>
+  </html>
+  `;
+
+  console.log(`[RJFC-SECURITY] 🛡️ 2-Step Verification Code for Admin (${email}): ${otp}`);
+
+  if (!EMAIL_ENABLED) {
+    return { success: true, logged: true, code: otp };
+  }
+
+  try {
+    const t = getTransporter();
+    await t.sendMail({
+      from: `"RJ Fashion Security" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'security@rj-fashion-collection.web.app'}>`,
+      to: email,
+      subject,
+      html
+    });
+    return { success: true, sent: true };
+  } catch (err) {
+    console.error('[Email Service] Failed to send 2FA email:', err.message);
+    return { success: true, fallbackLogged: true, code: otp };
+  }
+}
+
+module.exports = { sendOrderConfirmation, sendAdmin2faOtp };

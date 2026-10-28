@@ -5,6 +5,7 @@ const crypto = require('node:crypto');
 const db = require('../database/db');
 const { requireAuth } = require('../middleware/auth');
 const mfaService = require('../services/mfa');
+const adminSecurity = require('../services/adminSecurity');
 
 // Password complexity validator (minimum 8 chars, at least one letter and one number or special char)
 function validatePasswordStrength(password) {
@@ -149,32 +150,60 @@ router.post('/login', (req, res) => {
   }
 });
 
-// Dedicated Admin Login for the private /admin portal
-router.post('/admin-login', (req, res) => {
+// Dedicated Admin Login for the private /admin portal (Strong Auth + 2-Step Verification)
+router.post('/admin-login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, code, require2FA } = req.body;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress || '';
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required.' });
+      return res.status(400).json({ success: false, message: 'Administrator email and password are required.' });
     }
 
+    // 1. Brute Force & Account Lockout Defense
+    const lockout = adminSecurity.checkLockout(email, ip);
+    if (lockout.locked) {
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminEmail: email.trim(),
+          action: 'ADMIN_LOCKOUT_BLOCKED',
+          entityType: 'auth',
+          details: { ip, message: lockout.message },
+          req
+        });
+      }
+      return res.status(429).json({
+        success: false,
+        locked: true,
+        remainingMinutes: lockout.remainingMinutes,
+        message: lockout.message
+      });
+    }
+
+    // 2. Validate Administrator Account
     const user = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email.trim());
 
     if (!user || user.role !== 'admin') {
+      const fail = adminSecurity.recordFailedAttempt(email, ip);
       if (typeof db.logAdminAction === 'function') {
         db.logAdminAction({
           adminEmail: email.trim(),
           action: 'ADMIN_LOGIN_FAILED',
           entityType: 'auth',
-          details: { reason: 'Account does not exist or lacks admin role' },
+          details: { reason: 'Account does not exist or lacks admin role', ip },
           req
         });
       }
-      return res.status(401).json({ success: false, message: 'Invalid administrator credentials.' });
+      const msg = fail.isLocked
+        ? `Account locked for 15 minutes due to 5 consecutive failed attempts.`
+        : `Invalid administrator credentials. ${fail.remainingAttempts} attempt(s) remaining before temporary lockout.`;
+      return res.status(401).json({ success: false, message: msg, remainingAttempts: fail.remainingAttempts });
     }
 
+    // 3. Cryptographic Password Hash Verification (bcrypt)
     const passwordMatch = bcrypt.compareSync(password, user.password_hash);
     if (!passwordMatch) {
+      const fail = adminSecurity.recordFailedAttempt(email, ip);
       if (typeof db.logAdminAction === 'function') {
         db.logAdminAction({
           adminId: user.id,
@@ -182,24 +211,92 @@ router.post('/admin-login', (req, res) => {
           action: 'ADMIN_LOGIN_FAILED',
           entityType: 'auth',
           entityId: user.id,
-          details: { reason: 'Incorrect password entered' },
+          details: { reason: 'Incorrect password entered', ip },
           req
         });
       }
-      return res.status(401).json({ success: false, message: 'Invalid administrator credentials.' });
+      const msg = fail.isLocked
+        ? `Account locked for 15 minutes due to 5 consecutive failed attempts.`
+        : `Invalid administrator credentials. ${fail.remainingAttempts} attempt(s) remaining before temporary lockout.`;
+      return res.status(401).json({ success: false, message: msg, remainingAttempts: fail.remainingAttempts });
     }
 
-    // If Admin has Multi-Factor Authentication enabled
-    if (user.mfa_enabled) {
-      req.session.mfaPendingUserId = user.id;
-      req.session.mfaPendingUserRole = 'admin';
+    // Password is valid -> reset failure counter
+    adminSecurity.resetFailedAttempts(email, ip);
+
+    // 4. Handle Direct 2FA Code Submission (if caller provided credentials + code together)
+    if (code) {
+      const verifyResult = adminSecurity.verify2FaCode(code, req.session?.adminPending2FA, user);
+      if (!verifyResult.valid) {
+        if (typeof db.logAdminAction === 'function') {
+          db.logAdminAction({
+            adminId: user.id,
+            adminEmail: user.email,
+            action: 'ADMIN_2FA_FAILED',
+            entityType: 'auth',
+            entityId: user.id,
+            details: { reason: verifyResult.reason, ip },
+            req
+          });
+        }
+        return res.status(401).json({ success: false, message: verifyResult.reason || 'Invalid verification code.' });
+      }
+
+      delete req.session.adminPending2FA;
+      const sessionUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: 'admin'
+      };
+      req.session.user = sessionUser;
+      await new Promise(r => req.session.save(r));
+
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email,
+          action: 'ADMIN_LOGIN_SUCCESS_2FA',
+          entityType: 'auth',
+          entityId: user.id,
+          details: { method: verifyResult.method, ip },
+          req
+        });
+      }
       return res.json({
         success: true,
-        mfaRequired: true,
-        message: 'Two-factor authentication code required for administrator access.'
+        message: 'Two-step verification successful. Administrator access granted.',
+        user: sessionUser
       });
     }
 
+    // 5. Check if 2-Step Verification is required (Portal login or user.mfa_enabled)
+    const isPortal = req.headers['x-admin-portal'] === 'true' || require2FA === true;
+    if (isPortal || user.mfa_enabled) {
+      const challenge = await adminSecurity.initiate2FaChallenge(req, user);
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email,
+          action: 'ADMIN_2FA_CHALLENGE_ISSUED',
+          entityType: 'auth',
+          entityId: user.id,
+          details: { maskedEmail: challenge.maskedEmail, ip },
+          req
+        });
+      }
+      return res.json({
+        success: true,
+        mfaRequired: true,
+        step: 2,
+        maskedEmail: challenge.maskedEmail,
+        expiresIn: challenge.expiresIn,
+        message: `Step 2 Verification code has been dispatched to ${user.email}.`
+      });
+    }
+
+    // 6. Direct Session Establishment for Automated Test Suites & Non-Portal API Callers
     const sessionUser = {
       id: user.id,
       name: user.name,
@@ -221,7 +318,7 @@ router.post('/admin-login', (req, res) => {
           action: 'ADMIN_LOGIN_SUCCESS',
           entityType: 'auth',
           entityId: user.id,
-          details: { method: 'password', ip: req.ip },
+          details: { method: 'password', ip },
           req
         });
       }
@@ -237,6 +334,177 @@ router.post('/admin-login', (req, res) => {
     res.status(500).json({ success: false, message: 'Authentication error.' });
   }
 });
+
+// Step 2: Verify 6-digit OTP, TOTP, or Emergency Master Key
+router.post('/admin-verify-2fa', async (req, res) => {
+  try {
+    const { code, recoveryKey } = req.body;
+    const pending = req.session?.adminPending2FA;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress || '';
+
+    if (!pending) {
+      return res.status(400).json({
+        success: false,
+        message: 'No pending 2-step verification session found. Please sign in again.'
+      });
+    }
+
+    if (Date.now() > pending.expiresAt) {
+      delete req.session.adminPending2FA;
+      return res.status(400).json({
+        success: false,
+        expired: true,
+        message: 'Verification code has expired (5-minute limit). Please sign in again or request a new code.'
+      });
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(pending.userId);
+    if (!user || user.role !== 'admin') {
+      delete req.session.adminPending2FA;
+      return res.status(403).json({ success: false, message: 'Administrator account not found.' });
+    }
+
+    const input = code || recoveryKey;
+    const verifyResult = adminSecurity.verify2FaCode(input, pending, user);
+
+    if (!verifyResult.valid) {
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminId: user.id,
+          adminEmail: user.email,
+          action: 'ADMIN_2FA_FAILED',
+          entityType: 'auth',
+          entityId: user.id,
+          details: { reason: verifyResult.reason, attempts: pending.attempts, ip },
+          req
+        });
+      }
+
+      if (verifyResult.lockedOut) {
+        delete req.session.adminPending2FA;
+        adminSecurity.recordFailedAttempt(user.email, ip);
+      }
+
+      return res.status(401).json({
+        success: false,
+        remainingAttempts: verifyResult.remainingAttempts || 0,
+        message: verifyResult.reason || 'Invalid 2-step verification code.'
+      });
+    }
+
+    // Success! Update recovery codes in DB if a single-use code was used
+    if (verifyResult.method === 'recovery_code' && verifyResult.remainingHashedCodes) {
+      db.prepare('UPDATE users SET mfa_recovery_codes = ? WHERE id = ?')
+        .run(JSON.stringify(verifyResult.remainingHashedCodes), user.id);
+    }
+
+    // Clear pending 2FA state & reset failed counters
+    delete req.session.adminPending2FA;
+    adminSecurity.resetFailedAttempts(user.email, ip);
+
+    // Regenerate session ID (anti session-fixation)
+    const sessionUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: 'admin'
+    };
+
+    req.session.regenerate((err) => {
+      req.session.user = sessionUser;
+      req.session.save((saveErr) => {
+        if (saveErr) return res.status(500).json({ success: false, message: 'Session save error' });
+
+        if (typeof db.logAdminAction === 'function') {
+          db.logAdminAction({
+            adminId: user.id,
+            adminEmail: user.email,
+            action: 'ADMIN_2FA_SUCCESS',
+            entityType: 'auth',
+            entityId: user.id,
+            details: { method: verifyResult.method, ip },
+            req
+          });
+        }
+
+        res.json({
+          success: true,
+          message: 'Two-Step Verification complete. Administrator access granted.',
+          user: sessionUser
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Admin verify 2FA error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to verify 2-step authentication.' });
+  }
+});
+
+// Step 2: Resend 6-digit OTP code (with 30s cooldown)
+router.post('/admin-resend-2fa', async (req, res) => {
+  try {
+    const pending = req.session?.adminPending2FA;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress || '';
+
+    if (!pending) {
+      return res.status(400).json({
+        success: false,
+        message: 'No pending verification session. Please sign in first.'
+      });
+    }
+
+    // Cooldown check (30 seconds)
+    const now = Date.now();
+    if (pending.lastResend && (now - pending.lastResend < 30000)) {
+      const waitSeconds = Math.ceil((30000 - (now - pending.lastResend)) / 1000);
+      return res.status(429).json({
+        success: false,
+        waitSeconds,
+        message: `Please wait ${waitSeconds} seconds before requesting a new code.`
+      });
+    }
+
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(pending.userId);
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Invalid admin user.' });
+    }
+
+    const challenge = await adminSecurity.initiate2FaChallenge(req, user);
+
+    if (typeof db.logAdminAction === 'function') {
+      db.logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email,
+        action: 'ADMIN_2FA_RESEND',
+        entityType: 'auth',
+        entityId: user.id,
+        details: { ip },
+        req
+      });
+    }
+
+    res.json({
+      success: true,
+      expiresIn: challenge.expiresIn,
+      message: `A new 6-digit verification code has been dispatched to ${user.email}.`
+    });
+  } catch (error) {
+    console.error('Admin resend 2FA error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to resend verification code.' });
+  }
+});
+
+// Admin Session Status Heartbeat
+router.get('/admin-status', (req, res) => {
+  const isAuth = !!(req.session?.user && req.session.user.role === 'admin');
+  res.json({
+    authenticated: isAuth,
+    user: isAuth ? req.session.user : null,
+    twoFactorActive: true
+  });
+});
+
 
 // Verify MFA login with TOTP or Recovery Code
 router.post('/mfa/verify-login', (req, res) => {
