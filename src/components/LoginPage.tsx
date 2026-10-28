@@ -643,7 +643,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           <div className="flex justify-center mb-4">
             <div className="relative w-14 h-14 flex items-center justify-center transition-transform duration-300 hover:scale-105">
               <img
-                src="/images/rj-logo-monogram.svg"
+                src="/images/rj-logo-monogram.png"
                 alt="RJ Fashion Collection Official Monogram"
                 width={54}
                 height={54}
@@ -651,7 +651,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 loading="eager"
               />
               <img
-                src="/images/rj-logo-monogram-dark.svg"
+                src="/images/rj-logo-monogram-dark.png"
                 alt="RJ Fashion Collection Official Monogram (Dark)"
                 width={54}
                 height={54}

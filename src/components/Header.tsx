@@ -547,7 +547,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Monogram Mark with Dark Mode Contrast Adaptation */}
             <div className="relative w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 flex-shrink-0">
               <img
-                src="/images/rj-logo-monogram.svg"
+                src="/images/rj-logo-monogram.png"
                 alt="RJ Monogram"
                 width={44}
                 height={44}
@@ -555,7 +555,7 @@ export const Header: React.FC<HeaderProps> = ({
                 loading="eager"
               />
               <img
-                src="/images/rj-logo-monogram-dark.svg"
+                src="/images/rj-logo-monogram-dark.png"
                 alt="RJ Monogram (Dark Mode)"
                 width={44}
                 height={44}
@@ -813,14 +813,14 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="flex items-center gap-2.5">
                 <div className="relative w-8 h-8 flex-shrink-0">
                   <img
-                    src="/images/rj-logo-monogram.svg"
+                    src="/images/rj-logo-monogram.png"
                     alt="RJ"
                     width={32}
                     height={32}
                     className="w-full h-full object-contain dark:hidden"
                   />
                   <img
-                    src="/images/rj-logo-monogram-dark.svg"
+                    src="/images/rj-logo-monogram-dark.png"
                     alt="RJ"
                     width={32}
                     height={32}

@@ -113,38 +113,28 @@ def generate_logos():
     b64_light = to_base64_png(master_light, (512, 512))
     b64_dark = to_base64_png(master_dark, (512, 512))
 
-    # 8. Create Scalable SVGs with embedded high-res artwork and vector crispness
-    svg_light = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none" aria-label="RJ Fashion Collection Royal Monogram">
-  <defs>
-    <filter id="royalLogoShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.12" />
-    </filter>
-  </defs>
-  <image href="data:image/png;base64,{b64_light}" x="0" y="0" width="512" height="512" filter="url(#royalLogoShadow)" />
+    # 8. Create Scalable, 100% compliant SVGs without any problematic filters
+    svg_light = f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" width="512" height="512" aria-label="RJ Fashion Collection Royal Monogram">
+  <image href="data:image/png;base64,{b64_light}" xlink:href="data:image/png;base64,{b64_light}" x="0" y="0" width="512" height="512" preserveAspectRatio="xMidYMid meet" />
 </svg>'''
 
-    svg_dark = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none" aria-label="RJ Fashion Collection Royal Monogram (Dark Mode)">
-  <defs>
-    <filter id="royalLogoGlowDark" x="-15%" y="-15%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#D4AF37" flood-opacity="0.25" />
-    </filter>
-  </defs>
-  <image href="data:image/png;base64,{b64_dark}" x="0" y="0" width="512" height="512" filter="url(#royalLogoGlowDark)" />
+    svg_dark = f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" width="512" height="512" aria-label="RJ Fashion Collection Royal Monogram (Dark Mode)">
+  <image href="data:image/png;base64,{b64_dark}" xlink:href="data:image/png;base64,{b64_dark}" x="0" y="0" width="512" height="512" preserveAspectRatio="xMidYMid meet" />
 </svg>'''
 
     with open(os.path.join(output_dir, 'rj-logo-monogram.svg'), 'w', encoding='utf-8') as f:
         f.write(svg_light)
     with open(os.path.join(output_dir, 'rj-logo-monogram-dark.svg'), 'w', encoding='utf-8') as f:
         f.write(svg_dark)
-    print(f"SUCCESS: Generated SVGs: rj-logo-monogram.svg, rj-logo-monogram-dark.svg")
+    print(f"SUCCESS: Generated clean SVGs: rj-logo-monogram.svg, rj-logo-monogram-dark.svg")
 
     # 9. Generate Favicon with Imperial Emerald Tile & Gold Monogram
     b64_fav = to_base64_png(master_dark, (128, 128))
-    favicon_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+    favicon_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 160 160" width="160" height="160">
   <!-- Royal Deep Imperial Emerald Background Tile -->
   <rect width="160" height="160" rx="36" fill="#061A13" />
   <rect x="3" y="3" width="154" height="154" rx="33" fill="none" stroke="#D4AF37" stroke-width="2.5" opacity="0.75" />
-  <image href="data:image/png;base64,{b64_fav}" x="16" y="16" width="128" height="128" />
+  <image href="data:image/png;base64,{b64_fav}" xlink:href="data:image/png;base64,{b64_fav}" x="16" y="16" width="128" height="128" preserveAspectRatio="xMidYMid meet" />
 </svg>'''
 
     with open(os.path.join(public_dir, 'favicon.svg'), 'w', encoding='utf-8') as f:
