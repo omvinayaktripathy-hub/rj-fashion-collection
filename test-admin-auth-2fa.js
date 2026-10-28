@@ -116,6 +116,21 @@ async function runTests() {
     db.prepare('DELETE FROM users WHERE email = ?').run(testEmail);
   });
 
+  // 2b. Strong Google Authentication Validation
+  await test('Admin Google Login rejects requests without idToken with 400', async () => {
+    const res = await request('POST', '/api/auth/admin-google-login', {});
+    assert.strictEqual(res.statusCode, 400);
+    assert.strictEqual(res.json.success, false);
+  });
+
+  await test('Admin Google Login rejects forged or invalid Google token with 401', async () => {
+    const res = await request('POST', '/api/auth/admin-google-login', {
+      idToken: 'forged_fake_google_token_1234567890'
+    });
+    assert.strictEqual(res.statusCode, 401);
+    assert.strictEqual(res.json.success, false);
+  });
+
   // 3. Step 1: 2-Step Verification Initiation
   console.log('\n--- Phase 2: Step 1 (Credential Verification) & 2FA Challenge ---');
   let sessionCookie = '';

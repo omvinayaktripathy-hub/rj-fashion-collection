@@ -340,6 +340,119 @@ router.post('/admin-login', async (req, res) => {
   }
 });
 
+// Dedicated Strong Google Authentication for Admin Portal (OAuth Token Verification + 2-Step Verification)
+router.post('/admin-google-login', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress || '';
+
+    if (!idToken || typeof idToken !== 'string') {
+      return res.status(400).json({ success: false, message: 'Google Authentication token is required.' });
+    }
+
+    // 1. Verify Google Firebase ID Token cryptographically
+    const { verifyFirebaseToken } = require('../services/firebase');
+    const decoded = await verifyFirebaseToken(idToken);
+    if (!decoded || !decoded.email) {
+      return res.status(401).json({ success: false, message: 'Invalid or expired Google authentication token.' });
+    }
+
+    const email = decoded.email.toLowerCase().trim();
+
+    // 2. Check Brute-Force & Lockout Defenses
+    const lockout = adminSecurity.checkLockout(email, ip);
+    if (lockout.locked) {
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminId: 0,
+          adminEmail: email,
+          action: 'ADMIN_GOOGLE_LOCKOUT_BLOCKED',
+          entityType: 'auth',
+          entityId: 0,
+          details: { ip, remainingMinutes: lockout.remainingMinutes },
+          req
+        });
+      }
+      return res.status(429).json({
+        success: false,
+        message: `Too many failed administrative login attempts. Access is locked for ${lockout.remainingMinutes} more minute(s).`
+      });
+    }
+
+    // 3. Strict Admin Ownership Validation
+    const isOwner = email === 'omvinayakwork@gmail.com' || decoded.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1';
+    if (!isOwner) {
+      adminSecurity.recordFailedAttempt(email, ip);
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminId: 0,
+          adminEmail: email,
+          action: 'ADMIN_GOOGLE_UNAUTHORIZED_ATTEMPT',
+          entityType: 'auth',
+          entityId: 0,
+          details: { ip, unauthorizedEmail: email, uid: decoded.uid },
+          req
+        });
+      }
+      return res.status(403).json({
+        success: false,
+        message: `Access denied. Google account (${email}) is not authorized for administrative access. Only the verified owner (omvinayakwork@gmail.com) is permitted.`
+      });
+    }
+
+    // 4. Retrieve or synchronize owner in database
+    let user = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email);
+    if (!user) {
+      const insert = db.prepare(`
+        INSERT INTO users (name, email, phone, password_hash, role)
+        VALUES (?, ?, ?, ?, 'admin')
+      `);
+      const dummyHash = bcrypt.hashSync(crypto.randomBytes(16).toString('hex'), 10);
+      const result = insert.run('RJ Fashion Admin (Om Vinayak)', email, '', dummyHash);
+      user = {
+        id: Number(result.lastInsertRowid),
+        name: 'RJ Fashion Admin (Om Vinayak)',
+        email: email,
+        phone: '',
+        role: 'admin'
+      };
+    } else if (user.role !== 'admin') {
+      db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(user.id);
+      user.role = 'admin';
+    }
+
+    // 5. Reset failed lockout attempts on successful Google credential verification
+    adminSecurity.resetFailedAttempts(email, ip);
+
+    // 6. MANDATORY STEP 2: Issue 2-Step Verification Challenge (Cryptographic 6-digit OTP)
+    const challenge = await adminSecurity.initiate2FaChallenge(req, user);
+
+    if (typeof db.logAdminAction === 'function') {
+      db.logAdminAction({
+        adminId: user.id,
+        adminEmail: user.email,
+        action: 'ADMIN_GOOGLE_2FA_CHALLENGE_ISSUED',
+        entityType: 'auth',
+        entityId: user.id,
+        details: { maskedEmail: challenge.maskedEmail, ip, authMethod: 'google_oauth' },
+        req
+      });
+    }
+
+    return res.json({
+      success: true,
+      mfaRequired: true,
+      step: 2,
+      maskedEmail: challenge.maskedEmail,
+      expiresIn: challenge.expiresIn,
+      message: `Google identity verified. Step 2 Verification code has been dispatched to ${user.email}.`
+    });
+  } catch (error) {
+    console.error('Admin Google login error:', error.message);
+    res.status(500).json({ success: false, message: 'Google administrative authentication failed.' });
+  }
+});
+
 // Step 2: Verify 6-digit OTP, TOTP, or Emergency Master Key
 router.post('/admin-verify-2fa', async (req, res) => {
   try {

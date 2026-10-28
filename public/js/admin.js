@@ -77,50 +77,43 @@ async function initAdmin() {
     }
   } catch (err) {}
 
-  // 2. Display if sessionStorage exists
-  try {
-    const saved = sessionStorage.getItem('rjfc_admin_session');
-    if (saved) {
-      adminUser = JSON.parse(saved);
-      hideAdminLoginScreen();
-      const topbarName = document.getElementById('admin-topbar-username');
-      if (topbarName) topbarName.textContent = adminUser.name;
-      setupSidebarCollapseState();
-      loadDashboardStats();
-      loadCategoriesList();
-      loadAdminProducts();
-    }
-  } catch (e) {}
+  // 2. Strict Display Check: only show admin if session confirmed by HttpOnly cookie /api/me
+  showAdminLoginScreen();
+}
 
-  // 2. Ensure Firebase Auth session is active & synchronized
-  if (typeof firebase !== 'undefined' && firebase.auth) {
-    try {
-      firebase.auth().onAuthStateChanged((user) => {
-        if (user && user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
-          adminUser = {
-            id: 1,
-            name: 'RJ Fashion Admin (Om Vinayak)',
-            email: user.email,
-            role: 'admin',
-            uid: user.uid
-          };
-          sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-          hideAdminLoginScreen();
-          const topbarName = document.getElementById('admin-topbar-username');
-          if (topbarName) topbarName.textContent = adminUser.name;
-          setupSidebarCollapseState();
-          loadDashboardStats();
-          loadCategoriesList();
-          loadAdminProducts();
-          startRealtimeSync();
-        } else if (!user && !sessionStorage.getItem('rjfc_admin_session')) {
-          showAdminLoginScreen();
-        }
-      });
-    } catch (_) {}
+// Global CSRF helper for admin mutation requests
+function getCsrfToken() {
+  const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+window.getCsrfToken = getCsrfToken;
+
+// Switch Admin Auth Mode (Google SSO vs Master Password)
+function switchAdminAuthMode(mode) {
+  const googleTab = document.getElementById('tab-google-auth-btn');
+  const passTab = document.getElementById('tab-password-auth-btn');
+  const googlePane = document.getElementById('admin-mode-google');
+  const passPane = document.getElementById('admin-mode-password');
+  const errEl = document.getElementById('admin-login-error');
+  if (errEl) errEl.style.display = 'none';
+
+  if (mode === 'google') {
+    if (googleTab) googleTab.classList.add('active');
+    if (passTab) passTab.classList.remove('active');
+    if (googlePane) googlePane.style.display = 'block';
+    if (passPane) passPane.style.display = 'none';
+  } else {
+    if (googleTab) googleTab.classList.remove('active');
+    if (passTab) passTab.classList.add('active');
+    if (googlePane) googlePane.style.display = 'none';
+    if (passPane) passPane.style.display = 'block';
+    const emailInput = document.getElementById('admin-email');
+    if (emailInput) setTimeout(() => emailInput.focus(), 100);
   }
+}
+window.switchAdminAuthMode = switchAdminAuthMode;
 
-  // 3. Check server session if running on node server
+function unusedInitBlock() {
   try {
     const res = await fetch(`${API_BASE}/me`);
     if (res.ok) {
@@ -152,16 +145,16 @@ function hideAdminLoginScreen() {
   if (screen) screen.style.display = 'none';
 }
 
-// 1-Click Google Sign In for Super Admin
+// Strong Google Authentication for Admin Portal (Mandatory Step 2 2FA)
 async function handleAdminGoogleLogin() {
-  const btn = document.getElementById('admin-google-btn');
+  const btn = document.getElementById('admin-google-sso-btn');
   const errEl = document.getElementById('admin-login-error');
   if (errEl) errEl.style.display = 'none';
 
   if (btn) {
     btn.disabled = true;
     btn.style.opacity = '0.75';
-    btn.innerHTML = 'Signing in with Google...';
+    btn.innerHTML = 'Connecting to Google Security...';
   }
 
   try {
@@ -172,40 +165,61 @@ async function handleAdminGoogleLogin() {
     }
 
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     const result = await firebase.auth().signInWithPopup(provider);
     const user = result.user;
 
-    if (user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
-      try {
-        const idToken = await user.getIdToken();
-        if (idToken) {
-          await fetch(`${API_BASE}/auth/session-login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken })
-          });
-        }
-      } catch (_) {}
-      adminUser = {
-        id: 1,
-        name: 'RJ Fashion Admin (Om Vinayak)',
-        email: 'omvinayakwork@gmail.com',
-        role: 'admin',
-        uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1'
-      };
-      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-      hideAdminLoginScreen();
-      document.getElementById('admin-topbar-username').textContent = adminUser.name;
-      showToast('Admin access granted! Welcome Om Vinayak 👑', 'success');
-      loadDashboardStats();
-      loadAdminProducts();
-      return;
-    } else {
+    if (!user || !user.email) {
+      throw new Error('Google sign-in did not return a valid user profile.');
+    }
+
+    // Verify Google ID Token with backend dedicated rate-limited admin endpoint
+    const idToken = await user.getIdToken();
+
+    if (btn) {
+      btn.innerHTML = 'Verifying Owner Permissions & Dispatched 2FA...';
+    }
+
+    const res = await fetch(`${API_BASE}/auth/admin-google-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    // Check Account Lockout
+    if (res.status === 429 || data.locked) {
       if (errEl) {
-        errEl.textContent = `Access denied for ${user.email}. Only the owner (omvinayakwork@gmail.com) has admin rights.`;
+        errEl.innerHTML = `<strong>Account Temporarily Locked</strong><br>${escapeHtml(data.message || 'Too many failed login attempts. Please wait 15 minutes.')}`;
         errEl.style.display = 'block';
       }
+      return;
     }
+
+    if (res.ok && data.success && data.mfaRequired) {
+      // Transition dynamically to Step 2 Verification Modal!
+      const step1Container = document.getElementById('admin-step1-container');
+      const step2Container = document.getElementById('admin-2fa-container');
+      const emailDisplay = document.getElementById('admin-2fa-email-display');
+
+      if (step1Container) step1Container.style.display = 'none';
+      if (step2Container) step2Container.style.display = 'block';
+      if (emailDisplay) emailDisplay.textContent = data.maskedEmail || user.email;
+
+      initOtpDigitInputs();
+      start2FACountdown(data.expiresIn || 300);
+      showToast('Owner Google ID verified! Step 2 verification code sent to your email 👑', 'success');
+      return;
+    }
+
+    // Unauthorized or locked out
+    if (errEl) {
+      errEl.textContent = data.message || `Access denied for ${user.email}. Only the owner (omvinayakwork@gmail.com) has admin rights.`;
+      errEl.style.display = 'block';
+    }
+    showToast(data.message || 'Access Denied: Unauthorized Google Account', 'error');
+
   } catch (err) {
     if (errEl) {
       errEl.textContent = err.message || 'Google Admin sign-in failed.';
@@ -216,17 +230,13 @@ async function handleAdminGoogleLogin() {
       btn.disabled = false;
       btn.style.opacity = '1';
       btn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-        </svg>
-        <span>Sign In with Owner Google Account</span>
+        <svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span>Continue with Owner Google Account</span>
       `;
     }
   }
 }
+window.handleAdminGoogleLogin = handleAdminGoogleLogin;
 
 // Admin Login Form Submit (Step 1: Credentials)
 let twoFactorCountdownTimer = null;
@@ -290,7 +300,8 @@ async function handleAdminLogin(e) {
     // Step 2: 2-Step Verification Challenge Required
     if (data.mfaRequired || data.step === 2) {
       showToast('Step 1 verified! 2-Step security code sent. 📩', 'info');
-      document.getElementById('admin-login-form').style.display = 'none';
+      const step1 = document.getElementById('admin-step1-container') || document.getElementById('admin-login-form');
+      step1.style.display = 'none';
       document.getElementById('admin-2fa-container').style.display = 'block';
 
       const emailDisplay = document.getElementById('admin-2fa-email-display');
@@ -646,9 +657,13 @@ function returnToAdminLoginForm() {
   const errEl = document.getElementById('admin-login-error');
   if (errEl) errEl.style.display = 'none';
 
-  document.getElementById('admin-2fa-container').style.display = 'none';
-  document.getElementById('admin-login-form').style.display = 'block';
-  document.getElementById('admin-password').value = '';
+  const step1 = document.getElementById('admin-step1-container');
+  const step2 = document.getElementById('admin-2fa-container');
+  if (step2) step2.style.display = 'none';
+  if (step1) step1.style.display = 'block';
+
+  const passInput = document.getElementById('admin-password');
+  if (passInput) passInput.value = '';
 }
 
 
