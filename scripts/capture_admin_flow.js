@@ -56,10 +56,10 @@ async function capture() {
     });
     await new Promise(r => setTimeout(r, 1500));
 
-    // Capture Step 2 screenshot (Google Authentication)
+    // Capture Step 2 screenshot (6-Digit Authenticator Code)
     const shot2 = await send('Page.captureScreenshot', { format: 'png' });
-    fs.writeFileSync(path.join(artifactDir, 'admin_step2_google_2fa.png'), Buffer.from(shot2.data, 'base64'));
-    console.log('Saved admin_step2_google_2fa.png');
+    fs.writeFileSync(path.join(artifactDir, 'admin_step2_authenticator_code.png'), Buffer.from(shot2.data, 'base64'));
+    console.log('Saved admin_step2_authenticator_code.png');
 
     ws.close();
     edge.kill();

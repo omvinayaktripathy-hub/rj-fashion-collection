@@ -52,17 +52,17 @@ async function testUI() {
     });
     await new Promise(r => setTimeout(r, 1500));
 
-    // Check if Step 2 is now visible
+    // Check if Step 2 is now visible with 6 OTP boxes
     const step2Check = await send('Runtime.evaluate', {
       expression: `(() => {
         const step1 = document.getElementById('admin-step1-container');
         const step2 = document.getElementById('admin-2fa-container');
-        const googleBtn = document.getElementById('admin-google-2fa-btn');
+        const otpBoxes = document.querySelectorAll('.admin-otp-digit');
         const timer = document.getElementById('admin-2fa-timer-display');
         return {
           step1Display: window.getComputedStyle(step1).display,
           step2Display: window.getComputedStyle(step2).display,
-          hasGoogleBtn: !!googleBtn,
+          otpBoxesCount: otpBoxes.length,
           timerText: timer ? timer.textContent : ''
         };
       })()`,
@@ -70,10 +70,9 @@ async function testUI() {
     });
     console.log('Step 2 UI status:', JSON.stringify(step2Check.result.value, null, 2));
 
-    console.log('3. Authenticating with Emergency Master Key via backup options drawer...');
+    console.log('3. Authenticating with Emergency Master Key via Emergency Key drawer...');
     await send('Runtime.evaluate', {
       expression: `
-        toggleAdminBackupDrawer();
         toggleEmergencyKeyInput();
         document.getElementById('admin-emergency-key-input').value = 'RJFC-ROYAL-ADMIN-2026';
         submitEmergencyKey();
