@@ -13,15 +13,25 @@ let currentAccountUser = null;
 async function initAccount() {
   try {
     let user = null;
-    const stored = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
-    if (stored) {
-      try { user = JSON.parse(stored); } catch (_) {}
-    }
 
-    if (!user) {
+    // Purge any tokens from localStorage and sessionStorage for security compliance
+    ['token', 'session_token', 'auth_token', 'id_token', 'idToken', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
+      try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (_) {}
+    });
+
+    // 1. Authoritative check: HttpOnly Cookie session from server
+    try {
       const res = await fetch(`${API_BASE}/me`);
       const data = await res.json();
       if (data.success && data.user) user = data.user;
+    } catch (_) {}
+
+    // 2. Fallback for static hosting
+    if (!user) {
+      const stored = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
+      if (stored) {
+        try { user = JSON.parse(stored); } catch (_) {}
+      }
     }
 
     if (!user) {
@@ -752,8 +762,9 @@ async function changePassword(e) {
  * Sign Out / Logout
  */
 async function handleLogout() {
-  localStorage.removeItem('rjfc_user');
-  sessionStorage.removeItem('rjfc_user');
+  ['rjfc_user', 'rj_user', 'token', 'session_token', 'auth_token', 'id_token', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
+    try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (_) {}
+  });
   try {
     if (typeof firebase !== 'undefined' && firebase.auth) {
       await firebase.auth().signOut();

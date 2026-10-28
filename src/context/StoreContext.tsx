@@ -468,10 +468,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setUser(null);
     if (typeof window !== 'undefined') {
       try {
-        localStorage.removeItem('rj_user');
-        localStorage.removeItem('rjfc_user');
-        sessionStorage.removeItem('rj_user');
-        sessionStorage.removeItem('rjfc_user');
+        ['rj_user', 'rjfc_user', 'token', 'session_token', 'auth_token', 'id_token', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
+          localStorage.removeItem(k);
+          sessionStorage.removeItem(k);
+        });
         window.dispatchEvent(new CustomEvent('rjfc_user_updated', { detail: { user: null } }));
         window.dispatchEvent(new Event('storage'));
       } catch (_) {}

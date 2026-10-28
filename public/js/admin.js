@@ -52,7 +52,32 @@ function ensureFirebaseInitialized() {
 async function initAdmin() {
   ensureFirebaseInitialized();
 
-  // 1. Quick display if sessionStorage exists
+  // Purge any tokens from localStorage and sessionStorage
+  ['token', 'session_token', 'auth_token', 'id_token', 'idToken', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
+    try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (_) {}
+  });
+
+  // 1. Authoritative check: HttpOnly Cookie session from node server
+  try {
+    const res = await fetch(`${API_BASE}/me`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.user && data.user.role === 'admin') {
+        adminUser = data.user;
+        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+        hideAdminLoginScreen();
+        document.getElementById('admin-topbar-username').textContent = adminUser.name;
+        setupSidebarCollapseState();
+        loadDashboardStats();
+        loadCategoriesList();
+        loadAdminProducts();
+        startRealtimeSync();
+        return;
+      }
+    }
+  } catch (err) {}
+
+  // 2. Display if sessionStorage exists
   try {
     const saved = sessionStorage.getItem('rjfc_admin_session');
     if (saved) {
@@ -151,6 +176,16 @@ async function handleAdminGoogleLogin() {
     const user = result.user;
 
     if (user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
+      try {
+        const idToken = await user.getIdToken();
+        if (idToken) {
+          await fetch(`${API_BASE}/auth/session-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+          });
+        }
+      } catch (_) {}
       adminUser = {
         id: 1,
         name: 'RJ Fashion Admin (Om Vinayak)',

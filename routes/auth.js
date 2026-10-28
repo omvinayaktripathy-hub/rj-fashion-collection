@@ -6,6 +6,7 @@ const db = require('../database/db');
 const { requireAuth } = require('../middleware/auth');
 const mfaService = require('../services/mfa');
 const adminSecurity = require('../services/adminSecurity');
+const sessionTokenService = require('../services/sessionTokenService');
 
 // Password complexity validator (minimum 8 chars, at least one letter and one number or special char)
 function validatePasswordStrength(password) {
@@ -77,6 +78,7 @@ router.post('/register', (req, res) => {
     };
 
     req.session.user = user;
+    sessionTokenService.issueSessionCookie(res, user, req);
     req.session.save((err) => {
       if (err) {
         return res.status(500).json({ success: false, message: 'Session error' });
@@ -134,6 +136,7 @@ router.post('/login', (req, res) => {
     };
 
     req.session.user = sessionUser;
+    sessionTokenService.issueSessionCookie(res, sessionUser, req);
     req.session.save((err) => {
       if (err) {
         return res.status(500).json({ success: false, message: 'Session error' });
@@ -251,6 +254,7 @@ router.post('/admin-login', async (req, res) => {
         role: 'admin'
       };
       req.session.user = sessionUser;
+      sessionTokenService.issueSessionCookie(res, sessionUser, req);
       await new Promise(r => req.session.save(r));
 
       if (typeof db.logAdminAction === 'function') {
@@ -306,6 +310,7 @@ router.post('/admin-login', async (req, res) => {
     };
 
     req.session.user = sessionUser;
+    sessionTokenService.issueSessionCookie(res, sessionUser, req);
     req.session.save((err) => {
       if (err) {
         return res.status(500).json({ success: false, message: 'Session error' });
@@ -413,6 +418,7 @@ router.post('/admin-verify-2fa', async (req, res) => {
 
     req.session.regenerate((err) => {
       req.session.user = sessionUser;
+      sessionTokenService.issueSessionCookie(res, sessionUser, req);
       req.session.save((saveErr) => {
         if (saveErr) return res.status(500).json({ success: false, message: 'Session save error' });
 
@@ -562,6 +568,7 @@ router.post('/mfa/verify-login', (req, res) => {
     };
 
     req.session.user = sessionUser;
+    sessionTokenService.issueSessionCookie(res, sessionUser, req);
     req.session.save((err) => {
       if (err) return res.status(500).json({ success: false, message: 'Session error' });
 
@@ -801,9 +808,101 @@ router.post('/reset-password', (req, res) => {
   }
 });
 
+// Session Login (Google OAuth / Firebase Token Bridge to HttpOnly Cookie)
+router.post('/session-login', async (req, res) => {
+  try {
+    const { idToken, email, password } = req.body;
+    const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket?.remoteAddress || '';
+
+    // 1. Firebase ID Token verification
+    if (idToken) {
+      const { verifyFirebaseToken } = require('../services/firebase');
+      const decoded = await verifyFirebaseToken(idToken);
+      if (!decoded || !decoded.email) {
+        return res.status(401).json({ success: false, message: 'Invalid authentication token.' });
+      }
+
+      const cleanEmail = decoded.email.toLowerCase().trim();
+      const isSuperAdmin = cleanEmail === 'omvinayakwork@gmail.com' || decoded.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1';
+
+      // Find or sync user in local database
+      let user = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(cleanEmail);
+      if (!user) {
+        const insert = db.prepare(`
+          INSERT INTO users (name, email, phone, password_hash, role)
+          VALUES (?, ?, ?, ?, ?)
+        `);
+        const dummyHash = bcrypt.hashSync(crypto.randomBytes(16).toString('hex'), 10);
+        const result = insert.run(
+          decoded.name || cleanEmail.split('@')[0],
+          cleanEmail,
+          decoded.phone_number || '',
+          dummyHash,
+          isSuperAdmin ? 'admin' : 'customer'
+        );
+        user = {
+          id: Number(result.lastInsertRowid),
+          name: decoded.name || cleanEmail.split('@')[0],
+          email: cleanEmail,
+          phone: decoded.phone_number || '',
+          role: isSuperAdmin ? 'admin' : 'customer'
+        };
+      } else if (isSuperAdmin && user.role !== 'admin') {
+        db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(user.id);
+        user.role = 'admin';
+      }
+
+      const sessionUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        role: user.role
+      };
+
+      sessionTokenService.issueSessionCookie(res, sessionUser, req);
+
+      return res.json({
+        success: true,
+        message: 'Session established securely with HttpOnly cookie.',
+        user: sessionUser
+      });
+    }
+
+    // 2. Fallback email/password if sent
+    if (email && password) {
+      const user = db.prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?)').get(email.trim());
+      if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials.' });
+      }
+      const sessionUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        role: user.role
+      };
+      sessionTokenService.issueSessionCookie(res, sessionUser, req);
+      return res.json({
+        success: true,
+        message: 'Session established securely with HttpOnly cookie.',
+        user: sessionUser
+      });
+    }
+
+    return res.status(400).json({ success: false, message: 'Authentication credential required.' });
+  } catch (err) {
+    console.error('Session login error:', err.message);
+    res.status(500).json({ success: false, message: 'Failed to establish session.' });
+  }
+});
+
 // Logout
 router.post('/logout', (req, res) => {
   const currentAdmin = (req.session && req.session.user && req.session.user.role === 'admin') ? req.session.user : null;
+  const token = req.cookies?.[sessionTokenService.SESSION_COOKIE_NAME] || req.session?.sessionToken;
+
+  sessionTokenService.clearSessionCookie(res, token, req);
 
   req.session.destroy((err) => {
     if (err) {

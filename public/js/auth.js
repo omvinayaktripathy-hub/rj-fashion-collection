@@ -222,6 +222,11 @@ function mapAuthErrorCode(code, fallbackMessage) {
 // Persist user state to dual keys & dispatch global update events
 // ─────────────────────────────────────────────────────────────
 function commitUserSession(userObj, isNew = false) {
+  // Purge any tokens from localStorage and sessionStorage for strict security compliance
+  ['token', 'session_token', 'auth_token', 'id_token', 'idToken', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
+    try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (_) {}
+  });
+
   const email = (userObj.email || '').toLowerCase();
   const isOwner = email === 'omvinayakwork@gmail.com';
   const displayName = userObj.displayName || userObj.name || (email ? email.split('@')[0] : 'Patron');
@@ -321,6 +326,18 @@ async function handleGoogleSignIn() {
         }
       } catch (_) {}
 
+      // Establish HttpOnly session token cookie on the backend
+      try {
+        const idToken = await user.getIdToken();
+        if (idToken) {
+          await fetch(`${API_BASE}/auth/session-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken })
+          });
+        }
+      } catch (_) {}
+
       commitUserSession(user, false);
       return;
     }
@@ -392,6 +409,15 @@ async function handleCustomerLogin(e) {
   try {
     const userRecord = await restFirebaseSignIn(email, password);
     if (userRecord && userRecord.email) {
+      if (userRecord.idToken) {
+        try {
+          await fetch(`${API_BASE}/auth/session-login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: userRecord.idToken })
+          });
+        } catch (_) {}
+      }
       commitUserSession(userRecord, false);
       return false;
     }

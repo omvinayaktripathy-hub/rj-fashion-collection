@@ -111,6 +111,32 @@ function showToast(message, type = 'info') {
 let currentUser = null;
 
 async function checkAuth() {
+  // Purge any tokens from localStorage and sessionStorage for strict security compliance
+  ['token', 'session_token', 'auth_token', 'id_token', 'idToken', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
+    try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (_) {}
+  });
+
+  // 1. Authoritative check: HttpOnly Cookie session from server
+  try {
+    const res = await fetch(`${API_BASE}/me`);
+    const data = await res.json();
+    if (data.success && data.user) {
+      currentUser = data.user;
+      renderAuthNav(data.user);
+      return;
+    } else if (data.success && data.user === null) {
+      // Server confirmed no active session: clear local cached user
+      currentUser = null;
+      try {
+        localStorage.removeItem('rjfc_user');
+        localStorage.removeItem('rj_user');
+      } catch (_) {}
+      renderAuthNav(null);
+      return;
+    }
+  } catch (err) {}
+
+  // 2. Fallback for static hosting without backend server
   const local = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
   if (local) {
     try {
@@ -119,20 +145,7 @@ async function checkAuth() {
       return;
     } catch (_) {}
   }
-
-  try {
-    const res = await fetch(`${API_BASE}/me`);
-    const data = await res.json();
-    if (data.success && data.user) {
-      currentUser = data.user;
-      renderAuthNav(data.user);
-    } else {
-      currentUser = null;
-      renderAuthNav(null);
-    }
-  } catch (err) {
-    renderAuthNav(null);
-  }
+  renderAuthNav(null);
 }
 
 function renderAuthNav(user) {

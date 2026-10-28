@@ -50,6 +50,7 @@ async function main() {
       'test-security-suite.js',
       'scripts/test-rbac-idor.js',
       'test-admin-auth-2fa.js',
+      'test-session-httponly-cookie.js',
       'scripts/test-firebase-rules.js',
       'test-tryon-suite.js'
     ];
@@ -58,7 +59,7 @@ async function main() {
       await runCommand('node', [test]);
     }
 
-    console.log('\n🎉 ALL 9 TEST SUITES PASSED 100%!');
+    console.log('\n🎉 ALL 10 TEST SUITES PASSED 100%!');
   } finally {
     console.log('\nShutting down test server...');
     server.kill();

@@ -264,6 +264,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       joinedDate: rawUser.joinedDate || new Date().toISOString()
     };
 
+    // Purge any tokens from localStorage and sessionStorage for strict security compliance
+    ['token', 'session_token', 'auth_token', 'id_token', 'idToken', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
+      try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (_) {}
+    });
+
     // 1. Persist to dual local storage keys for absolute cross-system compatibility
     try {
       localStorage.setItem('rj_user', JSON.stringify(normalizedUser));

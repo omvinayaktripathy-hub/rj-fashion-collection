@@ -1,11 +1,25 @@
 const { verifyFirebaseToken } = require('../services/firebase');
+const sessionTokenService = require('../services/sessionTokenService');
 
 async function requireAuth(req, res, next) {
+  // 1. Existing verified session
   if (req.session && req.session.user) {
     return next();
   }
 
-  // Firebase Admin ID token authentication support
+  // 2. HttpOnly Cookie Session Token validation fallback
+  const sessionCookie = req.cookies?.[sessionTokenService.SESSION_COOKIE_NAME];
+  if (sessionCookie) {
+    const user = sessionTokenService.validateSessionToken(sessionCookie);
+    if (user) {
+      if (!req.session) req.session = {};
+      req.session.user = user;
+      req.session.sessionToken = sessionCookie;
+      return next();
+    }
+  }
+
+  // 3. Firebase Admin ID token authentication support (Bearer token)
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.slice(7).trim();
