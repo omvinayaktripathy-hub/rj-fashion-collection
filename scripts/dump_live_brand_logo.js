@@ -4,12 +4,9 @@ const os = require('os');
 const path = require('path');
 
 async function test() {
-  const server = spawn('node', ['server.js'], { stdio: 'ignore' });
-  await new Promise(r => setTimeout(r, 1200));
-
   const edge = spawn('C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', [
     '--headless=new',
-    '--remote-debugging-port=9666',
+    '--remote-debugging-port=9888',
     '--no-first-run',
     '--no-default-browser-check',
     '--user-data-dir=' + path.join(os.tmpdir(), 'edge_test_' + Date.now())
@@ -17,7 +14,7 @@ async function test() {
 
   try {
     await new Promise(r => setTimeout(r, 1200));
-    const listRes = await new Promise((r) => http.get('http://127.0.0.1:9666/json', res => {
+    const listRes = await new Promise((r) => http.get('http://127.0.0.1:9888/json', res => {
       let d = ''; res.on('data', c => d += c); res.on('end', () => r(JSON.parse(d)));
     }));
     const pageTarget = listRes.find(t => t.type === 'page') || listRes[0];
@@ -35,60 +32,54 @@ async function test() {
       ws.send(JSON.stringify({ id: cur, method: m, params: p }));
     });
 
-    await send('Page.navigate', { url: 'http://localhost:3000/' });
-    await new Promise(r => setTimeout(r, 3000));
+    await send('Page.navigate', { url: 'https://rj-fashion-collection.web.app/?nocache=' + Date.now() });
+    await new Promise(r => setTimeout(r, 3500));
 
-    const imgDetails = await send('Runtime.evaluate', {
-      expression: `
-        Array.from(document.querySelectorAll('.brand-logo img')).map(img => ({
-          src: img.src,
-          className: img.className,
-          complete: img.complete,
-          naturalWidth: img.naturalWidth,
-          naturalHeight: img.naturalHeight,
-          width: img.width,
-          height: img.height,
-          computedDisplay: window.getComputedStyle(img).display
-        }))
-      `,
-      returnByValue: true
-    });
-
-    console.log('LOGO IMAGES IN BROWSER:', JSON.stringify(imgDetails.result.value, null, 2));
-
-    // Also test light theme
-    await send('Runtime.evaluate', {
-      expression: `
-        document.documentElement.classList.remove('dark-theme');
-        document.documentElement.removeAttribute('data-theme');
-      `
-    });
+    // Switch to light theme via app.js
+    await send('Runtime.evaluate', { expression: "applyTheme('light')" });
+    await new Promise(r => setTimeout(r, 500));
 
     const lightCheck = await send('Runtime.evaluate', {
-      expression: `
-        (() => {
-          const lightImg = document.querySelector('.logo-img-light');
-          return {
-            src: lightImg.src,
-            naturalWidth: lightImg.naturalWidth,
-            naturalHeight: lightImg.naturalHeight,
-            complete: lightImg.complete,
-            display: window.getComputedStyle(lightImg).display
-          };
-        })()
-      `,
+      expression: `(() => {
+        const l = document.querySelector('.logo-img-light');
+        const d = document.querySelector('.logo-img-dark');
+        return {
+          lightSrc: l ? l.src : null,
+          lightDisplay: l ? window.getComputedStyle(l).display : null,
+          lightNaturalWidth: l ? l.naturalWidth : null,
+          lightComplete: l ? l.complete : null,
+          darkDisplay: d ? window.getComputedStyle(d).display : null
+        };
+      })()`,
       returnByValue: true
     });
-    console.log('LIGHT MODE LOGO CHECK:', JSON.stringify(lightCheck.result.value, null, 2));
+    console.log('LIVE LIGHT THEME RESULT:', JSON.stringify(lightCheck.result.value, null, 2));
+
+    // Switch to dark theme via app.js
+    await send('Runtime.evaluate', { expression: "applyTheme('dark')" });
+    await new Promise(r => setTimeout(r, 500));
+
+    const darkCheck = await send('Runtime.evaluate', {
+      expression: `(() => {
+        const l = document.querySelector('.logo-img-light');
+        const d = document.querySelector('.logo-img-dark');
+        return {
+          darkSrc: d ? d.src : null,
+          darkDisplay: d ? window.getComputedStyle(d).display : null,
+          darkNaturalWidth: d ? d.naturalWidth : null,
+          darkComplete: d ? d.complete : null,
+          lightDisplay: l ? window.getComputedStyle(l).display : null
+        };
+      })()`,
+      returnByValue: true
+    });
+    console.log('LIVE DARK THEME RESULT:', JSON.stringify(darkCheck.result.value, null, 2));
 
     ws.close();
     edge.kill();
-    server.kill();
   } catch (err) {
     console.error(err);
     edge.kill();
-    server.kill();
   }
 }
-
 test();
