@@ -175,7 +175,17 @@ service cloud.firestore {
     }
 
     // ===================================================================
-    // 10. DEFAULT SECURITY STANCE: DENY ALL BY DEFAULT
+    // 10. REALTIME ADMIN QR SCAN CHALLENGES
+    // Ephemeral challenge sessions for on-demand mobile scan authorization
+    // ===================================================================
+
+    match /admin_scans/{scanId} {
+      allow create, read, update: if true;
+      allow delete: if isSuperAdmin();
+    }
+
+    // ===================================================================
+    // 11. DEFAULT SECURITY STANCE: DENY ALL BY DEFAULT
     // Any unrecognized path or collection is explicitly denied
     // ===================================================================
 
