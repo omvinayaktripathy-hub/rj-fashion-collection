@@ -154,6 +154,14 @@ function hideAdminLoginScreen() {
 let twoFactorCountdownTimer = null;
 window._adminPendingEmail = 'omvinayakwork@gmail.com';
 
+
+function toggleQrCodeModal() {
+  const modal = document.getElementById('admin-qr-modal');
+  if (!modal) return;
+  modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+}
+window.toggleQrCodeModal = toggleQrCodeModal;
+
 function toggleAdminPasswordVisibility() {
   const input = document.getElementById('admin-password');
   const icon = document.getElementById('pass-eye-icon');

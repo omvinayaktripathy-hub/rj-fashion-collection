@@ -492,6 +492,36 @@
             </button>
           </div>
 
+          <div style="text-align: center; margin-top: 14px;">
+            <button type="button" onclick="toggleQrCodeModal()" class="btn-link-gold" style="background: rgba(212, 175, 55, 0.08); border: 1px dashed rgba(212, 175, 55, 0.45); border-radius: 6px; padding: 7px 14px; color: #D4AF37; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Scan QR Code for Google Authenticator</span>
+            </button>
+          </div>
+
+          <!-- QR Code Scanner Modal / Drawer -->
+          <div id="admin-qr-modal" style="display: none; margin-top: 14px; padding: 16px; background: #070e1e; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; text-align: center;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">
+              Google Authenticator Setup
+            </div>
+            <p style="font-size: 0.76rem; color: #cbd5e1; margin: 0 0 12px; line-height: 1.4;">
+              Scan with your phone camera in <strong>Google Authenticator</strong> (or Authy / 1Password):
+            </p>
+            <div style="background: #ffffff; padding: 12px; border-radius: 8px; display: inline-block; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+              <img src="/images/google-authenticator-qr.png" alt="Google Authenticator QR Code" width="180" height="180" style="display: block; object-fit: contain;">
+            </div>
+            <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; text-align: left;">
+              <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 2px;">Can't scan? Enter Key Manually:</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                <code style="font-family: monospace; font-size: 0.78rem; color: #D4AF37; word-break: break-all;">RJFC77ADMIN22OMVINAYAK33ROYAL444</code>
+                <button type="button" onclick="navigator.clipboard.writeText('RJFC77ADMIN22OMVINAYAK33ROYAL444'); showToast('Secret key copied! 📋', 'success');" style="background: #334155; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; flex-shrink: 0;">Copy</button>
+              </div>
+            </div>
+            <button type="button" onclick="toggleQrCodeModal()" style="background: none; border: none; color: #94a3b8; font-size: 0.76rem; cursor: pointer; text-decoration: underline;">
+              Hide QR Code
+            </button>
+          </div>
+
           <!-- Emergency Master Recovery Key Drawer -->
           <div id="admin-emergency-key-drawer" style="display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid #334155;">
             <label style="color: #cbd5e1; font-size: 0.78rem; display: block; margin-bottom: 6px;">Master Recovery Key</label>
@@ -1887,7 +1917,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
   <script src="/firebase-config.js?v=20261025-01"></script>
   <script src="/js/app.js?v=20261025-01"></script>
-  <script src="/js/admin.js?v=20261028-sequential-google-2fa"></script>
+  <script src="/js/admin.js?v=20261029-qr-scanner-2fa"></script>
   <!-- CREATE PROMO CODE MODAL -->
   <div id="promo-modal" class="modal-backdrop">
     <div class="modal-window" style="max-width: 500px;">

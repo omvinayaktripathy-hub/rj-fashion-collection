@@ -277,9 +277,9 @@ router.post('/admin-login', async (req, res) => {
       });
     }
 
-    // 5. Check if 2-Step Verification is required (Portal login or user.mfa_enabled)
+    // 5. Check if 2-Step Verification is required (Portal login or require2FA)
     const isPortal = req.headers['x-admin-portal'] === 'true' || require2FA === true;
-    if (isPortal || user.mfa_enabled) {
+    if (isPortal) {
       const challenge = await adminSecurity.initiate2FaChallenge(req, user);
       if (typeof db.logAdminAction === 'function') {
         db.logAdminAction({

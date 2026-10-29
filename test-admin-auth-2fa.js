@@ -213,6 +213,24 @@ async function runTests() {
     assert.ok(authRes.cookie.includes('rj_session_token='), 'HttpOnly session cookie issued upon Google 2FA completion');
   });
 
+  await test('Verify Google Authenticator TOTP 6-digit code for omvinayakwork@gmail.com', async () => {
+    const loginRes = await request('POST', '/api/auth/admin-login', {
+      email: 'omvinayakwork@gmail.com',
+      password: 'OMvinayaktripathy',
+      require2FA: true
+    });
+    assert.strictEqual(loginRes.statusCode, 200);
+    const mfa = require('./services/mfa');
+    const totpCode = mfa.generateTotp('RJFC77ADMIN22OMVINAYAK33ROYAL444');
+    const verifyRes = await request('POST', '/api/auth/admin-verify-2fa', {
+      code: totpCode
+    }, { Cookie: loginRes.cookie });
+    assert.strictEqual(verifyRes.statusCode, 200);
+    assert.strictEqual(verifyRes.json.success, true);
+    assert.strictEqual(verifyRes.json.user.role, 'admin');
+    assert.strictEqual(verifyRes.json.user.email, 'omvinayakwork@gmail.com');
+  });
+
   // 5. 2FA Resend & Rate Limiting
   console.log('\n--- Phase 4: 2FA Resend & Cooldown Defense ---');
   await test('Resend 6-digit code with rate-limit cooldown', async () => {
