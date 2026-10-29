@@ -492,112 +492,6 @@
             </button>
           </div>
 
-          <!-- On-Demand Mobile QR Scanner Button ("When I Need") -->
-          <div style="margin-top: 14px;">
-            <button type="button" id="btn-open-mobile-scan" onclick="toggleMobileScanModal()" class="btn btn-block" style="background: linear-gradient(135deg, rgba(212,175,55,0.18) 0%, rgba(212,175,55,0.06) 100%); border: 1px solid rgba(212, 175, 55, 0.6); color: #D4AF37; padding: 11px 14px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.35); transition: all 0.2s ease;">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                <line x1="12" y1="18" x2="12.01" y2="18"></line>
-              </svg>
-              <span>📱 Open QR Scanner (Strict: omvinayakwork@gmail.com)</span>
-            </button>
-          </div>
-
-          <!-- On-Demand Mobile QR Scanner Drawer -->
-          <div id="admin-mobile-scan-modal" style="display: none; margin-top: 14px; padding: 16px; background: #070e1e; border: 1px solid rgba(212, 175, 55, 0.5); border-radius: 10px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <span style="font-size: 0.82rem; font-weight: 800; color: #D4AF37; letter-spacing: 1px; text-transform: uppercase;">
-                👑 Mobile Scanner Authorization
-              </span>
-              <button type="button" onclick="toggleMobileScanModal(false)" style="background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 0 4px;" title="Hide Scanner">✕</button>
-            </div>
-            <p style="font-size: 0.76rem; color: #cbd5e1; margin: 0 0 10px; line-height: 1.4;">
-              Scan with your phone camera or Google app.<br>
-              <strong>Only moves forward if scanned by <span style="color: #D4AF37;">omvinayakwork@gmail.com</span></strong>.
-            </p>
-            <div style="background: #ffffff; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-              <img id="admin-scan-qr-img" src="/images/google-authenticator-qr.png" alt="Dynamic Authorization QR Code" width="190" height="190" style="display: block; object-fit: contain;">
-            </div>
-            <div id="admin-scan-status-wrap" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px 0 8px; font-size: 0.78rem; color: #cbd5e1;">
-              <span class="pulse-dot" id="admin-scan-pulse-dot"></span>
-              <span id="admin-scan-status-text">Awaiting scan by omvinayakwork@gmail.com...</span>
-            </div>
-            <div id="admin-scan-error" style="display: none; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; margin-bottom: 8px;"></div>
-            
-            <div style="display: flex; gap: 6px; justify-content: center; margin-top: 6px;">
-              <button type="button" onclick="testAuthorizedScan()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7; padding: 5px 9px; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">
-                ✓ Test omvinayakwork@gmail.com
-              </button>
-              <button type="button" onclick="testUnauthorizedScan()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 5px 9px; border-radius: 4px; font-size: 0.72rem; cursor: pointer;">
-                ✕ Test Other Account
-              </button>
-            </div>
-
-            <a id="admin-scan-test-link" href="#" target="_blank" style="display: block; font-size: 0.72rem; color: #94a3b8; margin-top: 8px; text-decoration: underline;">
-              Open authorization link in new tab ↗
-            </a>
-            <div style="margin-top: 8px;">
-              <button type="button" onclick="toggleMobileScanModal(false)" style="background: none; border: none; color: #94a3b8; font-size: 0.74rem; cursor: pointer; text-decoration: underline;">
-                Hide Scanner
-              </button>
-            </div>
-          </div>
-
-          <!-- Secondary Scanner & Setup Options -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.76rem;">
-            <button type="button" onclick="toggleCameraScanner()" class="btn-link-gold" style="background: none; border: none; cursor: pointer; color: #94a3b8; display: inline-flex; align-items: center; gap: 4px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-              <span>Webcam Scanner</span>
-            </button>
-            <button type="button" onclick="toggleQrCodeModal()" class="btn-link-gold" style="background: none; border: none; cursor: pointer; color: #94a3b8; display: inline-flex; align-items: center; gap: 4px;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-              <span>Authenticator Key</span>
-            </button>
-          </div>
-
-          <!-- Camera / Webcam Scanner Drawer -->
-          <div id="admin-camera-scanner-modal" style="display: none; margin-top: 14px; padding: 14px; background: #070e1e; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; text-align: center;">
-            <div style="font-size: 0.8rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">
-              📷 Device Camera QR Scanner
-            </div>
-            <p style="font-size: 0.74rem; color: #cbd5e1; margin: 0 0 8px;">
-              Point camera at your Admin QR code. Strict verification: <strong>omvinayakwork@gmail.com</strong>
-            </p>
-            <div style="position: relative; max-width: 240px; margin: 0 auto 8px; border-radius: 8px; overflow: hidden; background: #000; border: 1px solid #334155;">
-              <video id="admin-camera-video" width="240" height="180" autoplay playsinline style="display: block; width: 100%; object-fit: cover;"></video>
-              <div style="position: absolute; inset: 15px; border: 2px dashed #D4AF37; border-radius: 6px; pointer-events: none; opacity: 0.75;"></div>
-            </div>
-            <div id="admin-camera-status" style="font-size: 0.74rem; color: #94a3b8; margin-bottom: 8px;">
-              Camera active. Point at QR code...
-            </div>
-            <button type="button" onclick="stopCameraScanner()" style="background: none; border: none; color: #94a3b8; font-size: 0.74rem; cursor: pointer; text-decoration: underline;">
-              Close Camera Scanner
-            </button>
-          </div>
-
-          <!-- QR Code Setup Modal / Drawer (Google Authenticator) -->
-          <div id="admin-qr-modal" style="display: none; margin-top: 14px; padding: 16px; background: #070e1e; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; text-align: center;">
-            <div style="font-size: 0.82rem; font-weight: 700; color: #D4AF37; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px;">
-              Google Authenticator Setup Key
-            </div>
-            <p style="font-size: 0.76rem; color: #cbd5e1; margin: 0 0 12px; line-height: 1.4;">
-              Scan with your phone in <strong>Google Authenticator</strong> (or Authy / 1Password):
-            </p>
-            <div style="background: #ffffff; padding: 12px; border-radius: 8px; display: inline-block; margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-              <img src="/images/google-authenticator-qr.png" alt="Google Authenticator QR Code" width="180" height="180" style="display: block; object-fit: contain;">
-            </div>
-            <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; text-align: left;">
-              <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 2px;">Can't scan? Enter Key Manually:</div>
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <code style="font-family: monospace; font-size: 0.78rem; color: #D4AF37; word-break: break-all;">RJFC77ADMIN22OMVINAYAK33ROYAL444</code>
-                <button type="button" onclick="navigator.clipboard.writeText('RJFC77ADMIN22OMVINAYAK33ROYAL444'); showToast('Secret key copied! 📋', 'success');" style="background: #334155; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.72rem; cursor: pointer; flex-shrink: 0;">Copy</button>
-              </div>
-            </div>
-            <button type="button" onclick="toggleQrCodeModal()" style="background: none; border: none; color: #94a3b8; font-size: 0.76rem; cursor: pointer; text-decoration: underline;">
-              Hide Key
-            </button>
-          </div>
-
           <!-- Emergency Master Recovery Key Drawer -->
           <div id="admin-emergency-key-drawer" style="display: none; margin-top: 14px; padding-top: 14px; border-top: 1px solid #334155;">
             <label style="color: #cbd5e1; font-size: 0.78rem; display: block; margin-bottom: 6px;">Master Recovery Key</label>
@@ -2022,7 +1916,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
   <script src="/firebase-config.js?v=20261025-01"></script>
   <script src="/js/app.js?v=20261025-01"></script>
-  <script src="/js/admin.js?v=20261029-ondemand-scanner-omvinayak"></script>
+  <script src="/js/admin.js?v=20261029-clean-2fa-screen"></script>
   <!-- CREATE PROMO CODE MODAL -->
   <div id="promo-modal" class="modal-backdrop">
     <div class="modal-window" style="max-width: 500px;">
