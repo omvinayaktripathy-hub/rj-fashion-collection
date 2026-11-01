@@ -462,6 +462,7 @@ app.get('/admin', (req, res) => {
 });
 
 // HTML page routes aliases (clean URLs)
+app.get(['/home', '/-home', '/index'], (req, res) => res.sendFile('index.html', { root: publicDir }));
 app.get('/shop', (req, res) => res.sendFile('shop.html', { root: publicDir }));
 app.get('/cart', (req, res) => res.sendFile('cart.html', { root: publicDir }));
 app.get('/delivery', (req, res) => res.sendFile('delivery.html', { root: publicDir }));

@@ -487,21 +487,42 @@ html, body {
   }
 
   .brand-logo {
+    min-width: 0;
     max-width: calc(100% - 130px);
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-logo-mark {
+    flex-shrink: 0;
+  }
+
+  .brand-logo-text {
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .brand-logo .logo-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
   }
 
   .brand-logo .logo-subtitle {
-    font-size: 0.58rem;
-    letter-spacing: 1.5px;
+    font-size: 0.55rem;
+    letter-spacing: 1.2px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
   }
 
   /* Header Actions on Mobile: Compact & Clean */
@@ -1482,14 +1503,22 @@ body.rj-scroll-locked {
 /* -------------------------------------------------------------
    2. TOUCH TARGETS (WCAG 2.5.5 / APPLE HIG >= 44x44px)
    ------------------------------------------------------------- */
-.rj-hamburger-btn {
-  min-width: 44px !important;
-  min-height: 44px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  touch-action: manipulation;
-  -webkit-touch-callout: none;
+@media (max-width: 991px) {
+  .rj-hamburger-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+}
+
+@media (min-width: 992px) {
+  .rj-hamburger-btn {
+    display: none !important;
+  }
 }
 
 .rj-drawer-close {
