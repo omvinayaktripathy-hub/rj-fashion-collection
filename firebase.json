@@ -9,6 +9,13 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
+      { "source": "/api/csrf-token", "destination": "/api/csrf-token.json" },
+      { "source": "/api/me", "destination": "/api/me.json" },
+      { "source": "/api/campaign", "destination": "/api/campaign.json" },
+      { "source": "/api/cart", "destination": "/api/cart.json" },
+      { "source": "/api/wishlist", "destination": "/api/wishlist.json" },
+      { "source": "/api/products", "destination": "/data/products.json" },
+      { "source": "/api/categories", "destination": "/data/categories.json" },
       { "source": "/home", "destination": "/index.html" },
       { "source": "/-home", "destination": "/index.html" },
       { "source": "/delivery", "destination": "/delivery.html" },
@@ -45,6 +52,13 @@
       {
         "source": "**/*.@(js|css)",
         "headers": [
+          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        ]
+      },
+      {
+        "source": "**/*.json",
+        "headers": [
+          { "key": "Content-Type", "value": "application/json; charset=utf-8" },
           { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
         ]
       },

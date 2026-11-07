@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    window.handleImgError = function(img) {
+      if (!img) return;
+      img.onerror = null;
+      img.src = '/images/rj-placeholder.svg';
+    };
+  </script>
   <!-- Favicons, Apple Touch Icon & PWA Setup -->
   <link rel="icon" type="image/svg+xml" href="/images/rj-favicon.svg">
   <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg">
@@ -154,8 +161,8 @@
       <!-- Composite Brand Logo Lockup -->
       <a href="/" class="brand-logo" aria-label="RJ Fashion Collection - Haute Couture &amp; Bridal">
         <div class="brand-logo-mark">
-          <img src="/images/rj-logo-monogram.png" alt="RJ Monogram" class="logo-img-light" width="44" height="44" loading="eager" onerror="this.onerror=null; this.src='/images/rj-favicon.svg';">
-          <img src="/images/rj-logo-monogram-dark.png" alt="RJ Monogram (Dark)" class="logo-img-dark" width="44" height="44" loading="eager" onerror="this.onerror=null; this.src='/images/rj-favicon.svg';">
+          <img src="/images/rj-logo-monogram.png" alt="RJ Monogram" class="logo-img-light" width="44" height="44" loading="eager" onerror="handleImgError(this)">
+          <img src="/images/rj-logo-monogram-dark.png" alt="RJ Monogram (Dark)" class="logo-img-dark" width="44" height="44" loading="eager" onerror="handleImgError(this)">
         </div>
         <div class="brand-logo-text">
           <span class="logo-title">RJ Fashion Collection</span>
@@ -246,7 +253,7 @@
                 <div class="mega-menu-col">
                   <div class="mega-promo-box">
                     <span class="mega-promo-badge">Little Royals</span>
-                    <img src="https://images.unsplash.com/photo-1621786030685-2c8c4a4e1017?auto=format&fit=crop&w=200&q=80" alt="Girls Edit" class="mega-promo-img" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+                    <img src="https://images.unsplash.com/photo-1621786030685-2c8c4a4e1017?auto=format&fit=crop&w=200&q=80" alt="Girls Edit" class="mega-promo-img" onerror="handleImgError(this)">
                     <h4 class="mega-promo-title">Girls Festive Coutures</h4>
                     <p class="mega-promo-sub">Intricate zardozi and gentle fabrics curated for little celebrations.</p>
                     <a href="/shop.html?category=kids-ethnic&gender=girls" class="mega-promo-btn">Shop Girls</a>
@@ -286,7 +293,7 @@
                 <div class="mega-menu-col">
                   <div class="mega-promo-box">
                     <span class="mega-promo-badge">The Atelier</span>
-                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80" alt="Women Edit" class="mega-promo-img" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+                    <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80" alt="Women Edit" class="mega-promo-img" onerror="handleImgError(this)">
                     <h4 class="mega-promo-title">Women’s Signature Edit</h4>
                     <p class="mega-promo-sub">Grand bridal silhouettes and pure zari weaves for royal celebrations.</p>
                     <a href="/shop.html?department=women" class="mega-promo-btn">Explore Women</a>
@@ -326,7 +333,7 @@
                 <div class="mega-menu-col">
                   <div class="mega-promo-box">
                     <span class="mega-promo-badge">Young Royals</span>
-                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80" alt="Boy Edit" class="mega-promo-img" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80" alt="Boy Edit" class="mega-promo-img" onerror="handleImgError(this)">
                     <h4 class="mega-promo-title">Boys Festive Regalia</h4>
                     <p class="mega-promo-sub">Bespoke tailoring and breathable linens for young celebrations.</p>
                     <a href="/shop.html?category=kids-ethnic&gender=boys" class="mega-promo-btn">Shop Boy</a>
@@ -366,7 +373,7 @@
                 <div class="mega-menu-col">
                   <div class="mega-promo-box">
                     <span class="mega-promo-badge">Bespoke Men</span>
-                    <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=200&q=80" alt="Man Edit" class="mega-promo-img" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+                    <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=200&q=80" alt="Man Edit" class="mega-promo-img" onerror="handleImgError(this)">
                     <h4 class="mega-promo-title">Men’s Festive Atelier</h4>
                     <p class="mega-promo-sub">Regal cuts, heirloom embroideries, and structured bridal fits.</p>
                     <a href="/shop.html?category=men-ethnic" class="mega-promo-btn">Explore Man</a>
@@ -406,7 +413,7 @@
                 <div class="mega-menu-col">
                   <div class="mega-promo-box">
                     <span class="mega-promo-badge">The Vault</span>
-                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80" alt="Jewellery Edit" class="mega-promo-img" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+                    <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80" alt="Jewellery Edit" class="mega-promo-img" onerror="handleImgError(this)">
                     <h4 class="mega-promo-title">Royal Jewellery Vault</h4>
                     <p class="mega-promo-sub">Artisanal antique finish adornments for celebrations.</p>
                     <a href="/shop.html?category=jewelry" class="mega-promo-btn">Explore Jewellery</a>
@@ -485,7 +492,7 @@
                    alt="Featured Luxury Collection Model in Banarasi Zari Saree"
                    class="hero-model-inner-img"
                    id="hero-main-img"
-                   loading="eager" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+                   loading="eager" onerror="handleImgError(this)">
               <div class="hero-img-bottom-shade" aria-hidden="true"></div>
             </div>
 
@@ -494,7 +501,7 @@
               <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=200&q=80"
                    alt="Royal Kundan Vault"
                    class="float-card-thumb"
-                   id="hero-float-thumb" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+                   id="hero-float-thumb" onerror="handleImgError(this)">
               <div class="float-card-meta">
                 <h4 class="float-card-title" id="hero-float-title">The Signature Vault</h4>
                 <span class="float-card-tag">Fine Artisanal Accents</span>
@@ -572,7 +579,7 @@
         <!-- 1. Women's Fashion -->
         <a href="/shop.html?category=sarees" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80" alt="Women's Fashion" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80" alt="Women's Fashion" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -594,7 +601,7 @@
         <!-- 2. Men's Fashion -->
         <a href="/shop.html?category=mens-fashion" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80" alt="Men's Fashion" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80" alt="Men's Fashion" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -616,7 +623,7 @@
         <!-- 3. Kids & Children -->
         <a href="/shop.html?category=kids-fashion" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80" alt="Kids & Children" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=800&q=80" alt="Kids & Children" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -638,7 +645,7 @@
         <!-- 4. Bags & Wallets -->
         <a href="/shop.html?category=bags" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80" alt="Bags & Wallets" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80" alt="Bags & Wallets" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -660,7 +667,7 @@
         <!-- 5. Sunglasses & Eyewear -->
         <a href="/shop.html?category=eyewear" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80" alt="Sunglasses & Eyewear" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80" alt="Sunglasses & Eyewear" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -682,7 +689,7 @@
         <!-- 6. Fashion Jewelry -->
         <a href="/shop.html?category=jewelry" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80" alt="Fashion Jewelry" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80" alt="Fashion Jewelry" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -704,7 +711,7 @@
         <!-- 7. Curated Gifts & Hampers -->
         <a href="/shop.html?category=gifts" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80" alt="Curated Gifts & Hampers" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80" alt="Curated Gifts & Hampers" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -726,7 +733,7 @@
         <!-- 8. Men's Innerwear & Loungewear -->
         <a href="/shop.html?category=mens-loungewear" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80" alt="Men's Innerwear & Loungewear" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=80" alt="Men's Innerwear & Loungewear" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -748,7 +755,7 @@
         <!-- 9. Women's & Girls' Lingerie & Sleepwear -->
         <a href="/shop.html?category=lingerie" class="dept-card">
           <div class="dept-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80" alt="Women's & Girls' Lingerie & Sleepwear" class="dept-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80" alt="Women's & Girls' Lingerie & Sleepwear" class="dept-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="dept-card-overlay"></div>
           <div class="dept-card-top">
@@ -792,7 +799,7 @@
       <div class="category-editorial-grid" id="homepage-category-grid">
         <a href="/shop.html?category=sarees" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80" alt="Sarees" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=300&q=80" alt="Sarees" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">Sarees</span>
           <span class="category-editorial-sub">Silk &amp; Banarasi</span>
@@ -800,7 +807,7 @@
 
         <a href="/shop.html?category=jewelry" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=300&q=80" alt="Jewelry" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=300&q=80" alt="Jewelry" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">Jewelry</span>
           <span class="category-editorial-sub">Kundan &amp; Bridal</span>
@@ -808,7 +815,7 @@
 
         <a href="/shop.html?category=ethnic-wear" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=300&q=80" alt="Ethnic Wear" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=300&q=80" alt="Ethnic Wear" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">Ethnic Wear</span>
           <span class="category-editorial-sub">Shararas &amp; Anarkali</span>
@@ -816,7 +823,7 @@
 
         <a href="/shop.html?category=kurtis" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=300&q=80" alt="Kurtis" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=300&q=80" alt="Kurtis" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">Kurtis</span>
           <span class="category-editorial-sub">Chikankari &amp; Daily</span>
@@ -824,7 +831,7 @@
 
         <a href="/shop.html?category=lehengas" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=300&q=80" alt="Lehengas" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=300&q=80" alt="Lehengas" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">Lehengas</span>
           <span class="category-editorial-sub">Bridal &amp; Party</span>
@@ -832,7 +839,7 @@
 
         <a href="/shop.html?category=dresses" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=300&q=80" alt="Dresses" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=300&q=80" alt="Dresses" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">Dresses</span>
           <span class="category-editorial-sub">Indo-Western</span>
@@ -840,7 +847,7 @@
 
         <a href="/shop.html?category=accessories" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=300&q=80" alt="Bags &amp; Gifts" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=300&q=80" alt="Bags &amp; Gifts" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">Bags &amp; Gifts</span>
           <span class="category-editorial-sub">Potlis &amp; Clutches</span>
@@ -848,7 +855,7 @@
 
         <a href="/shop.html?newArrival=true" class="category-editorial-card">
           <div class="category-circle-thumb">
-            <img src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=300&q=80" alt="New Arrivals" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=300&q=80" alt="New Arrivals" loading="lazy" onerror="handleImgError(this)">
           </div>
           <span class="category-editorial-name">New Arrivals</span>
           <span class="category-editorial-sub">Latest Trends</span>
@@ -870,7 +877,7 @@
     <!-- Seasonal Fashion Collections & Editorial Banners -->
     <section class="editorial-campaign-grid">
       <a href="/shop.html?category=sarees" class="editorial-banner-card">
-        <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=85" alt="Bridal Atelier" class="editorial-banner-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+        <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1000&q=85" alt="Bridal Atelier" class="editorial-banner-img" loading="lazy" onerror="handleImgError(this)">
         <div class="editorial-banner-overlay">
           <span class="editorial-banner-badge">✦ HEIRLOOM EDIT</span>
           <h3 class="editorial-banner-title">The Royal Bridal Atelier</h3>
@@ -880,7 +887,7 @@
       </a>
 
       <a href="/shop.html?category=jewelry" class="editorial-banner-card">
-        <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=1000&q=85" alt="Kundan Vault" class="editorial-banner-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+        <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=1000&q=85" alt="Kundan Vault" class="editorial-banner-img" loading="lazy" onerror="handleImgError(this)">
         <div class="editorial-banner-overlay">
           <span class="editorial-banner-badge">✦ HERITAGE ADORNMENTS</span>
           <h3 class="editorial-banner-title">The Kundan &amp; Polki Vault</h3>
@@ -954,7 +961,7 @@
         <!-- Card 1: Zardozi & Aari Embroidery -->
         <div class="craft-card">
           <div class="craft-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80" alt="Zardozi & Aari Embroidery" class="craft-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80" alt="Zardozi & Aari Embroidery" class="craft-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="craft-card-overlay"></div>
           <div class="craft-card-content">
@@ -967,7 +974,7 @@
         <!-- Card 2: Royal Kundan & Polki Setting -->
         <div class="craft-card">
           <div class="craft-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80" alt="Royal Kundan & Polki Setting" class="craft-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80" alt="Royal Kundan & Polki Setting" class="craft-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="craft-card-overlay"></div>
           <div class="craft-card-content">
@@ -980,7 +987,7 @@
         <!-- Card 3: Artisanal Silk Weaving -->
         <div class="craft-card">
           <div class="craft-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80" alt="Artisanal Silk Weaving" class="craft-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80" alt="Artisanal Silk Weaving" class="craft-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="craft-card-overlay"></div>
           <div class="craft-card-content">
@@ -993,7 +1000,7 @@
         <!-- Card 4: Bespoke Fit & Silhouette -->
         <div class="craft-card">
           <div class="craft-card-img-wrap">
-            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80" alt="Bespoke Tailoring & Fit" class="craft-card-img" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='16' dy='10.5' font-weight='bold' x='50%25' y='50%25' text-anchor='middle'%3ERJ Fashion Collection%3C/text%3E%3C/svg%3E';">
+            <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80" alt="Bespoke Tailoring & Fit" class="craft-card-img" loading="lazy" onerror="handleImgError(this)">
           </div>
           <div class="craft-card-overlay"></div>
           <div class="craft-card-content">
@@ -1015,8 +1022,8 @@
         <div class="footer-brand">
           <div class="footer-brand-logo-lockup" style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
             <div class="brand-logo-mark" style="width: 44px; height: 44px; flex-shrink: 0;">
-              <img src="/images/rj-logo-monogram.png" alt="RJ Monogram" class="logo-img-light" width="44" height="44" loading="lazy" onerror="this.onerror=null; this.src='/images/rj-favicon.svg';">
-              <img src="/images/rj-logo-monogram-dark.png" alt="RJ Monogram (Dark)" class="logo-img-dark" width="44" height="44" loading="lazy" onerror="this.onerror=null; this.src='/images/rj-favicon.svg';">
+              <img src="/images/rj-logo-monogram.png" alt="RJ Monogram" class="logo-img-light" width="44" height="44" loading="lazy" onerror="handleImgError(this)">
+              <img src="/images/rj-logo-monogram-dark.png" alt="RJ Monogram (Dark)" class="logo-img-dark" width="44" height="44" loading="lazy" onerror="handleImgError(this)">
             </div>
             <h3 class="footer-brand-title" style="margin: 0;">RJ FASHION COLLECTION</h3>
           </div>
@@ -1137,8 +1144,8 @@
   <!-- Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-  <script src="/firebase-config.js?v=20261025-01"></script>
-  <script src="/js/app.js?v=20261025-01"></script>
+  <script src="/firebase-config.js?v=20261107-console-fix"></script>
+  <script src="/js/app.js?v=20261107-console-fix"></script>
   <script src="/js/products.js?v=20261025-01"></script>
   <script>
     // Load Homepage Dynamic Products with real-time Firestore synchronization

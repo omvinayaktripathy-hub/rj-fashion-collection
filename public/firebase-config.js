@@ -16,11 +16,11 @@ if (typeof firebase !== 'undefined') {
   try {
     if (!firebase.apps.length) {
       firebase.initializeApp(window.firebaseConfig);
-      console.log('🔥 [Firebase] Client app initialized for rj-fashion-collection');
+      console.debug('🔥 [Firebase] Client app initialized for rj-fashion-collection');
     }
     if (typeof firebase.analytics === 'function') {
       firebase.analytics();
-      console.log('📊 [Firebase] Analytics (G-LL5KRD9639) active');
+      console.debug('📊 [Firebase] Analytics (G-LL5KRD9639) active');
     }
   } catch (err) {
     console.warn('[Firebase] Init notice:', err.message);

@@ -23,6 +23,13 @@ function escapeHtml(str) {
 }
 window.escapeHtml = escapeHtml;
 
+// Universal Image Fallback Handler (Defensive against broken URLs / adblockers)
+window.handleImgError = function(img) {
+  if (!img) return;
+  img.onerror = null;
+  img.src = '/images/rj-placeholder.svg';
+};
+
 // CSRF Token Helper & Fetch Interceptor
 function getCookie(name) {
   const value = `; ${document.cookie}`;
