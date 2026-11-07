@@ -14,6 +14,7 @@
       { "source": "/api/campaign", "destination": "/api/campaign.json" },
       { "source": "/api/cart", "destination": "/api/cart.json" },
       { "source": "/api/wishlist", "destination": "/api/wishlist.json" },
+      { "source": "/api/tryon/settings", "destination": "/api/tryon/settings.json" },
       { "source": "/api/products", "destination": "/data/products.json" },
       { "source": "/api/categories", "destination": "/data/categories.json" },
       { "source": "/home", "destination": "/index.html" },

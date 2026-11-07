@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "enabled": true,
+  "allowed_categories": [
+    "sarees",
+    "kurtis",
+    "dresses",
+    "lehengas",
+    "ethnic-wear"
+  ],
+  "max_upload_size_mb": 8,
+  "retention_hours": 2
+}
