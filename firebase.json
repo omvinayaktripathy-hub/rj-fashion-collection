@@ -145,6 +145,15 @@
         ]
       },
       {
+        "source": "/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
         "source": "/@(login|admin|checkout|delivery|cart|shop|account|orders|categories|faq|sale|size-guide|home|-home)",
         "headers": [
           {
