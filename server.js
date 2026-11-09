@@ -1,3 +1,5 @@
+const { wafMiddleware, getWafMetrics } = require('./middleware/waf');
+const { requireAdmin } = require('./middleware/admin');
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -138,6 +140,21 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Enterprise Web Application Firewall (WAF) Layer-7 Shield
+app.use(wafMiddleware);
+
+// WAF Health & Observability Endpoints
+app.get('/api/waf/status', (req, res) => {
+  res.json({
+    success: true,
+    firewall: 'RJ-WAF/2.0-Active',
+    mode: 'STRICT_BLOCK',
+    protection: ['SQLI', 'XSS', 'RCE', 'LFI_TRAVERSAL', 'BAD_BOTS', 'PROTO_POLLUTION']
+  });
+});
+app.get('/api/admin/waf/metrics', requireAdmin, getWafMetrics);
+
 
 app.use((req, res, next) => {
   if (req.body && typeof req.body === 'object') {
