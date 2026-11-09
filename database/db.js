@@ -346,6 +346,29 @@ function initSchema() {
     db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_payment_intent ON orders (payment_intent_id)`);
   } catch (_) {}
 
+  // Migrations for PhonePe Payment Gateway Integration
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN phonepe_merchant_transaction_id TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN phonepe_transaction_id TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN phonepe_provider_reference_id TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN phonepe_payment_mode TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN phonepe_arn TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN phonepe_response_code TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_phonepe_txn ON orders (phonepe_merchant_transaction_id)`);
+  } catch (_) {}
+
 
   // Migrations for Strict Single-Use Coupon Anti-Abuse (One per Customer & One per IP)
   try {

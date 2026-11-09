@@ -165,8 +165,15 @@ async function initCheckoutPage() {
 
     currentUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
 
-    // Check Stripe return query params
+    // Check PhonePe & Stripe return query params
     const urlParams = new URLSearchParams(window.location.search);
+    const phonepeTxn = urlParams.get('phonepe_txn') || urlParams.get('merchantTransactionId');
+    const phonepeOrderNumber = urlParams.get('order_number');
+
+    if (phonepeTxn && phonepeOrderNumber) {
+      const verified = await handlePhonePeCallback(phonepeOrderNumber, phonepeTxn);
+      if (verified) return;
+    }
     const stripeSessionId = urlParams.get('session_id');
     const stripeOrderNumber = urlParams.get('order_number');
     const stripeCancelled = urlParams.get('cancelled');
@@ -526,6 +533,57 @@ async function executePlaceOrder() {
     notes: notes,
     created_at: new Date().toISOString()
   };
+
+  // PHONEPE PAYMENT GATEWAY FLOW
+  if (paymentMethod === 'PhonePe' || paymentMethod === 'UPI') {
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `
+          <span class="spinner-inline" style="display: inline-block; width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px;"></span>
+          <span>CONNECTING TO PHONEPE...</span>
+        `;
+      }
+      const res = await fetch('/api/payment/phonepe/create-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload)
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.redirectUrl) {
+        if (typeof showToast === 'function') {
+          showToast('Redirecting to PhonePe secure payment gateway...', 'info');
+        }
+        window.location.href = data.redirectUrl;
+        return;
+      } else {
+        if (typeof showToast === 'function') {
+          showToast(data.message || 'Unable to initiate PhonePe payment. Please try another method.', 'error');
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `
+            <span id="confirm-order-btn-label">PAY &amp; COMPLETE ORDER</span>
+            <span style="font-size: 1.1rem; line-height: 1;">➔</span>
+          `;
+        }
+        return;
+      }
+    } catch (err) {
+      console.error('PhonePe initiation error:', err);
+      if (typeof showToast === 'function') {
+        showToast('Connection interrupted. Please try again.', 'error');
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <span id="confirm-order-btn-label">PAY &amp; COMPLETE ORDER</span>
+          <span style="font-size: 1.1rem; line-height: 1;">➔</span>
+        `;
+      }
+      return;
+    }
+  }
 
   // STRIPE CHECKOUT FLOW
   if (paymentMethod === 'Stripe') {

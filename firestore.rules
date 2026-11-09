@@ -51,21 +51,46 @@ service cloud.firestore {
 
     match /orders/{orderId} {
       // Authenticated customer can place order with their own UID and valid schema
+      // STRICT PAYMENT SECURITY (PHASE 3 ENFORCEMENT):
+      // 1. Client CANNOT mark payment_status as 'Paid' on creation (must be 'Pending' or 'Unpaid')
+      // 2. Client CANNOT inject or spoof verified gateway identifiers (PhonePe, Stripe, ARN, etc.)
       allow create: if isAuthenticated() &&
                     request.resource.data.userId == request.auth.uid &&
                     request.resource.data.keys().hasAll(['order_number', 'total', 'customer_name', 'customer_phone', 'items']) &&
                     request.resource.data.total is number &&
                     request.resource.data.total >= 0 &&
                     request.resource.data.items is list &&
-                    request.resource.data.items.size() > 0;
+                    request.resource.data.items.size() > 0 &&
+                    (!('payment_status' in request.resource.data) || request.resource.data.payment_status in ['Pending', 'Unpaid']) &&
+                    !request.resource.data.keys().hasAny([
+                      'phonepe_transaction_id',
+                      'phonepe_provider_reference_id',
+                      'phonepe_payment_mode',
+                      'phonepe_arn',
+                      'phonepe_response_code',
+                      'stripe_session_id',
+                      'payment_intent_id',
+                      'verified_at',
+                      'payment_verified_by'
+                    ]);
 
       // Customer can ONLY view their own orders; Admin can view all store orders
       allow read: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
 
       // Order status transitions (Packed, Shipped, Delivered, Cancelled) & payment status
-      // MUST be performed by server-verified administrators only
+      // MUST be performed by server-verified administrators or Firebase Admin SDK only
       allow update: if isSuperAdmin();
       allow delete: if isSuperAdmin();
+    }
+
+    // ===================================================================
+    // 2.1 PRIVATE PAYMENT RECORDS & GATEWAY AUDIT
+    // Gateway callbacks, raw transaction payloads, and secret tokens
+    // Strictly restricted to server-verified administrators & Admin SDK
+    // ===================================================================
+
+    match /payment_records/{recordId} {
+      allow read, write: if isSuperAdmin();
     }
 
     // ===================================================================

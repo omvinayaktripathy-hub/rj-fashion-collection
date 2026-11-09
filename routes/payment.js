@@ -5,6 +5,10 @@ const router = express.Router();
 const db = require('../database/db');
 const { requireAuth } = require('../middleware/auth');
 const { calculateServerPricing } = require('../services/pricing');
+const phonepe = require('../services/phonepe');
+const { requireAdmin } = require('../middleware/admin');
+const couponService = require('../services/couponService');
+const { syncOrderToFirestore } = require('../services/firebase');
 const { createRazorpayOrder, verifyPaymentSignature, RAZORPAY_ENABLED } = require('../services/payment');
 const {
   createStripeCheckoutSession,
@@ -49,6 +53,14 @@ router.get('/config', (req, res) => {
       upiId,
       merchantName,
       phone
+    },
+    phonepe: {
+      enabled: phonepe.PHONEPE_ENABLED,
+      merchantId: phonepe.PHONEPE_MERCHANT_ID,
+      merchantName: phonepe.MERCHANT_DISPLAY_NAME,
+      upiId: phonepe.MERCHANT_UPI_ID,
+      terminalId: phonepe.MERCHANT_TERMINAL_ID,
+      env: phonepe.PHONEPE_ENV
     }
   });
 });
@@ -540,6 +552,541 @@ router.post('/verify', requireAuth, (req, res) => {
   } catch (err) {
     console.error('Payment verify error:', err);
     res.status(500).json({ success: false, message: 'Failed to verify payment.' });
+  }
+});
+
+
+// ===================================================================
+// PHONEPE STANDARD CHECKOUT PAYMENT GATEWAY INTEGRATION
+// Unified UPI, Cards, Net Banking, Wallets, and EMI Support
+// Cryptographically verified checksum & server-side pricing
+// ===================================================================
+
+// GET /api/payment/phonepe/config
+router.get('/phonepe/config', (req, res) => {
+  res.json({
+    success: true,
+    enabled: phonepe.PHONEPE_ENABLED,
+    merchantId: phonepe.PHONEPE_MERCHANT_ID,
+    merchantName: phonepe.MERCHANT_DISPLAY_NAME,
+    upiId: phonepe.MERCHANT_UPI_ID,
+    terminalId: phonepe.MERCHANT_TERMINAL_ID,
+    env: phonepe.PHONEPE_ENV
+  });
+});
+
+/**
+ * Atomic helper to mark order as Paid in SQLite, record coupon, clear cart,
+ * decrement inventory, and sync to Cloud Firestore
+ */
+function finalizePhonePeOrderPaid(order, phonepeData, req) {
+  const transaction = db.transaction(() => {
+    // 1. Update order status and PhonePe transaction references
+    db.prepare(`
+      UPDATE orders
+      SET payment_status = 'Paid',
+          status = 'Confirmed',
+          phonepe_transaction_id = ?,
+          phonepe_provider_reference_id = ?,
+          phonepe_payment_mode = ?,
+          phonepe_response_code = ?,
+          phonepe_arn = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(
+      phonepeData.transactionId || null,
+      phonepeData.providerReferenceId || null,
+      phonepeData.paymentInstrument?.type || 'PHONEPE_STANDARD',
+      phonepeData.responseCode || 'SUCCESS',
+      phonepeData.paymentInstrument?.arn || phonepeData.paymentInstrument?.utr || null,
+      order.id
+    );
+
+    // 2. Atomically decrement stock
+    const items = db.prepare('SELECT product_id, quantity FROM order_items WHERE order_id = ?').all(order.id);
+    for (const it of items) {
+      if (it.product_id) {
+        db.prepare('UPDATE products SET stock = MAX(0, stock - ?) WHERE id = ?').run(it.quantity, it.product_id);
+      }
+    }
+
+    // 3. Clear user's cart
+    if (order.user_id) {
+      db.prepare('DELETE FROM cart_items WHERE user_id = ?').run(order.user_id);
+    }
+
+    // 4. Record single-use coupon redemption
+    if (order.coupon_code) {
+      const clientIp = couponService.extractClientIp(req);
+      couponService.recordCouponRedemption({
+        couponCode: order.coupon_code,
+        userId: order.user_id,
+        userEmail: order.customer_email,
+        userIp: clientIp,
+        orderId: order.id,
+        orderNumber: order.order_number,
+        discountAmount: order.discount || 0
+      });
+    }
+  });
+
+  transaction();
+
+  // 5. Fire and forget Cloud Firestore sync
+  try {
+    const updatedOrder = db.prepare('SELECT * FROM orders WHERE id = ?').get(order.id);
+    if (updatedOrder) {
+      syncOrderToFirestore(updatedOrder).catch(err => {
+        console.warn('[Firestore] Sync warning after PhonePe payment:', err.message);
+      });
+    }
+  } catch (_) {}
+}
+
+// POST /api/payment/phonepe/create-payment
+// Initiates official PhonePe Standard Checkout (PAY_PAGE)
+router.post('/phonepe/create-payment', requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const clientIp = couponService.extractClientIp(req);
+    const { orderNumber, addressId, address_id, notes = '', coupon, couponCode } = req.body;
+
+    let targetOrder = null;
+
+    // A. If an existing orderNumber is provided (e.g. payment retry)
+    if (orderNumber) {
+      const existing = db.prepare('SELECT * FROM orders WHERE order_number = ? AND user_id = ?').get(orderNumber, userId);
+      if (!existing) {
+        return res.status(403).json({ success: false, message: 'Order not found or unauthorized.' });
+      }
+      if (existing.payment_status === 'Paid') {
+        return res.status(400).json({ success: false, message: 'This order has already been paid.' });
+      }
+      targetOrder = existing;
+    } else {
+      // B. Create Pending Order from user's current cart with server-side authoritative pricing
+      const cartItems = db.prepare(`
+        SELECT ci.*, p.name, p.price, p.stock, p.image
+        FROM cart_items ci
+        JOIN products p ON ci.product_id = p.id
+        WHERE ci.user_id = ?
+      `).all(userId);
+
+      if (cartItems.length === 0) {
+        return res.status(400).json({ success: false, message: 'Your shopping cart is empty.' });
+      }
+
+      // Verify stock
+      for (const item of cartItems) {
+        if (item.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Product "${item.name}" has only ${item.stock} left in stock.`
+          });
+        }
+      }
+
+      // Resolve address
+      let deliveryAddress = '';
+      let customerName = req.body.customer_name || req.session.user.name;
+      let customerPhone = req.body.customer_phone || req.session.user.phone || '9999999999';
+      let resolvedAddrId = addressId || address_id;
+
+      if (resolvedAddrId) {
+        const addr = db.prepare('SELECT * FROM addresses WHERE id = ? AND user_id = ?').get(Number(resolvedAddrId), userId);
+        if (addr) {
+          customerName = addr.full_name;
+          customerPhone = addr.phone;
+          deliveryAddress = `${addr.house_flat}, ${addr.street}, ${addr.city}, ${addr.state} - ${addr.pin_code}. Phone: ${addr.phone}`;
+        }
+      }
+
+      if (!deliveryAddress && (req.body.shipping_address || req.body.delivery_address || req.body.address)) {
+        deliveryAddress = String(req.body.shipping_address || req.body.delivery_address || req.body.address).trim();
+      }
+
+      if (!deliveryAddress) {
+        const defaultAddr = db.prepare('SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, id DESC LIMIT 1').get(userId);
+        if (defaultAddr) {
+          resolvedAddrId = defaultAddr.id;
+          customerName = defaultAddr.full_name;
+          customerPhone = defaultAddr.phone;
+          deliveryAddress = `${defaultAddr.house_flat}, ${defaultAddr.street}, ${defaultAddr.city}, ${defaultAddr.state} - ${defaultAddr.pin_code}. Phone: ${defaultAddr.phone}`;
+        }
+      }
+
+      if (!deliveryAddress) {
+        return res.status(400).json({ success: false, message: 'Please provide or select a delivery address.' });
+      }
+
+      const activeCoupon = (coupon || couponCode || '').trim().toUpperCase();
+      if (activeCoupon) {
+        const eligibility = couponService.checkCouponEligibility(activeCoupon, {
+          userId,
+          userEmail: req.session.user.email,
+          userIp: clientIp
+        });
+        if (!eligibility.eligible) {
+          return res.status(400).json({ success: false, message: eligibility.message });
+        }
+      }
+
+      // Calculate authoritative server pricing
+      const pricing = calculateServerPricing(cartItems, activeCoupon, {
+        userId,
+        userEmail: req.session.user.email,
+        userIp: clientIp
+      });
+
+      const newOrderNumber = generateOrderNumber();
+
+      // Create Pending Order in database
+      const createTx = db.transaction(() => {
+        const result = db.prepare(`
+          INSERT INTO orders (
+            order_number, user_id, address_id, customer_name, customer_email, customer_phone,
+            delivery_address, subtotal, discount, shipping, total, payment_method, payment_status,
+            status, notes, coupon_code
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PhonePe', 'Pending', 'Pending', ?, ?)
+        `).run(
+          newOrderNumber,
+          userId,
+          resolvedAddrId ? Number(resolvedAddrId) : null,
+          customerName,
+          req.session.user.email,
+          customerPhone,
+          deliveryAddress,
+          pricing.subtotal,
+          pricing.discount,
+          pricing.shipping,
+          pricing.total,
+          notes,
+          activeCoupon || null
+        );
+
+        const orderId = Number(result.lastInsertRowid);
+
+        for (const item of cartItems) {
+          db.prepare(`
+            INSERT INTO order_items (
+              order_id, product_id, product_name, product_image, size, color, quantity, price, total
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(
+            orderId,
+            item.product_id,
+            item.name,
+            item.image || '',
+            item.size || 'Free Size',
+            item.color || '',
+            item.quantity,
+            item.price,
+            Math.round(item.price * item.quantity)
+          );
+        }
+
+        return db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId);
+      });
+
+      targetOrder = createTx();
+    }
+
+    // Generate unique merchant transaction ID for PhonePe
+    const merchantTransactionId = phonepe.generateMerchantTransactionId('MT_RJFC');
+
+    // Update order with merchant transaction ID
+    db.prepare(`
+      UPDATE orders
+      SET phonepe_merchant_transaction_id = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(merchantTransactionId, targetOrder.id);
+
+    const appUrl = process.env.APP_URL || (req.protocol + '://' + req.get('host'));
+    const redirectUrl = `${appUrl}/checkout.html?order_number=${targetOrder.order_number}&phonepe_txn=${merchantTransactionId}`;
+    const callbackUrl = `${appUrl}/api/payment/phonepe/callback`;
+    const amountInPaise = Math.round(targetOrder.total * 100);
+
+    // Call PhonePe Payment Gateway
+    const phonepeResponse = await phonepe.initiatePayment({
+      merchantTransactionId,
+      merchantUserId: userId,
+      amountInPaise,
+      redirectUrl,
+      callbackUrl,
+      mobileNumber: targetOrder.customer_phone
+    });
+
+    if (phonepeResponse.success && phonepeResponse.data?.instrumentResponse?.redirectInfo?.url) {
+      return res.json({
+        success: true,
+        merchantTransactionId,
+        orderNumber: targetOrder.order_number,
+        amount: targetOrder.total,
+        amountInPaise,
+        redirectUrl: phonepeResponse.data.instrumentResponse.redirectInfo.url
+      });
+    } else {
+      console.error('[PhonePe Initiation Failed]', phonepeResponse);
+      return res.status(502).json({
+        success: false,
+        message: phonepeResponse.message || 'Unable to initiate PhonePe payment. Please try again or choose another payment method.'
+      });
+    }
+  } catch (err) {
+    console.error('PhonePe createPayment error:', err);
+    res.status(500).json({ success: false, message: 'Server error initiating payment.' });
+  }
+});
+
+// GET /api/payment/phonepe/status/:orderNumber
+// Independently verifies payment status with PhonePe API
+router.get('/phonepe/status/:orderNumber', requireAuth, async (req, res) => {
+  try {
+    const { orderNumber } = req.params;
+    const userId = req.session.user.id;
+    const isAdmin = req.session.user.role === 'admin';
+
+    // Anti-IDOR: verify customer ownership
+    const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(orderNumber);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    if (!isAdmin && order.user_id !== userId) {
+      return res.status(403).json({ success: false, message: 'Access denied: unauthorized access to order.' });
+    }
+
+    // 1. Idempotent short-circuit: if already paid, return verified
+    if (order.payment_status === 'Paid') {
+      return res.json({
+        success: true,
+        verified: true,
+        payment_status: 'Paid',
+        orderNumber,
+        phonepe_transaction_id: order.phonepe_transaction_id,
+        phonepe_payment_mode: order.phonepe_payment_mode
+      });
+    }
+
+    if (!order.phonepe_merchant_transaction_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'No PhonePe transaction reference found for this order.'
+      });
+    }
+
+    // 2. Independently verify with PhonePe Status API
+    const statusData = await phonepe.checkPaymentStatus(order.phonepe_merchant_transaction_id);
+
+    if (statusData.code === 'PAYMENT_SUCCESS' && statusData.data) {
+      // Cryptographic / Amount Match Validation
+      const expectedPaise = Math.round(order.total * 100);
+      if (statusData.data.amount && statusData.data.amount !== expectedPaise) {
+        console.error(`[SECURITY TAMPERING DETECTED] Amount mismatch for order #${orderNumber}: Expected ${expectedPaise} paise, got ${statusData.data.amount}`);
+        return res.status(400).json({
+          success: false,
+          verified: false,
+          message: 'Payment verification failed: transaction amount mismatch.'
+        });
+      }
+
+      finalizePhonePeOrderPaid(order, statusData.data, req);
+
+      return res.json({
+        success: true,
+        verified: true,
+        payment_status: 'Paid',
+        orderNumber,
+        phonepe_transaction_id: statusData.data.transactionId,
+        payment_mode: statusData.data.paymentInstrument?.type || 'PHONEPE'
+      });
+    } else if (statusData.code === 'PAYMENT_PENDING') {
+      return res.json({
+        success: true,
+        verified: false,
+        payment_status: 'Pending',
+        orderNumber,
+        message: 'Payment is currently pending confirmation from your bank.'
+      });
+    } else {
+      // Marked failed
+      db.prepare(`
+        UPDATE orders
+        SET payment_status = 'Failed',
+            phonepe_response_code = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(statusData.code || 'PAYMENT_ERROR', order.id);
+
+      return res.status(400).json({
+        success: false,
+        verified: false,
+        payment_status: 'Failed',
+        orderNumber,
+        message: statusData.message || 'Payment failed or was cancelled.'
+      });
+    }
+  } catch (err) {
+    console.error('PhonePe status check error:', err);
+    res.status(500).json({ success: false, message: 'Error checking payment status.' });
+  }
+});
+
+// POST /api/payment/phonepe/callback
+// PhonePe server-to-server webhook callback
+router.post('/phonepe/callback', async (req, res) => {
+  try {
+    const base64Response = req.body.response;
+    const xVerifyHeader = req.headers['x-verify'];
+
+    // 1. Cryptographically verify signature
+    const verification = phonepe.verifyAndDecodeCallback(base64Response, xVerifyHeader);
+    if (!verification.isValid) {
+      console.warn('[SECURITY] PhonePe webhook signature verification failed:', verification.error);
+      return res.status(400).json({
+        success: false,
+        message: 'Signature verification failed'
+      });
+    }
+
+    const payload = verification.payload;
+    if (!payload || !payload.data) {
+      return res.status(400).json({ success: false, message: 'Invalid payload structure' });
+    }
+
+    const { merchantTransactionId, transactionId, amount } = payload.data;
+    if (!merchantTransactionId) {
+      return res.status(400).json({ success: false, message: 'Missing merchantTransactionId' });
+    }
+
+    // 2. Find order in database
+    const order = db.prepare('SELECT * FROM orders WHERE phonepe_merchant_transaction_id = ?').get(merchantTransactionId);
+    if (!order) {
+      console.warn(`[PhonePe Webhook] Order not found for merchantTransactionId: ${merchantTransactionId}`);
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // 3. Idempotent check
+    if (order.payment_status === 'Paid') {
+      return res.status(200).json({ success: true, message: 'Order already processed as paid' });
+    }
+
+    // 4. Double verification: Independently query PhonePe Status API
+    let verifiedStatus = payload;
+    try {
+      const liveCheck = await phonepe.checkPaymentStatus(merchantTransactionId);
+      if (liveCheck && liveCheck.code) {
+        verifiedStatus = liveCheck;
+      }
+    } catch (_) {}
+
+    if (verifiedStatus.code === 'PAYMENT_SUCCESS' && verifiedStatus.data) {
+      const expectedPaise = Math.round(order.total * 100);
+      if (amount && amount !== expectedPaise) {
+        console.error(`[SECURITY ALERT] PhonePe webhook amount mismatch for order #${order.order_number}: Expected ${expectedPaise}, received ${amount}`);
+        return res.status(400).json({ success: false, message: 'Amount tampering detected' });
+      }
+
+      finalizePhonePeOrderPaid(order, verifiedStatus.data, req);
+      return res.status(200).json({ success: true, message: 'Callback processed and order confirmed' });
+    } else {
+      db.prepare(`
+        UPDATE orders
+        SET payment_status = 'Failed',
+            phonepe_response_code = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(verifiedStatus.code || 'FAILED', order.id);
+
+      return res.status(200).json({ success: true, message: 'Payment marked failed' });
+    }
+  } catch (err) {
+    console.error('PhonePe callback error:', err);
+    res.status(500).json({ success: false, message: 'Webhook processing error' });
+  }
+});
+
+// POST /api/payment/phonepe/refund
+// Initiates PhonePe refund for a paid order (Admin Only)
+router.post('/phonepe/refund', requireAdmin, async (req, res) => {
+  try {
+    const { orderNumber, amount, reason = 'Customer requested refund' } = req.body;
+    if (!orderNumber) {
+      return res.status(400).json({ success: false, message: 'orderNumber is required.' });
+    }
+
+    const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(orderNumber);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    if (order.payment_status !== 'Paid') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot refund order with status "${order.payment_status}". Must be "Paid".`
+      });
+    }
+
+    const refundAmountRupees = amount ? Number(amount) : order.total;
+    if (refundAmountRupees <= 0 || refundAmountRupees > order.total) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid refund amount ₹${refundAmountRupees}. Must be between ₹1 and order total ₹${order.total}.`
+      });
+    }
+
+    const refundAmountPaise = Math.round(refundAmountRupees * 100);
+    const refundTxnId = phonepe.generateMerchantTransactionId('REF_RJFC');
+
+    const refundRes = await phonepe.processRefund({
+      originalTransactionId: order.phonepe_transaction_id || order.phonepe_merchant_transaction_id,
+      refundTransactionId: refundTxnId,
+      merchantUserId: order.user_id,
+      amountInPaise: refundAmountPaise
+    });
+
+    if (refundRes.success || refundRes.code === 'PAYMENT_SUCCESS') {
+      db.prepare(`
+        UPDATE orders
+        SET payment_status = 'Refunded',
+            status = 'Cancelled',
+            notes = coalesce(notes, '') || ' [Refunded: ₹' || ? || ' - ' || ? || ']',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(refundAmountRupees, reason, order.id);
+
+      // Sync updated order to Firestore
+      try {
+        const updated = db.prepare('SELECT * FROM orders WHERE id = ?').get(order.id);
+        syncOrderToFirestore(updated).catch(() => {});
+      } catch (_) {}
+
+      // Log admin action
+      if (typeof db.logAdminAction === 'function') {
+        db.logAdminAction({
+          adminEmail: req.session.user.email,
+          action: 'PHONEPE_ORDER_REFUNDED',
+          entityType: 'order',
+          entityId: order.id,
+          details: { orderNumber, refundAmountRupees, reason, refundTxnId },
+          req
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: `Refund of ₹${refundAmountRupees} processed successfully.`,
+        orderNumber,
+        refundTransactionId: refundTxnId
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: refundRes.message || 'Failed to process PhonePe refund.'
+      });
+    }
+  } catch (err) {
+    console.error('PhonePe refund error:', err);
+    res.status(500).json({ success: false, message: 'Server error processing refund.' });
   }
 });
 

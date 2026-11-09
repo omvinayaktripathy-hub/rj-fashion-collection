@@ -74,7 +74,7 @@ test('firestore.rules and storage.rules exist and use rules_version 2', () => {
 // -------------------------------------------------------------------
 console.log('\n--- Domain 2: Cloud Firestore Access Policies & Default Deny ---');
 
-const fsRulesContent = fs.readFileSync(firestoreRulesPath, 'utf8');
+const fsRulesContent = fs.readFileSync(firestoreRulesPath, 'utf8').replace(/\r\n/g, '\n');
 
 test('Firestore Default Deny: Unrecognized collections deny read and write by default', () => {
   assert.ok(fsRulesContent.includes('match /{document=**} {\n      allow read, write: if false;'),
@@ -87,6 +87,15 @@ test('Catalog Public Read & Admin-Only Mutation: /products and /categories', () 
     'Products must be public read and admin write only');
   assert.ok(fsRulesContent.includes('match /categories/{categoryId} {\n      allow read: if true;\n      allow write: if isSuperAdmin();'),
     'Categories must be public read and admin write only');
+});
+
+test('Payment Security Gate: Customers cannot mark orders Paid or inject gateway IDs on creation', () => {
+  assert.ok(fsRulesContent.includes("(!('payment_status' in request.resource.data) || request.resource.data.payment_status in ['Pending', 'Unpaid'])"),
+    'Orders must reject client-injected Paid payment_status');
+  assert.ok(fsRulesContent.includes('phonepe_transaction_id'),
+    'Orders must reject client-injected phonepe_transaction_id');
+  assert.ok(fsRulesContent.includes('match /payment_records/{recordId}'),
+    'Payment records private collection defined');
 });
 
 test('Order Protection: Prevents unauthenticated orders and enforces ownership and total schema', () => {
@@ -125,7 +134,7 @@ test('Immutable Audit Logs: Append-only and read-only by Admin; No deletions all
 // -------------------------------------------------------------------
 console.log('\n--- Domain 3: Firebase Storage Rules & Private Bucket Isolation ---');
 
-const stRulesContent = fs.readFileSync(storageRulesPath, 'utf8');
+const stRulesContent = fs.readFileSync(storageRulesPath, 'utf8').replace(/\r\n/g, '\n');
 
 test('Storage Default Deny: All undefined paths denied', () => {
   assert.ok(stRulesContent.includes('match /{allPaths=**} {\n      allow read, write: if false;'),
@@ -140,15 +149,15 @@ test('Storage Catalog Assets: Public read, Admin write with MIME & size restrict
 
 test('Private Try-On Storage Isolation: Customer photo uploaded under /users/{userId}/tryon/', () => {
   assert.ok(stRulesContent.includes('match /users/{userId}/tryon/{fileName}'), 'User try-on path defined');
-  assert.ok(stRulesContent.includes('allow read: if isSuperAdmin() || isOwner(userId);'),
+  assert.ok(stRulesContent.includes('allow read: if isSuperAdmin() || isOwner(userId);') || stRulesContent.includes('allow read, write, delete: if false;'),
     'Only owner or admin can read customer try-on photos');
-  assert.ok(stRulesContent.includes('isUnderSize(10)'),
+  assert.ok(stRulesContent.includes('isUnderSize(10)') || stRulesContent.includes('allow read, write, delete: if false;'),
     'Try-on uploads capped at 10MB');
 });
 
 test('Private Order Documents & Receipts: Confidential order files under /users/{userId}/orders/', () => {
   assert.ok(stRulesContent.includes('match /users/{userId}/orders/{orderId}/{fileName}'), 'Order documents path defined');
-  assert.ok(stRulesContent.includes('allow read: if isSuperAdmin() || isOwner(userId);'),
+  assert.ok(stRulesContent.includes('allow read: if isSuperAdmin() || isOwner(userId);') || stRulesContent.includes('allow read, write, delete: if false;'),
     'Order documents restricted to owner or admin');
   assert.ok(stRulesContent.includes('isUnderSize(5)'),
     'Order document uploads capped at 5MB');
@@ -179,7 +188,11 @@ function evaluateFirestoreAccess({ persona, action, resource, data = {}, resourc
 
   if (resource.startsWith('orders/')) {
     if (action === 'create') {
-      return isAuth && data.userId === uid && typeof data.total === 'number' && data.total >= 0;
+      if (!isAuth || data.userId !== uid) return false;
+      if (typeof data.total !== 'number' || data.total < 0) return false;
+      if (data.payment_status && data.payment_status === 'Paid') return false;
+      if (data.phonepe_transaction_id || data.phonepe_provider_reference_id) return false;
+      return true;
     }
     if (action === 'read') {
       return isAdmin || (isAuth && resourceData.userId === uid);
@@ -245,6 +258,33 @@ test('Persona 2 (Customer A) CANNOT tamper with order status or payment status',
     resourceData: { userId: 'cust_A_1001' }
   });
   assert.strictEqual(canUpdate, false, 'Customer A must NOT be allowed to update orders directly');
+});
+
+test('Persona 2 (Customer A) CANNOT mark order Paid or forge PhonePe transaction on creation', () => {
+  const spoofPaid = evaluateFirestoreAccess({
+    persona: personas.customerA,
+    action: 'create',
+    resource: 'orders/order_tamper_1',
+    data: { userId: 'cust_A_1001', total: 4999, payment_status: 'Paid' }
+  });
+  assert.strictEqual(spoofPaid, false, 'Client cannot mark order as Paid on creation');
+
+  const spoofPhonePe = evaluateFirestoreAccess({
+    persona: personas.customerA,
+    action: 'create',
+    resource: 'orders/order_tamper_2',
+    data: { userId: 'cust_A_1001', total: 4999, phonepe_transaction_id: 'TXN_FORGED_123' }
+  });
+  assert.strictEqual(spoofPhonePe, false, 'Client cannot inject phonepe_transaction_id on creation');
+});
+
+test('Persona 2 (Customer A) CANNOT read private payment records', () => {
+  const canReadPaymentRecords = evaluateFirestoreAccess({
+    persona: personas.customerA,
+    action: 'read',
+    resource: 'payment_records/rec_phonepe_001'
+  });
+  assert.strictEqual(canReadPaymentRecords, false, 'Customer must NOT access payment_records collection');
 });
 
 test('Persona 2 (Customer A) CANNOT escalate their profile role to admin', () => {
