@@ -14,15 +14,36 @@
   });
   var API_BASE = window.API_BASE || '/api';
 
+  var currentHost = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
+  var resolvedAuthDomain = (currentHost && (currentHost.includes('web.app') || currentHost.includes('firebaseapp.com')))
+    ? currentHost
+    : "rj-fashion-collection.firebaseapp.com";
+
   var FIREBASE_CONFIG = {
     apiKey: "AIzaSyBMkLwyXZINxOdq-hw7jFTVlnlFLdO_oTw",
-    authDomain: "rj-fashion-collection.firebaseapp.com",
+    authDomain: resolvedAuthDomain,
     projectId: "rj-fashion-collection",
     storageBucket: "rj-fashion-collection.firebasestorage.app",
     messagingSenderId: "136818820501",
     appId: "1:136818820501:web:251f54494df4209854a29c",
     measurementId: "G-LL5KRD9639"
   };
+
+  function isMobileBrowser() {
+    try {
+      var ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+        return true;
+      }
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+        return true;
+      }
+      if (typeof window !== 'undefined' && typeof window.orientation !== 'undefined') {
+        return true;
+      }
+    } catch (_) {}
+    return false;
+  }
 
   function loadScriptAsync(src) {
     return new Promise(function(resolve, reject) {
@@ -210,6 +231,9 @@ function togglePasswordVisibility(inputId, btn) {
 
 function mapAuthErrorCode(code, fallbackMessage) {
   const clean = String(code || '').toUpperCase();
+  if (clean.includes('INTERNAL_ERROR') || clean.includes('INTERNAL-ERROR')) {
+    return 'Authenticating with Google... If your browser interrupted the sign-in, please tap Continue with Google again or use email sign-in.';
+  }
   if (clean.includes('USER_NOT_FOUND') || clean.includes('USER-NOT-FOUND') || clean.includes('EMAIL_NOT_FOUND')) {
     return 'No patron account found with this email. Please check your spelling or create an account.';
   }
@@ -229,19 +253,25 @@ function mapAuthErrorCode(code, fallbackMessage) {
     return 'Access temporarily blocked due to repeated attempts. Please reset your password or try again later.';
   }
   if (clean.includes('POPUP_CLOSED') || clean.includes('POPUP-CLOSED-BY-USER') || clean.includes('CANCELLED')) {
-    return 'Google sign-in popup was closed before authentication could finish.';
+    return 'Google sign-in was closed before completion. Please tap Continue with Google to try again.';
   }
   if (clean.includes('POPUP_BLOCKED') || clean.includes('POPUP-BLOCKED')) {
-    return 'Google sign-in popup was blocked by your browser. Please allow popups or use email sign-in.';
+    return 'Connecting with Google secure sign-in... Please wait.';
   }
   if (clean.includes('ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL') || clean.includes('ACCOUNT-EXISTS-WITH-DIFFERENT-CREDENTIAL')) {
     return 'An account already exists for this email with password. Please sign in with your password below.';
   }
   if (clean.includes('UNAUTHORIZED_DOMAIN') || clean.includes('UNAUTHORIZED-DOMAIN')) {
-    return 'Authentication from this local origin is restricted. Please sign in with email and password.';
+    return 'Authentication from this origin is restricted. Please sign in with email and password.';
   }
   if (clean.includes('NETWORK') || clean.includes('FETCH_FAILED')) {
     return 'Network connection issue. Please check your internet connection and try again.';
+  }
+
+  // Strip technical Firebase jargon from fallback messages
+  var fbMsg = String(fallbackMessage || '');
+  if (fbMsg.includes('Firebase:') || fbMsg.includes('auth/')) {
+    return 'Authentication encountered a brief delay. Please try signing in again.';
   }
   return fallbackMessage || 'Authentication failed. Please verify your credentials and try again.';
 }
@@ -301,20 +331,51 @@ function commitUserSession(userObj, isNew = false) {
 // ─────────────────────────────────────────────────────────────
 // 1. Google Sign-In via Firebase Authentication
 // ─────────────────────────────────────────────────────────────
+async function finalizeGoogleUser(user) {
+  try { sessionStorage.removeItem('rj_auth_google_flow'); } catch (_) {}
+
+  // Sync Cloud Firestore patron record
+  try {
+    if (firebase.firestore) {
+      const isOwner = user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com';
+      await firebase.firestore().collection('users').doc(user.uid).set({
+        uid: user.uid,
+        name: user.displayName || (user.email ? user.email.split('@')[0] : 'Patron'),
+        email: user.email,
+        role: isOwner ? 'admin' : 'customer',
+        tier: 'Patron',
+        photo: user.photoURL || '',
+        last_login: new Date().toISOString()
+      }, { merge: true });
+    }
+  } catch (fsErr) {
+    console.warn('Firestore user sync notice:', fsErr);
+  }
+
+  // Establish HttpOnly session token cookie on the backend
+  try {
+    const idToken = await user.getIdToken();
+    if (idToken) {
+      await fetch(`${API_BASE}/auth/session-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
+    }
+  } catch (_) {}
+
+  commitUserSession(user, false);
+}
+
 async function handleGoogleSignIn() {
   hideAuthError();
   const btn = document.getElementById('google-signin-btn');
   const origHtml = btn ? btn.innerHTML : '';
-  if (btn) {
-    btn.disabled = true;
-    btn.style.opacity = '0.75';
-    btn.innerHTML = 'Connecting to Google...';
-  }
 
   try {
     const auth = await ensureFirebaseInit();
     if (!auth || typeof firebase === 'undefined') {
-      throw new Error('Google Sign-In is blocked or unavailable in this browser. Please sign in using your email and password below.');
+      throw new Error('Google Sign-In is unavailable in this browser session. Please sign in with email and password below.');
     }
 
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -322,55 +383,59 @@ async function handleGoogleSignIn() {
     provider.addScope('profile');
     provider.setCustomParameters({ prompt: 'select_account' });
 
+    try {
+      sessionStorage.setItem('rj_auth_google_flow', 'pending');
+    } catch (_) {}
+
+    // On mobile browsers: Popups are blocked or fail with auth/internal-error due to storage partitioning.
+    // Use signInWithRedirect directly for seamless mobile experience.
+    if (isMobileBrowser()) {
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.85';
+        btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;">Connecting to Google...</span>';
+      }
+      await auth.signInWithRedirect(provider);
+      return;
+    }
+
+    // On desktop: Attempt popup with smooth redirect fallback
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.75';
+      btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;">Opening Google Sign-In...</span>';
+    }
+
     let result = null;
     try {
       result = await auth.signInWithPopup(provider);
     } catch (popupErr) {
-      console.warn('Popup error:', popupErr);
-      if (popupErr.code === 'auth/popup-blocked') {
-        // Fall back to redirect flow
-        await auth.signInWithRedirect(provider);
+      console.warn('Popup flow intercepted, falling back to redirect:', popupErr);
+      const errCode = (popupErr && popupErr.code) ? popupErr.code : '';
+      if (errCode === 'auth/popup-closed-by-user' || errCode === 'auth/cancelled-popup-request') {
+        try { sessionStorage.removeItem('rj_auth_google_flow'); } catch (_) {}
+        if (btn) {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.innerHTML = origHtml;
+        }
         return;
       }
-      throw popupErr;
+      // For ANY popup error (internal-error, blocked, cross-origin), seamlessly fall back to redirect
+      if (btn) {
+        btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;">Redirecting to Google Sign-In...</span>';
+      }
+      await auth.signInWithRedirect(provider);
+      return;
     }
 
     if (result && result.user) {
-      const user = result.user;
-
-      // Optional Cloud Firestore patron record
-      try {
-        if (firebase.firestore) {
-          const isOwner = user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com';
-          await firebase.firestore().collection('users').doc(user.uid).set({
-            uid: user.uid,
-            name: user.displayName || user.email.split('@')[0],
-            email: user.email,
-            role: isOwner ? 'admin' : 'customer',
-            tier: 'Patron',
-            photo: user.photoURL || '',
-            last_login: new Date().toISOString()
-          }, { merge: true });
-        }
-      } catch (_) {}
-
-      // Establish HttpOnly session token cookie on the backend
-      try {
-        const idToken = await user.getIdToken();
-        if (idToken) {
-          await fetch(`${API_BASE}/auth/session-login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken })
-          });
-        }
-      } catch (_) {}
-
-      commitUserSession(user, false);
+      await finalizeGoogleUser(result.user);
       return;
     }
   } catch (error) {
     console.warn('Google Sign-In notice:', error);
+    try { sessionStorage.removeItem('rj_auth_google_flow'); } catch (_) {}
     if (btn) {
       btn.disabled = false;
       btn.style.opacity = '1';
@@ -707,16 +772,52 @@ function initAuthForms() {
     switchAuthTab('register');
   }
 
-  // Check for Google Redirect Result
+  // Check for Google Redirect Result & Real-Time Auth State
   try {
     ensureFirebaseInit().then(function(auth) {
-      if (auth && auth.getRedirectResult) {
-        auth.getRedirectResult().then(res => {
+      if (!auth) return;
+
+      var isPendingRedirect = false;
+      try {
+        isPendingRedirect = sessionStorage.getItem('rj_auth_google_flow') === 'pending';
+      } catch (_) {}
+
+      var googleBtn = document.getElementById('google-signin-btn');
+      if (isPendingRedirect && googleBtn) {
+        googleBtn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;">Finalizing Google Sign-In...</span>';
+        googleBtn.disabled = true;
+      }
+
+      if (auth.getRedirectResult) {
+        auth.getRedirectResult().then(async function(res) {
           if (res && res.user) {
-            commitUserSession(res.user, false);
+            await finalizeGoogleUser(res.user);
+          } else {
+            try { sessionStorage.removeItem('rj_auth_google_flow'); } catch (_) {}
+            if (googleBtn && isPendingRedirect) {
+              googleBtn.disabled = false;
+            }
           }
-        }).catch(err => {
+        }).catch(function(err) {
           console.warn('Redirect auth result notice:', err);
+          try { sessionStorage.removeItem('rj_auth_google_flow'); } catch (_) {}
+          if (googleBtn) googleBtn.disabled = false;
+          if (err && err.code && err.code !== 'auth/null-user') {
+            showAuthError(mapAuthErrorCode(err.code, err.message));
+          }
+        });
+      }
+
+      // Proactive session sync on state change
+      if (auth.onAuthStateChanged) {
+        auth.onAuthStateChanged(async function(user) {
+          if (user) {
+            var stored = null;
+            try { stored = localStorage.getItem('rj_user') || sessionStorage.getItem('rj_user'); } catch (_) {}
+            if (!stored) {
+              await finalizeGoogleUser(user);
+            }
+          }
         });
       }
     }).catch(function() {});

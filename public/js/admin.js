@@ -31,9 +31,14 @@ window.fetch = async function(...args) {
 function ensureFirebaseInitialized() {
   if (typeof firebase !== 'undefined') {
     if (!firebase.apps || !firebase.apps.length) {
+      const currentHost = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
+      const resolvedAuthDomain = (currentHost && (currentHost.includes('web.app') || currentHost.includes('firebaseapp.com')))
+        ? currentHost
+        : "rj-fashion-collection.firebaseapp.com";
+
       const config = window.firebaseConfig || {
         apiKey: "AIzaSyBMkLwyXZINxOdq-hw7jFTVlnlFLdO_oTw",
-        authDomain: "rj-fashion-collection.firebaseapp.com",
+        authDomain: resolvedAuthDomain,
         projectId: "rj-fashion-collection",
         storageBucket: "rj-fashion-collection.firebasestorage.app",
         messagingSenderId: "136818820501",
