@@ -1,12 +1,17 @@
 // RJ FASHION COLLECTION - GLOBAL APP LOGIC
 
 // Ensure subtitle is removed from DOM immediately
+function initAppHeaderClean() {
+  document.querySelectorAll('.logo-subtitle').forEach(el => el.remove());
+  const curYear = new Date().getFullYear();
+  document.querySelectorAll('.current-year, #copyright-year').forEach(el => el.textContent = curYear);
+}
 try {
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.logo-subtitle').forEach(el => el.remove());
-    const curYear = new Date().getFullYear();
-    document.querySelectorAll('.current-year, #copyright-year').forEach(el => el.textContent = curYear);
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAppHeaderClean);
+  } else {
+    initAppHeaderClean();
+  }
 } catch (e) {}
 
 const API_BASE = '/api';
@@ -740,8 +745,7 @@ const AdaptiveDevice = {
 // Run immediately for instant zero-flicker detection
 AdaptiveDevice.init();
 
-// Initialize on DOM load
-document.addEventListener('DOMContentLoaded', () => {
+function startAppCore() {
   initTheme();
   AdaptiveDevice.detect();
   initBackToTop();
@@ -880,7 +884,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startAppCore);
+} else {
+  startAppCore();
+}
 
 
 
@@ -925,7 +935,11 @@ function initGiftOptionUI() {
 
 window.toggleGiftOption = toggleGiftOption;
 window.saveGiftMessage = saveGiftMessage;
-document.addEventListener('DOMContentLoaded', initGiftOptionUI);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGiftOptionUI);
+} else {
+  initGiftOptionUI();
+}
 
 
 // ===================================================================

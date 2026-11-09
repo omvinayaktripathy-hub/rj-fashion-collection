@@ -146,24 +146,21 @@ async function loadCart() {
   if (!container) return;
 
   try {
-    // 1. Load Cart Data (API with graceful localStorage fallback)
-    let items = [];
-    try {
-      if (window.isStaticHosting) throw new Error('static');
-      const res = await fetch(`${API_BASE}/cart`);
-      if (res.ok) {
-        const apiData = await res.json();
-        if (apiData && apiData.success && Array.isArray(apiData.items) && apiData.items.length > 0) {
-          items = apiData.items.map(normalizeCartItemSafe).filter(Boolean);
-          // Mirror active server session to local storage
-          saveUnifiedLocalCart(items);
-        }
-      }
-    } catch (_) {}
+    // 1. Instant Zero-Delay Local Storage First (0ms)
+    let items = getUnifiedLocalCart();
 
-    // Fallback to unified localStorage if API returned nothing or was empty
-    if (!items || items.length === 0) {
-      items = getUnifiedLocalCart();
+    // In background on dynamic server, mirror server state if available
+    if (!window.isStaticHosting && items.length === 0) {
+      try {
+        const res = await fetch(`${API_BASE}/cart`);
+        if (res.ok) {
+          const apiData = await res.json();
+          if (apiData && apiData.success && Array.isArray(apiData.items) && apiData.items.length > 0) {
+            items = apiData.items.map(normalizeCartItemSafe).filter(Boolean);
+            saveUnifiedLocalCart(items);
+          }
+        }
+      } catch (_) {}
     }
 
     // Empty State Check
@@ -502,4 +499,4 @@ if (typeof window !== 'undefined') {
   });
 }
 
-document.addEventListener('DOMContentLoaded', loadCart);
+if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', loadCart); } else { loadCart(); }

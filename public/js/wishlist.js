@@ -565,7 +565,11 @@ function notifyStock(productName) {
 }
 window.notifyStock = notifyStock;
 
-document.addEventListener('DOMContentLoaded', loadWishlist);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadWishlist);
+} else {
+  loadWishlist();
+}
 
 
 // Synchronize on external wishlist changes

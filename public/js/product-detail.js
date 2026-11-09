@@ -1286,4 +1286,8 @@ async function loadRelatedProducts(categoryOrDept, currentId) {
 }
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', loadProductDetails);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadProductDetails);
+} else {
+  loadProductDetails();
+}

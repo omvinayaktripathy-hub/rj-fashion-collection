@@ -9,9 +9,11 @@ let selectedAddressId = null;
 let currentCartData = null;
 let editingAddressId = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDeliveryPage);
+} else {
   initDeliveryPage();
-});
+}
 
 async function initDeliveryPage() {
   try {
@@ -376,10 +378,8 @@ function confirmAddressAndProceed(e, id) {
 
   showToast('Delivery address confirmed! Proceeding to Payment...', 'success');
 
-  // Navigate to Step 3: Order Summary & Payment
-  setTimeout(() => {
-    window.location.href = '/checkout.html';
-  }, 350);
+  // Navigate immediately to Step 3: Order Summary & Payment (Zero delay)
+  window.location.href = '/checkout.html';
 }
 
 function toggleNewAddressForm() {

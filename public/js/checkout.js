@@ -106,19 +106,32 @@ function getUnifiedSelectedAddress() {
 // Page Lifecycle & Initialization
 // ─────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
-  initCheckoutPage();
+function startCheckout() {
+  // 1. INSTANT FIRST PAINT: Synchronously hydrate address, items & price card from local storage (0ms)
+  resolveDeliveryAddress();
+  loadCheckoutCartSync();
 
+  // 2. Resolve User Session synchronously from local storage
+  let user = null;
+  const localUser = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
+  if (localUser) {
+    try { user = JSON.parse(localUser); } catch (_) {}
+  }
+  currentUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
+
+  // 3. Attach interactive UI listeners
   const notesInput = document.getElementById('order-delivery-notes');
-  if (notesInput) {
+  if (notesInput && !notesInput.__notesBound) {
     notesInput.addEventListener('input', () => {
       const counter = document.getElementById('delivery-notes-count');
       if (counter) counter.textContent = String(notesInput.value.length) + ' / 200';
     });
+    notesInput.__notesBound = true;
   }
 
   // Payment radio card styling & animated toggle
   document.querySelectorAll('input[name="checkout_payment_method"]').forEach(radio => {
+    if (radio.__radioBound) return;
     radio.addEventListener('change', () => {
       document.querySelectorAll('.payment-option-box').forEach(box => {
         box.classList.remove('selected');
@@ -132,40 +145,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (detail) detail.style.display = 'block';
       }
     });
+    radio.__radioBound = true;
   });
 
   // Listen for storage cart updates
   window.addEventListener('storage', () => {
-    loadCheckoutCart();
+    loadCheckoutCartSync();
   });
   window.addEventListener('rjfc_cart_updated', () => {
-    loadCheckoutCart();
+    loadCheckoutCartSync();
   });
-});
 
-async function initCheckoutPage() {
+  // 4. Asynchronous gateway returns (PhonePe / Stripe) handled non-blocking
+  handleAsyncGatewayCallbacks();
+}
+
+async function handleAsyncGatewayCallbacks() {
   try {
-    // 1. Resolve User Session (allow guest or logged in)
-    let user = null;
-    try {
-      if (window.isStaticHosting) throw new Error('static');
-      const authRes = await fetch('/api/me');
-      if (authRes.ok) {
-        const authData = await authRes.json();
-        if (authData.success && authData.user) user = authData.user;
-      }
-    } catch (_) {}
-
-    if (!user) {
-      const localUser = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
-      if (localUser) {
-        try { user = JSON.parse(localUser); } catch (_) {}
-      }
-    }
-
-    currentUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
-
-    // Check PhonePe & Stripe return query params
     const urlParams = new URLSearchParams(window.location.search);
     const phonepeTxn = urlParams.get('phonepe_txn') || urlParams.get('merchantTransactionId');
     const phonepeOrderNumber = urlParams.get('order_number');
@@ -187,15 +183,20 @@ async function initCheckoutPage() {
       const verified = await handleStripeCallback(stripeSessionId, stripeOrderNumber);
       if (verified) return;
     }
-
-    // 2. Resolve Delivery Address
-    resolveDeliveryAddress();
-
-    // 3. Load Cart & Price Details
-    await loadCheckoutCart();
   } catch (err) {
-    console.error('Checkout initialization error:', err);
+    console.warn('Gateway callback check notice:', err);
   }
+}
+
+// Immediate zero-delay trigger: if DOM is interactive/complete, run immediately; otherwise on DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startCheckout);
+} else {
+  startCheckout();
+}
+
+async function initCheckoutPage() {
+  startCheckout();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -253,28 +254,95 @@ function resolveDeliveryAddress() {
 // ─────────────────────────────────────────────────────────────
 // Cart & Order Items Summary (Step 3 Review)
 // ─────────────────────────────────────────────────────────────
-async function loadCheckoutCart() {
+function loadCheckoutCartSync() {
   const container = document.getElementById('checkout-cart-items');
   const countEl = document.getElementById('checkout-items-count');
 
-  let rawItems = [];
+  // Direct zero-delay synchronous read from local storage
+  const rawItems = getUnifiedLocalCart();
 
-  // 1. Try server API
-  try {
-    if (window.isStaticHosting) throw new Error('static');
-    const res = await fetch('/api/cart');
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && Array.isArray(data.items) && data.items.length > 0) {
-        rawItems = data.items;
-      }
-    }
-  } catch (_) {}
+  // Normalize items
+  currentCartItems = rawItems.map((item, idx) => {
+    const price = Number(item.price) || 0;
+    const origPrice = Number(item.original_price || item.originalPrice || price);
+    return {
+      id: item.id || item.product_id || `item_${idx + 1}`,
+      name: item.name || item.title || 'Artisanal Ensemble',
+      price: price,
+      original_price: origPrice,
+      quantity: Math.max(1, Number(item.quantity) || 1),
+      size: item.size || item.selected_size || 'Free Size',
+      color: item.color || item.selected_color || '',
+      image: item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || '/images/placeholder.jpg'
+    };
+  });
 
-  // 2. Fallback to unified local storage
-  if (rawItems.length === 0) {
-    rawItems = getUnifiedLocalCart();
+  const itemCount = currentCartItems.reduce((s, i) => s + i.quantity, 0);
+
+  // Update Header Item Count
+  if (countEl) {
+    countEl.textContent = `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`;
   }
+
+  if (!container) return;
+
+  // Empty Bag Handling
+  if (currentCartItems.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 28px 16px; text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 8px;">🛍️</div>
+        <p style="font-size: 0.95rem; font-weight: 600; color: var(--deliv-text-primary); margin: 0 0 6px 0;">
+          Your bag is currently empty
+        </p>
+        <p style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin: 0 0 16px 0;">
+          Please select your couture pieces before proceeding to checkout.
+        </p>
+        <a href="/shop.html" style="display: inline-flex; align-items: center; gap: 8px; background: #111111; color: #ffffff; padding: 10px 22px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;">
+          <span>Explore Couture Catalog →</span>
+        </a>
+      </div>
+    `;
+
+    renderPriceDetails();
+    const confirmBtn = document.getElementById('confirm-order-btn');
+    if (confirmBtn) confirmBtn.disabled = true;
+    return;
+  }
+
+  // Render Compact 3:4 Portrait Item Rows
+  container.innerHTML = currentCartItems.map(item => `
+    <div class="checkout-item-row" style="display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--deliv-card-border);">
+      <img
+        src="${escapeHtml(item.image)}"
+        alt="${escapeHtml(item.name)}"
+        class="checkout-item-thumb"
+        style="width: 56px; height: 74px; aspect-ratio: 3/4; object-fit: cover; border-radius: 6px; background: #F7F4F0; flex-shrink: 0;"
+        onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'"
+      >
+      <div style="flex: 1; min-width: 0;">
+        <h4 class="checkout-item-title" style="font-size: 0.92rem; font-weight: 600; font-family: serif; color: var(--deliv-text-primary); margin: 0 0 4px 0; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${escapeHtml(item.name)}
+        </h4>
+        <div class="checkout-item-meta" style="font-size: 0.8rem; color: var(--deliv-text-secondary); display: flex; gap: 10px; flex-wrap: wrap;">
+          <span>Size: <strong>${escapeHtml(item.size)}</strong></span>
+          ${item.color ? `<span>Color: <strong>${escapeHtml(item.color)}</strong></span>` : ''}
+          <span>Qty: <strong>${item.quantity}</strong></span>
+        </div>
+      </div>
+      <div class="checkout-item-price" style="font-weight: 700; font-family: monospace; font-size: 0.96rem; color: var(--deliv-text-primary); text-align: right; flex-shrink: 0;">
+        ${formatPrice(item.price * item.quantity)}
+      </div>
+    </div>
+  `).join('');
+
+  const confirmBtn = document.getElementById('confirm-order-btn');
+  if (confirmBtn) confirmBtn.disabled = false;
+
+  renderPriceDetails();
+}
+
+async function loadCheckoutCart() {
+  loadCheckoutCartSync();
 
   // Normalize items
   currentCartItems = rawItems.map((item, idx) => {

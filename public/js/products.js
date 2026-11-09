@@ -946,7 +946,11 @@ function initShop() {
 
 // Immediate execution if DOM already loaded, or on DOMContentLoaded
 if (document.readyState === 'loading') {
+  if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initShop);
+} else {
+  initShop();
+}
 } else {
   initShop();
 }

@@ -227,4 +227,8 @@ async function submitOrderCancellation() {
   await loadMyOrders();
 }
 
-document.addEventListener('DOMContentLoaded', loadMyOrders);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadMyOrders);
+} else {
+  loadMyOrders();
+}

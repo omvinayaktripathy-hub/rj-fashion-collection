@@ -494,6 +494,52 @@
         </div>
 
         <!-- RIGHT COLUMN: Crisp Minimal Order Summary Card (Sticky) -->
+        <script>
+        // Instant Zero-Delay First Paint for Shopping Cart
+        (function() {
+          try {
+            var cartKeys = ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
+            var items = [];
+            for (var j = 0; j < cartKeys.length; j++) {
+              var rawC = localStorage.getItem(cartKeys[j]) || sessionStorage.getItem(cartKeys[j]);
+              if (rawC) {
+                try {
+                  var pC = JSON.parse(rawC);
+                  if (Array.isArray(pC) && pC.length > 0) { items = pC; break; }
+                } catch(_) {}
+              }
+            }
+            var listEl = document.getElementById('cart-items-list');
+            var subtotalEl = document.getElementById('cart-subtotal-display');
+            var totalEl = document.getElementById('cart-grand-total-display');
+            var countEl = document.getElementById('cart-heading-item-count');
+            if (listEl && items.length > 0) {
+              var subtotal = 0;
+              var totalQty = 0;
+              var html = '';
+              for (var k = 0; k < items.length; k++) {
+                var it = items[k];
+                var q = Math.max(1, Number(it.quantity) || 1);
+                var pr = Number(it.price) || 0;
+                totalQty += q;
+                subtotal += pr * q;
+                var img = it.image || it.thumbnail || (Array.isArray(it.images) && it.images[0]) || '/images/placeholder.jpg';
+                var itName = it.name || it.title || 'Artisanal Ensemble';
+                var itSize = it.size || it.selected_size || 'Free Size';
+                html += '<div class="cart-item-card" style="display:flex;gap:16px;padding:16px;border-bottom:1px solid #e5e0d8;align-items:center;">' +
+                  '<img src="' + img + '" alt="' + itName + '" style="width:80px;height:106px;aspect-ratio:3/4;object-fit:cover;border-radius:6px;flex-shrink:0;">' +
+                  '<div style="flex:1;min-width:0;"><h3 style="font-size:0.98rem;font-weight:600;font-family:serif;margin:0 0 4px 0;">' + itName + '</h3>' +
+                  '<div style="font-size:0.82rem;color:#6b7280;">Size: ' + itSize + ' • Qty: ' + q + '</div>' +
+                  '<div style="font-weight:700;font-family:monospace;font-size:1.05rem;color:#111;margin-top:6px;">₹' + Math.round(pr * q).toLocaleString('en-IN') + '</div></div></div>';
+              }
+              listEl.innerHTML = html;
+              if (subtotalEl) subtotalEl.textContent = '₹' + Math.round(subtotal).toLocaleString('en-IN');
+              if (totalEl) totalEl.textContent = '₹' + Math.round(subtotal).toLocaleString('en-IN');
+              if (countEl) countEl.textContent = '[ ' + totalQty + (totalQty === 1 ? ' Item ]' : ' Items ]');
+            }
+          } catch(e) {}
+        })();
+        </script>
         <aside class="cart-right-column">
           <div class="cart-summary-card" id="cart-summary-box">
             <h2 class="summary-card-title">Order Summary</h2>
@@ -649,7 +695,7 @@
 
   <script src="/firebase-config.js?v=20261109-waf-active"></script>
   <script src="/js/app.js?v=20261109-waf-active"></script>
-  <script src="/js/cart.js?v=20261109-waf-active"></script>
+  <script src="/js/cart.js?v=20261109-fast-boot"></script>
 
   <!-- Floating WhatsApp VIP Concierge Button -->
   <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20my%20bag%20and%20luxury%20order." target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" title="Chat on WhatsApp with RJ Fashion Concierge">

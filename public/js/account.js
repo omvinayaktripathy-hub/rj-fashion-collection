@@ -827,7 +827,7 @@ function handleAvatarSelected(event) {
 window.handleAvatarSelected = handleAvatarSelected;
 
 // Setup Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
+function startAccount() {
   initAccount();
   const profileForm = document.getElementById('profile-form');
   const pwdForm = document.getElementById('change-pwd-form');
@@ -836,4 +836,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (profileForm) profileForm.addEventListener('submit', updateProfile);
   if (pwdForm) pwdForm.addEventListener('submit', changePassword);
   if (addrForm) addrForm.addEventListener('submit', saveAccountNewAddress);
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startAccount);
+} else {
+  startAccount();
+}

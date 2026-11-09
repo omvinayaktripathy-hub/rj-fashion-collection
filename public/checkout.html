@@ -179,10 +179,11 @@
     .anim-fade-in {
       animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .anim-delay-1 { animation-delay: 0.08s; opacity: 0; }
-    .anim-delay-2 { animation-delay: 0.16s; opacity: 0; }
-    .anim-delay-3 { animation-delay: 0.24s; opacity: 0; }
-    .anim-delay-4 { animation-delay: 0.32s; opacity: 0; }
+    .anim-delay-1 { animation-delay: 0s; opacity: 1; }
+    .anim-delay-2 { animation-delay: 0s; opacity: 1; }
+    .anim-delay-3 { animation-delay: 0s; opacity: 1; }
+    .anim-delay-4 { animation-delay: 0s; opacity: 1; }
+    .anim-fade-in { animation: none !important; opacity: 1 !important; }
 
     /* Top Announcement Bar */
     .top-bar {
@@ -865,6 +866,76 @@
           </div>
         </div>
 
+        <script>
+        // Instant Zero-Delay First Paint: Synchronously populate address & bag from storage in 0ms
+        (function() {
+          try {
+            var addrKeys = ['rj_selected_address', 'checkout_address_summary', 'rjfc_selected_address'];
+            var addr = null;
+            for (var i = 0; i < addrKeys.length; i++) {
+              var raw = sessionStorage.getItem(addrKeys[i]) || localStorage.getItem(addrKeys[i]);
+              if (raw) {
+                try {
+                  var p = JSON.parse(raw);
+                  if (p && (p.name || p.fullName || p.full_name)) { addr = p; break; }
+                } catch(_) {}
+              }
+            }
+            var addrEl = document.getElementById('confirmed-address-content');
+            if (addrEl && addr) {
+              var name = addr.name || addr.fullName || addr.full_name || '';
+              var phone = addr.phone || addr.customer_phone || '';
+              var text = addr.text || ((addr.house_flat || '') + ', ' + (addr.street || '') + ', ' + (addr.city || '') + ' - ' + (addr.pin_code || ''));
+              var type = (addr.address_type || addr.addressType || 'HOME').toUpperCase();
+              addrEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
+                '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+                '<strong style="font-size:1.08rem;color:var(--deliv-text-primary);font-family:serif;">' + name + '</strong>' +
+                '<span class="addr-tag default-tag" style="background:#0F382A;color:#ffffff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;">' + type + '</span>' +
+                (phone ? '<span style="color:var(--deliv-text-secondary);font-size:0.9rem;font-weight:600;">📞 ' + phone + '</span>' : '') +
+                '</div><div style="color:var(--deliv-text-secondary);font-size:0.92rem;line-height:1.6;">' + text + '</div>' +
+                '<div style="margin-top:6px;font-size:0.8rem;font-weight:600;color:#0F382A;display:flex;align-items:center;gap:6px;"><span>🚚</span><span>Arrives in 3–5 Business Days via Express Insured Courier</span></div></div>';
+            }
+
+            var cartKeys = ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
+            var items = [];
+            for (var j = 0; j < cartKeys.length; j++) {
+              var rawC = localStorage.getItem(cartKeys[j]) || sessionStorage.getItem(cartKeys[j]);
+              if (rawC) {
+                try {
+                  var pC = JSON.parse(rawC);
+                  if (Array.isArray(pC) && pC.length > 0) { items = pC; break; }
+                } catch(_) {}
+              }
+            }
+            var itemsEl = document.getElementById('checkout-cart-items');
+            var countEl = document.getElementById('checkout-items-count');
+            if (itemsEl && items.length > 0) {
+              var totalQty = 0;
+              var subtotal = 0;
+              var html = '';
+              for (var k = 0; k < items.length; k++) {
+                var it = items[k];
+                var q = Math.max(1, Number(it.quantity) || 1);
+                var pr = Number(it.price) || 0;
+                totalQty += q;
+                subtotal += pr * q;
+                var img = it.image || it.thumbnail || (Array.isArray(it.images) && it.images[0]) || '/images/placeholder.jpg';
+                var itName = it.name || it.title || 'Artisanal Ensemble';
+                var itSize = it.size || it.selected_size || 'Free Size';
+                html += '<div class="checkout-item-row" style="display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--deliv-card-border);">' +
+                  '<img src="' + img + '" alt="' + itName + '" class="checkout-item-thumb" style="width:56px;height:74px;aspect-ratio:3/4;object-fit:cover;border-radius:6px;background:#F7F4F0;flex-shrink:0;">' +
+                  '<div style="flex:1;min-width:0;"><h4 style="font-size:0.92rem;font-weight:600;font-family:serif;color:var(--deliv-text-primary);margin:0 0 4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + itName + '</h4>' +
+                  '<div style="font-size:0.8rem;color:var(--deliv-text-secondary);display:flex;gap:10px;"><span>Size: <strong>' + itSize + '</strong></span><span>Qty: <strong>' + q + '</strong></span></div></div>' +
+                  '<div style="font-weight:700;font-family:monospace;font-size:0.96rem;color:var(--deliv-text-primary);text-align:right;">₹' + Math.round(pr * q).toLocaleString('en-IN') + '</div></div>';
+              }
+              itemsEl.innerHTML = html;
+              if (countEl) countEl.textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
+              var ctaBtn = document.getElementById('confirm-order-btn-label');
+              if (ctaBtn) ctaBtn.textContent = 'PAY & COMPLETE ORDER • ₹' + Math.round(subtotal).toLocaleString('en-IN');
+            }
+          } catch(e) {}
+        })();
+        </script>
         <!-- CARD 3: FESTIVE COUPON & PROMO CODE -->
         <div class="coupon-card-section anim-fade-in anim-delay-3">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
@@ -1221,7 +1292,7 @@
 
   <script src="/firebase-config.js?v=20261109-waf-active"></script>
   <script src="/js/app.js?v=20261109-waf-active"></script>
-  <script src="/js/checkout.js?v=20261109-waf-active"></script>
+  <script src="/js/checkout.js?v=20261109-fast-boot"></script>
   <script src="/js/mobile-nav.js?v=20261109-waf-active" defer></script>
   <script src="/js/analytics.js" defer></script>
 <script src="/js/shadcn-ui.js?v=20261109-waf-active" defer></script>
