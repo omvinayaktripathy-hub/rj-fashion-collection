@@ -238,7 +238,8 @@
         "destination": "/404",
         "type": 302
       }
-    ]
+    ],
+    "site": "rj-fashion-collection"
   },
   "firestore": {
     "rules": "firestore.rules"
