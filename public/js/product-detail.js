@@ -329,22 +329,6 @@ function renderProduct(p) {
             </div>
           ` : ''}
 
-          <!-- AI Virtual Try-On Studio Action Button -->
-          <div style="margin-bottom: 12px;">
-            <button type="button" 
-              id="btnOpenTryonStudio" 
-              class="fk-cta-btn fk-btn-tryon" 
-              role="button" 
-              tabindex="0" 
-              aria-haspopup="dialog"
-              aria-label="AI Virtual Dressing Room — Try On in Real-Time"
-              onclick="handleOpenTryonStudio(event)" 
-              title="Virtual Dressing Room">
-              <span class="fk-cta-icon">✨</span>
-              <span>AI VIRTUAL DRESSING ROOM — TRY ON IN REAL-TIME</span>
-            </button>
-          </div>
-
           <!-- Flipkart Dual Action Buttons (Desktop / Tablet) -->
           <div class="fk-cta-grid fk-desktop-cta">
             <button class="fk-cta-btn fk-btn-cart ${isOutOfStock ? 'disabled' : ''}" 
@@ -1303,27 +1287,3 @@ async function loadRelatedProducts(categoryOrDept, currentId) {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', loadProductDetails);
-
-// Interactive AI Virtual Dressing Room Launcher
-function handleOpenTryonStudio(event) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-  const prod = currentProduct || window.currentProduct || window.currentProductDetail || window.lastLoadedProduct;
-  if (typeof window.openRjTryonStudio === 'function') {
-    window.openRjTryonStudio(prod);
-  } else {
-    const btn = document.getElementById('btnOpenTryonStudio');
-    if (btn) btn.classList.add('loading');
-    setTimeout(() => {
-      if (btn) btn.classList.remove('loading');
-      if (typeof window.openRjTryonStudio === 'function') {
-        window.openRjTryonStudio(prod);
-      } else {
-        console.warn('AI Virtual Dressing Room studio initialization pending...');
-      }
-    }, 150);
-  }
-}
-window.handleOpenTryonStudio = handleOpenTryonStudio;
