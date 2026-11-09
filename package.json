@@ -25,6 +25,7 @@
   "author": "RJ Fashion Collection",
   "license": "ISC",
   "dependencies": {
+    "@gradio/client": "^2.7.2",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.3.1",

@@ -2215,3 +2215,179 @@ main {
   overflow-wrap: break-word !important;
   box-sizing: border-box !important;
 }
+
+
+/* ===================================================================
+   MOBILE & TABLET HEADER & LAYOUT ALIGNMENT PERFECTION (2026)
+   =================================================================== */
+@media screen and (max-width: 768px) {
+  /* 1. Header Main: Clean 2-Row Layout */
+  .site-header .header-main,
+  .header-main {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 8px 12px !important;
+    gap: 6px 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Hamburger Button */
+  #rj-hamburger-btn {
+    order: 1 !important;
+    flex: 0 0 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--text) !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+  }
+
+  /* Brand Logo: Clean, never truncated, stays on row 1 */
+  .brand-logo {
+    order: 2 !important;
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 110px) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    text-decoration: none !important;
+  }
+
+  .brand-logo-mark {
+    flex: 0 0 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .brand-logo-mark img {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain !important;
+  }
+
+  .brand-logo-text {
+    min-width: 0 !important;
+    flex: 0 1 auto !important;
+  }
+
+  .brand-logo .logo-title {
+    font-size: clamp(0.85rem, 3.5vw, 1rem) !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    letter-spacing: 0.2px !important;
+    line-height: 1.15 !important;
+    display: block !important;
+  }
+
+  .brand-logo .logo-subtitle {
+    display: none !important;
+  }
+
+  /* Header Actions on Mobile: Keep on Row 1 at the right edge */
+  .header-actions {
+    order: 3 !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+  }
+
+  /* Cart & account icons are already permanently pinned in mobile .bottom-nav */
+  .header-actions .action-btn {
+    display: none !important;
+  }
+
+  .theme-switch-container {
+    padding: 3px 5px !important;
+    gap: 3px !important;
+    min-width: unset !important;
+  }
+
+  .theme-switch-container .theme-mode-text {
+    display: none !important;
+  }
+
+  .theme-switch-track {
+    width: 28px !important;
+    height: 15px !important;
+  }
+
+  .theme-switch-thumb {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  /* Full-width Search Bar on Row 2 */
+  .header-search {
+    order: 10 !important;
+    flex-basis: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 4px 0 0 0 !important;
+  }
+
+  .header-search form {
+    width: 100% !important;
+  }
+
+  /* 2. Safe Bottom Padding for Mobile (Prevents content hidden behind Bottom Navigation) */
+  body {
+    padding-bottom: calc(72px + var(--safe-bottom, 0px)) !important;
+  }
+
+  /* 3. Floating WhatsApp Button: Elevated above Bottom Navigation */
+  .whatsapp-float-btn {
+    bottom: calc(72px + var(--safe-bottom, 0px)) !important;
+    right: 14px !important;
+    width: 48px !important;
+    height: 48px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    z-index: 998 !important;
+  }
+
+  .whatsapp-float-btn .whatsapp-label {
+    display: none !important;
+  }
+
+  .whatsapp-float-btn svg {
+    margin: 0 !important;
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  /* 4. Category Section Header: Clean wrap and gold contrast */
+  .section-header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  .section-header .section-title {
+    font-size: clamp(1.35rem, 4.5vw, 1.85rem) !important;
+    margin: 0 !important;
+  }
+
+  .section-header .view-all-link {
+    color: var(--gold) !important;
+    font-size: 0.84rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+}

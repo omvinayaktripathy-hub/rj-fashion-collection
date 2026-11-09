@@ -3954,9 +3954,7 @@ function applySettingsToForm(s) {
   if (document.getElementById('set-store-whatsapp')) document.getElementById('set-store-whatsapp').value = s.whatsapp_number || '+91 78940 93586';
   if (document.getElementById('set-shipping-threshold')) document.getElementById('set-shipping-threshold').value = s.free_shipping_threshold || 999;
   if (document.getElementById('set-shipping-fee')) document.getElementById('set-shipping-fee').value = s.shipping_fee || 99;
-  if (document.getElementById('set-tryon-enabled')) document.getElementById('set-tryon-enabled').checked = s.tryon_enabled === 1 || s.tryon_enabled === true;
-  if (document.getElementById('set-tryon-api-url')) document.getElementById('set-tryon-api-url').value = s.tryon_api_url || '';
-}
+    }
 
 async function handleSettingsFormSubmit(e) {
   if (e) e.preventDefault();
@@ -3970,9 +3968,7 @@ async function handleSettingsFormSubmit(e) {
     whatsapp_number: document.getElementById('set-store-whatsapp')?.value?.trim() || '+91 78940 93586',
     free_shipping_threshold: Number(document.getElementById('set-shipping-threshold')?.value) || 999,
     shipping_fee: Number(document.getElementById('set-shipping-fee')?.value) || 99,
-    tryon_enabled: document.getElementById('set-tryon-enabled')?.checked ? 1 : 0,
-    tryon_api_url: document.getElementById('set-tryon-api-url')?.value?.trim() || ''
-  };
+          };
 
   try {
     const res = await fetch('/api/admin/settings', {

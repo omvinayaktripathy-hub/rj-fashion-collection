@@ -23,8 +23,8 @@
   <meta name="twitter:title" content="RJ Fashion Collection - Private Admin Portal">
   <meta name="twitter:description" content="RJ Fashion Collection Private Boutique Administration Portal.">
   <meta name="twitter:image" content="https://rj-fashion-collection.web.app/images/og-preview.jpg">
-  <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261109-tryon-live-fixed">
-  <link rel="stylesheet" href="/css/admin.css?v=20261109-tryon-live-fixed">
+  <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261109-production-clean">
+  <link rel="stylesheet" href="/css/admin.css?v=20261109-production-clean">
   <style>
     /* Admin layout explicit flex-direction & responsive styles */
     html, body {
@@ -1325,22 +1325,11 @@
 
               <!-- Shipping & AI Try-On -->
               <div class="settings-card" style="grid-column: 1 / -1;">
-                <h4>🚚 Shipping Policies & Virtual Try-On</h4>
+                <h4>🚚 Shipping Policies</h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
                   <div class="form-group">
                     <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Free Shipping Threshold (₹)</label>
                     <input type="number" id="set-free-shipping" value="999" min="0" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
-                  </div>
-                  <div class="form-group">
-                    <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Virtual Try-On Status</label>
-                    <select id="set-tryon-enabled" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background:#fff;">
-                      <option value="1">🟢 Enabled (IDM-VTON / CatVTON Active)</option>
-                      <option value="0">🔴 Disabled (Under Maintenance)</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label style="font-size: 0.8rem; font-weight: 700; color: #334155;">Privacy: File Erasure Window (Hours)</label>
-                    <input type="number" id="set-tryon-retention" value="2" min="1" max="24" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;">
                   </div>
                 </div>
               </div>
@@ -1914,9 +1903,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
-  <script src="/firebase-config.js?v=20261109-tryon-live-fixed"></script>
-  <script src="/js/app.js?v=20261109-tryon-live-fixed"></script>
-  <script src="/js/admin.js?v=20261109-tryon-live-fixed"></script>
+  <script src="/firebase-config.js?v=20261109-production-clean"></script>
+  <script src="/js/app.js?v=20261109-production-clean"></script>
+  <script src="/js/admin.js?v=20261109-production-clean"></script>
   <!-- CREATE PROMO CODE MODAL -->
   <div id="promo-modal" class="modal-backdrop">
     <div class="modal-window" style="max-width: 500px;">
@@ -1977,6 +1966,6 @@
       <div id="campaign-preview-body" style="max-height: 80vh; overflow-y: auto; background: #faf8f5;"></div>
     </div>
   </div>
-<script src="/js/shadcn-ui.js?v=20261109-tryon-live-fixed" defer></script>
+<script src="/js/shadcn-ui.js?v=20261109-production-clean" defer></script>
 </body>
 </html>

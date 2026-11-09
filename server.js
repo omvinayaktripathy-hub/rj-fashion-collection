@@ -20,7 +20,6 @@ const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payment');
 const notificationRoutes = require('./routes/notifications');
 const contactRoutes = require('./routes/contact');
-const tryonRoutes = require('./routes/tryon');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -356,7 +355,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/contact', authLimiter, contactRoutes);
-app.use('/api/tryon', tryonRoutes);
 
 // Public Homepage Campaign & Grand Opening Settings
 app.get('/api/campaign', (req, res) => {
