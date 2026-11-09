@@ -1241,10 +1241,7 @@ function initAnnouncementBarRotator() {
        <strong class="code-val">GRANDRJ</strong>
        <span class="code-copy-tip" id="code-copy-tip">COPIED</span>
      </span>`,
-    `<span class="top-bar-msg">✨ 100% Certified Authentic Artisanal Silk Weaves & Heirloom Jewelry</span>
-     <span class="top-bar-sep" aria-hidden="true">•</span>
-     <span class="top-bar-perk">Direct from Master Artisans of Varanasi & Kanchipuram</span>
-     <a href="/shop.html?category=sarees" style="color:#d4af37;text-decoration:underline;font-weight:700;margin-left:6px;">Explore Sarees &rarr;</a>`,
+
     `<span class="top-bar-msg">💬 Need Personalized Styling or Bridal Consultation?</span>
      <span class="top-bar-sep" aria-hidden="true">•</span>
      <span class="top-bar-perk">Boutique VIP Concierge Available on WhatsApp</span>

@@ -350,7 +350,7 @@ function renderProduct(p) {
             <div class="fk-trust-item">
               <span class="fk-trust-icon">🛡️</span>
               <div>
-                <strong>100% Authentic</strong>
+                <strong>Premium Quality</strong>
                 <p>Pure Artisan Craft</p>
               </div>
             </div>
@@ -578,7 +578,7 @@ function renderProduct(p) {
           <div class="fk-reviews-header">
             <div>
               <h3 class="fk-section-title" style="margin-bottom: 4px;">Ratings & Customer Reviews</h3>
-              <div style="font-size: 0.9rem; color: var(--muted);">Certified Authentic Buyer Feedback</div>
+              <div style="font-size: 0.9rem; color: var(--muted);">Verified Buyer Reviews & Feedback</div>
             </div>
             <button type="button" class="btn btn-outline" onclick="openReviewModal()" style="font-size: 0.85rem; padding: 6px 16px;">
               ★ Rate Product
