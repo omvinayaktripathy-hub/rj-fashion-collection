@@ -346,6 +346,39 @@ function initSchema() {
     db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_payment_intent ON orders (payment_intent_id)`);
   } catch (_) {}
 
+
+  // Migrations for Strict Single-Use Coupon Anti-Abuse (One per Customer & One per IP)
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS coupon_redemptions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        coupon_code TEXT NOT NULL,
+        user_id INTEGER,
+        user_email TEXT,
+        user_ip TEXT NOT NULL,
+        order_id INTEGER,
+        order_number TEXT,
+        discount_amount REAL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_code_ip ON coupon_redemptions (coupon_code, user_ip)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_code_user ON coupon_redemptions (coupon_code, user_id)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_code_email ON coupon_redemptions (coupon_code, user_email)`);
+  } catch (err) {
+    console.warn('[DB Migration] coupon_redemptions notice:', err.message);
+  }
+
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN user_ip TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`ALTER TABLE orders ADD COLUMN coupon_code TEXT`);
+  } catch (_) {}
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_orders_coupon_ip ON orders (coupon_code, user_ip)`);
+  } catch (_) {}
+
   // Migrations for MFA and Password Reset in users table
   try {
     db.exec(`ALTER TABLE users ADD COLUMN mfa_enabled INTEGER DEFAULT 0`);

@@ -86,7 +86,7 @@ function evaluateCoupon(couponCode, subtotal) {
  * @param {Array} rawCartItems - array of items with product_id (or id) and quantity
  * @param {string} couponCode - optional promotional coupon string
  */
-function calculateServerPricing(rawCartItems, couponCode = '') {
+function calculateServerPricing(rawCartItems, couponCode = '', userContext = {}) {
   let subtotal = 0;
   const verifiedItems = [];
 
@@ -135,9 +135,36 @@ function calculateServerPricing(rawCartItems, couponCode = '') {
   // Shipping calculation: Free over ₹999, else ₹49
   const shipping = subtotal > 999 ? 0 : 49;
 
-  // Authoritative discount evaluation
-  const couponResult = evaluateCoupon(couponCode, subtotal);
-  const discount = couponResult.discount;
+  // Authoritative discount evaluation via strict anti-abuse engine
+  let discount = 0;
+  let appliedCoupon = null;
+  let couponMessage = '';
+
+  if (couponCode) {
+    try {
+      const couponService = require('./couponService');
+      const eligibility = couponService.checkCouponEligibility(couponCode, {
+        userId: userContext.userId || null,
+        userEmail: userContext.userEmail || '',
+        userIp: userContext.userIp || '127.0.0.1',
+        orderAmount: subtotal
+      });
+
+      if (eligibility.eligible) {
+        discount = eligibility.discount_amount;
+        appliedCoupon = eligibility.code;
+        couponMessage = eligibility.message;
+      } else {
+        couponMessage = eligibility.message;
+      }
+    } catch (_) {
+      // Fallback to in-memory evaluation if DB unavailable
+      const fallbackResult = evaluateCoupon(couponCode, subtotal);
+      discount = fallbackResult.discount;
+      appliedCoupon = fallbackResult.coupon;
+      couponMessage = fallbackResult.message || '';
+    }
+  }
 
   // Grand total
   const total = Math.max(0, subtotal + shipping - discount);
@@ -146,7 +173,8 @@ function calculateServerPricing(rawCartItems, couponCode = '') {
     subtotal,
     shipping,
     discount,
-    couponCode: couponResult.coupon,
+    couponCode: appliedCoupon,
+    couponMessage,
     total,
     verifiedItems
   };

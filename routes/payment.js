@@ -130,8 +130,27 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       return res.status(400).json({ success: false, message: 'Please select a delivery address before checkout.' });
     }
 
-    // 4. Calculate authoritative server-side pricing
-    const pricing = calculateServerPricing(cartItems, coupon || couponCode);
+    // 4. Calculate authoritative server-side pricing with Strict Anti-Abuse
+    const couponService = require('../services/couponService');
+    const clientIp = couponService.extractClientIp(req);
+    const codeToTest = (coupon || couponCode || '').trim().toUpperCase();
+
+    if (codeToTest) {
+      const eligibility = couponService.checkCouponEligibility(codeToTest, {
+        userId,
+        userEmail: req.session.user.email,
+        userIp: clientIp
+      });
+      if (!eligibility.eligible) {
+        return res.status(400).json({ success: false, message: eligibility.message });
+      }
+    }
+
+    const pricing = calculateServerPricing(cartItems, codeToTest, {
+      userId,
+      userEmail: req.session.user.email,
+      userIp: clientIp
+    });
     const subtotal = pricing.subtotal;
     const shipping = pricing.shipping;
     const discount = pricing.discount;
@@ -144,8 +163,8 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       INSERT INTO orders (
         order_number, user_id, address_id, customer_name, customer_email, customer_phone,
         delivery_address, subtotal, discount, shipping, total, payment_method, payment_status,
-        status, notes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Stripe', 'Pending', 'Pending', ?)
+        status, notes, user_ip, coupon_code
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Stripe', 'Pending', 'Pending', ?, ?, ?)
     `);
 
     const orderResult = orderInsert.run(
@@ -160,7 +179,9 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       discount,
       shipping,
       total,
-      notes
+      notes,
+      clientIp,
+      appliedCoupon || null
     );
     const orderId = Number(orderResult.lastInsertRowid);
 
@@ -188,7 +209,20 @@ router.post('/stripe/create-checkout-session', requireAuth, async (req, res) => 
       stockUpdate.run(item.quantity, item.product_id);
     }
 
-    // 7. Clear cart
+    // 7. Record coupon redemption in audit ledger
+    if (appliedCoupon && discount > 0) {
+      couponService.recordCouponRedemption({
+        couponCode: appliedCoupon,
+        userId,
+        userEmail: req.session.user.email,
+        userIp: clientIp,
+        orderId,
+        orderNumber,
+        discountAmount: discount
+      });
+    }
+
+    // 8. Clear cart
     db.prepare('DELETE FROM cart_items WHERE user_id = ?').run(userId);
 
     // 8. Determine origin for callback

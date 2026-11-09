@@ -417,72 +417,39 @@ async function applyCartCoupon(e) {
     subtotal = local.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
   } catch (_) {}
 
-  let validated = false;
   try {
     const res = await fetch(`${API_BASE}/promotions/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, amount: subtotal })
     });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success) {
-        appliedCartCoupon = {
-          code: data.code,
-          discount_type: data.discount_type,
-          discount_value: data.discount_value,
-          discount_amount: data.discount_amount
-        };
-        validated = true;
+    const data = await res.json();
+    if (res.ok && data && data.success) {
+      appliedCartCoupon = {
+        code: data.code,
+        discount_type: data.discount_type,
+        discount_value: data.discount_value,
+        discount_amount: data.discount_amount
+      };
+      try {
+        sessionStorage.setItem('rjfc_cart_coupon', JSON.stringify(appliedCartCoupon));
+        localStorage.setItem('rjfc_cart_coupon', JSON.stringify(appliedCartCoupon));
+        sessionStorage.setItem('rjfc_cart_promo_code', appliedCartCoupon.code);
+        localStorage.setItem('rjfc_cart_promo_code', appliedCartCoupon.code);
+      } catch (_) {}
+      if (input) input.value = '';
+      await loadCart();
+      if (typeof showToast === 'function') {
+        showToast(data.message || `Promo code "${appliedCartCoupon.code}" applied successfully! 🎉`, 'success');
+      }
+    } else {
+      if (typeof showToast === 'function') {
+        showToast(data?.message || 'Invalid promo code or not eligible.', 'error');
       }
     }
-  } catch (_) {}
-
-  if (!validated) {
-    if (code === 'GRANDRJ') {
-      const discountVal = subtotal >= 2000 ? 500 : Math.round(subtotal * 0.15);
-      appliedCartCoupon = {
-        code: 'GRANDRJ',
-        discount_type: 'fixed',
-        discount_value: discountVal,
-        discount_amount: discountVal
-      };
-      validated = true;
-    } else if (code === 'ROYALE10' || code === 'ROYAL10' || code === 'FESTIVE10') {
-      const discountVal = Math.round(subtotal * 0.10);
-      appliedCartCoupon = {
-        code,
-        discount_type: 'percentage',
-        discount_value: 10,
-        discount_amount: discountVal
-      };
-      validated = true;
-    } else if (code === 'WELCOME500' && subtotal >= 2999) {
-      appliedCartCoupon = {
-        code: 'WELCOME500',
-        discount_type: 'fixed',
-        discount_value: 500,
-        discount_amount: 500
-      };
-      validated = true;
-    }
-  }
-
-  if (validated && appliedCartCoupon) {
-    try {
-      sessionStorage.setItem('rjfc_cart_coupon', JSON.stringify(appliedCartCoupon));
-      localStorage.setItem('rjfc_cart_coupon', JSON.stringify(appliedCartCoupon));
-      sessionStorage.setItem('rjfc_cart_promo_code', appliedCartCoupon.code);
-      localStorage.setItem('rjfc_cart_promo_code', appliedCartCoupon.code);
-    } catch (_) {}
-    if (input) input.value = '';
-    await loadCart();
+  } catch (err) {
     if (typeof showToast === 'function') {
-      showToast(`Promo code "${appliedCartCoupon.code}" applied successfully!`, 'success');
-    }
-  } else {
-    if (typeof showToast === 'function') {
-      showToast('Invalid promo code or minimum spend requirement not met', 'error');
+      showToast('Could not validate promo code. Please check your connection.', 'error');
     }
   }
 }

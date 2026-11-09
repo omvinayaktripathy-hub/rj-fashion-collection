@@ -113,8 +113,27 @@ router.post('/', requireAuth, (req, res) => {
     }
 
     // 4. Calculate authoritative server-side totals (client-supplied prices & discounts strictly ignored)
+    const couponService = require('../services/couponService');
+    const clientIp = couponService.extractClientIp(req);
     const { calculateServerPricing } = require('../services/pricing');
-    const pricing = calculateServerPricing(cartItems, couponCode);
+
+    // Strict Anti-Abuse Check: Reject order if coupon was already redeemed by this customer or IP
+    if (couponCode) {
+      const eligibility = couponService.checkCouponEligibility(couponCode, {
+        userId,
+        userEmail: req.session.user.email,
+        userIp: clientIp
+      });
+      if (!eligibility.eligible) {
+        return res.status(400).json({ success: false, message: eligibility.message });
+      }
+    }
+
+    const pricing = calculateServerPricing(cartItems, couponCode, {
+      userId,
+      userEmail: req.session.user.email,
+      userIp: clientIp
+    });
     const subtotal = pricing.subtotal;
     const shipping = pricing.shipping;
     const discount = pricing.discount;
@@ -136,8 +155,8 @@ router.post('/', requireAuth, (req, res) => {
         INSERT INTO orders (
           order_number, user_id, address_id, customer_name, customer_email, customer_phone,
           delivery_address, subtotal, discount, shipping, total, payment_method, payment_status,
-          status, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', ?)
+          status, notes, user_ip, coupon_code
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', ?, ?, ?)
       `);
 
       const orderResult = orderInsert.run(
@@ -154,7 +173,9 @@ router.post('/', requireAuth, (req, res) => {
         total,
         paymentMethod,
         paymentMethod === 'Cash on Delivery' ? 'Pending' : 'Paid',
-        notes
+        notes,
+        clientIp,
+        pricing.couponCode || null
       );
 
       const orderId = Number(orderResult.lastInsertRowid);

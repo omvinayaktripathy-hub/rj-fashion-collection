@@ -484,42 +484,43 @@ app.get('/api/campaign', (req, res) => {
   }
 });
 
-// Public Promotional Code Validator
+// Public Promotional Code Validator with Strict Anti-Abuse (Single-Use per Customer & per IP)
 app.post('/api/promotions/validate', (req, res) => {
   try {
     const { code, amount } = req.body;
     if (!code) return res.status(400).json({ success: false, message: 'Please enter a coupon code' });
-    const cleanCode = code.trim().toUpperCase();
-    const db = require('./database/db');
-    const promo = db.prepare('SELECT * FROM promotions WHERE code = ? AND active = 1').get(cleanCode);
-    if (!promo) {
-      return res.status(404).json({ success: false, message: 'Invalid or expired promotional code' });
-    }
-    const orderAmount = Number(amount) || 0;
-    if (promo.min_order_amount && orderAmount < promo.min_order_amount) {
+
+    const couponService = require('./services/couponService');
+    const clientIp = couponService.extractClientIp(req);
+    const userId = req.session?.user?.id || null;
+    const userEmail = req.session?.user?.email || '';
+
+    const result = couponService.checkCouponEligibility(code, {
+      userId,
+      userEmail,
+      userIp: clientIp,
+      orderAmount: Number(amount) || 0
+    });
+
+    if (!result.eligible) {
       return res.status(400).json({
         success: false,
-        message: `This code requires a minimum order amount of ₹${promo.min_order_amount}`
+        code: result.code,
+        message: result.message
       });
     }
-    let discount = 0;
-    if (promo.discount_type === 'percentage') {
-      discount = Math.round((orderAmount * promo.discount_value) / 100);
-      if (promo.max_discount_amount && discount > promo.max_discount_amount) {
-        discount = promo.max_discount_amount;
-      }
-    } else {
-      discount = Math.min(orderAmount, promo.discount_value);
-    }
+
     res.json({
       success: true,
-      code: promo.code,
-      discount_type: promo.discount_type,
-      discount_value: promo.discount_value,
-      discount_amount: discount,
-      message: `${promo.description || promo.code} applied successfully! 🎉`
+      code: result.code,
+      discount_type: result.discount_type,
+      discount_value: result.discount_value,
+      discount_amount: result.discount_amount,
+      min_order_amount: result.min_order_amount,
+      message: result.message
     });
   } catch (err) {
+    console.error('Coupon validation error:', err.message);
     res.status(500).json({ success: false, message: 'Failed to validate promo code' });
   }
 });

@@ -8,7 +8,7 @@ let activeAddressData = null;
 let currentCartItems = [];
 let currentCartTotal = 0;
 let appliedDiscount = 0;
-let couponCodeApplied = 'GRANDRJ';
+let couponCodeApplied = (function() { try { return sessionStorage.getItem('rjfc_cart_promo_code') || localStorage.getItem('rjfc_cart_promo_code') || ''; } catch(_) { return ''; } })();
 let currentUser = null;
 
 function formatPrice(amount) {
@@ -435,7 +435,7 @@ function renderPriceDetails() {
 // ─────────────────────────────────────────────────────────────
 // Interactive Coupon Code System
 // ─────────────────────────────────────────────────────────────
-function applyPromoCode(codeOverride) {
+async function applyPromoCode(codeOverride) {
   const input = document.getElementById('coupon-input');
   const code = (codeOverride || input?.value || '').trim().toUpperCase();
 
@@ -446,31 +446,33 @@ function applyPromoCode(codeOverride) {
 
   const itemsSubtotal = currentCartItems.reduce((s, i) => s + (i.price * i.quantity), 0);
 
-  if (code === 'GRANDRJ' || code === 'ROYAL10') {
-    couponCodeApplied = code;
-    if (input) input.value = code;
-    if (typeof showToast === 'function') {
-      showToast(`👑 Promo code "${code}" applied successfully!`, 'success');
-    }
-    triggerConfetti(35);
-    renderPriceDetails();
-  } else if (code === 'WELCOME500') {
-    if (itemsSubtotal >= 2999) {
-      couponCodeApplied = code;
-      if (input) input.value = code;
+  try {
+    const res = await fetch('/api/promotions/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, amount: itemsSubtotal })
+    });
+    const data = await res.json();
+    if (res.ok && data && data.success) {
+      couponCodeApplied = data.code;
+      if (input) input.value = data.code;
+      try {
+        sessionStorage.setItem('rjfc_cart_promo_code', data.code);
+        localStorage.setItem('rjfc_cart_promo_code', data.code);
+      } catch (_) {}
       if (typeof showToast === 'function') {
-        showToast('🎉 Promo code "WELCOME500" applied! You saved ₹500 extra!', 'success');
+        showToast(data.message || `👑 Promo code "${data.code}" applied successfully!`, 'success');
       }
       triggerConfetti(35);
       renderPriceDetails();
     } else {
       if (typeof showToast === 'function') {
-        showToast('WELCOME500 requires a minimum bag value of ₹2,999', 'warning');
+        showToast(data?.message || 'Invalid promo code or not eligible.', 'error');
       }
     }
-  } else {
+  } catch (err) {
     if (typeof showToast === 'function') {
-      showToast('Invalid promo coupon code or minimum order condition not met', 'error');
+      showToast('Could not validate coupon. Please check connection.', 'error');
     }
   }
 }
