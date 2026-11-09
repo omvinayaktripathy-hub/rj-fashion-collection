@@ -11269,3 +11269,13 @@ body.style-editorial-impact {
   white-space: nowrap !important;
   border: 0 !important;
 }
+
+
+/* Disable colliding underline for centered section headers and signature tabs */
+.signature-tabs-section .section-title::after,
+.section-header[style*="column"] .section-title::after,
+.section-header[style*="center"] .section-title::after,
+.section-header.text-center .section-title::after {
+  display: none !important;
+  content: none !important;
+}
