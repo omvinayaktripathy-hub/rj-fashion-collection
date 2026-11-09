@@ -200,13 +200,17 @@ function switchAuthTab(tab) {
 }
 
 function showAuthError(msg) {
+  var raw = String(msg || '');
+  if (raw.includes('Firebase:') || raw.includes('auth/')) {
+    raw = mapAuthErrorCode('', raw);
+  }
   const banner = document.getElementById('auth-error-banner');
   const textEl = document.getElementById('auth-error-text');
   if (banner && textEl) {
-    textEl.textContent = msg;
+    textEl.textContent = raw;
     banner.style.display = 'flex';
   } else if (typeof showToast === 'function') {
-    showToast(msg, 'error');
+    showToast(raw, 'error');
   }
 }
 
@@ -230,7 +234,7 @@ function togglePasswordVisibility(inputId, btn) {
 }
 
 function mapAuthErrorCode(code, fallbackMessage) {
-  const clean = String(code || '').toUpperCase();
+  const clean = (String(code || '') + ' ' + String(fallbackMessage || '')).toUpperCase();
   if (clean.includes('INTERNAL_ERROR') || clean.includes('INTERNAL-ERROR')) {
     return 'Authenticating with Google... If your browser interrupted the sign-in, please tap Continue with Google again or use email sign-in.';
   }

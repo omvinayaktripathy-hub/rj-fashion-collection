@@ -206,7 +206,7 @@ async function loadDeliveryAddresses() {
     addresses = [
       {
         id: 101,
-        full_name: currentUser.name || 'Om Vinayak',
+        full_name: currentUser.displayName || currentUser.name || 'Valued Patron',
         phone: currentUser.phone || '9876543210',
         house_flat: 'Flat No. 402, Royal Palms Residency',
         street: 'MG Road, Jubilee Hills',
@@ -373,7 +373,9 @@ function confirmAddressAndProceed(e, id) {
 
   sessionStorage.setItem('checkout_address_id', chosen.id);
   sessionStorage.setItem('checkout_address_summary', JSON.stringify(summaryObj));
+  sessionStorage.setItem('rj_selected_address', JSON.stringify(summaryObj));
   localStorage.setItem('rjfc_selected_address', JSON.stringify(summaryObj));
+  localStorage.setItem('rj_selected_address', JSON.stringify(summaryObj));
   localStorage.setItem('rjfc_selected_address_id', chosen.id);
 
   showToast('Delivery address confirmed! Proceeding to Payment...', 'success');

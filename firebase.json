@@ -93,6 +93,22 @@
       {
         "source": "/size-guide",
         "destination": "/size-guide.html"
+      },
+      {
+        "source": "/about",
+        "destination": "/about.html"
+      },
+      {
+        "source": "/contact",
+        "destination": "/contact.html"
+      },
+      {
+        "source": "/register",
+        "destination": "/register.html"
+      },
+      {
+        "source": "/product",
+        "destination": "/product.html"
       }
     ],
     "headers": [
@@ -101,7 +117,7 @@
         "headers": [
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com https://*.firebaseio.com https://*.googleapis.com https://www.gstatic.com https://apis.google.com https://*.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://accounts.google.com https://api.stripe.com https://api.razorpay.com https://images.unsplash.com https://*.google-analytics.com https://analytics.google.com https://wa.me https://*.firebaseapp.com https://*.web.app; frame-src 'self' https://accounts.google.com https://*.google.com https://checkout.razorpay.com https://js.stripe.com https://*.firebaseapp.com https://*.web.app; frame-ancestors 'self'; object-src 'none'; base-uri 'self';"
+            "value": "default-src 'self'; script-src 'self' https://*.phonepe.com https://mercury.phonepe.com https://mercury-uat.phonepe.com 'unsafe-inline' https://fonts.googleapis.com https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com https://*.firebaseio.com https://*.googleapis.com https://www.gstatic.com https://apis.google.com https://*.firebaseapp.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://*.phonepe.com https://api.phonepe.com https://api-preprod.phonepe.com https://mercury.phonepe.com https://mercury-uat.phonepe.com https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://accounts.google.com https://api.stripe.com https://api.razorpay.com https://images.unsplash.com https://*.google-analytics.com https://analytics.google.com https://wa.me https://*.firebaseapp.com https://*.web.app; frame-src 'self' https://*.phonepe.com https://mercury.phonepe.com https://mercury-uat.phonepe.com https://accounts.google.com https://*.google.com https://checkout.razorpay.com https://js.stripe.com https://*.firebaseapp.com https://*.web.app; frame-ancestors 'self'; object-src 'none'; base-uri 'self';"
           },
           {
             "key": "Strict-Transport-Security",
@@ -125,7 +141,7 @@
           },
           {
             "key": "Permissions-Policy",
-            "value": "camera=(), microphone=(), geolocation=(), payment=(self \"https://checkout.razorpay.com\")"
+            "value": "camera=(), microphone=(), geolocation=(), payment=(self \"https://*.phonepe.com\" \"https://mercury.phonepe.com\" \"https://mercury-uat.phonepe.com\" \"https://checkout.razorpay.com\" \"https://js.stripe.com\")"
           },
           {
             "key": "Cross-Origin-Opener-Policy",
