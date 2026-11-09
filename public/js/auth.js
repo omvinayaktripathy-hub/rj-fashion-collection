@@ -130,23 +130,51 @@ function getRedirectUrl() {
 }
 
 function switchAuthTab(tab) {
-  const loginForm = document.getElementById('login-form-box');
-  const registerForm = document.getElementById('register-form-box');
-  const loginTabBtn = document.getElementById('tab-login-btn');
-  const registerTabBtn = document.getElementById('tab-register-btn');
+  const blade = document.getElementById('auth-blade');
+  const isMovingToSignUp = tab === 'register';
 
-  hideAuthError();
+  const applyState = () => {
+    const loginForm = document.getElementById('login-form-box');
+    const registerForm = document.getElementById('register-form-box');
+    const loginTabBtn = document.getElementById('tab-login-btn');
+    const registerTabBtn = document.getElementById('tab-register-btn');
+    const subtitle = document.getElementById('auth-card-subtitle');
 
-  if (tab === 'login') {
-    if (loginForm) loginForm.style.display = 'block';
-    if (registerForm) registerForm.style.display = 'none';
-    if (loginTabBtn) loginTabBtn.classList.add('active');
-    if (registerTabBtn) registerTabBtn.classList.remove('active');
+    hideAuthError();
+
+    if (tab === 'login') {
+      if (loginForm) loginForm.style.display = 'block';
+      if (registerForm) registerForm.style.display = 'none';
+      if (loginTabBtn) loginTabBtn.classList.add('active');
+      if (registerTabBtn) registerTabBtn.classList.remove('active');
+      if (subtitle) subtitle.textContent = 'Sign in to access your curated orders, saved looks, and bridal concierge services.';
+      window._currentAuthTab = 'login';
+    } else {
+      if (loginForm) loginForm.style.display = 'none';
+      if (registerForm) registerForm.style.display = 'block';
+      if (loginTabBtn) loginTabBtn.classList.remove('active');
+      if (registerTabBtn) registerTabBtn.classList.add('active');
+      if (subtitle) subtitle.textContent = 'Create your account to curate orders, saved looks, and bridal concierge services.';
+      window._currentAuthTab = 'register';
+    }
+  };
+
+  if (blade && window._currentAuthTab !== tab && !window._isBladeAnimating) {
+    window._isBladeAnimating = true;
+    blade.className = 'auth-blade ' + (isMovingToSignUp ? 'sweep-right' : 'sweep-left');
+
+    // Midpoint (280ms): That dark is where the two states trade places
+    setTimeout(() => {
+      applyState();
+    }, 280);
+
+    // Completion (560ms)
+    setTimeout(() => {
+      blade.className = 'auth-blade ' + (isMovingToSignUp ? 'parked-right' : 'parked-left');
+      window._isBladeAnimating = false;
+    }, 560);
   } else {
-    if (loginForm) loginForm.style.display = 'none';
-    if (registerForm) registerForm.style.display = 'block';
-    if (loginTabBtn) loginTabBtn.classList.remove('active');
-    if (registerTabBtn) registerTabBtn.classList.add('active');
+    applyState();
   }
 }
 

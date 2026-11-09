@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RJ Fashion Collection — The Sliding Blade Auth</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-serif: 'Playfair Display', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --gold-primary: #D4AF37;
+      --gold-deep: #A47E1B;
+      --gold-light: #F4E5B8;
+      --obsidian-base: #070A12;
+      --obsidian-surface: #0E1322;
+      --obsidian-card: #12182B;
+      --border-subtle: rgba(212, 175, 55, 0.18);
+      --border-focus: rgba(212, 175, 55, 0.55);
+      --text-main: #FFFFFF;
+      --text-muted: #8E9AB0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 20%, #161D36 0%, #070A12 70%);
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Background Atmosphere */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Brand Header Lockup */
+    .brand-header {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-monogram {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 10px;
+      display: block;
+      filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.3));
+    }
+
+    .brand-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold-primary);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #FFFFFF;
+    }
+
+    /* ==========================================================
+       THE AUTH CARD — FIXED DIMENSIONS, OVERFLOW HIDDEN
+       ========================================================== */
+    .auth-card-stage {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 440px;
+      background: var(--obsidian-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      box-shadow: 
+        0 24px 60px -12px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 0 35px -5px rgba(212, 175, 55, 0.08);
+      overflow: hidden; /* Clips the blade */
+    }
+
+    /* Inner Deck holding the two forms */
+    .auth-deck {
+      position: relative;
+      width: 100%;
+      min-height: 580px;
+    }
+
+    /* Form Panes: Stacked directly on top of each other */
+    .auth-pane {
+      position: absolute;
+      inset: 0;
+      padding: 34px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: opacity 0s, visibility 0s; /* No fade transition */
+      will-change: opacity;
+    }
+
+    .auth-pane[data-active="true"] {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      z-index: 2;
+    }
+
+    .auth-pane[data-active="false"] {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ==========================================================
+       THE BLADE: ONE RECTANGLE. ONE TRANSLATEX.
+       Travels across the card. Midpoint (0%) covers card completely.
+       That dark is where the two states trade places.
+       Zero dependencies. Transform and opacity only.
+       ========================================================== */
+    .auth-blade {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -3%;
+      width: 106%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, #0F172A 0%, #060913 70%, #020408 100%);
+      z-index: 50;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 
+        inset 0 0 70px rgba(0, 0, 0, 0.95),
+        0 0 50px rgba(0, 0, 0, 0.98);
+      /* Default parked state (tucked off-screen to the left) */
+      transform: translate3d(-105%, 0, 0);
+      will-change: transform;
+    }
+
+    /* Leading/Trailing Edge Hairline Accents */
+    .auth-blade::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2.5px;
+      background: linear-gradient(180deg, transparent 0%, var(--gold-primary) 50%, transparent 100%);
+      box-shadow: 0 0 18px var(--gold-primary), 0 0 30px rgba(212, 175, 55, 0.5);
+    }
+
+    /* Blade moving Left to Right: leading edge is on the right */
+    .auth-blade.sweep-right::before {
+      right: 0;
+    }
+
+    /* Blade moving Right to Left: leading edge is on the left */
+    .auth-blade.sweep-left::before {
+      left: 0;
+    }
+
+    /* Center emblem revealed momentarily in total dark coverage */
+    .blade-seal {
+      width: 52px;
+      height: 52px;
+      opacity: 0.9;
+      filter: drop-shadow(0 0 14px rgba(212, 175, 55, 0.6));
+    }
+
+    .blade-tag {
+      font-size: 0.66rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      font-weight: 700;
+      opacity: 0.85;
+    }
+
+    /* SWEEP ANIMATIONS: Pure GPU Transform
+       44% to 56% is the impenetrable dark coverage where states trade places */
+    .auth-blade.sweep-right {
+      animation: bladeSweepRight 0.56s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes bladeSweepRight {
+      0% {
+        transform: translate3d(-105%, 0, 0);
+      }
+      44% {
+        transform: translate3d(0%, 0, 0); /* ENTERS COMPLETE COVERAGE */
+      }
+      56% {
+        transform: translate3d(0%, 0, 0); /* HOLDS COMPLETE DARKNESS */
+      }
+      100% {
+        transform: translate3d(105%, 0, 0); /* EXITS RIGHT */
+      }
+    }
+
+    /* Sweep Left (Sign Up -> Sign In: Perfectly Mirrored) */
+    .auth-blade.sweep-left {
+      animation: bladeSweepLeft 0.56s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes bladeSweepLeft {
+      0% {
+        transform: translate3d(105%, 0, 0);
+      }
+      44% {
+        transform: translate3d(0%, 0, 0); /* ENTERS COMPLETE COVERAGE */
+      }
+      56% {
+        transform: translate3d(0%, 0, 0); /* HOLDS COMPLETE DARKNESS */
+      }
+      100% {
+        transform: translate3d(-105%, 0, 0); /* EXITS LEFT */
+      }
+    }
+
+    /* Stationary Parked States */
+    .auth-blade.parked-left {
+      transform: translate3d(-105%, 0, 0);
+    }
+    .auth-blade.parked-right {
+      transform: translate3d(105%, 0, 0);
+    }
+
+    /* ==========================================================
+       FORM STYLING & SYMMETRY (REAL FORMS UNDERNEATH)
+       ========================================================== */
+    .pane-header {
+      margin-bottom: 22px;
+    }
+
+    .pane-eyebrow {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--gold-primary);
+      margin-bottom: 6px;
+    }
+
+    .pane-title {
+      font-family: var(--font-serif);
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .pane-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Google Button */
+    .btn-google {
+      width: 100%;
+      background: #FFFFFF;
+      color: #0F172A;
+      border: none;
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-bottom: 18px;
+    }
+
+    .btn-google:hover {
+      background: #F1F5F9;
+      transform: translateY(-1px);
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .auth-divider span {
+      padding: 0 10px;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      color: #55627A;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* Form Fields */
+    .field-group {
+      margin-bottom: 14px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      margin-bottom: 6px;
+    }
+
+    .field-wrap {
+      position: relative;
+    }
+
+    .field-input {
+      width: 100%;
+      background: var(--obsidian-base);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-size: 0.86rem;
+      color: #FFFFFF;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.18);
+    }
+
+    .field-input::placeholder {
+      color: #475569;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-deep) 100%);
+      color: #070A12;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px -3px rgba(212, 175, 55, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 6px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px -3px rgba(212, 175, 55, 0.5);
+    }
+
+    /* Switch Action (Mirrored Footer) */
+    .pane-switch-footer {
+      text-align: center;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+    }
+
+    .btn-trigger-blade {
+      background: none;
+      border: none;
+      color: var(--gold-primary);
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-family: inherit;
+      font-size: inherit;
+      padding: 2px 4px;
+      transition: color 0.15s;
+    }
+
+    .btn-trigger-blade:hover {
+      color: var(--gold-light);
+    }
+
+    /* Mechanical Indicator Bar at the bottom */
+    .blade-telemetry {
+      position: relative;
+      z-index: 10;
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      color: #64748B;
+      text-transform: uppercase;
+    }
+
+    .telemetry-active-state {
+      color: var(--gold-primary);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+
+  <!-- Header Lockup -->
+  <header class="brand-header">
+    <img src="/images/rj-logo-monogram-dark.png" alt="RJ Monogram" class="brand-monogram">
+    <div class="brand-eyebrow">The Royal Atelier</div>
+    <h1 class="brand-title">RJ Fashion Collection</h1>
+  </header>
+
+  <!-- The Stage -->
+  <main class="auth-card-stage">
+    
+    <!-- The Deck containing both real forms -->
+    <div class="auth-deck">
+
+      <!-- ==============================================
+           PANE 1: SIGN IN (Active by default)
+           ============================================== -->
+      <section class="auth-pane" id="pane-signin" data-active="true" aria-label="Sign In Pane">
+        <div>
+          <div class="pane-header">
+            <div class="pane-eyebrow">Patron Access</div>
+            <h2 class="pane-title">Welcome Back</h2>
+            <p class="pane-desc">Sign in to your private wardrobe, orders, and bespoke concierge.</p>
+          </div>
+
+          <!-- Google 1-Click -->
+          <button type="button" class="btn-google" onclick="window.parent ? window.parent.handleGoogleSignIn && window.parent.handleGoogleSignIn() : null">
+            <svg width="17" height="17" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+
+          <div class="auth-divider">
+            <span>Or with Credentials</span>
+          </div>
+
+          <!-- Real Sign In Form -->
+          <form id="form-signin" onsubmit="event.preventDefault(); triggerBladeTransition('signup');">
+            <div class="field-group">
+              <label class="field-label" for="signin-email">Email Address</label>
+              <div class="field-wrap">
+                <input type="email" id="signin-email" class="field-input" placeholder="patron@rj-fashion.com" required autocomplete="email">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="field-label" for="signin-password" style="margin-bottom: 0;">Confidential Key</label>
+                <a href="#" style="font-size: 0.7rem; color: var(--gold-primary); text-decoration: none;">Forgot?</a>
+              </div>
+              <div class="field-wrap">
+                <input type="password" id="signin-password" class="field-input" placeholder="••••••••••••" required autocomplete="current-password">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+              <span>Sign In to Atelier</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- Mirrored Footer Trigger -->
+        <div class="pane-switch-footer">
+          <span>First time at the House?</span>
+          <button type="button" class="btn-trigger-blade" onclick="triggerBladeTransition('signup')">
+            Create Account →
+          </button>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           PANE 2: SIGN UP (Mirrored Counterpart)
+           ============================================== -->
+      <section class="auth-pane" id="pane-signup" data-active="false" aria-label="Sign Up Pane">
+        <div>
+          <div class="pane-header">
+            <div class="pane-eyebrow">New Patron Registry</div>
+            <h2 class="pane-title">Create Account</h2>
+            <p class="pane-desc">Begin your bespoke journey with bridal preview and private curations.</p>
+          </div>
+
+          <!-- Google 1-Click -->
+          <button type="button" class="btn-google" onclick="window.parent ? window.parent.handleGoogleSignIn && window.parent.handleGoogleSignIn() : null">
+            <svg width="17" height="17" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.15z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.36 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.36 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>Register with Google</span>
+          </button>
+
+          <div class="auth-divider">
+            <span>Or with Email</span>
+          </div>
+
+          <!-- Real Sign Up Form -->
+          <form id="form-signup" onsubmit="event.preventDefault(); triggerBladeTransition('signin');">
+            <div class="field-group">
+              <label class="field-label" for="signup-name">Full Name</label>
+              <div class="field-wrap">
+                <input type="text" id="signup-name" class="field-input" placeholder="e.g. Maharani Gayatri" required autocomplete="name">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="signup-email">Email Address</label>
+              <div class="field-wrap">
+                <input type="email" id="signup-email" class="field-input" placeholder="patron@rj-fashion.com" required autocomplete="email">
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="signup-password">Create Key</label>
+              <div class="field-wrap">
+                <input type="password" id="signup-password" class="field-input" placeholder="Min 6 characters" minlength="6" required autocomplete="new-password">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+              <span>Register Patron</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </form>
+        </div>
+
+        <!-- Mirrored Footer Trigger -->
+        <div class="pane-switch-footer">
+          <span>Already registered?</span>
+          <button type="button" class="btn-trigger-blade" onclick="triggerBladeTransition('signin')">
+            ← Sign In
+          </button>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           THE BLADE: ONE RECTANGLE. ONE TRANSLATEX.
+           ============================================== -->
+      <div class="auth-blade" id="auth-blade" aria-hidden="true">
+        <img src="/images/rj-logo-monogram-dark.png" alt="RJ Emblem" class="blade-seal">
+        <span class="blade-tag">The Royal House</span>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="blade-telemetry">
+    <span>State: </span>
+    <span id="telemetry-state" class="telemetry-active-state">SIGN IN</span>
+    <span> &bull; 60 FPS GPU Composite &bull; Zero Dependencies</span>
+  </footer>
+
+  <!-- ==============================================
+       THE MECHANIC: ZERO DEPENDENCIES.
+       Transform and opacity only.
+       Blade covers card completely at 50% midpoint.
+       That dark is where the two states trade places.
+       ============================================== -->
+  <script>
+    (function() {
+      var ANIMATION_MS = 560;
+      var MIDPOINT_MS = ANIMATION_MS / 2; // 280ms
+      var currentState = 'signin';
+      var isAnimating = false;
+
+      var blade = document.getElementById('auth-blade');
+      var paneSignIn = document.getElementById('pane-signin');
+      var paneSignUp = document.getElementById('pane-signup');
+      var telemetry = document.getElementById('telemetry-state');
+
+      window.triggerBladeTransition = function(targetState) {
+        if (isAnimating || currentState === targetState) return;
+        isAnimating = true;
+
+        var isMovingToSignUp = targetState === 'signup';
+
+        // 1. Launch the Blade across the card in ONE direction
+        // Sweep-right: travels -100% -> 0% -> +100%
+        // Sweep-left:  travels +100% -> 0% -> -100% (mirrored)
+        blade.className = 'auth-blade ' + (isMovingToSignUp ? 'sweep-right' : 'sweep-left');
+
+        // 2. Midpoint (50% across): The blade covers the card COMPLETELY.
+        // "That dark is where the two states trade places."
+        setTimeout(function() {
+          if (isMovingToSignUp) {
+            paneSignIn.setAttribute('data-active', 'false');
+            paneSignUp.setAttribute('data-active', 'true');
+            currentState = 'signup';
+            if (telemetry) telemetry.textContent = 'SIGN UP';
+          } else {
+            paneSignUp.setAttribute('data-active', 'false');
+            paneSignIn.setAttribute('data-active', 'true');
+            currentState = 'signin';
+            if (telemetry) telemetry.textContent = 'SIGN IN';
+          }
+        }, MIDPOINT_MS);
+
+        // 3. Animation Completion: Park the blade on the exit side ready for the return trip
+        setTimeout(function() {
+          blade.className = 'auth-blade ' + (isMovingToSignUp ? 'parked-right' : 'parked-left');
+          isAnimating = false;
+        }, ANIMATION_MS);
+      };
+    })();
+  </script>
+</body>
+</html>
