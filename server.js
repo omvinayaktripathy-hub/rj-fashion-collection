@@ -1,5 +1,29 @@
+
+// Process-Level Fatal Error Sentinel (Alerts owner immediately before clean exit or restart)
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err);
+  alertService.notifyOwner({
+    type: 'FATAL_UNCAUGHT_EXCEPTION',
+    title: 'Fatal Process Uncaught Exception',
+    message: err.message,
+    stack: err.stack,
+    severity: 'CRITICAL'
+  });
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled Rejection:', reason);
+  alertService.notifyOwner({
+    type: 'UNHANDLED_PROMISE_REJECTION',
+    title: 'Unhandled Promise Rejection',
+    message: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : '',
+    severity: 'CRITICAL'
+  });
+});
 const { wafMiddleware, getWafMetrics } = require('./middleware/waf');
 const { requireAdmin } = require('./middleware/admin');
+const alertService = require('./services/alertService');
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -154,6 +178,50 @@ app.get('/api/waf/status', (req, res) => {
   });
 });
 app.get('/api/admin/waf/metrics', requireAdmin, getWafMetrics);
+
+// Automated System Health & Uptime Sentinel
+app.get(['/api/health', '/health'], (req, res) => {
+  try {
+    const db = require('./database/db');
+    const check = db.prepare('SELECT 1 as ok').get();
+    res.json({
+      status: 'UP',
+      timestamp: new Date().toISOString(),
+      database: check && check.ok === 1 ? 'HEALTHY' : 'DEGRADED',
+      uptime: Math.round(process.uptime()),
+      environment: isProd ? 'production' : 'development'
+    });
+  } catch (err) {
+    alertService.notifyOwner({
+      type: 'HEALTH_CHECK_FAILURE',
+      title: 'Health Check Failed',
+      message: err.message,
+      stack: err.stack,
+      severity: 'CRITICAL',
+      req
+    });
+    res.status(503).json({
+      status: 'DEGRADED',
+      timestamp: new Date().toISOString(),
+      message: 'Service experiencing technical moment'
+    });
+  }
+});
+
+// Admin Incident Ledger Endpoints (Strict Owner / Admin Access)
+app.get('/api/admin/incidents', requireAdmin, (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 50, 200);
+  res.json({
+    success: true,
+    incidents: alertService.getRecentIncidents(limit)
+  });
+});
+
+app.post('/api/admin/incidents/:ref/ack', requireAdmin, (req, res) => {
+  const success = alertService.acknowledgeIncident(req.params.ref);
+  res.json({ success, message: success ? 'Incident acknowledged' : 'Incident not found' });
+});
+
 
 
 app.use((req, res, next) => {
@@ -510,17 +578,9 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Resource not found' });
 });
 
-// Global error handler (Debug mode suppressed in prod)
+// Global error handler: Dispatches alert to store owner FIRST while serving elegant customer response
 app.use((err, req, res, next) => {
-  if (!isProd) {
-    console.error('Unhandled application error:', err);
-  } else {
-    console.error('Unhandled error:', err.message);
-  }
-  res.status(err.status || 500).json({
-    success: false,
-    message: isProd ? 'Internal server error occurred. Please try again later.' : (err.message || 'Internal server error')
-  });
+  return alertService.handleExpressError(err, req, res);
 });
 
 app.listen(PORT, () => {
