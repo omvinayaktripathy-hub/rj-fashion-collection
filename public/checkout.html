@@ -992,7 +992,7 @@
           </div>
 
           <div class="checkout-card-body" style="padding-top: 20px;">
-            <!-- Option 1: Official PhonePe Standard Checkout Gateway -->
+            <!-- Option 1: UPI Gateway (Flipkart / Enterprise Standard Checkout) -->
             <label class="payment-option-box selected" id="phonepe-box">
               <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
                 <div style="display: flex; gap: 14px; align-items: flex-start;">
@@ -1001,69 +1001,85 @@
                     <div style="font-weight: 700; font-size: 1rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                       <span style="display: inline-flex; align-items: center; gap: 6px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="#5f259f" style="vertical-align: middle;"><circle cx="12" cy="12" r="11" fill="#5f259f"/><path d="M12 5.5v13M8 10h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-                        PhonePe Payment Gateway (UPI, Cards &amp; Net Banking)
+                        UPI (Google Pay, PhonePe, Paytm &amp; Any UPI)
                       </span>
-                      <span style="font-size: 0.7rem; background: #faf5ff; color: #581c87; border: 1px solid #d8b4fe; padding: 1px 7px; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">Official Merchant</span>
+                      <span style="font-size: 0.7rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 7px; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">Fast &amp; Free</span>
                     </div>
                     <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin-top: 3px;">
-                      PhonePe • Google Pay • Paytm • BHIM • UPI QR • Credit/Debit Cards • Net Banking
+                      Instant checkout via any UPI App or Enter your UPI ID • Zero Convenience Fee
                     </div>
                   </div>
                 </div>
-                <!-- Micro badges -->
+                <!-- Enterprise Micro Badges -->
                 <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
                   <span style="font-size: 0.65rem; font-weight: 800; background: #5f259f; color: #ffffff; padding: 2px 6px; border-radius: 4px;">PhonePe</span>
                   <span style="font-size: 0.65rem; font-weight: 700; background: #f4f4f5; color: #27272a; border: 1px solid #e4e4e7; padding: 2px 6px; border-radius: 4px;">GPay</span>
                   <span style="font-size: 0.65rem; font-weight: 700; background: #f0f9ff; color: #0c4a6e; border: 1px solid #bae6fd; padding: 2px 6px; border-radius: 4px;">Paytm</span>
-                  <span style="font-size: 0.65rem; font-weight: 700; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 2px 6px; border-radius: 4px;">UPI QR</span>
+                  <span style="font-size: 0.65rem; font-weight: 700; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 2px 6px; border-radius: 4px;">BHIM</span>
                 </div>
               </div>
 
-              <!-- Expanded Active PhonePe Details & Official Merchant Identity -->
+              <!-- Expanded Active UPI Details (Flipkart / Myntra Architecture) -->
               <div class="payment-extra-detail" style="display: block;">
-                <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(95, 37, 159, 0.03); border: 1px solid rgba(95, 37, 159, 0.15); border-radius: 8px; padding: 14px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <div>
-                      <div style="font-size: 0.85rem; font-weight: 700; color: var(--deliv-text-primary);">
-                        Store Merchant: <strong>RJ FASHION</strong>
+                <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(95, 37, 159, 0.02); border: 1px solid rgba(95, 37, 159, 0.12); border-radius: 10px; padding: 14px;">
+                  
+                  <!-- Option A: 1-Click UPI Mobile / Web Redirect -->
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div style="font-size: 1.3rem;">⚡</div>
+                    <div style="flex: 1;">
+                      <div style="font-size: 0.86rem; font-weight: 700; color: var(--deliv-text-primary);">
+                        1-Click UPI Payment via App or Dynamic QR
                       </div>
-                      <div style="font-size: 0.78rem; color: var(--deliv-text-secondary); margin-top: 2px;">
-                        UPI ID: <code style="background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; font-weight: 600;">Q070080131@ybl</code> • Terminal 1-Q070080131
+                      <div style="font-size: 0.8rem; color: var(--deliv-text-secondary); margin-top: 2px; line-height: 1.4;">
+                        On mobile, you will be directed to your chosen UPI app (PhonePe, GPay, Paytm). On desktop, an official real-time dynamic QR code will be generated for your exact order amount.
                       </div>
                     </div>
-                    <span style="font-size: 0.75rem; color: #047857; font-weight: 700; background: #ecfdf5; padding: 3px 8px; border-radius: 4px; border: 1px solid #a7f3d0;">
-                      🔒 256-Bit Bank Encryption
+                  </div>
+
+                  <!-- Option B: Enter Customer's Personal UPI ID (Flipkart Style) -->
+                  <div style="padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <div style="font-size: 0.84rem; font-weight: 700; color: var(--deliv-text-primary); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                      <span>Or Pay by your UPI ID</span>
+                      <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">(e.g. mobile@upi, name@okhdfcbank)</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <div style="position: relative; flex: 1;">
+                        <input type="text" id="customer-upi-id-input" placeholder="Enter your UPI ID (e.g. 9876543210@paytm)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; background: #fdfdfe;" oninput="validateCustomerUpiInput(this)">
+                      </div>
+                      <button type="button" id="btn-verify-customer-upi" onclick="verifyCustomerUpi()" style="padding: 8px 16px; background: #5f259f; color: #ffffff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                        Verify
+                      </button>
+                    </div>
+                    <div id="customer-upi-feedback" style="display: none; font-size: 0.76rem; margin-top: 6px; font-weight: 600;"></div>
+                  </div>
+
+                  <!-- Enterprise Trust & Security Footnote -->
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.76rem; color: #64748b; padding-top: 2px;">
+                    <span style="display: inline-flex; align-items: center; gap: 5px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      <strong>100% Safe &amp; Secure</strong> • Powered by Official PhonePe Payment Gateway
+                    </span>
+                    <span style="color: #047857; font-weight: 700; background: #ecfdf5; padding: 2px 8px; border-radius: 4px; border: 1px solid #a7f3d0;">
+                      🔒 PCI-DSS Certified
                     </span>
                   </div>
-                  <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); line-height: 1.5;">
-                    Upon clicking <strong>Pay &amp; Complete Order</strong>, you will be securely redirected to PhonePe's official hosted checkout to complete payment via UPI app, scanned QR code, cards, net banking, or wallets.
-                  </div>
-                  <div style="margin-top: 4px;">
-                    <button type="button" onclick="var q=document.getElementById('phonepe-qr-preview-box'); if(q){q.style.display=q.style.display==='none'?'block':'none';}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #ffffff; border: 1px solid rgba(95, 37, 159, 0.25); border-radius: 6px; font-size: 0.76rem; font-weight: 700; color: #5f259f; cursor: pointer; transition: all 0.2s ease;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                      <span>Show Terminal QR Code</span>
-                    </button>
-                    <div id="phonepe-qr-preview-box" style="display: none; margin-top: 10px; padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center;">
-                      <img src="/images/phonepe-merchant-qr.jpg" alt="RJ Fashion Official PhonePe QR" style="max-width: 220px; width: 100%; border-radius: 6px; border: 1px solid #cbd5e1; margin: 0 auto; display: block;" loading="lazy">
-                      <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px; font-weight: 600;">Scan with PhonePe, GPay, Paytm or any UPI app</div>
-                    </div>
-                  </div>
+
                 </div>
               </div>
             </label>
 
-            <!-- Option 2: Cards & Global Gateways -->
+            <!-- Option 2: Credit / Debit / ATM Cards -->
             <label class="payment-option-box" id="stripe-box">
               <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
                 <div style="display: flex; gap: 14px; align-items: flex-start;">
                   <input type="radio" name="checkout_payment_method" value="Stripe" style="accent-color: #111111; width: 18px; height: 18px; margin-top: 2px;">
                   <div>
                     <div style="font-weight: 700; font-size: 1rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                      <span>Credit / Debit Card &amp; Net Banking</span>
-                      <span style="font-size: 0.7rem; background: #f4f4f5; color: #3f3f46; border: 1px solid #e4e4e7; padding: 1px 7px; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">Stripe Secured</span>
+                      <span>Credit / Debit / ATM Cards</span>
+                      <span style="font-size: 0.7rem; background: #f4f4f5; color: #3f3f46; border: 1px solid #e4e4e7; padding: 1px 7px; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">All Banks</span>
                     </div>
                     <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin-top: 3px;">
-                      All Indian and International cards • 3D Secure 2.0 Protection
+                      Visa, MasterCard, RuPay, Maestro • 3D Secure 2.0 Protection
                     </div>
                   </div>
                 </div>
@@ -1079,13 +1095,46 @@
               <div class="payment-extra-detail" style="display: none;">
                 <div style="display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.06); border-radius: 8px; padding: 14px;">
                   <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); line-height: 1.5;">
-                    🔒 Bank-grade 256-bit encryption powered by Stripe. You can enter card details or complete via Apple Pay / Google Pay with instant authorization.
+                    🔒 <strong>Bank-Grade 256-Bit Encryption:</strong> Complete payment securely with instant Bank OTP authorization. We support all Indian and International debit and credit cards.
                   </div>
                 </div>
               </div>
             </label>
 
-            <!-- Option 3: Cash on Delivery -->
+            <!-- Option 3: Net Banking -->
+            <label class="payment-option-box" id="netbanking-box">
+              <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
+                <div style="display: flex; gap: 14px; align-items: flex-start;">
+                  <input type="radio" name="checkout_payment_method" value="PhonePe" data-sub="netbanking" style="accent-color: #5f259f; width: 18px; height: 18px; margin-top: 2px;">
+                  <div>
+                    <div style="font-weight: 700; font-size: 1rem; color: var(--deliv-text-primary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      <span>Net Banking (All Major Indian Banks)</span>
+                      <span style="font-size: 0.7rem; background: #f4f4f5; color: #3f3f46; border: 1px solid #e4e4e7; padding: 1px 7px; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">Direct Bank</span>
+                    </div>
+                    <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin-top: 3px;">
+                      HDFC, SBI, ICICI, Axis, Kotak, PNB &amp; 40+ other banks
+                    </div>
+                  </div>
+                </div>
+                <!-- Micro badges -->
+                <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap;">
+                  <span style="font-size: 0.65rem; font-weight: 700; background: #f4f4f5; color: #27272a; border: 1px solid #e4e4e7; padding: 2px 6px; border-radius: 4px;">HDFC</span>
+                  <span style="font-size: 0.65rem; font-weight: 700; background: #f4f4f5; color: #27272a; border: 1px solid #e4e4e7; padding: 2px 6px; border-radius: 4px;">SBI</span>
+                  <span style="font-size: 0.65rem; font-weight: 700; background: #f4f4f5; color: #27272a; border: 1px solid #e4e4e7; padding: 2px 6px; border-radius: 4px;">ICICI</span>
+                </div>
+              </div>
+
+              <!-- Expanded Net Banking State -->
+              <div class="payment-extra-detail" style="display: none;">
+                <div style="display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.06); border-radius: 8px; padding: 14px;">
+                  <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); line-height: 1.5;">
+                    🏛️ You will be redirected to the secure PhonePe banking gateway to select your bank and complete the transfer via your bank's official portal.
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <!-- Option 4: Cash on Delivery -->
             <label class="payment-option-box" id="cod-box">
               <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
                 <div style="display: flex; gap: 14px; align-items: flex-start;">

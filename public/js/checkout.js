@@ -811,3 +811,42 @@ function toggleGiftOption(el) {
 function saveGiftMessage(val) {
   sessionStorage.setItem('rj_gift_message', val);
 }
+
+// ─────────────────────────────────────────────────────────────
+// Customer UPI ID Verification (Flipkart / Enterprise Style)
+// ─────────────────────────────────────────────────────────────
+window.validateCustomerUpiInput = function(el) {
+  const val = (el.value || '').trim();
+  const feedback = document.getElementById('customer-upi-feedback');
+  if (!val && feedback) {
+    feedback.style.display = 'none';
+  }
+};
+
+window.verifyCustomerUpi = function() {
+  const input = document.getElementById('customer-upi-id-input');
+  const feedback = document.getElementById('customer-upi-feedback');
+  if (!input || !feedback) return;
+  const val = input.value.trim();
+  const upiRegex = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
+
+  if (!val) {
+    feedback.style.display = 'block';
+    feedback.style.color = '#dc2626';
+    feedback.textContent = 'Please enter your UPI ID (e.g. 9876543210@paytm or name@okhdfcbank)';
+    return;
+  }
+
+  if (upiRegex.test(val)) {
+    feedback.style.display = 'block';
+    feedback.style.color = '#059669';
+    feedback.innerHTML = `✓ Valid UPI ID (<strong>${escapeHtml(val)}</strong>). Click Pay &amp; Complete Order to proceed.`;
+    if (typeof showToast === 'function') {
+      showToast('UPI ID verified successfully!', 'success');
+    }
+  } else {
+    feedback.style.display = 'block';
+    feedback.style.color = '#dc2626';
+    feedback.textContent = 'Please enter a valid UPI format with @ handle (e.g. yourname@okhdfcbank)';
+  }
+};
