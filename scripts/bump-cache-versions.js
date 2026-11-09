@@ -4,7 +4,7 @@ const path = require('path');
 const publicDir = path.join(__dirname, '..', 'public');
 const htmlFiles = fs.readdirSync(publicDir).filter(f => f.endsWith('.html'));
 
-const NEW_VERSION = '20261109-live-all-pass';
+const NEW_VERSION = '20261109-tryon-live-fixed';
 
 let totalReplacements = 0;
 
