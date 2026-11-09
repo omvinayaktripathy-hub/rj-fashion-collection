@@ -894,6 +894,8 @@
                 (phone ? '<span style="color:var(--deliv-text-secondary);font-size:0.9rem;font-weight:600;">📞 ' + phone + '</span>' : '') +
                 '</div><div style="color:var(--deliv-text-secondary);font-size:0.92rem;line-height:1.6;">' + text + '</div>' +
                 '<div style="margin-top:6px;font-size:0.8rem;font-weight:600;color:#0F382A;display:flex;align-items:center;gap:6px;"><span>🚚</span><span>Arrives in 3–5 Business Days via Express Insured Courier</span></div></div>';
+            } else if (addrEl) {
+              addrEl.innerHTML = '<div style="background: rgba(0,0,0,0.02); border: 1.5px dashed var(--deliv-card-border); border-radius: 12px; padding: 22px 18px; text-align: center;"><div style="font-size: 1.6rem; margin-bottom: 6px;">📍</div><p style="font-size: 0.95rem; font-weight: 600; color: var(--deliv-text-primary); margin: 0 0 6px 0;">Please select or add a delivery address to complete your order</p><p style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin: 0 0 16px 0;">Your haute couture en route requires a verified recipient name, doorstep address, and contact number.</p><a href="/delivery.html" style="display: inline-flex; align-items: center; gap: 8px; background: #111111; color: #ffffff; padding: 10px 22px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;"><span>Select or Add Delivery Address →</span></a></div>';
             }
 
             var cartKeys = ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
@@ -932,6 +934,9 @@
               if (countEl) countEl.textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
               var ctaBtn = document.getElementById('confirm-order-btn-label');
               if (ctaBtn) ctaBtn.textContent = 'PAY & COMPLETE ORDER • ₹' + Math.round(subtotal).toLocaleString('en-IN');
+            } else if (itemsEl) {
+              itemsEl.innerHTML = '<div style="padding: 24px 16px; text-align: center;"><div style="font-size: 2rem; margin-bottom: 8px;">🛍️</div><p style="font-size: 0.95rem; font-weight: 600; color: var(--deliv-text-primary); margin: 0 0 6px 0;">Your bag is currently empty</p><p style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin: 0 0 16px 0;">Please select your couture pieces before proceeding to checkout.</p><a href="/shop.html" style="display: inline-flex; align-items: center; gap: 8px; background: #111111; color: #ffffff; padding: 10px 22px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;"><span>Explore Couture Catalog →</span></a></div>';
+              if (countEl) countEl.textContent = '0 items';
             }
           } catch(e) {}
         })();
