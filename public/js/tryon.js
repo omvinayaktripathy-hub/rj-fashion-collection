@@ -33,6 +33,7 @@ var escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).rep
   // Initialize and fetch tryon config
   async function init() {
     try {
+      if (window.isStaticHosting) throw new Error('static');
       const res = await fetch('/api/tryon/settings');
       if (res.ok) {
         const data = await res.json();

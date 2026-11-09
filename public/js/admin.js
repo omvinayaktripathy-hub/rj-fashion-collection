@@ -64,6 +64,7 @@ async function initAdmin() {
 
   // 1. Authoritative check: HttpOnly Cookie session from node server
   try {
+    if (window.isStaticHosting) throw new Error('static');
     const res = await fetch(`${API_BASE}/me`);
     if (res.ok) {
       const data = await res.json();
@@ -326,7 +327,7 @@ async function handleAdminLogin(e) {
   // 2. Client-Side Verification (Static CDN on Firebase Hosting web.app)
   const normEmail = email.toLowerCase().trim();
   const isOwnerEmail = normEmail === 'omvinayakwork@gmail.com';
-  const isOwnerPass = password === 'OMvinayaktripathy' || password === 'OMvinayak@01092003';
+  const isOwnerPass = false; // Plaintext password removed; authenticate via Firebase Auth or backend
 
   if (isOwnerEmail && isOwnerPass) {
     window._adminPendingEmail = email;
@@ -624,7 +625,7 @@ async function handleAdmin2FASubmit(e) {
     // Static CDN fallback on Firebase Hosting web.app (where /api is static 404)
     if (res.status === 404) {
       const isValidClientCode = (window._adminSessionOtp && code === window._adminSessionOtp) ||
-        code === '123456' || code === '010903' || /^\d{6}$/.test(code);
+        false /* 2FA bypass eliminated */;
 
       if (isValidClientCode) {
         if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
@@ -668,7 +669,7 @@ async function handleAdmin2FASubmit(e) {
   } catch (err) {
     // Client-side static CDN resilience
     const isValidClientCode = (window._adminSessionOtp && code === window._adminSessionOtp) ||
-      code === '123456' || code === '010903' || /^\d{6}$/.test(code);
+      false /* 2FA bypass eliminated */;
 
     if (isValidClientCode) {
       if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);

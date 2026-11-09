@@ -10,6 +10,14 @@ try {
 } catch (e) {}
 
 const API_BASE = '/api';
+const isStaticHosting = (typeof window !== 'undefined' && (
+  window.location.hostname.endsWith('web.app') ||
+  window.location.hostname.endsWith('firebaseapp.com') ||
+  window.location.protocol === 'file:' ||
+  (window.location.hostname === '127.0.0.1' && window.location.port !== '3000') ||
+  (window.location.hostname === 'localhost' && window.location.port !== '3000')
+));
+window.isStaticHosting = isStaticHosting;
 
 // HTML Escape Sanitizer (Defensive against XSS)
 function escapeHtml(str) {
@@ -40,6 +48,7 @@ function getCookie(name) {
 
 let cachedCsrfToken = null;
 async function getCsrfToken() {
+  if (isStaticHosting) return '';
   const cookieVal = getCookie('XSRF-TOKEN');
   if (cookieVal) return cookieVal;
   if (cachedCsrfToken) return cachedCsrfToken;
@@ -60,7 +69,10 @@ const originalFetch = window.fetch;
 window.fetch = async function(resource, init) {
   init = init || {};
   const method = (init.method || 'GET').toUpperCase();
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+  const urlStr = typeof resource === 'string' ? resource : (resource && resource.url ? resource.url : '');
+  const isApiRequest = urlStr.startsWith('/api') || urlStr.startsWith(window.location.origin + '/api');
+
+  if (isApiRequest && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
     const token = await getCsrfToken();
     if (token) {
       if (init.headers instanceof Headers) {
@@ -118,32 +130,40 @@ function showToast(message, type = 'info') {
 let currentUser = null;
 
 async function checkAuth() {
-  // Purge any tokens from localStorage and sessionStorage for strict security compliance
   ['token', 'session_token', 'auth_token', 'id_token', 'idToken', 'jwt', 'rjfc_token', 'rj_session_token'].forEach(k => {
     try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (_) {}
   });
 
-  // 1. Authoritative check: HttpOnly Cookie session from server
-  try {
-    const res = await fetch(`${API_BASE}/me`);
-    const data = await res.json();
-    if (data.success && data.user) {
-      currentUser = data.user;
-      renderAuthNav(data.user);
-      return;
-    } else if (data.success && data.user === null) {
-      // Server confirmed no active session: clear local cached user
-      currentUser = null;
-      try {
-        localStorage.removeItem('rjfc_user');
-        localStorage.removeItem('rj_user');
-      } catch (_) {}
-      renderAuthNav(null);
-      return;
-    }
-  } catch (err) {}
+  if (!isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/me`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.user) {
+          currentUser = data.user;
+          renderAuthNav(data.user);
+          return;
+        }
+      }
+    } catch (_) {}
+  }
 
-  // 2. Fallback for static hosting without backend server
+  // Fallback to Firebase client SDK and localStorage
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    try {
+      const fbUser = firebase.auth().currentUser;
+      if (fbUser) {
+        currentUser = {
+          name: fbUser.displayName || fbUser.email.split('@')[0],
+          email: fbUser.email,
+          uid: fbUser.uid
+        };
+        renderAuthNav(currentUser);
+        return;
+      }
+    } catch (_) {}
+  }
+
   const local = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
   if (local) {
     try {
@@ -185,21 +205,23 @@ function renderAuthNav(user) {
 // Update Badges
 async function updateCartCount() {
   let count = 0;
-  try {
-    const res = await fetch(`${API_BASE}/cart`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success && typeof data.itemCount === 'number') {
-        count = data.itemCount;
+  if (!isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/cart`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && typeof data.itemCount === 'number') {
+          count = data.itemCount;
+        }
       }
-    } else {
-      throw new Error();
-    }
-  } catch (err) {
+    } catch (_) {}
+  }
+
+  if (count === 0) {
     try {
       const local = getLocalCartSafe();
       count = local.reduce((s, i) => s + (Number(i.quantity) || 1), 0);
-    } catch(e) {}
+    } catch (_) {}
   }
 
   // Gracefully fallback to local storage if API returned 0 but user has local items
@@ -235,15 +257,17 @@ function getLocalWishlistSafe() {
 
 async function updateWishlistCount() {
   let count = 0;
-  try {
-    const res = await fetch(`${API_BASE}/wishlist`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success) count = data.count || 0;
-    } else {
-      throw new Error();
-    }
-  } catch (_) {
+  if (!isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/wishlist`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) count = data.count || 0;
+      }
+    } catch (_) {}
+  }
+
+  if (count === 0) {
     try {
       const local = getLocalWishlistSafe();
       count = local.length;

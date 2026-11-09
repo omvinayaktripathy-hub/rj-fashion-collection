@@ -149,6 +149,7 @@ async function loadCart() {
     // 1. Load Cart Data (API with graceful localStorage fallback)
     let items = [];
     try {
+      if (window.isStaticHosting) throw new Error('static');
       const res = await fetch(`${API_BASE}/cart`);
       if (res.ok) {
         const apiData = await res.json();

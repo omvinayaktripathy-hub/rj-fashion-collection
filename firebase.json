@@ -9,70 +9,148 @@
     "cleanUrls": true,
     "trailingSlash": false,
     "rewrites": [
-      { "source": "/api/csrf-token", "destination": "/api/csrf-token.json" },
-      { "source": "/api/me", "destination": "/api/me.json" },
-      { "source": "/api/campaign", "destination": "/api/campaign.json" },
-      { "source": "/api/cart", "destination": "/api/cart.json" },
-      { "source": "/api/wishlist", "destination": "/api/wishlist.json" },
-      { "source": "/api/tryon/settings", "destination": "/api/tryon/settings.json" },
-      { "source": "/api/products", "destination": "/data/products.json" },
-      { "source": "/api/categories", "destination": "/data/categories.json" },
-      { "source": "/home", "destination": "/index.html" },
-      { "source": "/-home", "destination": "/index.html" },
-      { "source": "/delivery", "destination": "/delivery.html" },
-      { "source": "/checkout", "destination": "/checkout.html" },
-      { "source": "/login", "destination": "/login.html" },
-      { "source": "/admin", "destination": "/admin.html" },
-      { "source": "/shop", "destination": "/shop.html" },
-      { "source": "/cart", "destination": "/cart.html" },
-      { "source": "/wishlist", "destination": "/wishlist.html" },
-      { "source": "/account", "destination": "/account.html" },
-      { "source": "/orders", "destination": "/orders.html" },
-      { "source": "/categories", "destination": "/categories.html" },
-      { "source": "/faq", "destination": "/faq.html" },
-      { "source": "/sale", "destination": "/sale.html" },
-      { "source": "/size-guide", "destination": "/size-guide.html" }
+      {
+        "source": "/api/products",
+        "destination": "/data/products.json"
+      },
+      {
+        "source": "/api/categories",
+        "destination": "/data/categories.json"
+      },
+      {
+        "source": "/home",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/-home",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/delivery",
+        "destination": "/delivery.html"
+      },
+      {
+        "source": "/checkout",
+        "destination": "/checkout.html"
+      },
+      {
+        "source": "/login",
+        "destination": "/login.html"
+      },
+      {
+        "source": "/admin",
+        "destination": "/admin.html"
+      },
+      {
+        "source": "/shop",
+        "destination": "/shop.html"
+      },
+      {
+        "source": "/cart",
+        "destination": "/cart.html"
+      },
+      {
+        "source": "/wishlist",
+        "destination": "/wishlist.html"
+      },
+      {
+        "source": "/account",
+        "destination": "/account.html"
+      },
+      {
+        "source": "/orders",
+        "destination": "/orders.html"
+      },
+      {
+        "source": "/categories",
+        "destination": "/categories.html"
+      },
+      {
+        "source": "/faq",
+        "destination": "/faq.html"
+      },
+      {
+        "source": "/sale",
+        "destination": "/sale.html"
+      },
+      {
+        "source": "/size-guide",
+        "destination": "/size-guide.html"
+      }
     ],
     "headers": [
       {
         "source": "/**",
         "headers": [
-          { "key": "X-Content-Type-Options", "value": "nosniff" },
-          { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-          { "key": "X-XSS-Protection", "value": "1; mode=block" },
-          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-          { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "SAMEORIGIN"
+          },
+          {
+            "key": "X-XSS-Protection",
+            "value": "1; mode=block"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "camera=(), microphone=(), geolocation=()"
+          }
         ]
       },
       {
         "source": "**/*.@(jpg|jpeg|gif|png|webp|avif|svg|ico|woff|woff2)",
         "headers": [
-          { "key": "Cache-Control", "value": "public, max-age=604800, stale-while-revalidate=86400" }
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=604800, stale-while-revalidate=86400"
+          }
         ]
       },
       {
         "source": "**/*.@(js|css)",
         "headers": [
-          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
         ]
       },
       {
         "source": "**/*.json",
         "headers": [
-          { "key": "Content-Type", "value": "application/json; charset=utf-8" },
-          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+          {
+            "key": "Content-Type",
+            "value": "application/json; charset=utf-8"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
         ]
       },
       {
         "source": "**/*.html",
         "headers": [
-          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
         ]
       },
       {
         "source": "/@(login|admin|checkout|delivery|cart|shop|account|orders|categories|faq|sale|size-guide|home|-home)",
         "headers": [
-          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
         ]
       }
     ]

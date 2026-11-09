@@ -18,6 +18,7 @@ async function initDeliveryPage() {
     // 1. Check Authentication - If not logged in, redirect to dedicated login page
     let user = null;
     try {
+      if (window.isStaticHosting) throw new Error('static');
       const authRes = await fetch(`${API_BASE}/me`);
       if (authRes.ok) {
         const authData = await authRes.json();
@@ -67,6 +68,7 @@ async function loadDeliveryCartSummary() {
 
   let cart = null;
   try {
+    if (window.isStaticHosting) throw new Error('static');
     const res = await fetch(`${API_BASE}/cart`);
     if (res.ok) {
       const data = await res.json();

@@ -21,6 +21,7 @@ async function initAccount() {
 
     // 1. Authoritative check: HttpOnly Cookie session from server
     try {
+      if (window.isStaticHosting) throw new Error('static');
       const res = await fetch(`${API_BASE}/me`);
       const data = await res.json();
       if (data.success && data.user) user = data.user;
@@ -206,6 +207,7 @@ async function loadUserOrders(filter = 'all') {
     } catch (_) {}
 
     try {
+      if (window.isStaticHosting) throw new Error('static');
       const res = await fetch(`${API_BASE}/orders`);
       const data = await res.json();
       if (data.success && Array.isArray(data.orders)) {

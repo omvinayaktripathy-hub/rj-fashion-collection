@@ -34,6 +34,7 @@ async function loadWishlist() {
 
   // 1. Try server API first (authenticated session)
   try {
+    if (window.isStaticHosting) throw new Error('static');
     const res = await fetch(`${API_BASE}/wishlist`);
     if (res.ok) {
       const data = await res.json();
@@ -44,7 +45,7 @@ async function loadWishlist() {
   } catch (_) {}
 
   // 2. Fallback to localStorage (Firebase static hosting or guest session)
-  if (items === null) {
+  if (!items || items.length === 0) {
     try {
       const keys = ['rj_fashion_wishlist', 'rjfc_wishlist', 'rjfc_react_wishlist', 'wishlist'];
       let rawList = null;

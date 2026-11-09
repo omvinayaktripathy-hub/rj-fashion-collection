@@ -12,15 +12,17 @@ async function loadMyOrders() {
   let orders = [];
 
   // 1. Try server API
-  try {
-    const res = await fetch(`${API_BASE}/orders`);
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/orders`);
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
         orders = data.orders;
       }
     }
-  } catch (_) {}
+    } catch (_) {}
+  }
 
   // 2. Fallback to localStorage saved orders
   if (orders.length === 0) {

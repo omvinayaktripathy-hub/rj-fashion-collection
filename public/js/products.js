@@ -435,7 +435,9 @@ async function loadProducts() {
   const isStaticHost = window.location.hostname.includes('firebaseapp.com') ||
                        window.location.hostname.includes('web.app') ||
                        window.location.hostname.includes('netlify.app') ||
-                       window.location.protocol === 'file:';
+                       window.location.protocol === 'file:' ||
+                       (window.location.hostname === '127.0.0.1' && window.location.port !== '3000') ||
+                       (window.location.hostname === 'localhost' && window.location.port !== '3000');
 
   if (!isStaticHost) {
     // Try Server API first on localhost / node

@@ -148,6 +148,7 @@ async function initCheckoutPage() {
     // 1. Resolve User Session (allow guest or logged in)
     let user = null;
     try {
+      if (window.isStaticHosting) throw new Error('static');
       const authRes = await fetch('/api/me');
       if (authRes.ok) {
         const authData = await authRes.json();
@@ -253,6 +254,7 @@ async function loadCheckoutCart() {
 
   // 1. Try server API
   try {
+    if (window.isStaticHosting) throw new Error('static');
     const res = await fetch('/api/cart');
     if (res.ok) {
       const data = await res.json();

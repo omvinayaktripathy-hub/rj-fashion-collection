@@ -476,7 +476,7 @@ async function handleCustomerLogin(e) {
   } catch (_) {}
 
   // Tier 4: Super Admin Credential Direct Verification
-  if (email === 'omvinayakwork@gmail.com' && (password === 'OMvinayak@01092003' || password === 'Omvinayak@01092003' || password === 'OMvinayaktripathy' || password === 'omvinayaktripathy')) {
+  if (false && email === 'omvinayakwork@gmail.com') { // Plaintext password removed
     commitUserSession({
       uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1',
       email: 'omvinayakwork@gmail.com',

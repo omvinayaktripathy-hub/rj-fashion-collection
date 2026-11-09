@@ -1,0 +1,135 @@
+[
+  {
+    "url": "/",
+    "title": "RJ Fashion Collection - Premium Indian Sarees, Jewelry & Ethnic Wear",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/shop.html",
+    "title": "Shop Ethnic Fashion & Sarees - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/categories.html",
+    "title": "All Fashion Categories - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/product.html?id=1",
+    "title": "Royal Kanjivaram Pure Silk Zari Saree | Buy at Best Price on RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/cart.html",
+    "title": "Shopping Bag - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/wishlist.html",
+    "title": "My Saved Collection & Wishlist - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/checkout.html",
+    "title": "Payment & Review - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/delivery.html",
+    "title": "Customer Login & Register - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/login.html",
+    "title": "Customer Login & Register - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/register.html",
+    "title": "Create Your Account - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/account.html",
+    "title": "Customer Login & Register - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/orders.html",
+    "title": "My Orders - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/admin.html",
+    "title": "RJ Fashion Collection - Private Admin Portal",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/faq.html",
+    "title": "Frequently Asked Questions | RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/sale.html",
+    "title": "Mega Sale & Offers Up to 70% OFF | RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/size-guide.html",
+    "title": "Size Guide Sarees, Kurtis, Lehengas & Jewelry | RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/about.html",
+    "title": "About Us - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/contact.html",
+    "title": "Customer Support & Contact - RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  },
+  {
+    "url": "/404.html",
+    "title": "404 - Page Not Found | RJ Fashion Collection",
+    "status": "PASS",
+    "errors": [],
+    "networkFails": []
+  }
+]
