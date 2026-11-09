@@ -103,7 +103,7 @@ function formatPrice(amount) {
 }
 
 // Toast Notification (XSS-safe textContent)
-function showToast(message, type = 'info') {
+function showToast(message, type = 'info', isHtml = false) {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -114,7 +114,11 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
   const span = document.createElement('span');
-  span.textContent = String(message || '');
+  if (isHtml) {
+    span.innerHTML = message;
+  } else {
+    span.textContent = String(message || '');
+  }
   toast.appendChild(span);
 
   container.appendChild(toast);
@@ -519,7 +523,7 @@ async function addToCart(productId, quantity = 1, size = 'Free Size') {
   saveLocalCartSafe(local);
 
   // 5. Instantly provide positive UI feedback
-  showToast('Added to cart!', 'success');
+  showToast(`Added to bag • <a href="/cart.html" style="color:#d4af37;text-decoration:underline;font-weight:700;margin-left:6px;">View Bag &rarr;</a>`, 'success', true);
   updateCartCount();
 
   // 6. Fire background API sync (non-blocking)
@@ -740,6 +744,8 @@ AdaptiveDevice.init();
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   AdaptiveDevice.detect();
+  initBackToTop();
+  initAnnouncementBarRotator();
   checkAuth().then(() => {
     updateCartCount();
     updateWishlistCount();
@@ -772,30 +778,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let matches = [];
       try {
-        const res = await fetch(`/api/products?search=${encodeURIComponent(q)}&limit=6`);
+        const res = await fetch('/data/products.json');
         if (res.ok) {
           const data = await res.json();
-          if (data.success && Array.isArray(data.products)) {
-            matches = data.products;
-          }
+          const list = data.products || [];
+          matches = list.filter(p => 
+            (p.name && p.name.toLowerCase().includes(q)) ||
+            (p.category_name && p.category_name.toLowerCase().includes(q)) ||
+            (p.category && p.category.toLowerCase().includes(q)) ||
+            (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
+            (p.brand && p.brand.toLowerCase().includes(q)) ||
+            (p.department && p.department.toLowerCase().includes(q))
+          ).slice(0, 6);
         }
       } catch (_) {}
-
-      // Fallback to static products.json if needed
-      if (matches.length === 0) {
-        try {
-          const res = await fetch('/data/products.json');
-          if (res.ok) {
-            const data = await res.json();
-            const list = data.products || [];
-            matches = list.filter(p => 
-              (p.name && p.name.toLowerCase().includes(q)) ||
-              (p.subcategory && p.subcategory.toLowerCase().includes(q)) ||
-              (p.brand && p.brand.toLowerCase().includes(q))
-            ).slice(0, 6);
-          }
-        } catch (_) {}
-      }
 
       if (matches.length === 0) {
         suggestionsBox.innerHTML = `
@@ -1195,3 +1191,75 @@ window.addEventListener('scroll', () => {
 // Live sync for wishlist count across windows & contexts
 window.addEventListener('wishlist-updated', updateWishlistCount);
 window.addEventListener('rjfc_wishlist_updated', updateWishlistCount);
+
+
+// ===================================================================
+// FLOATING BACK-TO-TOP & ANNOUNCEMENT ROTATOR ENHANCEMENTS (2026)
+// ===================================================================
+function initBackToTop() {
+  if (document.getElementById('backToTopBtn')) return;
+  const btn = document.createElement('button');
+  btn.id = 'backToTopBtn';
+  btn.className = 'back-to-top-btn';
+  btn.setAttribute('aria-label', 'Back to top');
+  btn.setAttribute('title', 'Back to top');
+  btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
+  document.body.appendChild(btn);
+
+  let isShown = false;
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    if (scrollY > 350) {
+      if (!isShown) {
+        btn.classList.add('is-visible');
+        isShown = true;
+      }
+    } else {
+      if (isShown) {
+        btn.classList.remove('is-visible');
+        isShown = false;
+      }
+    }
+  }, { passive: true });
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+window.initBackToTop = initBackToTop;
+
+function initAnnouncementBarRotator() {
+  const el = document.getElementById('announcement-text');
+  if (!el) return;
+
+  const announcements = [
+    `<span class="top-bar-msg">Discover the New Season — Explore the RJ Fashion Collection</span>
+     <span class="top-bar-sep" aria-hidden="true">•</span>
+     <span class="top-bar-perk">Complimentary Express Shipping on Orders Above ₹999</span>
+     <span class="top-bar-code-pill" onclick="copyPromoCode('GRANDRJ')" title="Click to copy coupon code GRANDRJ" role="button" tabindex="0">
+       <span class="code-label">USE CODE:</span>
+       <strong class="code-val">GRANDRJ</strong>
+       <span class="code-copy-tip" id="code-copy-tip">COPIED</span>
+     </span>`,
+    `<span class="top-bar-msg">✨ 100% Certified Authentic Artisanal Silk Weaves & Heirloom Jewelry</span>
+     <span class="top-bar-sep" aria-hidden="true">•</span>
+     <span class="top-bar-perk">Direct from Master Artisans of Varanasi & Kanchipuram</span>
+     <a href="/shop.html?category=sarees" style="color:#d4af37;text-decoration:underline;font-weight:700;margin-left:6px;">Explore Sarees &rarr;</a>`,
+    `<span class="top-bar-msg">💬 Need Personalized Styling or Bridal Consultation?</span>
+     <span class="top-bar-sep" aria-hidden="true">•</span>
+     <span class="top-bar-perk">Boutique VIP Concierge Available on WhatsApp</span>
+     <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20would%20like%20assistance%20with%20your%20luxury%20collection." target="_blank" rel="noopener noreferrer" style="color:#25D366;font-weight:700;margin-left:6px;">Chat Now &rarr;</a>`
+  ];
+
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx + 1) % announcements.length;
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.4s ease';
+    setTimeout(() => {
+      el.innerHTML = announcements[idx];
+      el.style.opacity = '1';
+    }, 400);
+  }, 6500);
+}
+window.initAnnouncementBarRotator = initAnnouncementBarRotator;

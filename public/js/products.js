@@ -258,6 +258,18 @@ async function openQuickView(productId, event) {
   if (window.catalogProducts && Array.isArray(window.catalogProducts)) {
     p = window.catalogProducts.find(item => String(item.id) === String(productId));
   }
+  if (!p && window.homepageFullCatalog && Array.isArray(window.homepageFullCatalog)) {
+    p = window.homepageFullCatalog.find(item => String(item.id) === String(productId));
+  }
+  if (!p) {
+    try {
+      const res = await fetch('/data/products.json');
+      if (res.ok) {
+        const data = await res.json();
+        p = (data.products || []).find(item => String(item.id) === String(productId));
+      }
+    } catch (_) {}
+  }
   if (!p) {
     try {
       const res = await fetch(`/api/products/${productId}`);
