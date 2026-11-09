@@ -319,6 +319,7 @@ const publicDir = path.join(__dirname, 'public');
 
 // Serve static frontend assets (with clean HTML URL extension support and smart caching)
 app.use(express.static(publicDir, {
+  dotfiles: 'deny',
   extensions: ['html'],
   maxAge: '1h',
   setHeaders: (res, filePath) => {

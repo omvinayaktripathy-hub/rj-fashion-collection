@@ -4,7 +4,24 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/*.sqlite*",
+      "**/*.db*",
+      "**/*.env*",
+      "**/*.log",
+      "**/*.pem",
+      "**/*.key",
+      "**/*.crt",
+      "**/serviceAccountKey*.json",
+      "**/database/**",
+      "**/scripts/**",
+      "**/tests/**",
+      "**/backups/**",
+      "**/uploads/**",
+      "**/temp/**",
+      "**/*secret*",
+      "**/*qr*.png",
+      "**/*authenticator*.png"
     ],
     "cleanUrls": true,
     "trailingSlash": false,
@@ -181,6 +198,33 @@
             "value": "no-cache, no-store, must-revalidate"
           }
         ]
+      }
+    ],
+    "redirects": [
+      {
+        "source": "/.git{,/**}",
+        "destination": "/404",
+        "type": 302
+      },
+      {
+        "source": "/.env{,/**}",
+        "destination": "/404",
+        "type": 302
+      },
+      {
+        "source": "/images/google-authenticator-qr.png",
+        "destination": "/404",
+        "type": 302
+      },
+      {
+        "source": "/uploads{,/**}",
+        "destination": "/404",
+        "type": 302
+      },
+      {
+        "source": "/auth-blade{,.html}",
+        "destination": "/404",
+        "type": 302
       }
     ]
   },

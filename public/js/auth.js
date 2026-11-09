@@ -475,16 +475,7 @@ async function handleCustomerLogin(e) {
     }
   } catch (_) {}
 
-  // Tier 4: Super Admin Credential Direct Verification
-  if (false && email === 'omvinayakwork@gmail.com') { // Plaintext password removed
-    commitUserSession({
-      uid: 'aJC901OkCjU5UvqUUF9tvaqpdbn1',
-      email: 'omvinayakwork@gmail.com',
-      displayName: 'RJ Fashion Admin (Om Vinayak)',
-      role: 'admin'
-    }, false);
-    return false;
-  }
+
 
   if (btn) {
     btn.disabled = false;

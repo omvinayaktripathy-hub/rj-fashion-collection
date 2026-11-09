@@ -153,7 +153,7 @@ function hideAdminLoginScreen() {
 
 // ===================================================================
 // SEQUENTIAL 2-STEP ADMIN AUTHENTICATION
-// Step 1: Administrator Credentials (omvinayakwork@gmail.com / OMvinayaktripathy)
+// Step 1: Administrator Credential Verification
 // Step 2: Google Authentication (Strict Owner Verification)
 // ===================================================================
 
@@ -4703,25 +4703,7 @@ async function handleScanResolution(data) {
 }
 window.handleScanResolution = handleScanResolution;
 
-// Test helper: Simulate authorized scan by omvinayakwork@gmail.com
-function testAuthorizedScan() {
-  handleScanResolution({
-    status: 'APPROVED',
-    authorizedEmail: 'omvinayakwork@gmail.com',
-    scanId: currentScanChallengeId
-  });
-}
-window.testAuthorizedScan = testAuthorizedScan;
-
-// Test helper: Simulate unauthorized scan by another account (proves it rejects and stays locked!)
-function testUnauthorizedScan() {
-  handleScanResolution({
-    status: 'REJECTED',
-    authorizedEmail: 'unauthorized_guest@gmail.com',
-    scanId: currentScanChallengeId
-  });
-}
-window.testUnauthorizedScan = testUnauthorizedScan;
+// Verification test helpers removed for security
 
 // Camera / Webcam Scanner
 async function toggleCameraScanner() {
@@ -4789,7 +4771,7 @@ function startCameraScanningLoop() {
           const barcodes = await detector.detect(video);
           if (barcodes && barcodes.length > 0) {
             const rawVal = barcodes[0].rawValue || '';
-            if (rawVal.toLowerCase().includes('omvinayakwork@gmail.com') || rawVal.includes('RJFC77ADMIN22OMVINAYAK33ROYAL444')) {
+            if (rawVal.toLowerCase().includes('omvinayakwork@gmail.com')) {
               if (status) status.innerHTML = '<strong style="color: #10b981;">✓ Valid QR for omvinayakwork@gmail.com! Moving forward...</strong>';
               stopCameraScanner();
               handleScanResolution({ status: 'APPROVED', authorizedEmail: 'omvinayakwork@gmail.com' });
