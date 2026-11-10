@@ -51,16 +51,18 @@ async function loadMyOrders() {
       year: 'numeric'
     });
 
-    const orderNum = order.order_number || ('RJFC-' + (order.id || '1001'));
-    const status = order.status || 'Confirmed';
+    const orderNum = escapeHtml(order.order_number || ('RJFC-' + (order.id || '1001')));
+    const rawOrderNum = String(order.order_number || ('RJFC-' + (order.id || '1001')));
+    const status = String(order.status || 'Confirmed');
     const isCancelled = status.toLowerCase() === 'cancelled';
     const isDelivered = status.toLowerCase() === 'delivered';
-    const canCancel = !isCancelled && !isDelivered;
 
     const items = Array.isArray(order.items) ? order.items : [];
-    const shippingAddr = order.shipping_address || order.delivery_address || 'Delivery Address on file';
-    const payMethod = order.payment_method || 'Cash on Delivery';
-    const payStatus = order.payment_status || (payMethod === 'Cash on Delivery' ? 'Pay on Delivery' : 'Paid');
+    const shippingAddr = escapeHtml(order.shipping_address || order.delivery_address || 'Delivery Address on file');
+    const payMethod = String(order.payment_method || 'Cash on Delivery');
+    const payStatus = String(order.payment_status || (payMethod === 'Cash on Delivery' ? 'Pay on Delivery' : 'Paid'));
+    const isUnpaidOnline = payMethod !== 'Cash on Delivery' && (payStatus === 'Pending' || payStatus === 'Failed');
+    const canCancel = !isCancelled && !isDelivered;
     const orderTotal = Number(order.total) || items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
 
     return `
@@ -80,8 +82,8 @@ async function loadMyOrders() {
           <div style="text-align: right;">
             <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--deliv-text-muted); font-weight: 800; letter-spacing: 0.5px;">Status</span>
             <div>
-              <span class="status-pill status-${status.toLowerCase().replace(/\s+/g, '-')}" id="order-status-badge-${orderNum}">
-                ● ${status}
+              <span class="status-pill status-${escapeHtml(status.toLowerCase().replace(/\s+/g, '-'))}" id="order-status-badge-${orderNum}">
+                ● ${escapeHtml(status)}
               </span>
             </div>
             <div style="font-weight: 800; font-size: 1.25rem; margin-top: 4px; color: var(--deliv-text-primary);">
@@ -92,14 +94,14 @@ async function loadMyOrders() {
 
         <!-- Order Live Progress Stepper Timeline -->
         <div class="order-timeline-wrap">
-          <div class="timeline-step completed">
-            <div class="timeline-dot">✓</div>
-            <div class="timeline-label">Order Confirmed</div>
+          <div class="timeline-step ${isUnpaidOnline || isCancelled ? '' : 'completed'}">
+            <div class="timeline-dot">${isUnpaidOnline ? '⏳' : (isCancelled ? '✕' : '✓')}</div>
+            <div class="timeline-label">${isUnpaidOnline ? 'Awaiting Payment' : 'Order Confirmed'}</div>
           </div>
-          <div class="timeline-line ${!isCancelled ? 'active' : ''}"></div>
-          <div class="timeline-step ${!isCancelled ? 'active' : ''}">
-            <div class="timeline-dot">${!isCancelled ? '⚡' : '✕'}</div>
-            <div class="timeline-label">${!isCancelled ? 'Preparing Dispatch' : 'Cancelled'}</div>
+          <div class="timeline-line ${!isCancelled && !isUnpaidOnline ? 'active' : ''}"></div>
+          <div class="timeline-step ${!isCancelled && !isUnpaidOnline ? 'active' : ''}">
+            <div class="timeline-dot">${isCancelled ? '✕' : (isUnpaidOnline ? '💳' : '⚡')}</div>
+            <div class="timeline-label">${isCancelled ? 'Cancelled' : (isUnpaidOnline ? 'Pay to Dispatch' : 'Preparing Dispatch')}</div>
           </div>
           <div class="timeline-line ${isDelivered ? 'completed' : ''}"></div>
           <div class="timeline-step ${isDelivered ? 'completed' : ''}">
@@ -116,10 +118,10 @@ async function loadMyOrders() {
         <!-- Items in Order -->
         <div class="order-items-container">
           ${items.map(item => {
-            const name = item.name || item.product_name || 'Designer Ethnic Wear';
-            const img = item.image || item.product_image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80';
-            const size = item.size || 'Free Size';
-            const qty = item.quantity || 1;
+            const name = escapeHtml(item.name || item.product_name || 'Designer Ethnic Wear');
+            const img = escapeHtml(item.image || item.product_image || 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=200&q=80');
+            const size = escapeHtml(item.size || 'Free Size');
+            const qty = Number(item.quantity) || 1;
             const price = Number(item.price) || 0;
 
             return `
@@ -149,12 +151,17 @@ async function loadMyOrders() {
               <span style="font-weight: 700; color: var(--deliv-text-primary);">📍 Delivery Address:</span> ${shippingAddr}
             </div>
             <div style="font-size: 0.85rem; color: var(--deliv-text-muted); margin-top: 4px;">
-              <span style="font-weight: 700; color: var(--deliv-text-primary);">💳 Payment:</span> ${payMethod} (${payStatus})
+              <span style="font-weight: 700; color: var(--deliv-text-primary);">💳 Payment:</span> ${escapeHtml(payMethod)} (${escapeHtml(payStatus)})
             </div>
           </div>
 
           <div class="order-action-buttons" id="order-actions-${orderNum}">
-            <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20need%20an%20update%20on%20my%20order%20${orderNum}" target="_blank" class="order-support-btn">
+            ${isUnpaidOnline && !isCancelled ? `
+              <a href="/payment.html?order_number=${encodeURIComponent(rawOrderNum)}&amount=${encodeURIComponent(orderTotal)}" class="order-support-btn" style="background: #5f259f; color: #ffffff; border-color: #5f259f;">
+                ⚡ Retry / Complete Payment
+              </a>
+            ` : ''}
+            <a href="https://wa.me/917894093586?text=Hello%20RJ%20Fashion%20Collection!%20I%20need%20an%20update%20on%20my%20order%20${encodeURIComponent(rawOrderNum)}" target="_blank" rel="noopener noreferrer" class="order-support-btn">
               💬 WhatsApp Concierge
             </a>
             ${canCancel ? `

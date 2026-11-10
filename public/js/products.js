@@ -230,7 +230,8 @@ async function handleCardBuyNow(productId, event) {
 
   const added = await addToCart(productId, 1, selectedSize || 'Free Size');
   if (added) {
-    window.location.href = '/checkout.html';
+    const hasAddress = localStorage.getItem('rjfc_selected_address') || localStorage.getItem('rj_selected_address') || sessionStorage.getItem('checkout_address_summary') || sessionStorage.getItem('rj_selected_address') || (localStorage.getItem('rjfc_saved_addresses') && localStorage.getItem('rjfc_saved_addresses') !== '[]');
+    window.location.href = hasAddress ? '/checkout.html' : '/delivery.html';
   }
 }
 
@@ -418,7 +419,8 @@ async function quickViewBuyNow(productId) {
   const added = await addToCart(productId, 1, size);
   if (added) {
     closeQuickView();
-    window.location.href = '/delivery.html';
+    const hasAddress = localStorage.getItem('rjfc_selected_address') || localStorage.getItem('rj_selected_address') || sessionStorage.getItem('checkout_address_summary') || sessionStorage.getItem('rj_selected_address') || (localStorage.getItem('rjfc_saved_addresses') && localStorage.getItem('rjfc_saved_addresses') !== '[]');
+    window.location.href = hasAddress ? '/checkout.html' : '/delivery.html';
   }
 }
 

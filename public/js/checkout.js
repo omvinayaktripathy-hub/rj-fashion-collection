@@ -9,7 +9,7 @@ let currentCartItems = [];
 let currentCartTotal = 0;
 let appliedDiscount = 0;
 let couponCodeApplied = (function() { try { return sessionStorage.getItem('rjfc_cart_promo_code') || localStorage.getItem('rjfc_cart_promo_code') || ''; } catch(_) { return ''; } })();
-let currentUser = null;
+let checkoutCurrentUser = null;
 
 function formatPrice(amount) {
   if (typeof amount !== 'number' || isNaN(amount)) return '₹0';
@@ -42,9 +42,11 @@ function clearUnifiedCart() {
       sessionStorage.removeItem(key);
     } catch (_) {}
   }
-  try {
-    fetch('/api/cart/clear', { method: 'POST' }).catch(() => {});
-  } catch (_) {}
+  if (!window.isStaticHosting) {
+    try {
+      fetch('/api/cart/clear', { method: 'POST' }).catch(() => {});
+    } catch (_) {}
+  }
   try {
     window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: [] } }));
     window.dispatchEvent(new Event('storage'));
@@ -117,9 +119,14 @@ function startCheckout() {
   if (localUser) {
     try { user = JSON.parse(localUser); } catch (_) {}
   }
-  currentUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
+  checkoutCurrentUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
 
   // 3. Attach interactive UI listeners
+  const couponInput = document.getElementById('coupon-input');
+  if (couponInput && couponCodeApplied && !couponInput.value) {
+    couponInput.value = couponCodeApplied;
+  }
+
   const notesInput = document.getElementById('order-delivery-notes');
   if (notesInput && !notesInput.__notesBound) {
     notesInput.addEventListener('input', () => {
@@ -343,85 +350,6 @@ function loadCheckoutCartSync() {
 
 async function loadCheckoutCart() {
   loadCheckoutCartSync();
-
-  // Normalize items
-  currentCartItems = rawItems.map((item, idx) => {
-    const price = Number(item.price) || 0;
-    const origPrice = Number(item.original_price || item.originalPrice || price);
-    return {
-      id: item.id || item.product_id || `item_${idx + 1}`,
-      name: item.name || item.title || 'Artisanal Ensemble',
-      price: price,
-      original_price: origPrice,
-      quantity: Math.max(1, Number(item.quantity) || 1),
-      size: item.size || item.selected_size || 'Free Size',
-      color: item.color || item.selected_color || '',
-      image: item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || '/images/placeholder.jpg'
-    };
-  });
-
-  const itemCount = currentCartItems.reduce((s, i) => s + i.quantity, 0);
-
-  // Update Header Item Count
-  if (countEl) {
-    countEl.textContent = `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`;
-  }
-
-  if (!container) return;
-
-  // Empty Bag Handling
-  if (currentCartItems.length === 0) {
-    container.innerHTML = `
-      <div style="padding: 28px 16px; text-align: center;">
-        <div style="font-size: 2rem; margin-bottom: 8px;">🛍️</div>
-        <p style="font-size: 0.95rem; font-weight: 600; color: var(--deliv-text-primary); margin: 0 0 6px 0;">
-          Your bag is currently empty
-        </p>
-        <p style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin: 0 0 16px 0;">
-          Please select your couture pieces before proceeding to checkout.
-        </p>
-        <a href="/shop.html" style="display: inline-flex; align-items: center; gap: 8px; background: #111111; color: #ffffff; padding: 10px 22px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;">
-          <span>Explore Couture Catalog →</span>
-        </a>
-      </div>
-    `;
-
-    renderPriceDetails();
-    const confirmBtn = document.getElementById('confirm-order-btn');
-    if (confirmBtn) confirmBtn.disabled = true;
-    return;
-  }
-
-  // Render Compact 3:4 Portrait Item Rows
-  container.innerHTML = currentCartItems.map(item => `
-    <div class="checkout-item-row" style="display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--deliv-card-border);">
-      <img
-        src="${escapeHtml(item.image)}"
-        alt="${escapeHtml(item.name)}"
-        class="checkout-item-thumb"
-        style="width: 56px; height: 74px; aspect-ratio: 3/4; object-fit: cover; border-radius: 6px; background: #F7F4F0; flex-shrink: 0;"
-        onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'"
-      >
-      <div style="flex: 1; min-width: 0;">
-        <h4 class="checkout-item-title" style="font-size: 0.92rem; font-weight: 600; font-family: serif; color: var(--deliv-text-primary); margin: 0 0 4px 0; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-          ${escapeHtml(item.name)}
-        </h4>
-        <div class="checkout-item-meta" style="font-size: 0.8rem; color: var(--deliv-text-secondary); display: flex; gap: 10px; flex-wrap: wrap;">
-          <span>Size: <strong>${escapeHtml(item.size)}</strong></span>
-          ${item.color ? `<span>Color: <strong>${escapeHtml(item.color)}</strong></span>` : ''}
-          <span>Qty: <strong>${item.quantity}</strong></span>
-        </div>
-      </div>
-      <div class="checkout-item-price" style="font-weight: 700; font-family: monospace; font-size: 0.96rem; color: var(--deliv-text-primary); text-align: right; flex-shrink: 0;">
-        ${formatPrice(item.price * item.quantity)}
-      </div>
-    </div>
-  `).join('');
-
-  const confirmBtn = document.getElementById('confirm-order-btn');
-  if (confirmBtn) confirmBtn.disabled = false;
-
-  renderPriceDetails();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -496,7 +424,7 @@ function renderPriceDetails() {
 
     <div class="fk-price-total-row" style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: var(--deliv-text-primary); padding-top: 14px; border-top: 1.5px solid var(--deliv-card-border); margin-top: 10px;">
       <span>Total Amount Payable</span>
-      <span class="total-highlight" style="font-family: monospace; color: #111111;">${formatPrice(grandTotal)}</span>
+      <span class="total-highlight" style="font-family: monospace; color: var(--deliv-text-primary);">${formatPrice(grandTotal)}</span>
     </div>
 
     ${(catalogSavings + promoDiscount) > 0 ? `
@@ -521,12 +449,48 @@ async function applyPromoCode(codeOverride) {
 
   const itemsSubtotal = currentCartItems.reduce((s, i) => s + (i.price * i.quantity), 0);
 
+  const applyLocalStaticCoupon = () => {
+    const rules = {
+      GRANDRJ: { min: 0, msg: '👑 Promo code "GRANDRJ" applied (Up to ₹500 off)!' },
+      ROYAL10: { min: 0, msg: '👑 Promo code "ROYAL10" applied (10% off)!' },
+      WELCOME500: { min: 2999, msg: '👑 Promo code "WELCOME500" applied (₹500 off)!' }
+    };
+    const rule = rules[code];
+    if (!rule) {
+      if (typeof showToast === 'function') showToast('Invalid promo code. Try ROYAL10, GRANDRJ, or WELCOME500.', 'error');
+      return;
+    }
+    if (itemsSubtotal < rule.min) {
+      if (typeof showToast === 'function') showToast(`Code ${code} requires a minimum order of ₹${rule.min}.`, 'warning');
+      return;
+    }
+    couponCodeApplied = code;
+    if (input) input.value = code;
+    try {
+      sessionStorage.setItem('rjfc_cart_promo_code', code);
+      localStorage.setItem('rjfc_cart_promo_code', code);
+    } catch (_) {}
+    if (typeof showToast === 'function') showToast(rule.msg, 'success');
+    triggerConfetti(35);
+    renderPriceDetails();
+  };
+
+  if (window.isStaticHosting) {
+    applyLocalStaticCoupon();
+    return;
+  }
+
   try {
     const res = await fetch('/api/promotions/validate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code, amount: itemsSubtotal })
     });
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      applyLocalStaticCoupon();
+      return;
+    }
     const data = await res.json();
     if (res.ok && data && data.success) {
       couponCodeApplied = data.code;
@@ -583,13 +547,16 @@ async function executePlaceOrder() {
 
   const paymentRadio = document.querySelector('input[name="checkout_payment_method"]:checked');
   const paymentMethod = paymentRadio ? paymentRadio.value : 'Cash on Delivery';
+  const paymentSubMode = paymentRadio ? (paymentRadio.getAttribute('data-sub') || '') : '';
+  const customerUpiVal = (document.getElementById('customer-upi-id-input')?.value || '').trim();
+  const validCustomerVpa = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(customerUpiVal) ? customerUpiVal : '';
   const notes = document.getElementById('order-delivery-notes')?.value.trim() || '';
 
   const orderPayload = {
     addressId: activeAddressData.id || null,
     address_id: activeAddressData.id || null,
     customer_name: activeAddressData.name,
-    customer_email: (currentUser && currentUser.email) || 'customer@example.com',
+    customer_email: (checkoutCurrentUser && checkoutCurrentUser.email) || 'customer@example.com',
     customer_phone: activeAddressData.phone,
     delivery_address: activeAddressData.text,
     shipping_address: activeAddressData.text,
@@ -602,6 +569,53 @@ async function executePlaceOrder() {
     created_at: new Date().toISOString()
   };
 
+  async function savePendingOrderAndGoToPayment(extraMode) {
+    let placedOrderNumber = `RJFC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    if (!window.isStaticHosting) {
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPayload)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && (data.orderNumber || data.orderId)) {
+            placedOrderNumber = data.orderNumber || `RJFC-${data.orderId}`;
+          }
+        }
+      } catch (_) {}
+    }
+
+    orderPayload.order_number = placedOrderNumber;
+    orderPayload.id = Date.now();
+    orderPayload.payment_status = 'Pending';
+    orderPayload.status = 'Pending Payment';
+
+    try {
+      sessionStorage.setItem('rj_pending_order', JSON.stringify(orderPayload));
+      localStorage.setItem('rj_pending_order', JSON.stringify(orderPayload));
+      const existing = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+      existing.unshift(orderPayload);
+      localStorage.setItem('rj_orders', JSON.stringify(existing));
+    } catch (_) {}
+
+    if (typeof showToast === 'function') {
+      showToast('Opening payment gateway options...', 'info');
+    }
+
+    let payUrl = `/payment.html?order_number=${encodeURIComponent(placedOrderNumber)}&amount=${encodeURIComponent(currentCartTotal)}&name=${encodeURIComponent(activeAddressData.name)}&phone=${encodeURIComponent(activeAddressData.phone)}`;
+    const modeToPass = extraMode || paymentSubMode;
+    if (modeToPass) {
+      payUrl += `&mode=${encodeURIComponent(modeToPass)}`;
+    }
+    if (validCustomerVpa) {
+      payUrl += `&vpa=${encodeURIComponent(validCustomerVpa)}`;
+    }
+    window.location.href = payUrl;
+  }
+
   // PHONEPE & UPI DIRECT INTENT GATEWAY FLOW (Flipkart Style)
   if (paymentMethod === 'PhonePe' || paymentMethod === 'UPI') {
     if (btn) {
@@ -611,9 +625,46 @@ async function executePlaceOrder() {
         <span>OPENING PAYMENT GATEWAY...</span>
       `;
     }
+    await savePendingOrderAndGoToPayment();
+    return;
+  }
 
-    let placedOrderNumber = `RJFC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+  // STRIPE / CARDS CHECKOUT FLOW (Never fall through to unpaid COD confirmation!)
+  if (paymentMethod === 'Stripe') {
+    if (!window.isStaticHosting) {
+      try {
+        const res = await fetch('/api/payment/stripe/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPayload)
+        });
+        const contentType = res.headers.get('content-type') || '';
+        if (res.ok && contentType.includes('application/json')) {
+          const data = await res.json();
+          if (data.success && data.url) {
+            if (typeof showToast === 'function') showToast('Redirecting to Stripe secure checkout...', 'info');
+            window.location.href = data.url;
+            return;
+          }
+        }
+      } catch (_) {}
+    }
 
+    // Fallback on static hosting or disabled Stripe: send to /payment.html with mode=cards
+    await savePendingOrderAndGoToPayment('cards');
+    return;
+  }
+
+  // STRICT COD GUARD: Only Cash on Delivery places an offline confirmed order
+  if (paymentMethod !== 'Cash on Delivery') {
+    await savePendingOrderAndGoToPayment();
+    return;
+  }
+
+  // CASH ON DELIVERY (COD) ORDER FLOW
+  let placedOrderNumber = `RJFC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  if (!window.isStaticHosting) {
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -627,67 +678,17 @@ async function executePlaceOrder() {
         }
       }
     } catch (_) {}
-
-    orderPayload.order_number = placedOrderNumber;
-    orderPayload.id = Date.now();
-    orderPayload.payment_status = 'Pending';
-    orderPayload.status = 'Pending';
-
-    try {
-      sessionStorage.setItem('rj_pending_order', JSON.stringify(orderPayload));
-      const existing = JSON.parse(localStorage.getItem('rj_orders') || '[]');
-      existing.unshift(orderPayload);
-      localStorage.setItem('rj_orders', JSON.stringify(existing));
-    } catch (_) {}
-
-    if (typeof showToast === 'function') {
-      showToast('Opening payment gateway options...', 'info');
-    }
-
-    const payUrl = `/payment.html?order_number=${encodeURIComponent(placedOrderNumber)}&amount=${encodeURIComponent(currentCartTotal)}&name=${encodeURIComponent(activeAddressData.name)}&phone=${encodeURIComponent(activeAddressData.phone)}`;
-    window.location.href = payUrl;
-    return;
   }
-
-  // STRIPE CHECKOUT FLOW
-  if (paymentMethod === 'Stripe') {
-    try {
-      const res = await fetch('/api/payment/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
-        if (typeof showToast === 'function') showToast('Redirecting to Stripe secure checkout...', 'info');
-        window.location.href = data.url;
-        return;
-      }
-    } catch (_) {}
-  }
-
-  // STANDARD / UPI / COD ORDER FLOW
-  let placedOrderNumber = `RJFC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-  try {
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderPayload)
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && (data.orderNumber || data.orderId)) {
-        placedOrderNumber = data.orderNumber || `RJFC-${data.orderId}`;
-      }
-    }
-  } catch (_) {}
 
   // 1. Persist in local storage orders
   try {
+    sessionStorage.removeItem('rj_pending_order');
+    localStorage.removeItem('rj_pending_order');
     const existing = JSON.parse(localStorage.getItem('rj_orders') || '[]');
     orderPayload.order_number = placedOrderNumber;
     orderPayload.id = Date.now();
+    orderPayload.payment_status = 'Pending';
+    orderPayload.status = 'Confirmed';
     existing.unshift(orderPayload);
     localStorage.setItem('rj_orders', JSON.stringify(existing));
   } catch (_) {}

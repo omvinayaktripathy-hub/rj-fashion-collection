@@ -207,7 +207,7 @@
         ]
       },
       {
-        "source": "/@(login|admin|checkout|delivery|cart|shop|account|orders|categories|faq|sale|size-guide|product|home|-home)",
+        "source": "/@(login|admin|checkout|delivery|cart|shop|account|orders|categories|faq|sale|size-guide|product|payment|home|-home)",
         "headers": [
           {
             "key": "Cache-Control",

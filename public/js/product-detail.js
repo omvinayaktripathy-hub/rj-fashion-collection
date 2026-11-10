@@ -1074,7 +1074,7 @@ async function buyCurrentProductNow() {
 
   const success = await addToCart(currentProduct.id, currentQty, selectedSize);
   if (success) {
-    const hasAddress = localStorage.getItem('rjfc_selected_address') || localStorage.getItem('rj_selected_address') || sessionStorage.getItem('checkout_address_summary');
+    const hasAddress = localStorage.getItem('rjfc_selected_address') || localStorage.getItem('rj_selected_address') || sessionStorage.getItem('checkout_address_summary') || sessionStorage.getItem('rj_selected_address') || (localStorage.getItem('rjfc_saved_addresses') && localStorage.getItem('rjfc_saved_addresses') !== '[]');
     if (hasAddress) {
       window.location.href = '/checkout.html';
     } else {

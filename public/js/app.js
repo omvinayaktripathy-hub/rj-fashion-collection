@@ -462,15 +462,17 @@ async function resolveProductById(productId) {
   } catch (_) {}
 
   // 4. Server API
-  try {
-    const apiRes = await fetch(`${API_BASE}/products/${encodeURIComponent(pIdStr)}`);
-    if (apiRes.ok) {
-      const apiData = await apiRes.json();
-      if (apiData && apiData.success && apiData.product) {
-        return apiData.product;
+  if (!isStaticHosting) {
+    try {
+      const apiRes = await fetch(`${API_BASE}/products/${encodeURIComponent(pIdStr)}`);
+      if (apiRes.ok) {
+        const apiData = await apiRes.json();
+        if (apiData && apiData.success && apiData.product) {
+          return apiData.product;
+        }
       }
-    }
-  } catch (_) {}
+    } catch (_) {}
+  }
 
   return null;
 }
@@ -532,13 +534,15 @@ async function addToCart(productId, quantity = 1, size = 'Free Size') {
   updateCartCount();
 
   // 6. Fire background API sync (non-blocking)
-  try {
-    fetch(`${API_BASE}/cart`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, quantity: qty, size: selectedSize })
-    }).catch(() => {});
-  } catch (_) {}
+  if (!isStaticHosting) {
+    try {
+      fetch(`${API_BASE}/cart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity: qty, size: selectedSize })
+      }).catch(() => {});
+    } catch (_) {}
+  }
 
   return true;
 }
