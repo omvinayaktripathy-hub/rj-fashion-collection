@@ -88,8 +88,7 @@
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261109-waf-active">
   <link rel="stylesheet" href="/css/style.css?v=20261109-waf-active">
   <link rel="stylesheet" href="/css/responsive.css?v=20261109-waf-active">
@@ -882,15 +881,12 @@
                 } catch(_) {}
               }
             }
-            var esc = function(s) {
-              return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            };
             var addrEl = document.getElementById('confirmed-address-content');
             if (addrEl && addr) {
-              var name = esc(addr.name || addr.fullName || addr.full_name || '');
-              var phone = esc(addr.phone || addr.customer_phone || '');
-              var text = esc(addr.text || ((addr.house_flat || '') + ', ' + (addr.street || '') + ', ' + (addr.city || '') + ' - ' + (addr.pin_code || '')));
-              var type = esc((addr.address_type || addr.addressType || 'HOME').toUpperCase());
+              var name = addr.name || addr.fullName || addr.full_name || '';
+              var phone = addr.phone || addr.customer_phone || '';
+              var text = addr.text || ((addr.house_flat || '') + ', ' + (addr.street || '') + ', ' + (addr.city || '') + ' - ' + (addr.pin_code || ''));
+              var type = (addr.address_type || addr.addressType || 'HOME').toUpperCase();
               addrEl.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;">' +
                 '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
                 '<strong style="font-size:1.08rem;color:var(--deliv-text-primary);font-family:serif;">' + name + '</strong>' +
@@ -925,9 +921,9 @@
                 var pr = Number(it.price) || 0;
                 totalQty += q;
                 subtotal += pr * q;
-                var img = esc(it.image || it.thumbnail || (Array.isArray(it.images) && it.images[0]) || '/images/placeholder.jpg');
-                var itName = esc(it.name || it.title || 'Artisanal Ensemble');
-                var itSize = esc(it.size || it.selected_size || 'Free Size');
+                var img = it.image || it.thumbnail || (Array.isArray(it.images) && it.images[0]) || '/images/placeholder.jpg';
+                var itName = it.name || it.title || 'Artisanal Ensemble';
+                var itSize = it.size || it.selected_size || 'Free Size';
                 html += '<div class="checkout-item-row" style="display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--deliv-card-border);">' +
                   '<img src="' + img + '" alt="' + itName + '" class="checkout-item-thumb" style="width:56px;height:74px;aspect-ratio:3/4;object-fit:cover;border-radius:6px;background:#F7F4F0;flex-shrink:0;">' +
                   '<div style="flex:1;min-width:0;"><h4 style="font-size:0.92rem;font-weight:600;font-family:serif;color:var(--deliv-text-primary);margin:0 0 4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + itName + '</h4>' +
@@ -997,8 +993,8 @@
 
           <div class="checkout-card-body" style="padding-top: 20px;">
             <!-- Option 1: UPI Gateway (Flipkart / Enterprise Standard Checkout) -->
-            <label class="payment-option-box selected" id="phonepe-box">
-              <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+            <div class="payment-option-box selected" id="phonepe-box" onclick="if(window.selectPaymentBox)selectPaymentBox(this,event)">
+              <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
                 <div style="display: flex; gap: 14px; align-items: flex-start;">
                   <input type="radio" name="checkout_payment_method" value="PhonePe" checked style="accent-color: #5f259f; width: 18px; height: 18px; margin-top: 2px;">
                   <div>
@@ -1028,7 +1024,7 @@
                 <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(95, 37, 159, 0.02); border: 1px solid rgba(95, 37, 159, 0.12); border-radius: 10px; padding: 14px;">
                   
                   <!-- Option A: 1-Click UPI Mobile / Web Redirect -->
-                  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--deliv-card-bg); border: 1px solid var(--deliv-card-border); border-radius: 8px;">
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 1.3rem;">⚡</div>
                     <div style="flex: 1;">
                       <div style="font-size: 0.86rem; font-weight: 700; color: var(--deliv-text-primary);">
@@ -1041,16 +1037,16 @@
                   </div>
 
                   <!-- Option B: Enter Customer's Personal UPI ID (Flipkart Style) -->
-                  <div style="padding: 12px 14px; background: var(--deliv-card-bg); border: 1px solid var(--deliv-card-border); border-radius: 8px;">
+                  <div style="padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;" onclick="event.stopPropagation()">
                     <div style="font-size: 0.84rem; font-weight: 700; color: var(--deliv-text-primary); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
                       <span>Or Pay by your UPI ID</span>
-                      <span style="font-size: 0.72rem; color: var(--deliv-text-muted); font-weight: 500;">(e.g. mobile@upi, name@okhdfcbank)</span>
+                      <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">(e.g. mobile@upi, name@okhdfcbank)</span>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center;">
                       <div style="position: relative; flex: 1;">
-                        <input type="text" id="customer-upi-id-input" placeholder="Enter your UPI ID (e.g. 9876543210@paytm)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--deliv-input-border); border-radius: 6px; font-size: 0.85rem; outline: none; background: var(--deliv-input-bg); color: var(--deliv-text-primary);" oninput="validateCustomerUpiInput(this)">
+                        <input type="text" id="customer-upi-id-input" placeholder="Enter your UPI ID (e.g. 9876543210@paytm)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; background: #fdfdfe;" oninput="if(window.validateCustomerUpiInput)validateCustomerUpiInput(this)" onclick="event.stopPropagation()">
                       </div>
-                      <button type="button" id="btn-verify-customer-upi" onclick="verifyCustomerUpi()" style="padding: 8px 16px; background: #5f259f; color: #ffffff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                      <button type="button" id="btn-verify-customer-upi" onclick="if(window.verifyCustomerUpi)verifyCustomerUpi(event)" style="padding: 8px 16px; background: #5f259f; color: #ffffff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
                         Verify
                       </button>
                     </div>
@@ -1070,10 +1066,10 @@
 
                 </div>
               </div>
-            </label>
+            </div>
 
             <!-- Option 2: Credit / Debit / ATM Cards -->
-            <label class="payment-option-box" id="stripe-box">
+            <div class="payment-option-box" id="stripe-box" onclick="if(window.selectPaymentBox)selectPaymentBox(this,event)">
               <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
                 <div style="display: flex; gap: 14px; align-items: flex-start;">
                   <input type="radio" name="checkout_payment_method" value="Stripe" style="accent-color: #111111; width: 18px; height: 18px; margin-top: 2px;">
@@ -1103,10 +1099,10 @@
                   </div>
                 </div>
               </div>
-            </label>
+            </div>
 
             <!-- Option 3: Net Banking -->
-            <label class="payment-option-box" id="netbanking-box">
+            <div class="payment-option-box" id="netbanking-box" onclick="if(window.selectPaymentBox)selectPaymentBox(this,event)">
               <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
                 <div style="display: flex; gap: 14px; align-items: flex-start;">
                   <input type="radio" name="checkout_payment_method" value="PhonePe" data-sub="netbanking" style="accent-color: #5f259f; width: 18px; height: 18px; margin-top: 2px;">
@@ -1136,10 +1132,10 @@
                   </div>
                 </div>
               </div>
-            </label>
+            </div>
 
             <!-- Option 4: Cash on Delivery -->
-            <label class="payment-option-box" id="cod-box">
+            <div class="payment-option-box" id="cod-box" onclick="if(window.selectPaymentBox)selectPaymentBox(this,event)">
               <div style="display: flex; gap: 14px; align-items: flex-start; justify-content: space-between;">
                 <div style="display: flex; gap: 14px; align-items: flex-start;">
                   <input type="radio" name="checkout_payment_method" value="Cash on Delivery" style="accent-color: #111111; width: 18px; height: 18px; margin-top: 2px;">
@@ -1157,11 +1153,11 @@
 
               <!-- Expanded Active COD State -->
               <div class="payment-extra-detail" style="display: none;">
-                <div style="background: var(--deliv-selected-bg); border: 1px solid rgba(251, 191, 36, 0.45); border-radius: 8px; padding: 12px 14px; font-size: 0.82rem; color: var(--deliv-text-primary); line-height: 1.5;">
+                <div style="background: rgba(254, 243, 199, 0.45); border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 8px; padding: 12px 14px; font-size: 0.82rem; color: #78350f; line-height: 1.5;">
                   <strong>Doorstep Peace of Mind:</strong> Pay securely to the courier partner upon package inspection. The delivery executive carries a handheld digital UPI scanner for contactless payment at arrival.
                 </div>
               </div>
-            </label>
+            </div>
 
             <!-- Collapsible Delivery Instructions Accordion -->
             <div style="margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--deliv-card-border);">
@@ -1349,8 +1345,8 @@
   </a>
 
   <script src="/firebase-config.js?v=20261109-waf-active"></script>
-  <script src="/js/app.js?v=20261110-flipkart-pay"></script>
-  <script src="/js/checkout.js?v=20261110-flipkart-pay"></script>
+  <script src="/js/app.js?v=20261109-waf-active"></script>
+  <script src="/js/checkout.js?v=20261110-fix-checkout"></script>
   <script src="/js/mobile-nav.js?v=20261109-waf-active" defer></script>
   <script src="/js/analytics.js" defer></script>
 <script src="/js/shadcn-ui.js?v=20261109-waf-active" defer></script>

@@ -9,7 +9,7 @@ let currentCartItems = [];
 let currentCartTotal = 0;
 let appliedDiscount = 0;
 let couponCodeApplied = (function() { try { return sessionStorage.getItem('rjfc_cart_promo_code') || localStorage.getItem('rjfc_cart_promo_code') || ''; } catch(_) { return ''; } })();
-let currentUser = null;
+let checkoutUser = null;
 
 function formatPrice(amount) {
   if (typeof amount !== 'number' || isNaN(amount)) return '₹0';
@@ -113,11 +113,11 @@ function startCheckout() {
 
   // 2. Resolve User Session synchronously from local storage
   let user = null;
-  const localUser = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user');
+  const localUser = localStorage.getItem('rjfc_user') || sessionStorage.getItem('rjfc_user') || localStorage.getItem('rj_user') || sessionStorage.getItem('rj_user');
   if (localUser) {
     try { user = JSON.parse(localUser); } catch (_) {}
   }
-  currentUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
+  checkoutUser = user || { name: 'Valued Client', email: 'guest@example.com', phone: '+91 9876543210' };
 
   // 3. Attach interactive UI listeners
   const notesInput = document.getElementById('order-delivery-notes');
@@ -132,21 +132,11 @@ function startCheckout() {
   // Payment radio card styling & animated toggle
   document.querySelectorAll('input[name="checkout_payment_method"]').forEach(radio => {
     if (radio.__radioBound) return;
-    radio.addEventListener('change', () => {
-      document.querySelectorAll('.payment-option-box').forEach(box => {
-        box.classList.remove('selected');
-        const detail = box.querySelector('.payment-extra-detail');
-        if (detail) detail.style.display = 'none';
-      });
-      const selectedBox = radio.closest('.payment-option-box');
-      if (selectedBox) {
-        selectedBox.classList.add('selected');
-        const detail = selectedBox.querySelector('.payment-extra-detail');
-        if (detail) detail.style.display = 'block';
-      }
-    });
+    radio.addEventListener('change', () => syncPaymentBoxSelection(radio));
     radio.__radioBound = true;
   });
+  const initiallyChecked = document.querySelector('input[name="checkout_payment_method"]:checked');
+  if (initiallyChecked) syncPaymentBoxSelection(initiallyChecked);
 
   // Listen for storage cart updates
   window.addEventListener('storage', () => {
@@ -343,86 +333,47 @@ function loadCheckoutCartSync() {
 
 async function loadCheckoutCart() {
   loadCheckoutCartSync();
+}
 
-  // Normalize items
-  currentCartItems = rawItems.map((item, idx) => {
-    const price = Number(item.price) || 0;
-    const origPrice = Number(item.original_price || item.originalPrice || price);
-    return {
-      id: item.id || item.product_id || `item_${idx + 1}`,
-      name: item.name || item.title || 'Artisanal Ensemble',
-      price: price,
-      original_price: origPrice,
-      quantity: Math.max(1, Number(item.quantity) || 1),
-      size: item.size || item.selected_size || 'Free Size',
-      color: item.color || item.selected_color || '',
-      image: item.image || item.thumbnail || (Array.isArray(item.images) && item.images[0]) || '/images/placeholder.jpg'
-    };
-  });
-
-  const itemCount = currentCartItems.reduce((s, i) => s + i.quantity, 0);
-
-  // Update Header Item Count
-  if (countEl) {
-    countEl.textContent = `${itemCount} ${itemCount === 1 ? 'item' : 'items'}`;
+function updateCheckoutButtonLabel(grandTotal) {
+  const confirmBtnLabel = document.getElementById('confirm-order-btn-label');
+  if (!confirmBtnLabel) return;
+  const radio = document.querySelector('input[name="checkout_payment_method"]:checked');
+  const method = radio ? radio.value : 'PhonePe';
+  const totalTxt = formatPrice(grandTotal);
+  if (method === 'Cash on Delivery') {
+    confirmBtnLabel.textContent = `CONFIRM COD ORDER • ${totalTxt}`;
+  } else {
+    confirmBtnLabel.textContent = `PAY & COMPLETE ORDER • ${totalTxt}`;
   }
+}
 
-  if (!container) return;
+function syncPaymentBoxSelection(radio) {
+  document.querySelectorAll('.payment-option-box').forEach(box => {
+    box.classList.remove('selected');
+    const detail = box.querySelector('.payment-extra-detail');
+    if (detail) detail.style.display = 'none';
+  });
+  const selectedBox = radio ? radio.closest('.payment-option-box') : null;
+  if (selectedBox) {
+    selectedBox.classList.add('selected');
+    const detail = selectedBox.querySelector('.payment-extra-detail');
+    if (detail) detail.style.display = 'block';
+  }
+  updateCheckoutButtonLabel(currentCartTotal);
+}
 
-  // Empty Bag Handling
-  if (currentCartItems.length === 0) {
-    container.innerHTML = `
-      <div style="padding: 28px 16px; text-align: center;">
-        <div style="font-size: 2rem; margin-bottom: 8px;">🛍️</div>
-        <p style="font-size: 0.95rem; font-weight: 600; color: var(--deliv-text-primary); margin: 0 0 6px 0;">
-          Your bag is currently empty
-        </p>
-        <p style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin: 0 0 16px 0;">
-          Please select your couture pieces before proceeding to checkout.
-        </p>
-        <a href="/shop.html" style="display: inline-flex; align-items: center; gap: 8px; background: #111111; color: #ffffff; padding: 10px 22px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;">
-          <span>Explore Couture Catalog →</span>
-        </a>
-      </div>
-    `;
-
-    renderPriceDetails();
-    const confirmBtn = document.getElementById('confirm-order-btn');
-    if (confirmBtn) confirmBtn.disabled = true;
+window.selectPaymentBox = function(box, event) {
+  if (!box) return;
+  if (event && event.target && (event.target.tagName === 'INPUT' && event.target.type !== 'radio' || event.target.tagName === 'BUTTON' || event.target.closest('button'))) {
     return;
   }
-
-  // Render Compact 3:4 Portrait Item Rows
-  container.innerHTML = currentCartItems.map(item => `
-    <div class="checkout-item-row" style="display: flex; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--deliv-card-border);">
-      <img
-        src="${escapeHtml(item.image)}"
-        alt="${escapeHtml(item.name)}"
-        class="checkout-item-thumb"
-        style="width: 56px; height: 74px; aspect-ratio: 3/4; object-fit: cover; border-radius: 6px; background: #F7F4F0; flex-shrink: 0;"
-        onerror="this.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'"
-      >
-      <div style="flex: 1; min-width: 0;">
-        <h4 class="checkout-item-title" style="font-size: 0.92rem; font-weight: 600; font-family: serif; color: var(--deliv-text-primary); margin: 0 0 4px 0; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-          ${escapeHtml(item.name)}
-        </h4>
-        <div class="checkout-item-meta" style="font-size: 0.8rem; color: var(--deliv-text-secondary); display: flex; gap: 10px; flex-wrap: wrap;">
-          <span>Size: <strong>${escapeHtml(item.size)}</strong></span>
-          ${item.color ? `<span>Color: <strong>${escapeHtml(item.color)}</strong></span>` : ''}
-          <span>Qty: <strong>${item.quantity}</strong></span>
-        </div>
-      </div>
-      <div class="checkout-item-price" style="font-weight: 700; font-family: monospace; font-size: 0.96rem; color: var(--deliv-text-primary); text-align: right; flex-shrink: 0;">
-        ${formatPrice(item.price * item.quantity)}
-      </div>
-    </div>
-  `).join('');
-
-  const confirmBtn = document.getElementById('confirm-order-btn');
-  if (confirmBtn) confirmBtn.disabled = false;
-
-  renderPriceDetails();
-}
+  const radio = box.querySelector('input[type="radio"][name="checkout_payment_method"]');
+  if (radio) {
+    radio.checked = true;
+    syncPaymentBoxSelection(radio);
+  }
+};
 
 // ─────────────────────────────────────────────────────────────
 // Hydrate Sticky Price Details Card
@@ -453,10 +404,7 @@ function renderPriceDetails() {
   currentCartTotal = grandTotal;
 
   // Hydrate Primary CTA Button
-  const confirmBtnLabel = document.getElementById('confirm-order-btn-label');
-  if (confirmBtnLabel) {
-    confirmBtnLabel.textContent = `PAY & COMPLETE ORDER • ${formatPrice(grandTotal)}`;
-  }
+  updateCheckoutButtonLabel(grandTotal);
 
   if (items.length === 0) {
     priceBody.innerHTML = `
@@ -583,13 +531,15 @@ async function executePlaceOrder() {
 
   const paymentRadio = document.querySelector('input[name="checkout_payment_method"]:checked');
   const paymentMethod = paymentRadio ? paymentRadio.value : 'Cash on Delivery';
+  const paymentSubMethod = paymentRadio ? (paymentRadio.getAttribute('data-sub') || '') : '';
   const notes = document.getElementById('order-delivery-notes')?.value.trim() || '';
+  const customerUpiId = document.getElementById('customer-upi-id-input')?.value.trim() || '';
 
   const orderPayload = {
     addressId: activeAddressData.id || null,
     address_id: activeAddressData.id || null,
     customer_name: activeAddressData.name,
-    customer_email: (currentUser && currentUser.email) || 'customer@example.com',
+    customer_email: (checkoutUser && checkoutUser.email) || 'customer@example.com',
     customer_phone: activeAddressData.phone,
     delivery_address: activeAddressData.text,
     shipping_address: activeAddressData.text,
@@ -597,6 +547,8 @@ async function executePlaceOrder() {
     total: currentCartTotal,
     paymentMethod: paymentMethod,
     payment_method: paymentMethod,
+    payment_sub_method: paymentSubMethod,
+    customer_upi_id: customerUpiId,
     coupon: couponCodeApplied,
     notes: notes,
     created_at: new Date().toISOString()
@@ -863,7 +815,9 @@ window.validateCustomerUpiInput = function(el) {
   }
 };
 
-window.verifyCustomerUpi = function() {
+window.verifyCustomerUpi = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  if (e && e.stopPropagation) e.stopPropagation();
   const input = document.getElementById('customer-upi-id-input');
   const feedback = document.getElementById('customer-upi-feedback');
   if (!input || !feedback) return;
@@ -880,9 +834,9 @@ window.verifyCustomerUpi = function() {
   if (upiRegex.test(val)) {
     feedback.style.display = 'block';
     feedback.style.color = '#059669';
-    feedback.innerHTML = `✓ Valid UPI ID (<strong>${escapeHtml(val)}</strong>). Click Pay &amp; Complete Order to proceed.`;
+    feedback.innerHTML = `✓ Valid UPI ID Format (<strong>${escapeHtml(val)}</strong>). Click Pay &amp; Complete Order to proceed.`;
     if (typeof showToast === 'function') {
-      showToast('UPI ID verified successfully!', 'success');
+      showToast('UPI ID format verified!', 'success');
     }
   } else {
     feedback.style.display = 'block';
@@ -890,3 +844,9 @@ window.verifyCustomerUpi = function() {
     feedback.textContent = 'Please enter a valid UPI format with @ handle (e.g. yourname@okhdfcbank)';
   }
 };
+
+window.executePlaceOrder = executePlaceOrder;
+window.applyPromoCode = applyPromoCode;
+window.toggleDeliveryInstructions = toggleDeliveryInstructions;
+window.toggleGiftOption = toggleGiftOption;
+window.saveGiftMessage = saveGiftMessage;
