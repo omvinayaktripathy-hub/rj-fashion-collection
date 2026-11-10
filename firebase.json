@@ -109,6 +109,10 @@
       {
         "source": "/product",
         "destination": "/product.html"
+      },
+      {
+        "source": "/payment",
+        "destination": "/payment.html"
       }
     ],
     "headers": [

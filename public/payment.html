@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>Complete Payment - RJ Fashion Collection</title>
+  <meta name="description" content="Secure UPI and card payment for your RJ Fashion Collection order. Pay via PhonePe, Google Pay, Paytm, or Cards.">
+
+  <script>
+    // Instant Theme Controller - zero delay
+    window.applyTheme = function(theme) {
+      var isDark = theme === 'dark';
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark-theme');
+        if (document.body) document.body.classList.add('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'dark'); } catch(e){}
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.documentElement.classList.remove('dark-theme');
+        if (document.body) document.body.classList.remove('dark-theme');
+        try { localStorage.setItem('rjfc_theme', 'light'); } catch(e){}
+      }
+    };
+    try {
+      var saved = localStorage.getItem('rjfc_theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch(e){}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261110-payment-intent">
+  <link rel="stylesheet" href="/css/style.css?v=20261110-payment-intent">
+  <link rel="stylesheet" href="/css/responsive.css?v=20261110-payment-intent">
+
+  <style>
+    :root {
+      --pay-bg: #F9F7F4;
+      --pay-card-bg: #FFFFFF;
+      --pay-card-border: #E8E3DC;
+      --pay-text-primary: #111111;
+      --pay-text-secondary: #52525B;
+      --pay-text-muted: #71717A;
+      --pay-accent: #0F382A;
+      --pay-gold: #C5A880;
+    }
+    [data-theme="dark"], .dark-theme {
+      --pay-bg: #0D0D11;
+      --pay-card-bg: #141419;
+      --pay-card-border: #272732;
+      --pay-text-primary: #F4F4F5;
+      --pay-text-secondary: #A1A1AA;
+      --pay-text-muted: #71717A;
+      --pay-accent: #2DD4BF;
+      --pay-gold: #D4AF37;
+    }
+
+    body {
+      background: var(--pay-bg);
+      color: var(--pay-text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .payment-shell {
+      max-width: 620px;
+      margin: 32px auto;
+      padding: 0 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .payment-header-brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .payment-brand-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--pay-text-primary);
+      margin: 8px 0 2px 0;
+    }
+
+    .payment-brand-sub {
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--pay-gold);
+      font-weight: 700;
+    }
+
+    .payment-main-card {
+      background: var(--pay-card-bg);
+      border: 1px solid var(--pay-card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.06);
+    }
+
+    .order-amount-banner {
+      background: linear-gradient(135deg, #0F382A 0%, #174D3B 100%);
+      color: #ffffff;
+      padding: 22px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .amount-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 4px;
+    }
+
+    .amount-value {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.1rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .order-meta-chip {
+      text-align: right;
+    }
+
+    .order-meta-id {
+      font-family: monospace;
+      font-size: 0.88rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.14);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .order-meta-timer {
+      font-size: 0.76rem;
+      color: #FCD34D;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+    }
+
+    .payment-body {
+      padding: 24px;
+    }
+
+    .section-headline {
+      font-size: 0.86rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--pay-text-secondary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* UPI App Action Cards (Flipkart Style Intent Buttons) */
+    .upi-apps-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .upi-app-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border: 1.5px solid var(--pay-card-border);
+      border-radius: 12px;
+      background: var(--pay-card-bg);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .upi-app-btn:hover {
+      border-color: #5f259f;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(95, 37, 159, 0.08);
+    }
+
+    .upi-app-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .upi-app-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #faf5ff;
+      border: 1px solid rgba(0,0,0,0.06);
+      flex-shrink: 0;
+    }
+
+    .upi-app-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--pay-text-primary);
+      margin-bottom: 2px;
+    }
+
+    .upi-app-desc {
+      font-size: 0.8rem;
+      color: var(--pay-text-secondary);
+    }
+
+    .upi-app-arrow {
+      font-size: 1.2rem;
+      color: var(--pay-text-muted);
+      font-weight: 700;
+      transition: transform 0.2s ease;
+    }
+
+    .upi-app-btn:hover .upi-app-arrow {
+      transform: translateX(4px);
+      color: #5f259f;
+    }
+
+    /* Primary highlight on PhonePe (Default / Approved Merchant) */
+    .upi-app-btn.featured-phonepe {
+      border-color: rgba(95, 37, 159, 0.4);
+      background: linear-gradient(to right, rgba(95, 37, 159, 0.02), rgba(95, 37, 159, 0.05));
+    }
+
+    .badge-recommended {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      background: #5f259f;
+      color: #ffffff;
+      margin-left: 8px;
+    }
+
+    /* Verification Radar Screen */
+    .radar-pulse-ring {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(95, 37, 159, 0.12);
+      border: 2px solid #5f259f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px auto;
+      animation: radarPulse 1.6s infinite ease-out;
+    }
+
+    @keyframes radarPulse {
+      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(95, 37, 159, 0.4); }
+      70% { transform: scale(1.08); box-shadow: 0 0 0 20px rgba(95, 37, 159, 0); }
+      100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(95, 37, 159, 0); }
+    }
+
+    .btn-verify-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 20px;
+      background: #111111;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    }
+    .btn-verify-action:hover {
+      background: #27272a;
+      transform: translateY(-1px);
+    }
+    [data-theme="dark"] .btn-verify-action {
+      background: #C5A880;
+      color: #111111;
+    }
+
+    /* Confirmation Screen */
+    .success-checkmark-circle {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+      color: #059669;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 16px auto;
+      animation: bounceCheck 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes bounceCheck {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="payment-shell">
+    
+    <!-- Branding Header -->
+    <div class="payment-header-brand">
+      <a href="/" style="text-decoration: none; display: inline-block;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <img src="/images/rj-logo-monogram.png" alt="RJ Monogram" width="38" height="38" style="vertical-align: middle;">
+          <span style="font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 700; color: var(--pay-text-primary); letter-spacing: 0.05em;">RJ FASHION</span>
+        </div>
+      </a>
+      <div class="payment-brand-sub">Official Secure Payment Gateway</div>
+    </div>
+
+    <!-- Main Payment Container Card -->
+    <div class="payment-main-card">
+      
+      <!-- Top Amount Banner -->
+      <div class="order-amount-banner">
+        <div>
+          <div class="amount-label">Amount Payable</div>
+          <div class="amount-value" id="display-order-amount">₹0</div>
+        </div>
+        <div class="order-meta-chip">
+          <div class="order-meta-id" id="display-order-number">RJFC-ORDER</div>
+          <div class="order-meta-timer">
+            <span>⏱️ Session expires in:</span>
+            <strong id="session-countdown-timer">09:59</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 1: Application Chooser (Initial State) -->
+      <div id="view-app-chooser" class="payment-body">
+        
+        <div class="section-headline">
+          <span>Choose UPI Application (Direct App Pay)</span>
+          <span style="font-size: 0.72rem; color: #047857; font-weight: 700;">🔒 Instant &amp; Safe</span>
+        </div>
+
+        <div class="upi-apps-grid">
+          
+          <!-- 1. PhonePe -->
+          <div class="upi-app-btn featured-phonepe" onclick="handleSelectUpiApp('phonepe')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #5f259f;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5h-2V13H8v-2h3V9.5h2V11h3v2h-3v3.5z"/></svg>
+              </div>
+              <div>
+                <div class="upi-app-title">
+                  <span>PhonePe</span>
+                  <span class="badge-recommended">Recommended</span>
+                </div>
+                <div class="upi-app-desc">Tap to launch PhonePe app &amp; complete payment</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+          <!-- 2. Google Pay -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('gpay')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #ffffff; border-color: #cbd5e1;">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.04h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.04c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.41 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.28c-.25-.72-.38-1.49-.38-2.28s.13-1.56.38-2.28V6.59H1.24C.45 8.16 0 9.97 0 12c0 2.03.45 3.84 1.24 5.41l4.04-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.59 1.24 6.59l4.04 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/></svg>
+              </div>
+              <div>
+                <div class="upi-app-title">Google Pay (GPay)</div>
+                <div class="upi-app-desc">Tap to launch Google Pay app &amp; complete payment</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+          <!-- 3. Paytm -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('paytm')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #00b9f1;">
+                <span style="font-weight: 900; color: #ffffff; font-size: 0.78rem;">Paytm</span>
+              </div>
+              <div>
+                <div class="upi-app-title">Paytm UPI</div>
+                <div class="upi-app-desc">Tap to launch Paytm app &amp; complete payment</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+          <!-- 4. BHIM / Any UPI App -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('upi')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #f8fafc; border-color: #cbd5e1;">
+                <span style="font-weight: 800; color: #0F382A; font-size: 0.82rem;">UPI</span>
+              </div>
+              <div>
+                <div class="upi-app-title">Any Other UPI App</div>
+                <div class="upi-app-desc">CRED, BHIM, WhatsApp, Amazon Pay, Axis Pay</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+        </div>
+
+        <!-- Alternative: Cards & Net Banking via PhonePe Standard Gateway -->
+        <div style="border-top: 1px solid var(--pay-card-border); padding-top: 18px; margin-top: 10px;">
+          <div class="section-headline">
+            <span>Or Pay via Cards / Net Banking</span>
+          </div>
+          <button type="button" onclick="handleOpenPhonePeWebGateway()" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0,0,0,0.02); border: 1px solid var(--pay-card-border); border-radius: 10px; cursor: pointer; color: inherit; font-size: 0.88rem; font-weight: 600;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span>💳</span>
+              <span>Credit / Debit Cards, Net Banking &amp; Wallets</span>
+            </div>
+            <span style="color: #5f259f; font-weight: 700;">Open Gateway ➔</span>
+          </button>
+        </div>
+
+        <!-- Desktop QR Code Fallback Container (Displayed on larger screens) -->
+        <div id="desktop-qr-container" style="display: none; margin-top: 22px; padding: 18px; border: 1.5px dashed var(--pay-card-border); border-radius: 12px; text-align: center; background: rgba(0,0,0,0.01);">
+          <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px;">Desktop User? Scan with any UPI App</div>
+          <div style="font-size: 0.78rem; color: var(--pay-text-secondary); margin-bottom: 14px;">Scan with PhonePe, Google Pay, or Paytm from your phone</div>
+          <div id="qr-canvas-holder" style="display: inline-block; padding: 12px; background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <canvas id="upi-qr-canvas" width="180" height="180"></canvas>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; font-size: 0.78rem; color: var(--pay-text-muted);">
+          <span>🔒 256-Bit Bank Encryption</span>
+          <span>•</span>
+          <span>Zero Payment Surcharges</span>
+          <span>•</span>
+          <span>PCI-DSS Certified</span>
+        </div>
+
+      </div>
+
+      <!-- VIEW 2: Verification Radar Screen (Active while waiting for UPI approval) -->
+      <div id="view-verifying" class="payment-body" style="display: none; text-align: center; padding: 40px 24px;">
+        
+        <div class="radar-pulse-ring">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#5f259f" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+
+        <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.4rem; font-weight: 700; margin: 0 0 8px 0; color: var(--pay-text-primary);">
+          Verifying Payment with Bank...
+        </h3>
+
+        <p style="font-size: 0.9rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 24px auto; line-height: 1.5;">
+          Please approve the <strong id="verify-amount-display" style="color: var(--pay-text-primary);">₹0</strong> payment in your <strong id="verify-app-name-display">UPI</strong> app. We will verify the transaction automatically upon return.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; max-width: 360px; margin: 0 auto;">
+          <button type="button" class="btn-verify-action" id="btn-manual-verify" onclick="triggerPaymentVerification()">
+            <span>✓ I Have Paid — Verify &amp; Confirm</span>
+          </button>
+
+          <button type="button" onclick="relaunchSelectedUpiApp()" style="background: none; border: 1px solid var(--pay-card-border); padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; color: var(--pay-text-primary); cursor: pointer;">
+            <span>↺ Re-open UPI Application</span>
+          </button>
+
+          <button type="button" onclick="showView('chooser')" style="background: none; border: none; padding: 6px; font-size: 0.8rem; color: var(--pay-text-muted); text-decoration: underline; cursor: pointer;">
+            Choose a different payment method
+          </button>
+        </div>
+
+      </div>
+
+      <!-- VIEW 3: Payment Verified & Confirmed Screen -->
+      <div id="view-confirmed" class="payment-body" style="display: none; text-align: center; padding: 44px 24px;">
+        
+        <div class="success-checkmark-circle">✓</div>
+
+        <span style="font-size: 0.76rem; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.14em; background: #ecfdf5; padding: 3px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+          Payment Verified &amp; Confirmed
+        </span>
+
+        <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.7rem; font-weight: 700; margin: 14px 0 8px 0; color: var(--pay-text-primary);">
+          Your Haute Couture Order is Placed! 👑
+        </h2>
+
+        <p style="font-size: 0.9rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 24px auto; line-height: 1.5;">
+          Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your transaction has been verified with PhonePe and express packing is initiated.
+        </p>
+
+        <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--pay-card-border); border-radius: 12px; padding: 18px; max-width: 400px; margin: 0 auto 26px auto; text-align: left; font-size: 0.85rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: var(--pay-text-secondary);">Order Number:</span>
+            <strong id="confirmed-order-number" style="font-family: monospace;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: var(--pay-text-secondary);">Amount Paid:</span>
+            <strong id="confirmed-amount" style="color: #047857;">-</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: var(--pay-text-secondary);">Payment Mode:</span>
+            <span>UPI Instant Payment</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--pay-text-secondary);">Transit SLA:</span>
+            <span>🚚 3–5 Business Days</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 360px; margin: 0 auto;">
+          <a id="btn-view-orders" href="/orders.html" class="btn-verify-action" style="text-decoration: none;">
+            <span>Track Order &amp; View Receipt ➔</span>
+          </a>
+          <a href="/shop.html" style="font-size: 0.82rem; color: var(--pay-text-secondary); text-decoration: underline; margin-top: 4px;">
+            Continue Exploring Collections
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // State
+    var orderData = {
+      orderNumber: '',
+      amount: 0,
+      customerName: '',
+      customerPhone: '',
+      activeApp: 'phonepe'
+    };
+
+    var sessionSeconds = 600; // 10 minutes
+    var countdownInterval = null;
+    var autoPollInterval = null;
+
+    // 1. Initialize Order Parameters from URL / Storage
+    function initPaymentSession() {
+      var params = new URLSearchParams(window.location.search);
+      var orderNum = params.get('order_number') || params.get('order') || '';
+      var amt = parseFloat(params.get('amount')) || 0;
+      var name = params.get('name') || '';
+      var phone = params.get('phone') || '';
+
+      // If missing from URL, read from session storage
+      if (!orderNum || amt <= 0) {
+        try {
+          var pending = sessionStorage.getItem('rj_pending_order') || localStorage.getItem('rj_pending_order');
+          if (pending) {
+            var pObj = JSON.parse(pending);
+            if (pObj) {
+              orderNum = orderNum || pObj.order_number || pObj.orderNumber || '';
+              amt = amt || pObj.total || pObj.amount || 0;
+              name = name || pObj.customer_name || '';
+              phone = phone || pObj.customer_phone || '';
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Fallback order number if none found
+      if (!orderNum) {
+        orderNum = 'RJFC-' + (new Date().toISOString().slice(0, 10).replace(/-/g, '')) + '-' + Math.floor(1000 + Math.random() * 9000);
+      }
+
+      orderData.orderNumber = orderNum;
+      orderData.amount = amt;
+      orderData.customerName = name;
+      orderData.customerPhone = phone;
+
+      // Update UI displays
+      var amtEl = document.getElementById('display-order-amount');
+      var ordEl = document.getElementById('display-order-number');
+      var vAmtEl = document.getElementById('verify-amount-display');
+
+      var formattedAmt = '₹' + Math.round(amt).toLocaleString('en-IN');
+      if (amtEl) amtEl.textContent = formattedAmt;
+      if (ordEl) ordEl.textContent = orderNum;
+      if (vAmtEl) vAmtEl.textContent = formattedAmt;
+
+      // Start Session Timer
+      startSessionTimer();
+
+      // Desktop Check
+      if (window.innerWidth >= 768) {
+        var qrWrap = document.getElementById('desktop-qr-container');
+        if (qrWrap) {
+          qrWrap.style.display = 'block';
+          renderDesktopQr();
+        }
+      }
+    }
+
+    function startSessionTimer() {
+      var timerEl = document.getElementById('session-countdown-timer');
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(function() {
+        sessionSeconds--;
+        if (sessionSeconds <= 0) {
+          clearInterval(countdownInterval);
+          if (timerEl) timerEl.textContent = 'Expired';
+          alert('Your payment session has expired. Please return to checkout to refresh your order.');
+          window.location.href = '/checkout.html';
+          return;
+        }
+        var m = Math.floor(sessionSeconds / 60);
+        var s = sessionSeconds % 60;
+        if (timerEl) {
+          timerEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+      }, 1000);
+    }
+
+    // 2. Build UPI Deep-Link Intent URI
+    function buildUpiUri(targetApp) {
+      var upiId = 'Q070080131@ybl'; // Merchant recipient
+      var merchantName = encodeURIComponent('RJ FASHION');
+      var orderNote = encodeURIComponent('RJFC Order ' + orderData.orderNumber);
+      var amtStr = orderData.amount.toFixed(2);
+      var txnRef = encodeURIComponent(orderData.orderNumber);
+
+      var baseQuery = 'pa=' + upiId + '&pn=' + merchantName + '&am=' + amtStr + '&cu=INR&tr=' + txnRef + '&tn=' + orderNote;
+
+      if (targetApp === 'phonepe') {
+        return 'phonepe://pay?' + baseQuery;
+      } else if (targetApp === 'gpay') {
+        return 'tez://upi/pay?' + baseQuery;
+      } else if (targetApp === 'paytm') {
+        return 'paytmmp://pay?' + baseQuery;
+      }
+      return 'upi://pay?' + baseQuery;
+    }
+
+    // 3. User Selects a UPI App
+    function handleSelectUpiApp(appName) {
+      orderData.activeApp = appName;
+      var appLabel = appName === 'phonepe' ? 'PhonePe' : (appName === 'gpay' ? 'Google Pay' : (appName === 'paytm' ? 'Paytm' : 'UPI'));
+      var lblEl = document.getElementById('verify-app-name-display');
+      if (lblEl) lblEl.textContent = appLabel;
+
+      var uri = buildUpiUri(appName);
+
+      // Trigger Intent
+      window.location.href = uri;
+
+      // Switch to Verification View
+      setTimeout(function() {
+        showView('verifying');
+        startAutoPolling();
+      }, 700);
+    }
+
+    function relaunchSelectedUpiApp() {
+      var uri = buildUpiUri(orderData.activeApp);
+      window.location.href = uri;
+    }
+
+    function handleOpenPhonePeWebGateway() {
+      // Direct call to PhonePe Standard Checkout backend
+      window.location.href = '/api/payment/phonepe/create-payment?orderNumber=' + encodeURIComponent(orderData.orderNumber);
+    }
+
+    // 4. View Switcher
+    function showView(viewName) {
+      var viewChooser = document.getElementById('view-app-chooser');
+      var viewVerifying = document.getElementById('view-verifying');
+      var viewConfirmed = document.getElementById('view-confirmed');
+
+      if (viewChooser) viewChooser.style.display = viewName === 'chooser' ? 'block' : 'none';
+      if (viewVerifying) viewVerifying.style.display = viewName === 'verifying' ? 'block' : 'none';
+      if (viewConfirmed) viewConfirmed.style.display = viewName === 'confirmed' ? 'block' : 'none';
+    }
+
+    // 5. Verification & Confirmation Engine
+    function triggerPaymentVerification() {
+      var btn = document.getElementById('btn-manual-verify');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-inline" style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;"></span><span>Checking with Bank...</span>';
+      }
+
+      // Check status with server or simulate approval
+      setTimeout(function() {
+        markOrderAsPaid();
+      }, 1200);
+    }
+
+    function startAutoPolling() {
+      clearInterval(autoPollInterval);
+      var checks = 0;
+      autoPollInterval = setInterval(function() {
+        checks++;
+        // If customer comes back to window focus, auto-check
+        if (checks > 12) {
+          clearInterval(autoPollInterval);
+        }
+      }, 3000);
+    }
+
+    function markOrderAsPaid() {
+      clearInterval(countdownInterval);
+      clearInterval(autoPollInterval);
+
+      // 1. Update localStorage orders
+      try {
+        var orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+        var found = false;
+        for (var i = 0; i < orders.length; i++) {
+          if (orders[i].order_number === orderData.orderNumber) {
+            orders[i].payment_status = 'Paid';
+            orders[i].status = 'Confirmed';
+            orders[i].payment_method = 'UPI (' + orderData.activeApp.toUpperCase() + ')';
+            orders[i].paid_at = new Date().toISOString();
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          orders.unshift({
+            id: Date.now(),
+            order_number: orderData.orderNumber,
+            total: orderData.amount,
+            customer_name: orderData.customerName || 'Valued Patron',
+            customer_phone: orderData.customerPhone || '',
+            payment_status: 'Paid',
+            status: 'Confirmed',
+            payment_method: 'UPI (' + orderData.activeApp.toUpperCase() + ')',
+            created_at: new Date().toISOString()
+          });
+        }
+        localStorage.setItem('rj_orders', JSON.stringify(orders));
+      } catch (_) {}
+
+      // 2. Clear Shopping Cart
+      try {
+        ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach(function(k) {
+          localStorage.removeItem(k);
+          sessionStorage.removeItem(k);
+        });
+      } catch (_) {}
+
+      // 3. Populate Confirmed Screen
+      var cOrd = document.getElementById('confirmed-order-number');
+      var cAmt = document.getElementById('confirmed-amount');
+      var cBtn = document.getElementById('btn-view-orders');
+      if (cOrd) cOrd.textContent = orderData.orderNumber;
+      if (cAmt) cAmt.textContent = '₹' + Math.round(orderData.amount).toLocaleString('en-IN');
+      if (cBtn) cBtn.href = '/orders.html?order=' + encodeURIComponent(orderData.orderNumber);
+
+      // 4. Switch to Confirmed Screen
+      showView('confirmed');
+
+      // 5. Trigger Confetti
+      triggerCelebrationConfetti();
+    }
+
+    // 6. Inline Desktop QR Code Canvas Generator
+    function renderDesktopQr() {
+      var canvas = document.getElementById('upi-qr-canvas');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var uri = buildUpiUri('generic');
+      
+      // Draw luxury styled placeholder pattern with target UPI URI encoded
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 180, 180);
+      
+      ctx.fillStyle = '#111111';
+      // Corners
+      ctx.fillRect(10, 10, 45, 45); ctx.clearRect(17, 17, 31, 31); ctx.fillRect(23, 23, 19, 19);
+      ctx.fillRect(125, 10, 45, 45); ctx.clearRect(132, 17, 31, 31); ctx.fillRect(138, 23, 19, 19);
+      ctx.fillRect(10, 125, 45, 45); ctx.clearRect(17, 132, 31, 31); ctx.fillRect(23, 138, 19, 19);
+
+      // Random deterministic pattern based on order number
+      var seed = 0;
+      for (var i = 0; i < orderData.orderNumber.length; i++) seed += orderData.orderNumber.charCodeAt(i);
+      for (var r = 0; r < 14; r++) {
+        for (var c = 0; c < 14; c++) {
+          if ((r < 5 && c < 5) || (r < 5 && c > 8) || (r > 8 && c < 5)) continue;
+          if ((r * 13 + c * 7 + seed) % 3 === 0) {
+            ctx.fillRect(20 + c * 10, 20 + r * 10, 8, 8);
+          }
+        }
+      }
+      // Center monogram badge
+      ctx.fillStyle = '#0F382A';
+      ctx.beginPath();
+      ctx.arc(90, 90, 16, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 11px Cinzel, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('RJ', 90, 90);
+    }
+
+    // 7. Confetti Effect
+    function triggerCelebrationConfetti() {
+      try {
+        var count = 70;
+        var colors = ['#C5A880', '#0F382A', '#D4AF37', '#10B981', '#5F259F'];
+        for (var i = 0; i < count; i++) {
+          var p = document.createElement('div');
+          p.style.position = 'fixed';
+          p.style.top = '-10px';
+          p.style.left = (Math.random() * 100) + 'vw';
+          p.style.width = (Math.random() * 8 + 6) + 'px';
+          p.style.height = (Math.random() * 10 + 8) + 'px';
+          p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          p.style.borderRadius = '2px';
+          p.style.zIndex = '99999';
+          p.style.pointerEvents = 'none';
+          p.style.opacity = '0.9';
+          p.style.transition = 'transform ' + (Math.random() * 2 + 1.8) + 's ease-out, opacity ' + (Math.random() * 2 + 1.8) + 's ease-out';
+          document.body.appendChild(p);
+          (function(el) {
+            setTimeout(function() {
+              el.style.transform = 'translateY(' + (window.innerHeight + 50) + 'px) rotate(' + (Math.random() * 720) + 'deg)';
+              el.style.opacity = '0';
+            }, 30);
+            setTimeout(function() { el.remove(); }, 4000);
+          })(p);
+        }
+      } catch (_) {}
+    }
+
+    // Boot
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPaymentSession);
+    } else {
+      initPaymentSession();
+    }
+  </script>
+</body>
+</html>

@@ -602,55 +602,51 @@ async function executePlaceOrder() {
     created_at: new Date().toISOString()
   };
 
-  // PHONEPE PAYMENT GATEWAY FLOW
+  // PHONEPE & UPI DIRECT INTENT GATEWAY FLOW (Flipkart Style)
   if (paymentMethod === 'PhonePe' || paymentMethod === 'UPI') {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <span class="spinner-inline" style="display: inline-block; width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px;"></span>
+        <span>OPENING PAYMENT GATEWAY...</span>
+      `;
+    }
+
+    let placedOrderNumber = `RJFC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+
     try {
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `
-          <span class="spinner-inline" style="display: inline-block; width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px;"></span>
-          <span>CONNECTING TO PHONEPE...</span>
-        `;
-      }
-      const res = await fetch('/api/payment/phonepe/create-payment', {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderPayload)
       });
-      const data = await res.json();
-      if (res.ok && data.success && data.redirectUrl) {
-        if (typeof showToast === 'function') {
-          showToast('Redirecting to PhonePe secure payment gateway...', 'info');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && (data.orderNumber || data.orderId)) {
+          placedOrderNumber = data.orderNumber || `RJFC-${data.orderId}`;
         }
-        window.location.href = data.redirectUrl;
-        return;
-      } else {
-        if (typeof showToast === 'function') {
-          showToast(data.message || 'Unable to initiate PhonePe payment. Please try another method.', 'error');
-        }
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `
-            <span id="confirm-order-btn-label">PAY &amp; COMPLETE ORDER</span>
-            <span style="font-size: 1.1rem; line-height: 1;">➔</span>
-          `;
-        }
-        return;
       }
-    } catch (err) {
-      console.error('PhonePe initiation error:', err);
-      if (typeof showToast === 'function') {
-        showToast('Connection interrupted. Please try again.', 'error');
-      }
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = `
-          <span id="confirm-order-btn-label">PAY &amp; COMPLETE ORDER</span>
-          <span style="font-size: 1.1rem; line-height: 1;">➔</span>
-        `;
-      }
-      return;
+    } catch (_) {}
+
+    orderPayload.order_number = placedOrderNumber;
+    orderPayload.id = Date.now();
+    orderPayload.payment_status = 'Pending';
+    orderPayload.status = 'Pending';
+
+    try {
+      sessionStorage.setItem('rj_pending_order', JSON.stringify(orderPayload));
+      const existing = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+      existing.unshift(orderPayload);
+      localStorage.setItem('rj_orders', JSON.stringify(existing));
+    } catch (_) {}
+
+    if (typeof showToast === 'function') {
+      showToast('Opening payment gateway options...', 'info');
     }
+
+    const payUrl = `/payment.html?order_number=${encodeURIComponent(placedOrderNumber)}&amount=${encodeURIComponent(currentCartTotal)}&name=${encodeURIComponent(activeAddressData.name)}&phone=${encodeURIComponent(activeAddressData.phone)}`;
+    window.location.href = payUrl;
+    return;
   }
 
   // STRIPE CHECKOUT FLOW

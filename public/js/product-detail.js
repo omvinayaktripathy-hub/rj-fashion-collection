@@ -1074,7 +1074,12 @@ async function buyCurrentProductNow() {
 
   const success = await addToCart(currentProduct.id, currentQty, selectedSize);
   if (success) {
-    window.location.href = '/delivery.html';
+    const hasAddress = localStorage.getItem('rjfc_selected_address') || localStorage.getItem('rj_selected_address') || sessionStorage.getItem('checkout_address_summary');
+    if (hasAddress) {
+      window.location.href = '/checkout.html';
+    } else {
+      window.location.href = '/delivery.html';
+    }
   }
 }
 
