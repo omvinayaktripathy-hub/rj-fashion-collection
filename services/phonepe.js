@@ -108,7 +108,11 @@ async function initiatePayment({
   amountInPaise,
   redirectUrl,
   callbackUrl,
-  mobileNumber = '9999999999'
+  mobileNumber = '9999999999',
+  paymentType = 'PAY_PAGE',
+  targetApp = '',
+  deviceOS = 'ANDROID',
+  redirectMode = 'REDIRECT'
 }) {
   if (!amountInPaise || amountInPaise <= 0 || !Number.isInteger(amountInPaise)) {
     throw new Error('Invalid amount in paise: must be a positive integer');
@@ -120,18 +124,34 @@ async function initiatePayment({
   // Format clean 10-digit mobile number for PhonePe
   const cleanMobile = String(mobileNumber || '').replace(/\D/g, '').slice(-10) || '9999999999';
 
+  // Map friendly app alias to official Android package name when UPI_INTENT is requested
+  const appPackageMap = {
+    PHONEPE: 'com.phonepe.app',
+    GPAY: 'com.google.android.apps.nbu.paisa.user',
+    PAYTM: 'net.one97.paytm',
+    BHIM: 'in.org.npci.upiapp'
+  };
+  const normalizedApp = String(targetApp || '').toUpperCase();
+  const useIntent = paymentType === 'UPI_INTENT' || Boolean(normalizedApp && normalizedApp !== 'PAY_PAGE');
+
+  const paymentInstrument = useIntent
+    ? {
+        type: 'UPI_INTENT',
+        ...(appPackageMap[normalizedApp] ? { targetApp: appPackageMap[normalizedApp] } : {})
+      }
+    : { type: 'PAY_PAGE' };
+
   const payload = {
     merchantId: PHONEPE_MERCHANT_ID,
     merchantTransactionId,
     merchantUserId: String(merchantUserId || 'guest_user'),
     amount: amountInPaise,
     redirectUrl,
-    redirectMode: 'POST',
+    redirectMode: redirectMode === 'POST' ? 'POST' : 'REDIRECT',
     callbackUrl,
     mobileNumber: cleanMobile,
-    paymentInstrument: {
-      type: 'PAY_PAGE'
-    }
+    ...(useIntent ? { deviceContext: { deviceOS: String(deviceOS || 'ANDROID').toUpperCase() } } : {}),
+    paymentInstrument
   };
 
   const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
@@ -146,13 +166,18 @@ async function initiatePayment({
       data: {
         merchantId: PHONEPE_MERCHANT_ID,
         merchantTransactionId,
-        instrumentResponse: {
-          type: 'PAY_PAGE',
-          redirectInfo: {
-            url: `${redirectUrl}?merchantTransactionId=${merchantTransactionId}&simulated=true`,
-            method: 'GET'
-          }
-        }
+        instrumentResponse: useIntent
+          ? {
+              type: 'UPI_INTENT',
+              intentUrl: `${redirectUrl}&merchantTransactionId=${merchantTransactionId}&simulated=true`
+            }
+          : {
+              type: 'PAY_PAGE',
+              redirectInfo: {
+                url: `${redirectUrl}?merchantTransactionId=${merchantTransactionId}&simulated=true`,
+                method: 'GET'
+              }
+            }
       }
     };
   }

@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <title>Payment Gateway - RJ Fashion Collection</title>
-  <meta name="description" content="Secure instant UPI & Card payment for RJ Fashion Collection. Pay securely via PhonePe, Google Pay, Paytm, or BHIM UPI.">
+  <title>Complete Payment - RJ Fashion Collection</title>
+  <meta name="description" content="Secure UPI and card payment for your RJ Fashion Collection order. Pay via PhonePe, Google Pay, Paytm, or Cards.">
 
-  <!-- Instant Theme Controller - Zero Delay -->
   <script>
+    // Instant Theme Controller - zero delay
     window.applyTheme = function(theme) {
       var isDark = theme === 'dark';
       if (isDark) {
@@ -35,105 +32,73 @@
     } catch(e){}
   </script>
 
-  <!-- Typography & Styles -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-  <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261110-v2">
-  <link rel="stylesheet" href="/css/style.css?v=20261110-v2">
-  <link rel="stylesheet" href="/css/responsive.css?v=20261110-v2">
-
-  <!-- Official QR Code Generator Library -->
-  <script src="/js/qrcode.min.js?v=20261110-v2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/shadcn-tokens.css?v=20261110-payment-intent">
+  <link rel="stylesheet" href="/css/style.css?v=20261110-payment-intent">
+  <link rel="stylesheet" href="/css/responsive.css?v=20261110-payment-intent">
 
   <style>
     :root {
       --pay-bg: #F9F7F4;
       --pay-card-bg: #FFFFFF;
       --pay-card-border: #E8E3DC;
-      --pay-card-inner: #FAFAF9;
       --pay-text-primary: #111111;
       --pay-text-secondary: #52525B;
       --pay-text-muted: #71717A;
       --pay-accent: #0F382A;
       --pay-gold: #C5A880;
-      --pay-phonepe-purple: #5F259F;
     }
     [data-theme="dark"], .dark-theme {
-      --pay-bg: #09090D;
-      --pay-card-bg: #14141A;
-      --pay-card-border: #262633;
-      --pay-card-inner: #1A1A23;
-      --pay-text-primary: #F8FAFC;
-      --pay-text-secondary: #CBD5E1;
-      --pay-text-muted: #94A3B8;
+      --pay-bg: #0D0D11;
+      --pay-card-bg: #141419;
+      --pay-card-border: #272732;
+      --pay-text-primary: #F4F4F5;
+      --pay-text-secondary: #A1A1AA;
+      --pay-text-muted: #71717A;
       --pay-accent: #2DD4BF;
       --pay-gold: #D4AF37;
-      --pay-phonepe-purple: #7E3AF2;
     }
-
-    * { box-sizing: border-box; }
 
     body {
       background: var(--pay-bg);
       color: var(--pay-text-primary);
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       margin: 0;
       padding: 0;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      -webkit-font-smoothing: antialiased;
     }
 
     .payment-shell {
       max-width: 620px;
-      margin: 24px auto 48px auto;
+      margin: 32px auto;
       padding: 0 16px;
       width: 100%;
+      box-sizing: border-box;
     }
 
     .payment-header-brand {
       text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .brand-pill-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: inherit;
-      padding: 6px 14px;
-      border-radius: 9999px;
-      background: rgba(0,0,0,0.03);
-      border: 1px solid var(--pay-card-border);
-      transition: all 0.2s ease;
-    }
-    .brand-pill-link:hover {
-      background: rgba(0,0,0,0.06);
-      transform: translateY(-1px);
-    }
-    [data-theme="dark"] .brand-pill-link {
-      background: rgba(255,255,255,0.04);
+      margin-bottom: 24px;
     }
 
     .payment-brand-title {
-      font-family: 'Cinzel', Georgia, serif;
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.6rem;
+      font-weight: 700;
       color: var(--pay-text-primary);
+      margin: 8px 0 2px 0;
     }
 
     .payment-brand-sub {
-      font-size: 0.72rem;
-      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--pay-gold);
       font-weight: 700;
-      margin-top: 6px;
     }
 
     .payment-main-card {
@@ -141,11 +106,9 @@
       border: 1px solid var(--pay-card-border);
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 12px 36px -10px rgba(0,0,0,0.08);
-      position: relative;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.06);
     }
 
-    /* Top Amount Banner */
     .order-amount-banner {
       background: linear-gradient(135deg, #0F382A 0%, #174D3B 100%);
       color: #ffffff;
@@ -158,21 +121,19 @@
     }
 
     .amount-label {
-      font-size: 0.74rem;
+      font-size: 0.76rem;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       color: rgba(255,255,255,0.8);
       margin-bottom: 4px;
-      font-weight: 600;
     }
 
     .amount-value {
       font-family: 'Playfair Display', Georgia, serif;
-      font-size: 2.15rem;
+      font-size: 2.1rem;
       font-weight: 800;
       color: #ffffff;
       line-height: 1;
-      letter-spacing: -0.02em;
     }
 
     .order-meta-chip {
@@ -183,12 +144,11 @@
       font-family: monospace;
       font-size: 0.88rem;
       font-weight: 700;
-      background: rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.14);
       padding: 4px 10px;
       border-radius: 6px;
       display: inline-block;
       margin-bottom: 4px;
-      letter-spacing: 0.04em;
     }
 
     .order-meta-timer {
@@ -206,7 +166,7 @@
     }
 
     .section-headline {
-      font-size: 0.84rem;
+      font-size: 0.86rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -217,12 +177,12 @@
       justify-content: space-between;
     }
 
-    /* UPI Apps Grid (Flipkart-Style Intent Buttons) */
+    /* UPI App Action Cards (Flipkart Style Intent Buttons) */
     .upi-apps-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
-      margin-bottom: 22px;
+      margin-bottom: 24px;
     }
 
     .upi-app-btn {
@@ -238,24 +198,18 @@
       color: inherit;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
     }
 
     .upi-app-btn:hover {
-      border-color: var(--pay-phonepe-purple);
+      border-color: #5f259f;
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(95, 37, 159, 0.08);
-    }
-    .upi-app-btn:active {
-      transform: scale(0.985);
     }
 
     .upi-app-left {
       display: flex;
       align-items: center;
       gap: 14px;
-      min-width: 0;
     }
 
     .upi-app-icon-wrap {
@@ -265,7 +219,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #FAFAFA;
+      background: #faf5ff;
       border: 1px solid rgba(0,0,0,0.06);
       flex-shrink: 0;
     }
@@ -275,38 +229,29 @@
       font-weight: 700;
       color: var(--pay-text-primary);
       margin-bottom: 2px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
     }
 
     .upi-app-desc {
       font-size: 0.8rem;
       color: var(--pay-text-secondary);
-      line-height: 1.35;
     }
 
     .upi-app-arrow {
       font-size: 1.2rem;
       color: var(--pay-text-muted);
       font-weight: 700;
-      transition: transform 0.2s ease, color 0.2s ease;
-      margin-left: 8px;
-      flex-shrink: 0;
-    }
-    .upi-app-btn:hover .upi-app-arrow {
-      transform: translateX(4px);
-      color: var(--pay-phonepe-purple);
+      transition: transform 0.2s ease;
     }
 
-    /* Featured App Card (PhonePe) */
-    .upi-app-btn.featured-phonepe {
-      border-color: rgba(95, 37, 159, 0.45);
-      background: linear-gradient(to right, rgba(95, 37, 159, 0.03), rgba(95, 37, 159, 0.06));
+    .upi-app-btn:hover .upi-app-arrow {
+      transform: translateX(4px);
+      color: #5f259f;
     }
-    [data-theme="dark"] .upi-app-btn.featured-phonepe {
-      background: linear-gradient(to right, rgba(126, 58, 242, 0.08), rgba(126, 58, 242, 0.12));
+
+    /* Primary highlight on PhonePe (Default / Approved Merchant) */
+    .upi-app-btn.featured-phonepe {
+      border-color: rgba(95, 37, 159, 0.4);
+      background: linear-gradient(to right, rgba(95, 37, 159, 0.02), rgba(95, 37, 159, 0.05));
     }
 
     .badge-recommended {
@@ -315,78 +260,29 @@
       text-transform: uppercase;
       padding: 2px 7px;
       border-radius: 9999px;
-      background: var(--pay-phonepe-purple);
+      background: #5f259f;
       color: #ffffff;
-      letter-spacing: 0.04em;
+      margin-left: 8px;
     }
 
-    /* Desktop / Dynamic QR Code Section */
-    .dynamic-qr-box {
-      margin-top: 18px;
-      padding: 20px;
-      border: 1.5px dashed var(--pay-card-border);
-      border-radius: 12px;
-      text-align: center;
-      background: var(--pay-card-inner);
-    }
-
-    .qr-render-frame {
-      display: inline-block;
-      padding: 14px;
-      background: #FFFFFF;
-      border-radius: 12px;
-      border: 1.5px solid #E2E8F0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      margin: 12px auto;
-    }
-    #upi-qr-render-target {
-      min-width: 190px;
-      min-height: 190px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #upi-qr-render-target img, #upi-qr-render-target canvas {
-      margin: 0 auto;
-    }
-
-    /* Radar Pulse Verification Screen */
+    /* Verification Radar Screen */
     .radar-pulse-ring {
-      width: 86px;
-      height: 86px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: rgba(95, 37, 159, 0.12);
-      border: 2px solid var(--pay-phonepe-purple);
+      border: 2px solid #5f259f;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 20px auto;
+      margin: 0 auto 18px auto;
       animation: radarPulse 1.6s infinite ease-out;
     }
 
     @keyframes radarPulse {
-      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(95, 37, 159, 0.45); }
-      70% { transform: scale(1.08); box-shadow: 0 0 0 22px rgba(95, 37, 159, 0); }
+      0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(95, 37, 159, 0.4); }
+      70% { transform: scale(1.08); box-shadow: 0 0 0 20px rgba(95, 37, 159, 0); }
       100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(95, 37, 159, 0); }
-    }
-
-    .telemetry-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 9999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: rgba(95, 37, 159, 0.08);
-      color: var(--pay-phonepe-purple);
-      border: 1px solid rgba(95, 37, 159, 0.2);
-      margin-bottom: 16px;
-    }
-    [data-theme="dark"] .telemetry-chip {
-      background: rgba(126, 58, 242, 0.16);
-      color: #D8B4FE;
-      border-color: rgba(126, 58, 242, 0.3);
     }
 
     .btn-verify-action {
@@ -406,7 +302,6 @@
       cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-      text-decoration: none;
     }
     .btn-verify-action:hover {
       background: #27272a;
@@ -417,34 +312,13 @@
       color: #111111;
     }
 
-    .btn-secondary-action {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 12px 18px;
-      background: transparent;
-      color: var(--pay-text-primary);
-      border: 1.5px solid var(--pay-card-border);
-      border-radius: 10px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-    .btn-secondary-action:hover {
-      background: var(--pay-card-inner);
-      border-color: #A1A1AA;
-    }
-
     /* Confirmation Screen */
     .success-checkmark-circle {
       width: 76px;
       height: 76px;
       border-radius: 50%;
-      background: #ECFDF5;
-      border: 2px solid #10B981;
+      background: #ecfdf5;
+      border: 2px solid #10b981;
       color: #059669;
       display: flex;
       align-items: center;
@@ -452,256 +326,25 @@
       font-size: 2.2rem;
       margin: 0 auto 16px auto;
       animation: bounceCheck 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    [data-theme="dark"] .success-checkmark-circle {
-      background: #064E3B;
-      border-color: #34D399;
-      color: #6EE7B7;
     }
 
     @keyframes bounceCheck {
       0% { transform: scale(0); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
-
-    /* Failed / Cancelled Screen */
-    .failed-cross-circle {
-      width: 76px;
-      height: 76px;
-      border-radius: 50%;
-      background: #FEF2F2;
-      border: 2px solid #EF4444;
-      color: #DC2626;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.2rem;
-      margin: 0 auto 16px auto;
-      animation: bounceCheck 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    [data-theme="dark"] .failed-cross-circle {
-      background: #450A0A;
-      border-color: #F87171;
-      color: #FCA5A5;
-    }
-
-    /* Micro Trust Badges */
-    .trust-strip-footer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 24px;
-      font-size: 0.78rem;
-      color: var(--pay-text-muted);
-      flex-wrap: wrap;
-    }
-
-    /* Status Notice Banner (No alert() dialogs) */
-    .status-banner-inline {
-      display: none;
-      padding: 12px 14px;
-      border-radius: 10px;
-      font-size: 0.82rem;
-      line-height: 1.45;
-      margin-bottom: 16px;
-      text-align: left;
-      font-weight: 600;
-    }
-    .status-banner-inline.info {
-      background: #EFF6FF;
-      border: 1px solid #BFDBFE;
-      color: #1E40AF;
-    }
-    .status-banner-inline.warn {
-      background: #FFFBEB;
-      border: 1px solid #FDE68A;
-      color: #92400E;
-    }
-    .status-banner-inline.success {
-      background: #ECFDF5;
-      border: 1px solid #A7F3D0;
-      color: #065F46;
-    }
-    [data-theme="dark"] .status-banner-inline.info {
-      background: rgba(30, 58, 138, 0.25);
-      border-color: rgba(96, 165, 250, 0.35);
-      color: #93C5FD;
-    }
-    [data-theme="dark"] .status-banner-inline.warn {
-      background: rgba(120, 53, 15, 0.25);
-      border-color: rgba(251, 191, 36, 0.35);
-      color: #FCD34D;
-    }
-    [data-theme="dark"] .status-banner-inline.success {
-      background: rgba(6, 78, 59, 0.25);
-      border-color: rgba(52, 211, 153, 0.35);
-      color: #6EE7B7;
-    }
-
-    /* Settled Verification Shield (Stops spinning once return check completes) */
-    .radar-pulse-ring.is-waiting {
-      border-color: var(--pay-phonepe-purple);
-    }
-    .radar-pulse-ring.is-settled-ready {
-      animation: none;
-      background: #ECFDF5;
-      border-color: #10B981;
-      color: #059669;
-    }
-    .radar-pulse-ring.is-settled-warn {
-      animation: none;
-      background: #FFFBEB;
-      border-color: #F59E0B;
-      color: #D97706;
-    }
-    [data-theme="dark"] .radar-pulse-ring.is-settled-ready {
-      background: rgba(16, 185, 129, 0.16);
-      color: #34D399;
-    }
-    [data-theme="dark"] .radar-pulse-ring.is-settled-warn {
-      background: rgba(245, 158, 11, 0.16);
-      color: #FBBF24;
-    }
-
-    .detection-steps-box {
-      max-width: 420px;
-      margin: 0 auto 18px auto;
-      background: var(--pay-card-inner);
-      border: 1px solid var(--pay-card-border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      text-align: left;
-      font-size: 0.8rem;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-    .detection-step-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--pay-text-secondary);
-    }
-    .detection-step-row.done {
-      color: #059669;
-      font-weight: 700;
-    }
-    .detection-step-row.warn {
-      color: #D97706;
-      font-weight: 700;
-    }
-    [data-theme="dark"] .detection-step-row.done {
-      color: #34D399;
-    }
-    [data-theme="dark"] .detection-step-row.warn {
-      color: #FBBF24;
-    }
-
-    .verdict-btn-confirm {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 14px 18px;
-      background: #0F382A;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 14px rgba(15, 56, 42, 0.25);
-    }
-    .verdict-btn-confirm:hover:not(:disabled) {
-      background: #174D3B;
-      transform: translateY(-1px);
-    }
-    .verdict-btn-confirm:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .verdict-btn-failed {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 12px 18px;
-      background: transparent;
-      color: #DC2626;
-      border: 1.5px solid #FCA5A5;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .verdict-btn-failed:hover {
-      background: #FEF2F2;
-      border-color: #EF4444;
-    }
-    [data-theme="dark"] .verdict-btn-failed {
-      color: #FCA5A5;
-      border-color: rgba(248, 113, 113, 0.45);
-    }
-    [data-theme="dark"] .verdict-btn-failed:hover {
-      background: rgba(127, 29, 29, 0.35);
-    }
-
-    .qr-mobile-toggle-wrap {
-      display: none;
-      margin-top: 10px;
-    }
-    .qr-awaiting-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 10px;
-      padding: 5px 12px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: rgba(95, 37, 159, 0.1);
-      color: var(--pay-phonepe-purple);
-    }
-    @media (max-width: 767px) {
-      .qr-mobile-toggle-wrap {
-        display: block;
-      }
-      .dynamic-qr-box.mobile-collapsed {
-        display: none;
-      }
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Reset native button styling inside UPI grid */
-    button.upi-app-btn {
-      width: 100%;
-      text-align: left;
-      font-family: inherit;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Hidden Fallback Anchor -->
-  <a id="hidden-intent-anchor" href="#" style="display: none;" aria-hidden="true"></a>
-
-  <!-- Branding Container -->
   <div class="payment-shell">
     
     <!-- Branding Header -->
     <div class="payment-header-brand">
-      <a href="/" class="brand-pill-link">
-        <img src="/images/rj-logo-monogram.png" alt="RJ Monogram" width="32" height="32" style="vertical-align: middle;">
-        <span class="payment-brand-title">RJ FASHION</span>
+      <a href="/" style="text-decoration: none; display: inline-block;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <img src="/images/rj-logo-monogram.png" alt="RJ Monogram" width="38" height="38" style="vertical-align: middle;">
+          <span style="font-family: 'Cinzel', serif; font-size: 1.15rem; font-weight: 700; color: var(--pay-text-primary); letter-spacing: 0.05em;">RJ FASHION</span>
+        </div>
       </a>
       <div class="payment-brand-sub">Official Secure Payment Gateway</div>
     </div>
@@ -709,7 +352,7 @@
     <!-- Main Payment Container Card -->
     <div class="payment-main-card">
       
-      <!-- Top Amount Banner (Always Visible across all views) -->
+      <!-- Top Amount Banner -->
       <div class="order-amount-banner">
         <div>
           <div class="amount-label">Amount Payable</div>
@@ -724,13 +367,8 @@
         </div>
       </div>
 
-      <!-- ============================================================== -->
-      <!-- VIEW 1: Application Chooser (Initial State)                    -->
-      <!-- ============================================================== -->
+      <!-- VIEW 1: Application Chooser (Initial State) -->
       <div id="view-app-chooser" class="payment-body">
-
-        <!-- Dynamic Inline Notice Banner (missing app, customer VPA ready, or cards notice) -->
-        <div id="payment-top-notice" class="status-banner-inline"></div>
         
         <div class="section-headline">
           <span>Choose UPI Application (Direct App Pay)</span>
@@ -739,10 +377,10 @@
 
         <div class="upi-apps-grid">
           
-          <!-- 1. PhonePe (Recommended) -->
-          <button type="button" class="upi-app-btn featured-phonepe" data-upi-app="phonepe" onclick="handleSelectUpiApp('phonepe')">
+          <!-- 1. PhonePe -->
+          <div class="upi-app-btn featured-phonepe" onclick="handleSelectUpiApp('phonepe')" role="button" tabindex="0">
             <div class="upi-app-left">
-              <div class="upi-app-icon-wrap" style="background: #5F259F;">
+              <div class="upi-app-icon-wrap" style="background: #5f259f;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5h-2V13H8v-2h3V9.5h2V11h3v2h-3v3.5z"/></svg>
               </div>
               <div>
@@ -750,117 +388,82 @@
                   <span>PhonePe</span>
                   <span class="badge-recommended">Recommended</span>
                 </div>
-                <div class="upi-app-desc">Open PhonePe app directly &amp; authorize with UPI PIN</div>
+                <div class="upi-app-desc">Tap to launch PhonePe app &amp; complete payment</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
-          </button>
+          </div>
 
-          <!-- 2. Google Pay (GPay) -->
-          <button type="button" class="upi-app-btn" data-upi-app="gpay" onclick="handleSelectUpiApp('gpay')">
+          <!-- 2. Google Pay -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('gpay')" role="button" tabindex="0">
             <div class="upi-app-left">
-              <div class="upi-app-icon-wrap" style="background: #ffffff; border-color: #CBD5E1;">
+              <div class="upi-app-icon-wrap" style="background: #ffffff; border-color: #cbd5e1;">
                 <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.04h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.04c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.41 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.28c-.25-.72-.38-1.49-.38-2.28s.13-1.56.38-2.28V6.59H1.24C.45 8.16 0 9.97 0 12c0 2.03.45 3.84 1.24 5.41l4.04-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.59 1.24 6.59l4.04 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/></svg>
               </div>
               <div>
                 <div class="upi-app-title">Google Pay (GPay)</div>
-                <div class="upi-app-desc">Open Google Pay app directly &amp; authorize payment</div>
+                <div class="upi-app-desc">Tap to launch Google Pay app &amp; complete payment</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
-          </button>
+          </div>
 
-          <!-- 3. Paytm UPI -->
-          <button type="button" class="upi-app-btn" data-upi-app="paytm" onclick="handleSelectUpiApp('paytm')">
+          <!-- 3. Paytm -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('paytm')" role="button" tabindex="0">
             <div class="upi-app-left">
-              <div class="upi-app-icon-wrap" style="background: #00B9F1;">
+              <div class="upi-app-icon-wrap" style="background: #00b9f1;">
                 <span style="font-weight: 900; color: #ffffff; font-size: 0.78rem;">Paytm</span>
               </div>
               <div>
                 <div class="upi-app-title">Paytm UPI</div>
-                <div class="upi-app-desc">Open Paytm app directly &amp; authorize payment</div>
+                <div class="upi-app-desc">Tap to launch Paytm app &amp; complete payment</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
-          </button>
+          </div>
 
-          <!-- 4. BHIM / Any Other UPI App -->
-          <button type="button" class="upi-app-btn" data-upi-app="upi" onclick="handleSelectUpiApp('upi')">
+          <!-- 4. BHIM / Any UPI App -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('upi')" role="button" tabindex="0">
             <div class="upi-app-left">
-              <div class="upi-app-icon-wrap" style="background: #F8FAFC; border-color: #CBD5E1;">
+              <div class="upi-app-icon-wrap" style="background: #f8fafc; border-color: #cbd5e1;">
                 <span style="font-weight: 800; color: #0F382A; font-size: 0.82rem;">UPI</span>
               </div>
               <div>
-                <div class="upi-app-title">BHIM / Any Other UPI App</div>
-                <div class="upi-app-desc">CRED, BHIM, WhatsApp Pay, Amazon Pay, iMobile</div>
+                <div class="upi-app-title">Any Other UPI App</div>
+                <div class="upi-app-desc">CRED, BHIM, WhatsApp, Amazon Pay, Axis Pay</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
+          </div>
+
+        </div>
+
+        <!-- Live Gateway Connectivity Notice (Shown automatically if /api backend is offline/unconfigured) -->
+        <div id="gateway-status-notice" style="display: none; margin-bottom: 18px; padding: 14px 16px; border-radius: 10px; border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.08); font-size: 0.84rem; line-height: 1.5; color: var(--pay-text-primary);">
+          <div style="font-weight: 700; margin-bottom: 4px; color: #b45309;">⚠️ Live Online Payment Gateway Server Not Connected Yet</div>
+          <div id="gateway-status-reason" style="color: var(--pay-text-secondary); margin-bottom: 10px;">
+            Real-time UPI app verification requires your live PhonePe PG API credentials &amp; backend server endpoint. We do not simulate fake payments.
+          </div>
+          <button type="button" onclick="switchPendingOrderToCOD()" style="width: 100%; padding: 10px 14px; background: #0F382A; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+            Complete Order via Cash on Delivery (COD) ➔
           </button>
-
         </div>
 
-        <!-- Mobile-Only QR Collapsible Toggle -->
-        <div class="qr-mobile-toggle-wrap">
-          <button type="button" id="btn-mobile-qr-toggle" class="btn-secondary-action" onclick="toggleMobileQrBox()">
-            <span>📱 Paying from Another Phone? Show QR Code</span>
-          </button>
-        </div>
-
-        <!-- Dynamic Scannable QR Code Section (Visible by default on Desktop, toggleable on Mobile) -->
-        <div id="desktop-qr-container" class="dynamic-qr-box mobile-collapsed">
-          <div id="qr-selected-app-label" style="font-weight: 800; font-size: 0.96rem; margin-bottom: 4px; color: var(--pay-text-primary);">
-            Desktop or Second Phone? Scan Dynamic QR Code
+        <!-- Alternative: Cards & Net Banking via PhonePe Standard Gateway -->
+        <div style="border-top: 1px solid var(--pay-card-border); padding-top: 18px; margin-top: 10px;">
+          <div class="section-headline">
+            <span>Or Pay via PhonePe Web Checkout (Cards, Dynamic QR, Net Banking)</span>
           </div>
-          <div id="qr-selected-app-sub" style="font-size: 0.8rem; color: var(--pay-text-secondary); margin-bottom: 10px;">
-            Open PhonePe, Google Pay, or Paytm scanner on your phone to scan &amp; pay
-          </div>
-          
-          <div id="qr-render-holder" class="qr-render-frame">
-            <!-- Real Reed-Solomon QR Code injected here by qrcode.min.js -->
-            <div id="upi-qr-render-target"></div>
-          </div>
-
-          <div style="font-size: 0.78rem; font-weight: 700; color: var(--pay-phonepe-purple); margin-top: 4px;">
-            🔒 Amount strictly locked to <span class="qr-amount-lock-display">₹0</span>
-          </div>
-
-          <div id="qr-awaiting-pill" class="qr-awaiting-pill">
-            <span>⏳</span>
-            <span id="qr-awaiting-pill-text">Scan QR from any UPI app &amp; tap confirm below</span>
-          </div>
-
-          <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px; max-width: 340px; margin-left: auto; margin-right: auto;">
-            <button type="button" id="btn-qr-scanned" class="verdict-btn-confirm" onclick="handleDesktopQrPaidClick()">
-              <span>✓ I Scanned &amp; Paid — Verify Status</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Alternative: Credit/Debit Cards, Net Banking & Wallets -->
-        <div style="border-top: 1px solid var(--pay-card-border); padding-top: 18px; margin-top: 18px;">
-          <button type="button" id="btn-toggle-cards-drawer" onclick="handleCardsNetbankingOption()" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--pay-card-inner); border: 1px solid var(--pay-card-border); border-radius: 10px; cursor: pointer; color: inherit; font-size: 0.88rem; font-weight: 600;">
+          <button type="button" onclick="handleOpenPhonePeWebGateway()" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0,0,0,0.02); border: 1px solid var(--pay-card-border); border-radius: 10px; cursor: pointer; color: inherit; font-size: 0.88rem; font-weight: 600;">
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.2rem;">💳</span>
-              <span>Credit / Debit Cards, Net Banking &amp; Wallets</span>
+              <span>💳</span>
+              <span>Credit / Debit Cards, Dynamic QR, Net Banking &amp; Wallets</span>
             </div>
-            <span id="cards-drawer-arrow" style="color: var(--pay-phonepe-purple); font-weight: 700;">Details ▾</span>
+            <span style="color: #5f259f; font-weight: 700;">Open Gateway ➔</span>
           </button>
-
-          <div id="cards-gateway-drawer" style="display: none; margin-top: 10px; padding: 14px 16px; background: var(--pay-card-inner); border: 1px solid var(--pay-card-border); border-radius: 10px; text-align: left; font-size: 0.82rem; color: var(--pay-text-secondary); line-height: 1.5;">
-            <div style="font-weight: 700; color: var(--pay-text-primary); margin-bottom: 4px;">
-              🔒 Official PhonePe Card &amp; Net Banking Checkout
-            </div>
-            <p style="margin: 0 0 10px 0;">
-              For maximum cardholder protection, we never collect card numbers directly on this page. Instant <strong>Zero-Fee UPI</strong> via PhonePe / GPay / Paytm / Scan QR above is active immediately, or you can switch this order to Cash on Delivery (COD).
-            </p>
-            <button type="button" class="btn-secondary-action" onclick="switchToCashOnDelivery()" style="padding: 9px 14px; font-size: 0.8rem;">
-              <span>💵 Switch to Cash on Delivery (COD)</span>
-            </button>
-          </div>
         </div>
 
-        <div class="trust-strip-footer">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; font-size: 0.78rem; color: var(--pay-text-muted);">
           <span>🔒 256-Bit Bank Encryption</span>
           <span>•</span>
           <span>Zero Payment Surcharges</span>
@@ -870,136 +473,85 @@
 
       </div>
 
-      <!-- ============================================================== -->
-      <!-- VIEW 2: Verification & Return Detection Screen                 -->
-      <!-- ============================================================== -->
-      <div id="view-verifying" class="payment-body" style="display: none; text-align: center; padding: 34px 24px;">
+      <!-- VIEW 2: Verification Radar Screen (Active while polling server-side PhonePe status) -->
+      <div id="view-verifying" class="payment-body" style="display: none; text-align: center; padding: 40px 24px;">
         
-        <div id="verifying-radar-ring" class="radar-pulse-ring is-waiting">
-          <svg id="verifying-shield-svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="radar-pulse-ring">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#5f259f" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
 
-        <div id="return-telemetry-badge" class="telemetry-chip" style="display: none;">
-          <span id="telemetry-status-icon">⏱️</span>
-          <strong id="telemetry-duration-text">Waiting for return...</strong>
-        </div>
-
-        <h3 id="verifying-headline-text" style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.45rem; font-weight: 700; margin: 0 0 8px 0; color: var(--pay-text-primary);">
-          Waiting for UPI App Payment...
+        <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.4rem; font-weight: 700; margin: 0 0 8px 0; color: var(--pay-text-primary);">
+          Verifying Payment with Bank...
         </h3>
 
-        <p id="verifying-sub-text" style="font-size: 0.9rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 18px auto; line-height: 1.55;">
-          Complete the <strong id="verify-amount-display" style="color: var(--pay-text-primary);">₹0</strong> payment in <strong id="verify-app-name-display">UPI</strong>. Return to this tab once done — your return is detected automatically.
+        <p id="verify-status-subtext" style="font-size: 0.9rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 24px auto; line-height: 1.5;">
+          Please approve the <strong id="verify-amount-display" style="color: var(--pay-text-primary);">₹0</strong> payment in your <strong id="verify-app-name-display">UPI</strong> app. Automatic bank detection checks every 3 seconds when you return.
         </p>
 
-        <!-- Live Detection Timeline Steps -->
-        <div id="detection-steps-box" class="detection-steps-box">
-          <div id="step-launch" class="detection-step-row done">
-            <span>✓</span>
-            <span id="step-launch-label">Payment request initiated</span>
-          </div>
-          <div id="step-return" class="detection-step-row">
-            <span>⏳</span>
-            <span id="step-return-label">Waiting for you to return from UPI app...</span>
-          </div>
-          <div id="step-verify" class="detection-step-row">
-            <span>○</span>
-            <span id="step-verify-label">Verifying payment status</span>
-          </div>
-        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px; max-width: 360px; margin: 0 auto;">
+          <button type="button" class="btn-verify-action" id="btn-manual-verify" onclick="triggerPaymentVerification()">
+            <span>🔄 Check Bank Status Now</span>
+          </button>
 
-        <!-- Quick Return Warning Banner (only shown if away < 4s) -->
-        <div id="quick-return-alert" class="status-banner-inline warn" style="max-width: 420px; margin: 0 auto 16px auto;"></div>
+          <button type="button" onclick="relaunchSelectedUpiApp()" style="background: none; border: 1px solid var(--pay-card-border); padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; color: var(--pay-text-primary); cursor: pointer;">
+            <span>↺ Re-open UPI Application</span>
+          </button>
 
-        <!-- Waiting Phase Actions (Shown while UPI app is open; replaced by Verdict Panel once return & check settle) -->
-        <div id="waiting-action-panel" style="max-width: 420px; margin: 0 auto;">
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button type="button" id="btn-manual-check-waiting" class="verdict-btn-confirm" onclick="triggerManualWaitingCheck()">
-              <span>⚡ Already Completed in App? Check Status</span>
-            </button>
-
-            <button type="button" id="btn-relaunch-upi-waiting" class="btn-secondary-action" onclick="relaunchSelectedUpiApp()">
-              <span>↺ Re-open <span id="btn-relaunch-waiting-app-name">UPI</span> Application</span>
-            </button>
-
-            <button type="button" onclick="returnToChooser()" style="background: none; border: none; padding: 6px; font-size: 0.8rem; color: var(--pay-text-muted); text-decoration: underline; cursor: pointer;">
-              Choose a different UPI app or scan QR code
-            </button>
-          </div>
-        </div>
-
-        <!-- UTR Input Box + Outcome Verdict Actions (Shown after return detection & status check settle) -->
-        <div id="verdict-prompt-panel" style="display: none; max-width: 420px; margin: 0 auto;">
-          <div style="background: var(--pay-card-inner); border: 1px solid var(--pay-card-border); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: left;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <label for="verify-utr-input" style="font-size: 0.84rem; font-weight: 700; color: var(--pay-text-primary);">
-                Enter 12-Digit UPI Ref / UTR Number
-              </label>
-              <span style="font-size: 0.7rem; color: var(--pay-text-muted); font-weight: 600;">Optional on Static Checkout</span>
-            </div>
-            <div style="font-size: 0.75rem; color: var(--pay-text-secondary); margin-bottom: 10px;">
-              Found on your PhonePe / GPay / Paytm receipt (e.g. 431209876543).
-            </div>
-            <input type="text" id="verify-utr-input" inputmode="numeric" autocomplete="off" placeholder="12-digit numeric UTR (e.g. 431209876543)" maxlength="12" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--pay-card-border); border-radius: 8px; font-size: 0.92rem; font-family: monospace; letter-spacing: 0.08em; background: var(--pay-card-bg); color: var(--pay-text-primary); outline: none;">
-            <div id="utr-validation-feedback" style="font-size: 0.74rem; margin-top: 6px; display: none; font-weight: 600;"></div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button type="button" class="verdict-btn-confirm" id="btn-manual-verify" onclick="triggerPaymentVerification()">
-              <span>✓ Yes, Payment Completed — Confirm Order</span>
-            </button>
-
-            <button type="button" class="verdict-btn-failed" id="btn-report-failed" onclick="handlePaymentCancelledOrFailed()">
-              <span>✕ Payment Failed / Declined / Cancelled</span>
-            </button>
-
-            <button type="button" id="btn-relaunch-upi" class="btn-secondary-action" onclick="relaunchSelectedUpiApp()">
-              <span>↺ Re-open <span id="btn-relaunch-app-name">UPI</span> Application</span>
-            </button>
-
-            <button type="button" onclick="returnToChooser()" style="background: none; border: none; padding: 6px; font-size: 0.8rem; color: var(--pay-text-muted); text-decoration: underline; cursor: pointer;">
-              Choose a different UPI app or scan QR code
-            </button>
-          </div>
+          <button type="button" onclick="stopAutoPolling(); showView('chooser');" style="background: none; border: none; padding: 6px; font-size: 0.8rem; color: var(--pay-text-muted); text-decoration: underline; cursor: pointer;">
+            Choose a different payment method
+          </button>
         </div>
 
       </div>
 
-      <!-- ============================================================== -->
-      <!-- VIEW 3: Payment Verified & Confirmed Screen                    -->
-      <!-- ============================================================== -->
-      <div id="view-confirmed" class="payment-body" style="display: none; text-align: center; padding: 42px 24px;">
+      <!-- VIEW 3: Payment Failed / Cancelled / Unconfirmed Screen -->
+      <div id="view-failed" class="payment-body" style="display: none; text-align: center; padding: 40px 24px;">
+        <div style="width: 68px; height: 68px; border-radius: 50%; background: #fef2f2; border: 2px solid #ef4444; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.9rem; margin: 0 auto 16px auto;">✕</div>
+        <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.45rem; font-weight: 700; margin: 0 0 8px 0; color: var(--pay-text-primary);">
+          Payment Not Confirmed
+        </h3>
+        <p id="failed-reason-text" style="font-size: 0.88rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 24px auto; line-height: 1.5;">
+          We could not confirm payment from the gateway. No amount has been captured as paid on your order.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 360px; margin: 0 auto;">
+          <button type="button" class="btn-verify-action" onclick="showView('chooser')">
+            <span>Retry Online Payment ➔</span>
+          </button>
+          <button type="button" onclick="switchPendingOrderToCOD()" style="background: none; border: 1px solid var(--pay-card-border); padding: 11px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; color: var(--pay-text-primary); cursor: pointer;">
+            Switch to Cash on Delivery (COD)
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Payment Verified & Confirmed Screen -->
+      <div id="view-confirmed" class="payment-body" style="display: none; text-align: center; padding: 44px 24px;">
         
         <div class="success-checkmark-circle">✓</div>
 
-        <span style="font-size: 0.74rem; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.14em; background: #ECFDF5; padding: 4px 12px; border-radius: 9999px; border: 1px solid #A7F3D0; display: inline-block;">
-          Payment Confirmed
+        <span id="confirmed-status-badge" style="font-size: 0.76rem; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: 0.14em; background: #ecfdf5; padding: 3px 10px; border-radius: 9999px; border: 1px solid #a7f3d0;">
+          Payment Verified &amp; Confirmed
         </span>
 
         <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.7rem; font-weight: 700; margin: 14px 0 8px 0; color: var(--pay-text-primary);">
           Your Haute Couture Order is Placed! 👑
         </h2>
 
-        <p id="confirmed-subtitle-text" style="font-size: 0.9rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 24px auto; line-height: 1.55;">
-          Thank you for choosing <strong>RJ Fashion Collection</strong>. Your payment confirmation has been recorded and express dispatch packaging is initiated.
+        <p id="confirmed-desc-text" style="font-size: 0.9rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 24px auto; line-height: 1.5;">
+          Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your transaction has been verified with the bank gateway and express packing is initiated.
         </p>
 
-        <div style="background: var(--pay-card-inner); border: 1px solid var(--pay-card-border); border-radius: 12px; padding: 18px; max-width: 420px; margin: 0 auto 26px auto; text-align: left; font-size: 0.86rem;">
+        <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--pay-card-border); border-radius: 12px; padding: 18px; max-width: 400px; margin: 0 auto 26px auto; text-align: left; font-size: 0.85rem;">
           <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
             <span style="color: var(--pay-text-secondary);">Order Number:</span>
             <strong id="confirmed-order-number" style="font-family: monospace;">-</strong>
           </div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
             <span style="color: var(--pay-text-secondary);">Amount Paid:</span>
-            <strong id="confirmed-amount" style="color: #047857; font-weight: 800;">-</strong>
+            <strong id="confirmed-amount" style="color: #047857;">-</strong>
           </div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
             <span style="color: var(--pay-text-secondary);">Payment Mode:</span>
-            <span id="confirmed-mode-display">UPI Instant Payment</span>
-          </div>
-          <div id="confirmed-utr-row" style="display: none; justify-content: space-between; margin-bottom: 8px;">
-            <span id="confirmed-utr-label" style="color: var(--pay-text-secondary);">Bank UTR / Ref:</span>
-            <strong id="confirmed-utr-display" style="font-family: monospace;">-</strong>
+            <span id="confirmed-mode">UPI Instant Payment</span>
           </div>
           <div style="display: flex; justify-content: space-between;">
             <span style="color: var(--pay-text-secondary);">Transit SLA:</span>
@@ -1007,64 +559,12 @@
           </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 380px; margin: 0 auto;">
-          <a id="btn-view-orders" href="/orders.html" class="btn-verify-action">
+        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 360px; margin: 0 auto;">
+          <a id="btn-view-orders" href="/orders.html" class="btn-verify-action" style="text-decoration: none;">
             <span>Track Order &amp; View Receipt ➔</span>
           </a>
-          <a href="/shop.html" style="font-size: 0.84rem; color: var(--pay-text-secondary); text-decoration: underline; margin-top: 4px;">
+          <a href="/shop.html" style="font-size: 0.82rem; color: var(--pay-text-secondary); text-decoration: underline; margin-top: 4px;">
             Continue Exploring Collections
-          </a>
-        </div>
-
-      </div>
-
-      <!-- ============================================================== -->
-      <!-- VIEW 4: Payment Failed / Cancelled Screen                      -->
-      <!-- ============================================================== -->
-      <div id="view-failed" class="payment-body" style="display: none; text-align: center; padding: 42px 24px;">
-        
-        <div class="failed-cross-circle">✕</div>
-
-        <span style="font-size: 0.74rem; font-weight: 800; color: #DC2626; text-transform: uppercase; letter-spacing: 0.14em; background: #FEF2F2; padding: 4px 12px; border-radius: 9999px; border: 1px solid #FECACA; display: inline-block;">
-          Payment Not Completed
-        </span>
-
-        <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.65rem; font-weight: 700; margin: 14px 0 8px 0; color: var(--pay-text-primary);">
-          Payment Was Cancelled or Declined
-        </h2>
-
-        <p id="failed-reason-text" style="font-size: 0.9rem; color: var(--pay-text-secondary); max-width: 440px; margin: 0 auto 24px auto; line-height: 1.55;">
-          Payment could not be confirmed for your order. If any amount was debited, your bank automatically refunds it within 24–48 hours.
-        </p>
-
-        <div style="background: var(--pay-card-inner); border: 1px solid var(--pay-card-border); border-radius: 12px; padding: 18px; max-width: 420px; margin: 0 auto 26px auto; text-align: left; font-size: 0.86rem;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="color: var(--pay-text-secondary);">Order Reference:</span>
-            <strong id="failed-order-number" style="font-family: monospace;">-</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="color: var(--pay-text-secondary);">Pending Amount:</span>
-            <strong id="failed-amount" style="color: #DC2626; font-weight: 800;">-</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--pay-text-secondary);">Bag Items:</span>
-            <span>Safely preserved in your bag</span>
-          </div>
-        </div>
-
-        <div id="cod-switch-feedback" class="status-banner-inline success" style="max-width: 380px; margin: 0 auto 14px auto;"></div>
-
-        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 380px; margin: 0 auto;">
-          <button type="button" class="btn-verify-action" onclick="returnToChooser()">
-            <span>↺ Retry UPI Payment</span>
-          </button>
-
-          <button type="button" id="btn-switch-cod" class="btn-secondary-action" onclick="switchToCashOnDelivery()">
-            <span>💵 Switch Order to Cash on Delivery (COD)</span>
-          </button>
-
-          <a href="/checkout.html" style="font-size: 0.84rem; color: var(--pay-text-secondary); text-decoration: underline; margin-top: 4px;">
-            Return to Checkout &amp; Bag Review
           </a>
         </div>
 
@@ -1075,94 +575,31 @@
   </div>
 
   <script>
-    // State Model
+    // State
     var orderData = {
       orderNumber: '',
       amount: 0,
       customerName: '',
       customerPhone: '',
-      customerVpa: '',
-      mode: '',
       activeApp: 'phonepe',
-      txnAttemptRef: ''
-    };
-
-    var paymentSession = {
-      initiated: false,
-      completed: false,
-      leftPageAt: null,
-      wasBackgrounded: false,
-      lastDurationSec: 0,
-      lastReturnHandledAt: 0,
-      sourceMode: 'app', // 'app' or 'qr'
-      waitingTicker: null,
-      waitingDelayTimer: null,
-      pollTimer: null
+      lastIntentUrl: '',
+      apiOnline: false,
+      isLiveGateway: false
     };
 
     var sessionSeconds = 600; // 10 minutes
     var countdownInterval = null;
-    var qrCodeInstance = null;
+    var autoPollInterval = null;
+    var isCheckingStatus = false;
 
-    function isStaticSiteHost() {
-      var h = (window.location && window.location.hostname) || '';
-      var p = (window.location && window.location.port) || '';
-      return (
-        h.endsWith('web.app') ||
-        h.endsWith('firebaseapp.com') ||
-        window.location.protocol === 'file:' ||
-        ((h === '127.0.0.1' || h === 'localhost') && p !== '3000')
-      );
-    }
-
-    function escapeText(str) {
-      return String(str == null ? '' : str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
-
-    function getAppDisplayName(appCode) {
-      if (appCode === 'phonepe') return 'PhonePe';
-      if (appCode === 'gpay') return 'Google Pay';
-      if (appCode === 'paytm') return 'Paytm';
-      if (appCode === 'qr') return 'UPI QR Scanner';
-      return 'UPI App';
-    }
-
-    // Secure Merchant Parameters (Encoded in UPI intents / QR only, hidden from visible UI prose)
-    function getMerchantConfig() {
-      return {
-        vpa: 'Q070080131@ybl',
-        name: 'RJ FASHION',
-        notePrefix: 'RJFC Order '
-      };
-    }
-
-    function showTopNotice(message, type) {
-      var el = document.getElementById('payment-top-notice');
-      if (!el) return;
-      el.className = 'status-banner-inline ' + (type || 'info');
-      el.textContent = message;
-      el.style.display = 'block';
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 1. Initialize Order Parameters, Fallback Chain & Idempotency
-    // ─────────────────────────────────────────────────────────────
-    function initPaymentSession() {
+    // 1. Initialize Order Parameters & Probe Live Gateway Health
+    async function initPaymentSession() {
       var params = new URLSearchParams(window.location.search);
-      var orderNum = (params.get('order_number') || params.get('order') || '').trim();
+      var orderNum = params.get('order_number') || params.get('order') || '';
       var amt = parseFloat(params.get('amount')) || 0;
-      var name = (params.get('name') || '').trim();
-      var phone = (params.get('phone') || '').trim();
-      var mode = (params.get('mode') || '').trim();
-      var vpa = (params.get('vpa') || '').trim();
-      var missingApp = (params.get('missing_app') || '').trim();
+      var name = params.get('name') || '';
+      var phone = params.get('phone') || '';
 
-      // Fallback 1: Read pending order from session/local storage
       if (!orderNum || amt <= 0) {
         try {
           var pending = sessionStorage.getItem('rj_pending_order') || localStorage.getItem('rj_pending_order');
@@ -1170,7 +607,7 @@
             var pObj = JSON.parse(pending);
             if (pObj) {
               orderNum = orderNum || pObj.order_number || pObj.orderNumber || '';
-              amt = amt || Number(pObj.total) || Number(pObj.amount) || 0;
+              amt = amt || pObj.total || pObj.amount || 0;
               name = name || pObj.customer_name || '';
               phone = phone || pObj.customer_phone || '';
             }
@@ -1178,128 +615,59 @@
         } catch (_) {}
       }
 
-      // Fallback 2: Calculate from unified cart keys
-      if (amt <= 0) {
-        var cartKeys = ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'];
-        for (var i = 0; i < cartKeys.length; i++) {
-          try {
-            var rawCart = localStorage.getItem(cartKeys[i]) || sessionStorage.getItem(cartKeys[i]);
-            if (rawCart) {
-              var items = JSON.parse(rawCart);
-              if (Array.isArray(items) && items.length > 0) {
-                var cartTotal = items.reduce(function(sum, it) {
-                  return sum + ((Number(it.price) || 0) * (Number(it.quantity) || 1));
-                }, 0);
-                if (cartTotal > 0) {
-                  amt = cartTotal;
-                  break;
-                }
-              }
-            }
-          } catch (_) {}
-        }
-      }
-
-      // Fallback 3: Check existing order records
-      var matchedOrder = null;
-      try {
-        var orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
-        if (Array.isArray(orders) && orders.length > 0) {
-          if (orderNum) {
-            matchedOrder = orders.find(function(o) { return o && o.order_number === orderNum; }) || null;
-          } else {
-            matchedOrder = orders[0];
-            orderNum = matchedOrder.order_number || ('RJFC-' + (matchedOrder.id || Date.now()));
-          }
-          if (amt <= 0 && matchedOrder) amt = Number(matchedOrder.total) || 0;
-        }
-      } catch (_) {}
-
-      // Default fallback if visited directly without bag/order
       if (!orderNum) {
         orderNum = 'RJFC-' + (new Date().toISOString().slice(0, 10).replace(/-/g, '')) + '-' + Math.floor(1000 + Math.random() * 9000);
-      }
-      if (amt <= 0) {
-        amt = 1999;
       }
 
       orderData.orderNumber = orderNum;
       orderData.amount = amt;
       orderData.customerName = name;
       orderData.customerPhone = phone;
-      orderData.customerVpa = vpa;
-      orderData.mode = mode;
 
-      // Update Top Amount Banner & labels
-      var formattedAmt = '₹' + Math.round(amt).toLocaleString('en-IN');
       var amtEl = document.getElementById('display-order-amount');
       var ordEl = document.getElementById('display-order-number');
       var vAmtEl = document.getElementById('verify-amount-display');
 
+      var formattedAmt = '₹' + Math.round(amt).toLocaleString('en-IN');
       if (amtEl) amtEl.textContent = formattedAmt;
       if (ordEl) ordEl.textContent = orderNum;
       if (vAmtEl) vAmtEl.textContent = formattedAmt;
 
-      document.querySelectorAll('.qr-amount-lock-display').forEach(function(el) {
-        el.textContent = formattedAmt;
-      });
-
-      // Idempotency: If this order is already marked Paid in storage, show Confirmed screen immediately
-      if (matchedOrder && matchedOrder.payment_status === 'Paid') {
-        markOrderAsPaid(matchedOrder.phonepe_transaction_id || '', 'already_paid', true);
-        return;
-      }
-
-      // Context-specific inline notices (No alert() dialogs)
-      if (missingApp) {
-        clearPersistedPayAttempt();
-        showTopNotice(
-          getAppDisplayName(missingApp) + ' does not appear to be installed on this device. Tap "BHIM / Any Other UPI App" below to pick another UPI app, or scan the QR code.',
-          'warn'
-        );
-      } else if (mode === 'cards' || mode === 'netbanking') {
-        showTopNotice(
-          'Card & Net Banking direct PG is in merchant onboarding. Choose any Instant Zero-Fee UPI App or Scan QR below to complete your order right away.',
-          'info'
-        );
-        var drawer = document.getElementById('cards-gateway-drawer');
-        var arrow = document.getElementById('cards-drawer-arrow');
-        if (drawer) drawer.style.display = 'block';
-        if (arrow) arrow.textContent = 'Hide ▴';
-      } else if (vpa) {
-        showTopNotice(
-          'UPI ID (' + vpa + ') noted — select your UPI app below to authorize payment instantly.',
-          'success'
-        );
-      }
-
-      // Wire live 12-digit UTR input validator
-      initUtrInputValidation();
-
-      // Start Session Countdown Timer
       startSessionTimer();
 
-      // Render Dynamic Real Scannable QR Code
-      renderDynamicQrCode();
+      // Probe real payment server connectivity
+      await checkGatewayConnectivity();
 
-      // Check if page was restored after returning from UPI app (skip if redirected via missing_app fallback!)
-      var restored = !missingApp && checkRestoredPaymentAttempt();
-
-      // Wire automatic return detection listeners
-      initReturnDetectionListeners();
-
-      // Clean transient missing_app param from URL bar
-      if (missingApp && window.history && window.history.replaceState) {
-        try {
-          params.delete('missing_app');
-          var nextQs = params.toString();
-          window.history.replaceState({}, document.title, window.location.pathname + (nextQs ? '?' + nextQs : ''));
-        } catch (_) {}
+      // If returning with ?txn=... query parameter, automatically check bank verification status
+      var returnTxn = params.get('txn') || params.get('phonepe_txn') || '';
+      if (returnTxn && orderData.apiOnline) {
+        showView('verifying');
+        startAutoPolling();
+        await checkRealPaymentStatus();
       }
+    }
 
-      if (!restored) {
-        showView('chooser');
-      }
+    async function checkGatewayConnectivity() {
+      var noticeEl = document.getElementById('gateway-status-notice');
+      var reasonEl = document.getElementById('gateway-status-reason');
+      try {
+        var res = await fetch('/api/payment/phonepe/config', { credentials: 'include' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var cfg = await res.json();
+        if (cfg && cfg.success && cfg.enabled) {
+          orderData.apiOnline = true;
+          orderData.isLiveGateway = Boolean(cfg.isLive);
+          if (!cfg.isLive && noticeEl && reasonEl) {
+            noticeEl.style.display = 'block';
+            reasonEl.textContent = 'Gateway backend is running in SANDBOX TEST mode (' + (cfg.env || 'sandbox') + '). Real money payments require approved PhonePe production credentials.';
+          }
+          return;
+        }
+      } catch (_) {}
+
+      orderData.apiOnline = false;
+      orderData.isLiveGateway = false;
+      if (noticeEl) noticeEl.style.display = 'block';
     }
 
     function startSessionTimer() {
@@ -1309,8 +677,9 @@
         sessionSeconds--;
         if (sessionSeconds <= 0) {
           clearInterval(countdownInterval);
+          stopAutoPolling();
           if (timerEl) timerEl.textContent = 'Expired';
-          showPaymentFailedView('Your 10-minute payment session expired before completion. Tap Retry UPI Payment below to start a fresh payment link.');
+          window.location.href = '/checkout.html';
           return;
         }
         var m = Math.floor(sessionSeconds / 60);
@@ -1321,596 +690,193 @@
       }, 1000);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 2. Build UPI Deep-Link Protocol URI (Device, Fallback & Spec Safe)
-    // ─────────────────────────────────────────────────────────────
-    function generateFreshTxnRef() {
-      var cleanOrd = (orderData.orderNumber || 'RJFC').replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
-      var attemptSuffix = Date.now().toString(36).toUpperCase().slice(-5);
-      orderData.txnAttemptRef = cleanOrd + attemptSuffix;
-      return orderData.txnAttemptRef;
-    }
-
-    function buildAndroidFallbackSegment(targetApp) {
+    // 2. Initiate Server-Signed Gateway Intent / Standard Checkout (Never raw unverified P2P UPI links)
+    async function initiateGatewaySession(mode, targetApp) {
+      var pending = {};
       try {
-        if (!window.location.protocol || !window.location.protocol.startsWith('http')) {
-          return '';
-        }
-        var fbUrl = window.location.origin + window.location.pathname +
-          '?order_number=' + encodeURIComponent(orderData.orderNumber) +
-          '&amount=' + encodeURIComponent(orderData.amount) +
-          (orderData.customerName ? '&name=' + encodeURIComponent(orderData.customerName) : '') +
-          (orderData.customerPhone ? '&phone=' + encodeURIComponent(orderData.customerPhone) : '') +
-          '&missing_app=' + encodeURIComponent(targetApp || 'upi');
-        return 'S.browser_fallback_url=' + encodeURIComponent(fbUrl) + ';';
-      } catch (_) {
-        return '';
-      }
-    }
+        pending = JSON.parse(sessionStorage.getItem('rj_pending_order') || localStorage.getItem('rj_pending_order') || '{}');
+      } catch (_) {}
 
-    function buildUpiUri(targetApp) {
-      var cfg = getMerchantConfig();
-      var merchantVpa = cfg.vpa;
-      var merchantName = encodeURIComponent(cfg.name);
-      var orderNote = encodeURIComponent(cfg.notePrefix + orderData.orderNumber);
-      var amtStr = Math.max(1, Number(orderData.amount || 0)).toFixed(2);
-      var txnRef = encodeURIComponent(orderData.txnAttemptRef || generateFreshTxnRef());
-
-      var query = 'pa=' + merchantVpa + '&pn=' + merchantName + '&am=' + amtStr + '&cu=INR&tr=' + txnRef + '&tn=' + orderNote;
-
-      // QR payload MUST always stay universal upi://pay so every mobile scanner understands it
-      if (targetApp === 'generic' || targetApp === 'qr') {
-        return 'upi://pay?' + query;
-      }
-
-      var ua = navigator.userAgent || '';
-      var isAndroid = /Android/i.test(ua);
-      var isIOS = /iPhone|iPad|iPod/i.test(ua);
-
-      // A. Android Chrome / Android Browser Intent Protocol + Safe Browser Fallback
-      if (isAndroid) {
-        var fb = buildAndroidFallbackSegment(targetApp);
-        if (targetApp === 'phonepe') {
-          return 'intent://pay?' + query + '#Intent;scheme=upi;package=com.phonepe.app;' + fb + 'end';
-        } else if (targetApp === 'gpay') {
-          return 'intent://pay?' + query + '#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;' + fb + 'end';
-        } else if (targetApp === 'paytm') {
-          return 'intent://pay?' + query + '#Intent;scheme=upi;package=net.one97.paytm;' + fb + 'end';
-        }
-        // System UPI chooser across all installed UPI apps
-        return 'intent://pay?' + query + '#Intent;scheme=upi;' + fb + 'end';
-      }
-
-      // B. iOS URL Schemes
-      if (isIOS) {
-        if (targetApp === 'phonepe') {
-          return 'phonepe://pay?' + query;
-        } else if (targetApp === 'gpay') {
-          return 'tez://upi/pay?' + query;
-        } else if (targetApp === 'paytm') {
-          return 'paytmmp://pay?' + query;
-        }
-        return 'upi://pay?' + query;
-      }
-
-      // C. Universal UPI URI
-      return 'upi://pay?' + query;
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 3. Persist & Launch Selected UPI App or Desktop QR
-    // ─────────────────────────────────────────────────────────────
-    function persistPayAttempt() {
-      var payload = JSON.stringify({
-        orderNumber: orderData.orderNumber,
-        amount: orderData.amount,
-        appName: orderData.activeApp,
-        leftPageAt: paymentSession.leftPageAt,
-        txnRef: orderData.txnAttemptRef
+      var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+      var res = await fetch('/api/payment/phonepe/create-payment', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber: pending.serverOrderNumber || undefined,
+          addressId: pending.addressId || null,
+          coupon: pending.coupon || null,
+          notes: pending.notes || '',
+          paymentType: mode,
+          targetApp: targetApp || '',
+          deviceOS: isIOS ? 'IOS' : 'ANDROID'
+        })
       });
-      try { sessionStorage.setItem('rj_active_pay_attempt', payload); } catch (_) {}
-      try { localStorage.setItem('rj_active_pay_attempt', payload); } catch (_) {}
-    }
 
-    function clearPersistedPayAttempt() {
-      try { sessionStorage.removeItem('rj_active_pay_attempt'); } catch (_) {}
-      try { localStorage.removeItem('rj_active_pay_attempt'); } catch (_) {}
-    }
-
-    function isMobileDevice() {
-      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-    }
-
-    function toggleMobileQrBox() {
-      var qrBox = document.getElementById('desktop-qr-container');
-      var btn = document.getElementById('btn-mobile-qr-toggle');
-      if (!qrBox) return;
-      var collapsed = qrBox.classList.toggle('mobile-collapsed');
-      if (btn) {
-        btn.innerHTML = collapsed
-          ? '<span>📱 Paying from Another Phone? Show QR Code</span>'
-          : '<span>▲ Hide Dynamic QR Code</span>';
+      if (!res.ok) {
+        var errJson = await res.json().catch(function() { return {}; });
+        throw new Error(errJson.message || ('Gateway returned HTTP ' + res.status));
       }
-      if (!collapsed) {
-        qrBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
+      return await res.json();
     }
 
-    function resetVerificationUiForWaiting(appLabel) {
-      paymentSession.completed = false;
-      clearInterval(paymentSession.waitingTicker);
-
-      var ring = document.getElementById('verifying-radar-ring');
-      var badge = document.getElementById('return-telemetry-badge');
-      var tIcon = document.getElementById('telemetry-status-icon');
-      var tText = document.getElementById('telemetry-duration-text');
-      var headline = document.getElementById('verifying-headline-text');
-      var subText = document.getElementById('verifying-sub-text');
-      var stepLaunchLabel = document.getElementById('step-launch-label');
-      var stepReturn = document.getElementById('step-return');
-      var stepReturnLabel = document.getElementById('step-return-label');
-      var stepVerify = document.getElementById('step-verify');
-      var stepVerifyLabel = document.getElementById('step-verify-label');
-      var quickWarn = document.getElementById('quick-return-alert');
-      var relaunchBtn = document.getElementById('btn-relaunch-upi');
-      var waitingPanel = document.getElementById('waiting-action-panel');
-      var verdictPanel = document.getElementById('verdict-prompt-panel');
-      var relaunchWaitingBtn = document.getElementById('btn-relaunch-upi-waiting');
-
-      if (ring) ring.className = 'radar-pulse-ring is-waiting';
-      if (badge) badge.style.display = 'inline-flex';
-      if (tIcon) tIcon.textContent = '⏱️';
-      if (tText) tText.textContent = 'Waiting for ' + appLabel + '... 0s';
-      if (headline) headline.textContent = 'Waiting for ' + appLabel + ' Payment...';
-      if (subText) {
-        subText.innerHTML = 'Complete the <strong style="color: var(--pay-text-primary);">₹' + Math.round(orderData.amount).toLocaleString('en-IN') + '</strong> payment in <strong>' + escapeText(appLabel) + '</strong>. Return here after authorizing PIN — we detect your return automatically.';
-      }
-      if (stepLaunchLabel) stepLaunchLabel.textContent = 'Switched / initiated ' + appLabel + ' payment link';
-      if (stepReturn) stepReturn.className = 'detection-step-row';
-      if (stepReturnLabel) stepReturnLabel.textContent = 'Waiting for you to return from ' + appLabel + '...';
-      if (stepVerify) stepVerify.className = 'detection-step-row';
-      if (stepVerifyLabel) stepVerifyLabel.textContent = 'Checking payment confirmation status';
-      if (quickWarn) quickWarn.style.display = 'none';
-      if (relaunchBtn) relaunchBtn.style.display = paymentSession.sourceMode === 'qr' ? 'none' : 'inline-flex';
-      if (relaunchWaitingBtn) relaunchWaitingBtn.style.display = paymentSession.sourceMode === 'qr' ? 'none' : 'inline-flex';
-      if (waitingPanel) waitingPanel.style.display = paymentSession.sourceMode === 'qr' ? 'none' : 'block';
-      if (verdictPanel) verdictPanel.style.display = 'none';
-
-      var startTs = paymentSession.leftPageAt || Date.now();
-      paymentSession.waitingTicker = setInterval(function() {
-        var secs = Math.max(0, Math.round((Date.now() - startTs) / 1000));
-        if (tText && !paymentSession.lastReturnHandledAt) {
-          tText.textContent = 'Waiting for ' + appLabel + '... ' + secs + 's';
-        }
-      }, 1000);
-    }
-
-    function handleSelectUpiApp(appName) {
-      clearTimeout(paymentSession.waitingDelayTimer);
+    // 3. User Selects a UPI App (PhonePe, GPay, Paytm, Any UPI)
+    async function handleSelectUpiApp(appName) {
       orderData.activeApp = appName;
-      generateFreshTxnRef();
-
-      var appLabel = getAppDisplayName(appName);
+      var appLabel = appName === 'phonepe' ? 'PhonePe' : (appName === 'gpay' ? 'Google Pay' : (appName === 'paytm' ? 'Paytm' : 'UPI'));
       var lblEl = document.getElementById('verify-app-name-display');
-      var rlblEl = document.getElementById('btn-relaunch-app-name');
-      var rwlblEl = document.getElementById('btn-relaunch-waiting-app-name');
       if (lblEl) lblEl.textContent = appLabel;
-      if (rlblEl) rlblEl.textContent = appLabel;
-      if (rwlblEl) rwlblEl.textContent = appLabel;
 
-      // Desktop Flow: Keep QR code visible! Highlight it & guide user to scan with selected app on phone
-      if (!isMobileDevice()) {
-        paymentSession.sourceMode = 'qr';
-        renderDynamicQrCode();
-        var qrBox = document.getElementById('desktop-qr-container');
-        var qrTitle = document.getElementById('qr-selected-app-label');
-        var qrSub = document.getElementById('qr-selected-app-sub');
-        var qrPill = document.getElementById('qr-awaiting-pill-text');
-        if (qrTitle) qrTitle.textContent = 'Scan Dynamic QR with ' + appLabel;
-        if (qrSub) qrSub.textContent = 'Open ' + appLabel + ' scanner on your phone, scan this QR code, pay, then tap Confirm below.';
-        if (qrPill) qrPill.textContent = 'Awaiting ' + appLabel + ' scan • Ref ' + orderData.txnAttemptRef;
-        if (qrBox) {
-          qrBox.classList.remove('mobile-collapsed');
-          qrBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          qrBox.style.boxShadow = '0 0 0 3px #5F259F';
-          setTimeout(function() { qrBox.style.boxShadow = 'none'; }, 2200);
-        }
+      if (!orderData.apiOnline) {
+        showFailedScreen('Live payment gateway backend is not deployed yet on this hosting environment (API endpoints return 404). Complete your order via Cash on Delivery or deploy the backend API with approved merchant keys.');
         return;
       }
 
-      // Mobile App Launch Flow (Direct Intent Deep-Link + Automatic Return Detection)
-      paymentSession.sourceMode = 'app';
-      paymentSession.initiated = true;
-      paymentSession.completed = false;
-      paymentSession.wasBackgrounded = false;
-      paymentSession.lastReturnHandledAt = 0;
-      paymentSession.leftPageAt = Date.now();
-
-      persistPayAttempt();
-      resetVerificationUiForWaiting(appLabel);
-
-      var targetUri = buildUpiUri(appName);
-
-      // Show waiting radar immediately behind the app switch so it is ready when user returns
-      paymentSession.waitingDelayTimer = setTimeout(function() {
-        if (paymentSession.initiated && !paymentSession.completed && !paymentSession.lastReturnHandledAt) {
-          showView('verifying');
-        }
-      }, 450);
-
-      // Synchronous trusted user-gesture navigation opens Android Intent / iOS URL scheme reliably
       try {
-        window.location.href = targetUri;
-      } catch (_) {
-        var anchor = document.getElementById('hidden-intent-anchor');
-        if (anchor) {
-          anchor.href = targetUri;
-          anchor.click();
+        showView('verifying');
+        var data = await initiateGatewaySession('UPI_INTENT', appName.toUpperCase());
+        if (data.orderNumber) orderData.orderNumber = data.orderNumber;
+
+        if (data.intentUrl) {
+          orderData.lastIntentUrl = data.intentUrl;
+          window.location.href = data.intentUrl;
+          startAutoPolling();
+        } else if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        } else {
+          throw new Error('Gateway did not return an app launch URL.');
         }
+      } catch (err) {
+        showFailedScreen(err.message || 'Unable to connect to payment gateway. Please try again or use Cash on Delivery.');
       }
-    }
-
-    function triggerManualWaitingCheck() {
-      if (!paymentSession.leftPageAt) {
-        paymentSession.leftPageAt = Date.now() - 5000;
-      }
-      onReturnedFromUpiApp(paymentSession.sourceMode === 'qr');
-    }
-
-    function handleDesktopQrPaidClick() {
-      paymentSession.sourceMode = 'qr';
-      paymentSession.initiated = true;
-      paymentSession.completed = false;
-      paymentSession.leftPageAt = Date.now() - 8000;
-      paymentSession.lastReturnHandledAt = 0;
-
-      var appLabel = getAppDisplayName(orderData.activeApp || 'qr');
-      resetVerificationUiForWaiting(appLabel);
-      showView('verifying');
-      onReturnedFromUpiApp(true);
     }
 
     function relaunchSelectedUpiApp() {
-      handleSelectUpiApp(orderData.activeApp || 'phonepe');
-    }
-
-    function returnToChooser() {
-      clearTimeout(paymentSession.waitingDelayTimer);
-      clearInterval(paymentSession.waitingTicker);
-      clearInterval(paymentSession.pollTimer);
-      paymentSession.initiated = false;
-      paymentSession.wasBackgrounded = false;
-      clearPersistedPayAttempt();
-      showView('chooser');
-    }
-
-    function handleCardsNetbankingOption() {
-      var drawer = document.getElementById('cards-gateway-drawer');
-      var arrow = document.getElementById('cards-drawer-arrow');
-      if (!drawer) return;
-      var open = drawer.style.display === 'none' || !drawer.style.display;
-      drawer.style.display = open ? 'block' : 'none';
-      if (arrow) arrow.textContent = open ? 'Hide ▴' : 'Details ▾';
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 4. Return Detection Engine (Detecting Return from UPI App)
-    // ─────────────────────────────────────────────────────────────
-    function markAppBackgrounded() {
-      if (paymentSession.initiated && !paymentSession.completed && !paymentSession.wasBackgrounded) {
-        paymentSession.wasBackgrounded = true;
-        if (!paymentSession.leftPageAt) {
-          paymentSession.leftPageAt = Date.now();
-        }
-        persistPayAttempt();
-      }
-    }
-
-    function maybeTriggerReturnDetection() {
-      if (paymentSession.initiated && paymentSession.wasBackgrounded && !paymentSession.completed) {
-        var now = Date.now();
-        if (now - (paymentSession.lastReturnHandledAt || 0) > 1000) {
-          onReturnedFromUpiApp(false);
-        }
-      }
-    }
-
-    function initReturnDetectionListeners() {
-      // 1. Page Visibility API (Primary on Android Chrome & iOS Safari)
-      document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'hidden') {
-          markAppBackgrounded();
-        } else if (document.visibilityState === 'visible') {
-          maybeTriggerReturnDetection();
-        }
-      });
-
-      // 2. Window Blur / Focus (Catches OS "Open in App?" confirmation sheets)
-      window.addEventListener('blur', function() {
-        if (paymentSession.initiated && !paymentSession.completed && (Date.now() - (paymentSession.leftPageAt || Date.now()) > 150)) {
-          markAppBackgrounded();
-        }
-      });
-      window.addEventListener('focus', function() {
-        maybeTriggerReturnDetection();
-      });
-
-      // 3. BFCache Pagehide / Pageshow
-      window.addEventListener('pagehide', function() {
-        markAppBackgrounded();
-      });
-      window.addEventListener('pageshow', function() {
-        maybeTriggerReturnDetection();
-      });
-    }
-
-    function checkRestoredPaymentAttempt() {
-      try {
-        var raw = sessionStorage.getItem('rj_active_pay_attempt') || localStorage.getItem('rj_active_pay_attempt');
-        if (raw) {
-          var att = JSON.parse(raw);
-          if (
-            att &&
-            att.leftPageAt &&
-            (Date.now() - att.leftPageAt < 900000) &&
-            (!att.orderNumber || att.orderNumber === orderData.orderNumber)
-          ) {
-            paymentSession.initiated = true;
-            paymentSession.wasBackgrounded = true;
-            paymentSession.leftPageAt = att.leftPageAt;
-            if (att.appName) orderData.activeApp = att.appName;
-            if (att.txnRef) orderData.txnAttemptRef = att.txnRef;
-            resetVerificationUiForWaiting(getAppDisplayName(orderData.activeApp));
-            showView('verifying');
-            onReturnedFromUpiApp(false);
-            return true;
-          }
-        }
-      } catch (_) {}
-      return false;
-    }
-
-    function settleVerificationPrompt(durationSec, isQrMode) {
-      clearInterval(paymentSession.waitingTicker);
-
-      var ring = document.getElementById('verifying-radar-ring');
-      var badge = document.getElementById('return-telemetry-badge');
-      var tIcon = document.getElementById('telemetry-status-icon');
-      var tText = document.getElementById('telemetry-duration-text');
-      var headline = document.getElementById('verifying-headline-text');
-      var subText = document.getElementById('verifying-sub-text');
-      var stepVerify = document.getElementById('step-verify');
-      var stepVerifyLabel = document.getElementById('step-verify-label');
-      var quickWarn = document.getElementById('quick-return-alert');
-      var waitingPanel = document.getElementById('waiting-action-panel');
-      var verdictPanel = document.getElementById('verdict-prompt-panel');
-      var appLabel = getAppDisplayName(orderData.activeApp);
-
-      var isQuickReturn = !isQrMode && durationSec < 4;
-
-      if (waitingPanel) waitingPanel.style.display = 'none';
-      if (verdictPanel) verdictPanel.style.display = 'block';
-
-      if (ring) {
-        ring.className = isQuickReturn
-          ? 'radar-pulse-ring is-settled-warn'
-          : 'radar-pulse-ring is-settled-ready';
-      }
-      if (badge) badge.style.display = 'inline-flex';
-      if (tIcon) tIcon.textContent = isQuickReturn ? '⚠️' : '✅';
-      if (tText) {
-        tText.textContent = isQrMode
-          ? ('QR Scan Submitted • ' + appLabel)
-          : ('Returned from ' + appLabel + ' (' + durationSec + 's)');
-      }
-
-      if (stepVerify) stepVerify.className = isQuickReturn ? 'detection-step-row warn' : 'detection-step-row done';
-      if (stepVerifyLabel) {
-        stepVerifyLabel.textContent = isStaticSiteHost()
-          ? '● Awaiting your final confirmation from UPI app receipt'
-          : '● Bank status pending manual UTR / final confirmation';
-      }
-
-      if (isQuickReturn) {
-        if (headline) headline.textContent = 'Did You Complete the Payment?';
-        if (subText) {
-          subText.innerHTML = 'You switched back in just <strong>' + durationSec + 's</strong>. Completing a UPI PIN payment usually takes 6–20s. If it failed or you closed the app, choose <strong>Payment Failed / Cancelled</strong> below.';
-        }
-        if (quickWarn) {
-          quickWarn.textContent = 'Quick return detected (' + durationSec + 's). Tap "Re-open ' + appLabel + '" below if the app did not finish loading.';
-          quickWarn.style.display = 'block';
-        }
+      if (orderData.lastIntentUrl) {
+        window.location.href = orderData.lastIntentUrl;
       } else {
-        if (headline) headline.textContent = 'Confirm Your Payment Result';
-        if (subText) {
-          subText.innerHTML = isQrMode
-            ? 'Please enter the 12-digit UTR (recommended) or confirm below whether your <strong>' + escapeText(appLabel) + '</strong> QR payment succeeded.'
-            : 'Welcome back from <strong>' + escapeText(appLabel) + '</strong> (' + durationSec + 's session detected). Enter your 12-digit UTR or confirm the transaction status below:';
-        }
-        if (quickWarn) quickWarn.style.display = 'none';
+        handleSelectUpiApp(orderData.activeApp);
       }
     }
 
-    function onReturnedFromUpiApp(isQrMode) {
-      clearTimeout(paymentSession.waitingDelayTimer);
-      clearInterval(paymentSession.waitingTicker);
-      paymentSession.wasBackgrounded = false;
-      paymentSession.lastReturnHandledAt = Date.now();
-
-      var durationMs = Date.now() - (paymentSession.leftPageAt || Date.now());
-      var durationSec = Math.max(1, Math.round(durationMs / 1000));
-      paymentSession.lastDurationSec = durationSec;
-
-      var appLabel = getAppDisplayName(orderData.activeApp);
-      var badge = document.getElementById('return-telemetry-badge');
-      var tIcon = document.getElementById('telemetry-status-icon');
-      var tText = document.getElementById('telemetry-duration-text');
-      var headline = document.getElementById('verifying-headline-text');
-      var subText = document.getElementById('verifying-sub-text');
-      var stepReturn = document.getElementById('step-return');
-      var stepReturnLabel = document.getElementById('step-return-label');
-      var stepVerify = document.getElementById('step-verify');
-      var stepVerifyLabel = document.getElementById('step-verify-label');
-      var ring = document.getElementById('verifying-radar-ring');
-      var waitingPanel = document.getElementById('waiting-action-panel');
-      var verdictPanel = document.getElementById('verdict-prompt-panel');
-
-      if (waitingPanel) waitingPanel.style.display = 'none';
-      if (verdictPanel) verdictPanel.style.display = 'none';
-      if (ring) ring.className = 'radar-pulse-ring is-waiting';
-
-      showView('verifying');
-
-      if (badge) badge.style.display = 'inline-flex';
-      if (tIcon) tIcon.textContent = '✅';
-      if (tText) {
-        tText.textContent = isQrMode
-          ? 'Checking QR payment status...'
-          : ('Return detected from ' + appLabel + ' (' + durationSec + 's)');
-      }
-
-      if (stepReturn) stepReturn.className = 'detection-step-row done';
-      if (stepReturnLabel) {
-        stepReturnLabel.textContent = isQrMode
-          ? '✓ QR scan completed'
-          : ('✓ Returned automatically from ' + appLabel + ' (' + durationSec + 's in app)');
-      }
-
-      if (headline) headline.textContent = 'Checking Transaction Status...';
-      if (subText) {
-        subText.innerHTML = 'Checking payment verification status for <strong>' + escapeText(orderData.orderNumber) + '</strong>...';
-      }
-      if (stepVerify) stepVerify.className = 'detection-step-row';
-      if (stepVerifyLabel) stepVerifyLabel.textContent = '⟳ Querying payment gateway status...';
-
-      // Clear active attempt flag cleanly once return was handled
-      clearPersistedPayAttempt();
-
-      // Check dynamic API if running on Node backend; otherwise complete check animation & show verdict
-      checkLiveServerPaymentStatus(durationSec, isQrMode);
-    }
-
-    async function checkLiveServerPaymentStatus(durationSec, isQrMode) {
-      // Static Firebase Hosting has no /api backend — finish check smoothly in ~1.2s & show honest verdict prompt
-      if (isStaticSiteHost()) {
-        setTimeout(function() {
-          if (!paymentSession.completed) {
-            settleVerificationPrompt(durationSec, isQrMode);
-          }
-        }, 1200);
+    async function handleOpenPhonePeWebGateway() {
+      if (!orderData.apiOnline) {
+        showFailedScreen('Live PhonePe Web Gateway requires an active backend API server and approved merchant API keys. Use Cash on Delivery below or configure backend hosting.');
         return;
       }
-
-      // Dynamic Node Backend: poll up to 3 times if Pending
-      var maxPolls = 3;
-      for (var attempt = 1; attempt <= maxPolls; attempt++) {
-        if (paymentSession.completed) return;
-        try {
-          var res = await fetch('/api/payment/phonepe/status/' + encodeURIComponent(orderData.orderNumber));
-          var contentType = res.headers.get('content-type') || '';
-          if (res.ok && contentType.includes('application/json')) {
-            var data = await res.json();
-            if (data && data.success && data.verified) {
-              markOrderAsPaid(data.phonepe_transaction_id || '', 'server_verified');
-              return;
-            } else if (data && data.payment_status === 'Failed') {
-              showPaymentFailedView(data.message || 'Payment was declined by bank');
-              return;
-            }
-          } else if (res.status === 404 || res.status === 401 || res.status === 400) {
-            // Backend returned non-PG status or offline/unauthenticated — settle to user confirmation UI cleanly
-            break;
-          }
-        } catch (_) {
-          break;
+      try {
+        var data = await initiateGatewaySession('PAY_PAGE', 'PAY_PAGE');
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        } else {
+          throw new Error('Could not obtain PhonePe checkout redirect URL.');
         }
-        if (attempt < maxPolls) {
-          await new Promise(function(r) { setTimeout(r, 2000); });
-        }
-      }
-
-      if (!paymentSession.completed) {
-        settleVerificationPrompt(durationSec, isQrMode);
+      } catch (err) {
+        showFailedScreen(err.message || 'Unable to open PhonePe Web Checkout.');
       }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 5. Verification, Live UTR Validator & Confirmation Engine
-    // ─────────────────────────────────────────────────────────────
-    function initUtrInputValidation() {
-      var utrInput = document.getElementById('verify-utr-input');
-      var feedback = document.getElementById('utr-validation-feedback');
-      if (!utrInput || !feedback || utrInput.__bound) return;
+    // 4. View Switcher
+    function showView(viewName) {
+      var viewChooser = document.getElementById('view-app-chooser');
+      var viewVerifying = document.getElementById('view-verifying');
+      var viewFailed = document.getElementById('view-failed');
+      var viewConfirmed = document.getElementById('view-confirmed');
 
-      utrInput.addEventListener('input', function() {
-        var digits = utrInput.value.replace(/\D/g, '').slice(0, 12);
-        if (utrInput.value !== digits) {
-          utrInput.value = digits;
-        }
-        if (!digits) {
-          feedback.style.display = 'none';
-          utrInput.style.borderColor = 'var(--pay-card-border)';
+      if (viewChooser) viewChooser.style.display = viewName === 'chooser' ? 'block' : 'none';
+      if (viewVerifying) viewVerifying.style.display = viewName === 'verifying' ? 'block' : 'none';
+      if (viewFailed) viewFailed.style.display = viewName === 'failed' ? 'block' : 'none';
+      if (viewConfirmed) viewConfirmed.style.display = viewName === 'confirmed' ? 'block' : 'none';
+    }
+
+    function showFailedScreen(reason) {
+      stopAutoPolling();
+      var reasonEl = document.getElementById('failed-reason-text');
+      if (reasonEl && reason) reasonEl.textContent = reason;
+      showView('failed');
+    }
+
+    // 5. Real Server-Authoritative Verification & Auto-Detection Polling
+    async function checkRealPaymentStatus() {
+      if (isCheckingStatus || !orderData.orderNumber || !orderData.apiOnline) return;
+      isCheckingStatus = true;
+
+      var subEl = document.getElementById('verify-status-subtext');
+      try {
+        var res = await fetch('/api/payment/phonepe/status/' + encodeURIComponent(orderData.orderNumber), {
+          credentials: 'include'
+        });
+        var data = await res.json().catch(function() { return {}; });
+
+        if (res.ok && data.verified === true && data.payment_status === 'Paid') {
+          markOrderAsVerifiedPaid(data.payment_mode || ('UPI (' + orderData.activeApp.toUpperCase() + ')'));
           return;
         }
-        feedback.style.display = 'block';
-        if (/^\d{12}$/.test(digits)) {
-          feedback.style.color = '#059669';
-          feedback.textContent = '✓ Valid 12-digit UTR format ready (' + digits + ')';
-          utrInput.style.borderColor = '#10B981';
-        } else {
-          feedback.style.color = '#D97706';
-          feedback.textContent = 'Enter all 12 digits (' + digits.length + '/12 entered) or leave blank';
-          utrInput.style.borderColor = '#F59E0B';
+
+        if (data && data.payment_status === 'Failed') {
+          showFailedScreen(data.message || 'Payment failed or was cancelled in your UPI app.');
+          return;
         }
-      });
-      utrInput.__bound = true;
+
+        if (subEl) {
+          subEl.textContent = data.message || 'Waiting for confirmation from PhonePe & bank servers...';
+        }
+      } catch (err) {
+        if (subEl) subEl.textContent = 'Checking gateway connectivity...';
+      } finally {
+        isCheckingStatus = false;
+      }
     }
 
-    function triggerPaymentVerification() {
+    async function triggerPaymentVerification() {
       var btn = document.getElementById('btn-manual-verify');
-      var utrInput = document.getElementById('verify-utr-input');
-      var feedback = document.getElementById('utr-validation-feedback');
-      var utrVal = utrInput ? utrInput.value.trim() : '';
-
-      // Validate partial/invalid UTR if user started typing one
-      if (utrVal && !/^\d{12}$/.test(utrVal)) {
-        if (feedback) {
-          feedback.style.display = 'block';
-          feedback.style.color = '#DC2626';
-          feedback.textContent = 'Please enter a valid 12-digit numeric UPI Ref / UTR number (or clear the field).';
-        }
-        if (utrInput) {
-          utrInput.style.borderColor = '#DC2626';
-          utrInput.focus();
-        }
-        return;
-      }
-
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-inline" style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;"></span><span>Confirming Payment...</span>';
+        btn.innerHTML = '<span class="spinner-inline" style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;"></span><span>Checking Bank Gateway...</span>';
       }
-
-      setTimeout(function() {
-        markOrderAsPaid(utrVal || orderData.txnAttemptRef, 'user_confirmed');
-      }, 900);
+      await checkRealPaymentStatus();
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🔄 Check Bank Status Now</span>';
+      }
     }
 
-    function markOrderAsPaid(utr, verificationSource, skipConfetti) {
-      paymentSession.completed = true;
-      clearTimeout(paymentSession.waitingDelayTimer);
+    function startAutoPolling() {
+      stopAutoPolling();
+      var checks = 0;
+      autoPollInterval = setInterval(function() {
+        checks++;
+        if (checks > 60) {
+          stopAutoPolling();
+          showFailedScreen('Verification timed out waiting for bank confirmation. If money was deducted, do not pay twice — check My Orders shortly.');
+          return;
+        }
+        checkRealPaymentStatus();
+      }, 3000);
+    }
+
+    function stopAutoPolling() {
+      clearInterval(autoPollInterval);
+      autoPollInterval = null;
+    }
+
+    // Auto-detect immediately when customer switches back from UPI app to browser
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible' && document.getElementById('view-verifying').style.display !== 'none') {
+        checkRealPaymentStatus();
+      }
+    });
+    window.addEventListener('focus', function() {
+      var v = document.getElementById('view-verifying');
+      if (v && v.style.display !== 'none') {
+        checkRealPaymentStatus();
+      }
+    });
+
+    function markOrderAsVerifiedPaid(paymentModeLabel) {
       clearInterval(countdownInterval);
-      clearInterval(paymentSession.waitingTicker);
-      clearInterval(paymentSession.pollTimer);
+      stopAutoPolling();
 
-      // Clear session storage attempt
-      clearPersistedPayAttempt();
-      try { sessionStorage.removeItem('rj_pending_order'); } catch (_) {}
-      try { localStorage.removeItem('rj_pending_order'); } catch (_) {}
-
-      var appLabel = getAppDisplayName(orderData.activeApp);
-
-      // 1. Update localStorage orders
       try {
         var orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
         var found = false;
@@ -1918,141 +884,83 @@
           if (orders[i].order_number === orderData.orderNumber) {
             orders[i].payment_status = 'Paid';
             orders[i].status = 'Confirmed';
-            orders[i].payment_method = 'UPI (' + appLabel + ')';
+            orders[i].payment_method = paymentModeLabel || 'PhonePe Verified';
             orders[i].paid_at = new Date().toISOString();
-            if (utr) orders[i].phonepe_transaction_id = utr;
             found = true;
             break;
           }
         }
         if (!found) {
-          orders.unshift({
-            id: Date.now(),
-            order_number: orderData.orderNumber,
-            total: orderData.amount,
-            customer_name: orderData.customerName || 'Valued Patron',
-            customer_phone: orderData.customerPhone || '',
-            payment_status: 'Paid',
-            status: 'Confirmed',
-            payment_method: 'UPI (' + appLabel + ')',
-            phonepe_transaction_id: utr || '',
-            created_at: new Date().toISOString()
-          });
+          var pending = JSON.parse(sessionStorage.getItem('rj_pending_order') || localStorage.getItem('rj_pending_order') || '{}');
+          pending.order_number = orderData.orderNumber;
+          pending.total = orderData.amount || pending.total || 0;
+          pending.payment_status = 'Paid';
+          pending.status = 'Confirmed';
+          pending.payment_method = paymentModeLabel || 'PhonePe Verified';
+          pending.paid_at = new Date().toISOString();
+          orders.unshift(pending);
         }
         localStorage.setItem('rj_orders', JSON.stringify(orders));
       } catch (_) {}
 
-      // 2. Clear Shopping Cart across all unified keys
       try {
-        ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach(function(k) {
+        ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart', 'rj_pending_order'].forEach(function(k) {
           localStorage.removeItem(k);
           sessionStorage.removeItem(k);
         });
-        window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: [] } }));
-        window.dispatchEvent(new Event('storage'));
       } catch (_) {}
 
-      // 3. Populate Confirmed Screen
+      var cBadge = document.getElementById('confirmed-status-badge');
+      var cDesc = document.getElementById('confirmed-desc-text');
       var cOrd = document.getElementById('confirmed-order-number');
       var cAmt = document.getElementById('confirmed-amount');
-      var cMode = document.getElementById('confirmed-mode-display');
-      var cSub = document.getElementById('confirmed-subtitle-text');
-      var cUtrRow = document.getElementById('confirmed-utr-row');
-      var cUtrLbl = document.getElementById('confirmed-utr-label');
-      var cUtr = document.getElementById('confirmed-utr-display');
+      var cMode = document.getElementById('confirmed-mode');
       var cBtn = document.getElementById('btn-view-orders');
-
+      if (cBadge) cBadge.textContent = 'Payment Verified & Confirmed';
+      if (cDesc) cDesc.innerHTML = 'Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your transaction has been verified with the bank gateway and express packing is initiated.';
       if (cOrd) cOrd.textContent = orderData.orderNumber;
       if (cAmt) cAmt.textContent = '₹' + Math.round(orderData.amount).toLocaleString('en-IN');
-      if (cMode) cMode.textContent = 'UPI (' + appLabel + ')';
-      if (cSub) {
-        cSub.innerHTML = verificationSource === 'server_verified'
-          ? 'Thank you for choosing <strong>RJ Fashion Collection</strong>. Your transaction has been verified with PhonePe and express packaging is initiated.'
-          : 'Thank you for choosing <strong>RJ Fashion Collection</strong>. Your UPI payment via <strong>' + escapeText(appLabel) + '</strong> is confirmed and express dispatch packaging is initiated.';
-      }
-      if (utr && cUtrRow && cUtr) {
-        cUtrRow.style.display = 'flex';
-        if (cUtrLbl) cUtrLbl.textContent = /^\d{12}$/.test(utr) ? 'Bank UTR No:' : 'Payment Ref:';
-        cUtr.textContent = utr;
-      }
+      if (cMode) cMode.textContent = paymentModeLabel || 'UPI Instant Payment';
       if (cBtn) cBtn.href = '/orders.html?order=' + encodeURIComponent(orderData.orderNumber);
 
-      // 4. Switch to Confirmed Screen
       showView('confirmed');
-
-      // 5. Trigger Grand Celebration Confetti
-      if (!skipConfetti) {
-        triggerCelebrationConfetti();
-      }
+      triggerCelebrationConfetti();
     }
 
-    function handlePaymentCancelledOrFailed() {
-      showPaymentFailedView('Payment was cancelled or declined in your UPI app. Your items remain safely saved in your shopping bag.');
-    }
+    async function switchPendingOrderToCOD() {
+      clearInterval(countdownInterval);
+      stopAutoPolling();
 
-    function showPaymentFailedView(reason) {
-      paymentSession.completed = false;
-      clearTimeout(paymentSession.waitingDelayTimer);
-      clearInterval(paymentSession.waitingTicker);
-      clearPersistedPayAttempt();
-
-      // Re-enable verify button in case user retries later
-      var btn = document.getElementById('btn-manual-verify');
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<span>✓ Yes, Payment Completed — Confirm Order</span>';
-      }
-
-      // Update failed view details
-      var fOrd = document.getElementById('failed-order-number');
-      var fAmt = document.getElementById('failed-amount');
-      var fReason = document.getElementById('failed-reason-text');
-
-      if (fOrd) fOrd.textContent = orderData.orderNumber;
-      if (fAmt) fAmt.textContent = '₹' + Math.round(orderData.amount).toLocaleString('en-IN');
-      if (fReason && reason) fReason.textContent = reason;
-
-      // Mark status Failed in localStorage (preserve shopping bag!)
+      var pending = {};
       try {
-        var orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
-        var found = false;
-        for (var i = 0; i < orders.length; i++) {
-          if (orders[i].order_number === orderData.orderNumber) {
-            orders[i].payment_status = 'Failed';
-            orders[i].status = 'Pending Payment';
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          orders.unshift({
-            id: Date.now(),
-            order_number: orderData.orderNumber,
-            total: orderData.amount,
-            customer_name: orderData.customerName || 'Valued Patron',
-            customer_phone: orderData.customerPhone || '',
-            payment_status: 'Failed',
-            status: 'Pending Payment',
-            payment_method: 'UPI (' + getAppDisplayName(orderData.activeApp) + ')',
-            created_at: new Date().toISOString()
-          });
-        }
-        localStorage.setItem('rj_orders', JSON.stringify(orders));
+        pending = JSON.parse(sessionStorage.getItem('rj_pending_order') || localStorage.getItem('rj_pending_order') || '{}');
       } catch (_) {}
 
-      showView('failed');
-    }
-
-    function switchToCashOnDelivery() {
-      clearPersistedPayAttempt();
-      try { sessionStorage.removeItem('rj_pending_order'); } catch (_) {}
-      try { localStorage.removeItem('rj_pending_order'); } catch (_) {}
+      var finalOrderNumber = orderData.orderNumber;
+      if (orderData.apiOnline) {
+        try {
+          pending.paymentMethod = 'Cash on Delivery';
+          pending.payment_method = 'Cash on Delivery';
+          var res = await fetch('/api/orders', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pending)
+          });
+          if (res.ok) {
+            var data = await res.json();
+            if (data.success && (data.orderNumber || data.orderId)) {
+              finalOrderNumber = data.orderNumber || ('RJFC-' + data.orderId);
+            }
+          }
+        } catch (_) {}
+      }
 
       try {
         var orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
         var found = false;
         for (var i = 0; i < orders.length; i++) {
-          if (orders[i].order_number === orderData.orderNumber) {
+          if (orders[i].order_number === finalOrderNumber) {
             orders[i].payment_method = 'Cash on Delivery';
             orders[i].payment_status = 'Pending';
             orders[i].status = 'Confirmed';
@@ -2061,96 +969,45 @@
           }
         }
         if (!found) {
-          orders.unshift({
-            id: Date.now(),
-            order_number: orderData.orderNumber,
-            total: orderData.amount,
-            customer_name: orderData.customerName || 'Valued Patron',
-            customer_phone: orderData.customerPhone || '',
-            payment_status: 'Pending',
-            status: 'Confirmed',
-            payment_method: 'Cash on Delivery',
-            created_at: new Date().toISOString()
-          });
+          pending.order_number = finalOrderNumber;
+          pending.total = orderData.amount || pending.total || 0;
+          pending.payment_method = 'Cash on Delivery';
+          pending.payment_status = 'Pending';
+          pending.status = 'Confirmed';
+          pending.created_at = pending.created_at || new Date().toISOString();
+          orders.unshift(pending);
         }
         localStorage.setItem('rj_orders', JSON.stringify(orders));
+      } catch (_) {}
 
-        // Clear cart
-        ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart'].forEach(function(k) {
+      try {
+        ['rj_fashion_cart', 'rjfc_cart', 'rjfc_local_cart', 'rjfc_react_cart', 'rj_pending_order'].forEach(function(k) {
           localStorage.removeItem(k);
           sessionStorage.removeItem(k);
         });
-        window.dispatchEvent(new CustomEvent('rjfc_cart_updated', { detail: { items: [] } }));
-        window.dispatchEvent(new Event('storage'));
       } catch (_) {}
 
-      var feedback = document.getElementById('cod-switch-feedback');
-      var codBtn = document.getElementById('btn-switch-cod');
-      if (codBtn) codBtn.disabled = true;
-      if (feedback) {
-        feedback.textContent = '✓ Order #' + orderData.orderNumber + ' switched to Cash on Delivery (COD)! Redirecting to My Orders...';
-        feedback.style.display = 'block';
-      }
-      setTimeout(function() {
-        window.location.href = '/orders.html?order=' + encodeURIComponent(orderData.orderNumber) + '&cod=1';
-      }, 900);
+      var cBadge = document.getElementById('confirmed-status-badge');
+      var cDesc = document.getElementById('confirmed-desc-text');
+      var cOrd = document.getElementById('confirmed-order-number');
+      var cAmt = document.getElementById('confirmed-amount');
+      var cMode = document.getElementById('confirmed-mode');
+      var cBtn = document.getElementById('btn-view-orders');
+      if (cBadge) cBadge.textContent = 'Cash on Delivery Confirmed';
+      if (cDesc) cDesc.innerHTML = 'Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your Cash on Delivery order is confirmed; pay via Cash or courier QR upon arrival.';
+      if (cOrd) cOrd.textContent = finalOrderNumber;
+      if (cAmt) cAmt.textContent = '₹' + Math.round(orderData.amount).toLocaleString('en-IN') + ' (Pay at Delivery)';
+      if (cMode) cMode.textContent = 'Cash on Delivery (COD)';
+      if (cBtn) cBtn.href = '/orders.html?order=' + encodeURIComponent(finalOrderNumber);
+
+      showView('confirmed');
+      triggerCelebrationConfetti();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 6. View Switcher
-    // ─────────────────────────────────────────────────────────────
-    function showView(viewName) {
-      var viewChooser = document.getElementById('view-app-chooser');
-      var viewVerifying = document.getElementById('view-verifying');
-      var viewConfirmed = document.getElementById('view-confirmed');
-      var viewFailed = document.getElementById('view-failed');
-
-      if (viewChooser) viewChooser.style.display = viewName === 'chooser' ? 'block' : 'none';
-      if (viewVerifying) viewVerifying.style.display = viewName === 'verifying' ? 'block' : 'none';
-      if (viewConfirmed) viewConfirmed.style.display = viewName === 'confirmed' ? 'block' : 'none';
-      if (viewFailed) viewFailed.style.display = viewName === 'failed' ? 'block' : 'none';
-
-      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (_) {}
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 7. Dynamic Real Scannable QR Code Generator (qrcode.min.js)
-    // ─────────────────────────────────────────────────────────────
-    function renderDynamicQrCode() {
-      var container = document.getElementById('upi-qr-render-target');
-      if (!container) return;
-
-      var uri = buildUpiUri('generic');
-
-      container.innerHTML = '';
-      if (typeof QRCode !== 'undefined') {
-        try {
-          qrCodeInstance = new QRCode(container, {
-            text: uri,
-            width: 190,
-            height: 190,
-            colorDark: '#111111',
-            colorLight: '#FFFFFF',
-            correctLevel: QRCode.CorrectLevel.M
-          });
-          // Strip auto-applied tooltip title so hover never leaks VPA in tooltip
-          container.removeAttribute('title');
-          var qrImg = container.querySelector('img');
-          if (qrImg) {
-            qrImg.alt = 'Dynamic UPI Payment QR Code';
-          }
-        } catch (e) {
-          console.warn('QR Code generation error:', e);
-        }
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // 8. Celebration Confetti Particle System
-    // ─────────────────────────────────────────────────────────────
+    // Confetti Effect
     function triggerCelebrationConfetti() {
       try {
-        var count = 80;
+        var count = 70;
         var colors = ['#C5A880', '#0F382A', '#D4AF37', '#10B981', '#5F259F'];
         for (var i = 0; i < count; i++) {
           var p = document.createElement('div');
@@ -2177,7 +1034,7 @@
       } catch (_) {}
     }
 
-    // Boot on page load
+    // Boot
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initPaymentSession);
     } else {

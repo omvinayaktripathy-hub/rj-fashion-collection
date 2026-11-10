@@ -28,17 +28,18 @@ function generateOrderNumber() {
   return `RJFC-${year}${month}${day}-${randomSuffix}`;
 }
 
-// GET /api/payment/config — Unified payment configuration
+// GET /api/payment/config — Unified payment configuration (zero credential / raw UPI leakage)
 router.get('/config', (req, res) => {
-  const upiId = process.env.MERCHANT_UPI_ID || 'q070080131@ybl';
   const merchantName = 'RJ FASHION COLLECTION';
   const phone = '7894093586';
+  const isPhonePeLive = phonepe.PHONEPE_ENV === 'production' && !String(phonepe.PHONEPE_MERCHANT_ID || '').startsWith('PGTEST');
+  const razorpayKey = process.env.RAZORPAY_KEY_ID || '';
+  const isRazorpayLive = RAZORPAY_ENABLED && razorpayKey.startsWith('rzp_live_');
 
   res.json({
     success: true,
     enabled: RAZORPAY_ENABLED,
-    keyId: RAZORPAY_ENABLED ? process.env.RAZORPAY_KEY_ID : null,
-    upiId,
+    keyId: RAZORPAY_ENABLED ? razorpayKey : null,
     merchantName,
     phone,
     stripe: {
@@ -47,19 +48,13 @@ router.get('/config', (req, res) => {
     },
     razorpay: {
       enabled: RAZORPAY_ENABLED,
-      keyId: RAZORPAY_ENABLED ? process.env.RAZORPAY_KEY_ID : null
-    },
-    upi: {
-      upiId,
-      merchantName,
-      phone
+      isLive: isRazorpayLive,
+      keyId: RAZORPAY_ENABLED ? razorpayKey : null
     },
     phonepe: {
       enabled: phonepe.PHONEPE_ENABLED,
-      merchantId: phonepe.PHONEPE_MERCHANT_ID,
+      isLive: isPhonePeLive,
       merchantName: phonepe.MERCHANT_DISPLAY_NAME,
-      upiId: phonepe.MERCHANT_UPI_ID,
-      terminalId: phonepe.MERCHANT_TERMINAL_ID,
       env: phonepe.PHONEPE_ENV
     }
   });
@@ -564,13 +559,12 @@ router.post('/verify', requireAuth, (req, res) => {
 
 // GET /api/payment/phonepe/config
 router.get('/phonepe/config', (req, res) => {
+  const isLive = phonepe.PHONEPE_ENV === 'production' && !String(phonepe.PHONEPE_MERCHANT_ID || '').startsWith('PGTEST');
   res.json({
     success: true,
     enabled: phonepe.PHONEPE_ENABLED,
-    merchantId: phonepe.PHONEPE_MERCHANT_ID,
+    isLive,
     merchantName: phonepe.MERCHANT_DISPLAY_NAME,
-    upiId: phonepe.MERCHANT_UPI_ID,
-    terminalId: phonepe.MERCHANT_TERMINAL_ID,
     env: phonepe.PHONEPE_ENV
   });
 });
@@ -644,12 +638,22 @@ function finalizePhonePeOrderPaid(order, phonepeData, req) {
 }
 
 // POST /api/payment/phonepe/create-payment
-// Initiates official PhonePe Standard Checkout (PAY_PAGE)
+// Initiates official PhonePe Standard Checkout (PAY_PAGE) or signed UPI_INTENT
 router.post('/phonepe/create-payment', requireAuth, async (req, res) => {
   try {
     const userId = req.session.user.id;
     const clientIp = couponService.extractClientIp(req);
-    const { orderNumber, addressId, address_id, notes = '', coupon, couponCode } = req.body;
+    const {
+      orderNumber,
+      addressId,
+      address_id,
+      notes = '',
+      coupon,
+      couponCode,
+      paymentType = 'PAY_PAGE',
+      targetApp = '',
+      deviceOS = 'ANDROID'
+    } = req.body;
 
     let targetOrder = null;
 
@@ -813,17 +817,26 @@ router.post('/phonepe/create-payment', requireAuth, async (req, res) => {
       amountInPaise,
       redirectUrl,
       callbackUrl,
-      mobileNumber: targetOrder.customer_phone
+      mobileNumber: targetOrder.customer_phone,
+      paymentType,
+      targetApp,
+      deviceOS,
+      redirectMode: 'REDIRECT'
     });
 
-    if (phonepeResponse.success && phonepeResponse.data?.instrumentResponse?.redirectInfo?.url) {
+    const instrumentResp = phonepeResponse?.data?.instrumentResponse;
+    const redirectTarget = instrumentResp?.redirectInfo?.url || null;
+    const intentUrl = instrumentResp?.intentUrl || null;
+
+    if (phonepeResponse.success && (redirectTarget || intentUrl)) {
       return res.json({
         success: true,
         merchantTransactionId,
         orderNumber: targetOrder.order_number,
         amount: targetOrder.total,
         amountInPaise,
-        redirectUrl: phonepeResponse.data.instrumentResponse.redirectInfo.url
+        redirectUrl: redirectTarget,
+        intentUrl
       });
     } else {
       console.error('[PhonePe Initiation Failed]', phonepeResponse);
@@ -836,6 +849,14 @@ router.post('/phonepe/create-payment', requireAuth, async (req, res) => {
     console.error('PhonePe createPayment error:', err);
     res.status(500).json({ success: false, message: 'Server error initiating payment.' });
   }
+});
+
+// ALL /api/payment/phonepe/redirect — Safe POST/GET bridge back to frontend
+router.all('/phonepe/redirect', (req, res) => {
+  const orderNumber = req.query.order_number || req.body?.merchantTransactionId || '';
+  const txn = req.query.phonepe_txn || req.body?.transactionId || '';
+  const target = `/checkout.html?order_number=${encodeURIComponent(orderNumber)}&phonepe_txn=${encodeURIComponent(txn)}`;
+  res.redirect(302, target);
 });
 
 // GET /api/payment/phonepe/status/:orderNumber
