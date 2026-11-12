@@ -217,6 +217,15 @@ service cloud.firestore {
     }
 
     // ===================================================================
+    // 10.1 PRIVATE ADMIN AUTHENTICATOR (TOTP) CONFIGURATION
+    // Strictly restricted to server-verified Super Admins only
+    // ===================================================================
+
+    match /admin_security/{docId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // ===================================================================
     // 11. DEFAULT SECURITY STANCE: DENY ALL BY DEFAULT
     // Any unrecognized path or collection is explicitly denied
     // ===================================================================

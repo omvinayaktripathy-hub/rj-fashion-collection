@@ -458,7 +458,7 @@
               <input type="text" class="admin-otp-digit admin-step1-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-idx="5" autocomplete="off" aria-label="Authenticator digit 6">
             </div>
             <div style="font-size: 0.72rem; color: #94a3b8; text-align: center; line-height: 1.35;">
-              Enter your 6-digit code from Google Authenticator (if enrolled; setup is available inside Settings once signed in).
+              Required: Enter the 6-digit code from Google Authenticator (first-time setup prompts automatically if not yet linked).
             </div>
           </div>
 
@@ -468,7 +468,48 @@
         </form>
 
         <div class="admin-auth-security-strip" style="margin-top: 20px; text-align: center; font-size: 0.72rem; color: #64748b; line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px;">
-          <span>🛡️ 256-Bit SSL • Google Authenticator TOTP MFA • Firebase Admin Verification • © 2026 RJ Fashion Collection</span>
+          <span>🛡️ 256-Bit SSL • Mandatory Google Authenticator TOTP • Firebase Admin Verification • © 2026 RJ Fashion Collection</span>
+        </div>
+      </div>
+
+      <!-- First-Time Mandatory Google Authenticator Enrollment Container (Keeps Dashboard Locked Until Linked) -->
+      <div id="admin-mandatory-setup-container" style="display: none;">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div class="admin-sso-badge" style="margin-bottom: 8px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>LINK GOOGLE AUTHENTICATOR TO CONTINUE</span>
+          </div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.3rem; color: #fff; margin: 6px 0 6px;">Set Up Google Authenticator</h3>
+          <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.45; margin: 0;">
+            Admin access is blocked without Google Authenticator. Add this setup key to your <strong>Google Authenticator</strong> app, then enter the 6-digit code below.
+          </p>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 0.72rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">1. Open Google Authenticator → + → Enter a setup key (Time-based):</div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <code id="admin-mandatory-totp-secret" style="flex: 1; background: #020617; color: #D4AF37; padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; word-break: break-all; user-select: all; border: 1px solid #334155;"></code>
+            <button type="button" onclick="copyMandatoryTotpSecret()" style="background: #334155; border: none; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Copy</button>
+          </div>
+          <a id="admin-mandatory-totp-uri" href="#" class="btn btn-outline btn-block" style="display: block; text-align: center; padding: 8px; font-size: 0.78rem; color: #D4AF37; border-color: rgba(212,175,55,0.45); text-decoration: none;">
+            📲 Open Directly in Authenticator App
+          </a>
+        </div>
+
+        <form onsubmit="completeMandatoryTotpSetup(event)">
+          <label style="color: #cbd5e1; font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 8px; text-align: center;">
+            2. Enter the 6-digit code shown in Google Authenticator:
+          </label>
+          <input type="text" id="admin-mandatory-totp-code" required maxlength="6" inputmode="numeric" pattern="[0-9]{6}" placeholder="000000" autocomplete="one-time-code" style="background: #0f172a; border: 1px solid #D4AF37; color: #fff; width: 100%; padding: 12px; border-radius: 8px; font-size: 1.25rem; font-weight: 700; letter-spacing: 6px; text-align: center; margin-bottom: 14px;">
+          <button type="submit" id="admin-mandatory-verify-btn" class="btn btn-primary btn-block" style="padding: 12px; font-weight: 700; font-size: 0.9rem;">
+            ✓ Verify Authenticator &amp; Enter Admin
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 14px;">
+          <a href="javascript:void(0);" onclick="cancelMandatoryTotpSetup()" style="color: #94a3b8; font-size: 0.8rem; text-decoration: none;">
+            ← Cancel &amp; Return to Login
+          </a>
         </div>
       </div>
 
@@ -1971,9 +2012,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
-  <script src="/firebase-config.js?v=20261112-fix4"></script>
-  <script src="/js/app.js?v=20261112-fix4"></script>
-  <script src="/js/admin.js?v=20261112-fix4"></script>
+  <script src="/firebase-config.js?v=20261112-fix5"></script>
+  <script src="/js/app.js?v=20261112-fix5"></script>
+  <script src="/js/admin.js?v=20261112-fix5"></script>
   <!-- CREATE PROMO CODE MODAL -->
   <div id="promo-modal" class="modal-backdrop">
     <div class="modal-window" style="max-width: 500px;">
