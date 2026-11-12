@@ -533,11 +533,14 @@ async function executePlaceOrder() {
   const paymentMethod = paymentRadio ? paymentRadio.value : 'Cash on Delivery';
   const paymentSubMethod = paymentRadio ? (paymentRadio.getAttribute('data-sub') || '') : '';
   const notes = document.getElementById('order-delivery-notes')?.value.trim() || '';
-  const customerUpiId = document.getElementById('customer-upi-id-input')?.value.trim() || '';
+  const fbUid = (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser)
+    ? firebase.auth().currentUser.uid
+    : ((checkoutUser && checkoutUser.uid) || null);
 
   const orderPayload = {
     addressId: activeAddressData.id || null,
     address_id: activeAddressData.id || null,
+    userId: fbUid,
     customer_name: activeAddressData.name,
     customer_email: (checkoutUser && checkoutUser.email) || 'customer@example.com',
     customer_phone: activeAddressData.phone,
@@ -548,7 +551,6 @@ async function executePlaceOrder() {
     paymentMethod: paymentMethod,
     payment_method: paymentMethod,
     payment_sub_method: paymentSubMethod,
-    customer_upi_id: customerUpiId,
     coupon: couponCodeApplied,
     notes: notes,
     created_at: new Date().toISOString()
@@ -725,20 +727,49 @@ async function handlePhonePeCallback(orderNumber, merchantTxnId) {
     }
     const data = await res.json();
     if (data && data.verified && data.payment_status === 'Paid') {
+      const paymentToken = data.payment_token || data.phonepe_transaction_id || merchantTxnId || '';
+      try {
+        const orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+        let found = false;
+        for (const o of orders) {
+          if (o.order_number === orderNumber) {
+            o.payment_status = 'Paid';
+            o.status = 'Confirmed';
+            o.payment_token = paymentToken;
+            o.phonepe_transaction_id = data.phonepe_transaction_id || paymentToken;
+            o.paid_at = new Date().toISOString();
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          const pending = JSON.parse(sessionStorage.getItem('rj_pending_order') || localStorage.getItem('rj_pending_order') || '{}');
+          if (pending && pending.order_number === orderNumber) {
+            pending.payment_status = 'Paid';
+            pending.status = 'Confirmed';
+            pending.payment_token = paymentToken;
+            pending.phonepe_transaction_id = data.phonepe_transaction_id || paymentToken;
+            pending.paid_at = new Date().toISOString();
+            orders.unshift(pending);
+          }
+        }
+        localStorage.setItem('rj_orders', JSON.stringify(orders));
+      } catch (_) {}
+
       clearUnifiedCart();
       window.history.replaceState({}, document.title, window.location.pathname);
       triggerConfetti(140);
       const modal = document.getElementById('order-success-modal');
       const numEl = document.getElementById('modal-order-number');
       const totalEl = document.getElementById('modal-order-total');
-      if (numEl) numEl.textContent = orderNumber;
+      if (numEl) numEl.textContent = paymentToken ? `${orderNumber} • Token: ${paymentToken}` : orderNumber;
       if (totalEl && currentCartTotal) totalEl.textContent = formatPrice(currentCartTotal);
       if (modal) {
         modal.classList.add('active');
         modal.style.display = 'flex';
       }
       if (typeof showToast === 'function') {
-        showToast('PhonePe payment verified! Your order is confirmed 👑', 'success');
+        showToast('Payment verified & confirmation token updated in your account! 👑', 'success');
       }
       return true;
     }
@@ -803,47 +834,6 @@ function toggleGiftOption(el) {
 function saveGiftMessage(val) {
   sessionStorage.setItem('rj_gift_message', val);
 }
-
-// ─────────────────────────────────────────────────────────────
-// Customer UPI ID Verification (Flipkart / Enterprise Style)
-// ─────────────────────────────────────────────────────────────
-window.validateCustomerUpiInput = function(el) {
-  const val = (el.value || '').trim();
-  const feedback = document.getElementById('customer-upi-feedback');
-  if (!val && feedback) {
-    feedback.style.display = 'none';
-  }
-};
-
-window.verifyCustomerUpi = function(e) {
-  if (e && e.preventDefault) e.preventDefault();
-  if (e && e.stopPropagation) e.stopPropagation();
-  const input = document.getElementById('customer-upi-id-input');
-  const feedback = document.getElementById('customer-upi-feedback');
-  if (!input || !feedback) return;
-  const val = input.value.trim();
-  const upiRegex = /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/;
-
-  if (!val) {
-    feedback.style.display = 'block';
-    feedback.style.color = '#dc2626';
-    feedback.textContent = 'Please enter your UPI ID (e.g. 9876543210@paytm or name@okhdfcbank)';
-    return;
-  }
-
-  if (upiRegex.test(val)) {
-    feedback.style.display = 'block';
-    feedback.style.color = '#059669';
-    feedback.innerHTML = `✓ Valid UPI ID Format (<strong>${escapeHtml(val)}</strong>). Click Pay &amp; Complete Order to proceed.`;
-    if (typeof showToast === 'function') {
-      showToast('UPI ID format verified!', 'success');
-    }
-  } else {
-    feedback.style.display = 'block';
-    feedback.style.color = '#dc2626';
-    feedback.textContent = 'Please enter a valid UPI format with @ handle (e.g. yourname@okhdfcbank)';
-  }
-};
 
 window.executePlaceOrder = executePlaceOrder;
 window.applyPromoCode = applyPromoCode;

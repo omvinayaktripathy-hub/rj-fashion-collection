@@ -197,12 +197,34 @@ async function loadUserOrders(filter = 'all') {
   if (!container) return;
 
   try {
-    let orders = [];
+    const orderMap = new Map();
+    const upsertOrder = (o) => {
+      if (!o) return;
+      const key = String(o.order_number || o.id || '');
+      if (!key) return;
+      const prev = orderMap.get(key) || {};
+      orderMap.set(key, { ...prev, ...o });
+    };
+
     try {
       const local = localStorage.getItem('rj_orders');
       if (local) {
         const parsed = JSON.parse(local);
-        if (Array.isArray(parsed) && parsed.length > 0) orders = parsed;
+        if (Array.isArray(parsed)) parsed.forEach(upsertOrder);
+      }
+    } catch (_) {}
+
+    // Live Firestore orders sync (automatic confirmation token reflection)
+    try {
+      if (typeof firebase !== 'undefined' && firebase.auth && firebase.firestore) {
+        const fbUser = firebase.auth().currentUser;
+        if (fbUser && fbUser.uid) {
+          const snap = await firebase.firestore()
+            .collection('orders')
+            .where('userId', '==', fbUser.uid)
+            .get();
+          snap.forEach(doc => upsertOrder({ id: doc.id, ...doc.data() }));
+        }
       }
     } catch (_) {}
 
@@ -211,16 +233,15 @@ async function loadUserOrders(filter = 'all') {
       const res = await fetch(`${API_BASE}/orders`);
       const data = await res.json();
       if (data.success && Array.isArray(data.orders)) {
-        const existingIds = new Set(orders.map(o => String(o.id || o.order_number)));
-        for (const o of data.orders) {
-          const oId = String(o.id || o.order_number);
-          if (!existingIds.has(oId)) {
-            orders.push(o);
-            existingIds.add(oId);
-          }
-        }
+        data.orders.forEach(upsertOrder);
       }
     } catch (_) {}
+
+    let orders = Array.from(orderMap.values()).sort((a, b) => {
+      const ta = new Date(a.created_at || 0).getTime() || 0;
+      const tb = new Date(b.created_at || 0).getTime() || 0;
+      return tb - ta;
+    });
 
     if (orders.length > 0) {
       currentAccountOrders = orders;
@@ -370,6 +391,7 @@ function renderOrdersList(filter = 'all') {
             <div class="tracking-carrier-meta">
               <span>Carrier: <strong>BlueDart Luxury Express</strong></span>
               <span>Tracking No: <strong>BD-${orderNumber.replace(/[^0-9]/g, '').slice(-8)}</strong></span>
+              ${(order.payment_token || order.phonepe_transaction_id) ? `<span>Payment Token: <strong style="color:#047857;font-family:monospace;">${escapeHtml(order.payment_token || order.phonepe_transaction_id)}</strong></span>` : ''}
             </div>
           </div>
         ` : `

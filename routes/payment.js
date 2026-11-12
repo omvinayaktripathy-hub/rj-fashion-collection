@@ -626,11 +626,16 @@ function finalizePhonePeOrderPaid(order, phonepeData, req) {
 
   transaction();
 
-  // 5. Fire and forget Cloud Firestore sync
+  // 5. Fire and forget Cloud Firestore sync (including verified payment token for automatic account reflection)
   try {
     const updatedOrder = db.prepare('SELECT * FROM orders WHERE id = ?').get(order.id);
     if (updatedOrder) {
-      syncOrderToFirestore(updatedOrder).catch(err => {
+      const paymentToken = phonepeData.transactionId || updatedOrder.phonepe_transaction_id || updatedOrder.phonepe_merchant_transaction_id;
+      syncOrderToFirestore({
+        ...updatedOrder,
+        payment_token: paymentToken,
+        payment_verified_by: 'PhonePe Gateway Webhook'
+      }).catch(err => {
         console.warn('[Firestore] Sync warning after PhonePe payment:', err.message);
       });
     }
@@ -878,12 +883,14 @@ router.get('/phonepe/status/:orderNumber', requireAuth, async (req, res) => {
 
     // 1. Idempotent short-circuit: if already paid, return verified
     if (order.payment_status === 'Paid') {
+      const paymentToken = order.phonepe_transaction_id || order.phonepe_merchant_transaction_id || orderNumber;
       return res.json({
         success: true,
         verified: true,
         payment_status: 'Paid',
         orderNumber,
         phonepe_transaction_id: order.phonepe_transaction_id,
+        payment_token: paymentToken,
         phonepe_payment_mode: order.phonepe_payment_mode
       });
     }
@@ -918,6 +925,7 @@ router.get('/phonepe/status/:orderNumber', requireAuth, async (req, res) => {
         payment_status: 'Paid',
         orderNumber,
         phonepe_transaction_id: statusData.data.transactionId,
+        payment_token: statusData.data.transactionId || order.phonepe_merchant_transaction_id || orderNumber,
         payment_mode: statusData.data.paymentInstrument?.type || 'PHONEPE'
       });
     } else if (statusData.code === 'PAYMENT_PENDING') {
