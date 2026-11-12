@@ -91,16 +91,32 @@ async function initAdmin() {
   // 2. Firebase-only Super Admin session restore (for Firebase Hosting & Google SSO)
   try {
     if (typeof firebase !== 'undefined' && firebase.auth) {
-      const fbUser = await new Promise((resolve) => {
-        const cur = firebase.auth().currentUser;
-        if (cur) return resolve(cur);
-        const timer = setTimeout(() => resolve(null), 2000);
-        const unsub = firebase.auth().onAuthStateChanged(u => {
-          clearTimeout(timer);
-          if (typeof unsub === 'function') unsub();
-          resolve(u || null);
+      let fbUser = null;
+      try {
+        const redirectRes = await firebase.auth().getRedirectResult();
+        if (redirectRes && redirectRes.user) {
+          fbUser = redirectRes.user;
+        }
+      } catch (redirErr) {
+        const errEl = document.getElementById('admin-login-error');
+        if (errEl && redirErr && redirErr.message) {
+          errEl.textContent = redirErr.message;
+          errEl.style.display = 'block';
+        }
+      }
+
+      if (!fbUser) {
+        fbUser = await new Promise((resolve) => {
+          const cur = firebase.auth().currentUser;
+          if (cur) return resolve(cur);
+          const timer = setTimeout(() => resolve(null), 2000);
+          const unsub = firebase.auth().onAuthStateChanged(u => {
+            clearTimeout(timer);
+            if (typeof unsub === 'function') unsub();
+            resolve(u || null);
+          });
         });
-      });
+      }
 
       const fbEmail = (fbUser && fbUser.email ? fbUser.email.toLowerCase().trim() : '');
       const isSuperAdminIdentity = Boolean(
@@ -128,6 +144,13 @@ async function initAdmin() {
         loadAdminProducts();
         startRealtimeSync();
         return;
+      } else if (fbUser && fbUser.email) {
+        const errEl = document.getElementById('admin-login-error');
+        if (errEl) {
+          errEl.textContent = `Signed-in Google account (${fbUser.email}) is not an administrator. Please authenticate with omvinayakwork@gmail.com.`;
+          errEl.style.display = 'block';
+        }
+        try { await firebase.auth().signOut(); } catch (_) {}
       }
     }
   } catch (err) {}
@@ -297,80 +320,85 @@ async function handleAdminLogin(e) {
     return;
   }
 
-  // 1. First attempt verification via Server API
-  try {
-    const res = await fetch(`${API_BASE}/auth/admin-login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-portal': 'true'
-      },
-      body: JSON.stringify({ email, password, require2FA: true })
-    });
+  // 1. First attempt verification via Server API (only when Node backend is running)
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/admin-login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-portal': 'true'
+        },
+        body: JSON.stringify({ email, password, require2FA: true })
+      });
 
-    const data = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}));
 
-    // Account Lockout
-    if (res.status === 429 || data.locked) {
-      if (errEl) {
-        errEl.innerHTML = `<strong>Account Temporarily Locked</strong><br>${escapeHtml(data.message || 'Too many failed login attempts. Please wait 15 minutes.')}`;
-        errEl.style.display = 'block';
+      // Account Lockout
+      if (res.status === 429 || data.locked) {
+        if (errEl) {
+          errEl.innerHTML = `<strong>Account Temporarily Locked</strong><br>${escapeHtml(data.message || 'Too many failed login attempts. Please wait 15 minutes.')}`;
+          errEl.style.display = 'block';
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+        }
+        return;
       }
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+
+      // Step 2: 2-Step Verification Challenge Required (Normal Portal Login)
+      if (res.ok && (data.mfaRequired || data.step === 2)) {
+        window._adminPendingEmail = email;
+        showToast('Step 1 credentials verified! Please authenticate with Google 👑', 'info');
+        const step1 = document.getElementById('admin-step1-container');
+        const step2 = document.getElementById('admin-2fa-container');
+        if (step1) step1.style.display = 'none';
+        if (step2) step2.style.display = 'block';
+
+        const emailDisplay = document.getElementById('admin-2fa-email-display');
+        if (emailDisplay) emailDisplay.textContent = email;
+
+        start2FACountdown(data.expiresIn || 300);
+        initOtpDigitInputs();
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+        }
+        return;
       }
-      return;
+
+      // Direct Login Grant
+      if (res.ok && data.success && data.user?.role === 'admin') {
+        adminUser = data.user;
+        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+        hideAdminLoginScreen();
+        const topbar = document.getElementById('admin-topbar-username');
+        if (topbar) topbar.textContent = adminUser.name;
+        showToast('Administrator access granted! 👑', 'success');
+        setupSidebarCollapseState();
+        loadDashboardStats();
+        loadCategoriesList();
+        loadAdminProducts();
+        startRealtimeSync();
+        return;
+      }
+
+      // Explicit 401 Wrong Password from active server
+      if (res.status === 401) {
+        if (errEl) {
+          errEl.textContent = data.message || 'Invalid administrator credentials.';
+          errEl.style.display = 'block';
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend admin login request note, evaluating Firebase Auth:', err);
     }
-
-    // Step 2: 2-Step Verification Challenge Required (Normal Portal Login)
-    if (res.ok && (data.mfaRequired || data.step === 2)) {
-      window._adminPendingEmail = email;
-      showToast('Step 1 credentials verified! Please authenticate with Google 👑', 'info');
-      const step1 = document.getElementById('admin-step1-container');
-      const step2 = document.getElementById('admin-2fa-container');
-      if (step1) step1.style.display = 'none';
-      if (step2) step2.style.display = 'block';
-
-      const emailDisplay = document.getElementById('admin-2fa-email-display');
-      if (emailDisplay) emailDisplay.textContent = email;
-
-      start2FACountdown(data.expiresIn || 300);
-      initOtpDigitInputs();
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
-      }
-      return;
-    }
-
-    // Direct Login Grant (e.g. non-2FA bypass)
-    if (res.ok && data.success && data.user?.role === 'admin') {
-      adminUser = data.user;
-      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-      hideAdminLoginScreen();
-      const topbar = document.getElementById('admin-topbar-username');
-      if (topbar) topbar.textContent = adminUser.name;
-      showToast('Administrator access granted! 👑', 'success');
-      loadDashboardStats();
-      loadAdminProducts();
-      return;
-    }
-
-    // Explicit 401 Wrong Password from active server
-    if (res.status === 401) {
-      if (errEl) {
-        errEl.textContent = data.message || 'Invalid administrator credentials.';
-        errEl.style.display = 'block';
-      }
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
-      }
-      return;
-    }
-  } catch (err) {
-    console.warn('Backend admin login request note, evaluating client verification:', err);
   }
 
   // 2. Client-Side Verification (Static CDN on Firebase Hosting web.app)
@@ -398,37 +426,68 @@ async function handleAdminLogin(e) {
     return;
   }
 
-  // 3. Fallback: Firebase Authentication SDK Email/Password
+  // 3. Firebase Authentication SDK Email/Password (Unlocks portal directly for Super Admin)
   ensureFirebaseInitialized();
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
       const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
       const user = cred.user;
-      if (user && user.email && user.email.toLowerCase() === 'omvinayakwork@gmail.com') {
-        window._adminPendingEmail = user.email;
-        showToast('Credentials verified via Firebase! Complete Step 2: Google Authentication 👑', 'info');
-        const step1 = document.getElementById('admin-step1-container');
-        const step2 = document.getElementById('admin-2fa-container');
-        if (step1) step1.style.display = 'none';
-        if (step2) step2.style.display = 'block';
+      const userEmail = (user && user.email ? user.email.toLowerCase().trim() : '');
+      const isSuperAdminIdentity = Boolean(
+        user && (userEmail === 'omvinayakwork@gmail.com' || user.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1')
+      );
 
-        const emailDisplay = document.getElementById('admin-2fa-email-display');
-        if (emailDisplay) emailDisplay.textContent = user.email;
-
-        start2FACountdown(300);
-        initOtpDigitInputs();
+      if (isSuperAdminIdentity) {
+        adminUser = {
+          id: 1,
+          name: user.displayName || 'RJ Fashion Admin (Om Vinayak)',
+          email: user.email,
+          role: 'admin',
+          uid: user.uid
+        };
+        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+        hideAdminLoginScreen();
+        const topbar = document.getElementById('admin-topbar-username');
+        if (topbar) topbar.textContent = adminUser.name;
+        showToast('Welcome, Om Vinayak! Firebase Admin Authentication Successful 👑', 'success');
+        setupSidebarCollapseState();
+        loadDashboardStats();
+        loadCategoriesList();
+        loadAdminProducts();
+        startRealtimeSync();
         if (btn) {
           btn.disabled = false;
           btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
         }
         return;
+      } else {
+        try { await firebase.auth().signOut(); } catch (_) {}
       }
-    } catch (_) {}
+    } catch (fbErr) {
+      const code = fbErr && fbErr.code ? fbErr.code : '';
+      let friendly = 'Invalid administrator email or password.';
+      if (code === 'auth/too-many-requests') {
+        friendly = 'Too many failed attempts. Please wait a few minutes or sign in using Google above.';
+      } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
+        friendly = 'Incorrect password or this Google account uses Google Sign-In. Click "Authenticate with Google" above.';
+      } else if (code === 'auth/network-request-failed') {
+        friendly = 'Network connection error reaching Firebase Authentication.';
+      }
+      if (errEl) {
+        errEl.textContent = friendly;
+        errEl.style.display = 'block';
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+      }
+      return;
+    }
   }
 
   // Invalid credentials feedback
   if (errEl) {
-    errEl.textContent = 'Invalid administrator credentials. Please check your email and password.';
+    errEl.textContent = 'Invalid administrator credentials. Please use Authenticate with Google or verify your password.';
     errEl.style.display = 'block';
   }
   if (btn) {
@@ -440,7 +499,7 @@ window.handleAdminLogin = handleAdminLogin;
 
 // Step 2: Google Authentication for Admin Portal
 async function handleAdminGoogle2FA() {
-  const btn = document.getElementById('admin-google-2fa-btn');
+  const btn = document.getElementById('admin-google-auth-btn') || document.getElementById('admin-google-2fa-btn');
   const errEl = document.getElementById('admin-login-error');
   if (errEl) errEl.style.display = 'none';
 
@@ -460,7 +519,17 @@ async function handleAdminGoogle2FA() {
 
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    const result = await firebase.auth().signInWithPopup(provider);
+    let result = null;
+    try {
+      result = await firebase.auth().signInWithPopup(provider);
+    } catch (popupErr) {
+      const code = popupErr && popupErr.code ? popupErr.code : '';
+      if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment' || code === 'auth/cancelled-popup-request') {
+        await firebase.auth().signInWithRedirect(provider);
+        return;
+      }
+      throw popupErr;
+    }
     const user = result.user;
 
     if (!user || !user.email) {
@@ -492,14 +561,16 @@ async function handleAdminGoogle2FA() {
       idToken = await user.getIdToken();
     } catch (_) {}
 
-    // Verify token with backend if server is active (sets HttpOnly cookie)
-    try {
-      await fetch(`${API_BASE}/auth/admin-verify-2fa`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ googleIdToken: idToken })
-      });
-    } catch (_) {}
+    // Verify token with backend only if Node server is active (avoid 404 on static Firebase Hosting)
+    if (!window.isStaticHosting) {
+      try {
+        await fetch(`${API_BASE}/auth/admin-verify-2fa`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ googleIdToken: idToken })
+        });
+      } catch (_) {}
+    }
 
     // Unlock Admin Portal
     adminUser = {
@@ -968,14 +1039,25 @@ async function loadAdminAuditLogs() {
   tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">Loading tamper-evident audit logs...</td></tr>';
 
   try {
-    const res = await fetch('/api/admin/audit-logs?limit=150', {
-      headers: { 'Accept': 'application/json' }
-    });
-    const data = await res.json();
-    if (!data.success || !data.logs || data.logs.length === 0) {
+    let logs = [];
+    if (!window.isStaticHosting) {
+      const res = await fetch('/api/admin/audit-logs?limit=150', {
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.logs)) logs = data.logs;
+    } else if (typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+      const snap = await firebase.firestore().collection('admin_audit_logs').limit(100).get();
+      snap.forEach(d => logs.push({ id: d.id, ...d.data() }));
+      logs.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    }
+
+    if (!logs || logs.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">No admin audit logs recorded yet.</td></tr>';
       return;
     }
+
+    const data = { logs };
 
     tbody.innerHTML = data.logs.map(log => {
       let badgeColor = '#64748b';
@@ -1673,16 +1755,18 @@ async function loadAdminProducts() {
 
   try {
     let prods = null;
-    // 1. Try Express API (Local server)
-    try {
-      const res = await fetch(`${API_BASE}/admin/products?${q.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
-          prods = data.products;
+    // 1. Try Express API (Only when running Node backend)
+    if (!window.isStaticHosting) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/products?${q.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+            prods = data.products;
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
 
     // 2. Try Cloud Firestore (Direct live database on Firebase Hosting)
     if (!prods && typeof firebase !== 'undefined' && firebase.firestore) {
@@ -2719,15 +2803,17 @@ async function loadAdminCustomers() {
     const deletedList = JSON.parse(localStorage.getItem('rj_deleted_customers') || '[]');
 
     let customers = [];
-    try {
-      const res = await fetch(`${API_BASE}/admin/customers`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.customers) && data.customers.length > 0) {
-          customers = data.customers;
+    if (!window.isStaticHosting) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/customers`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.customers) && data.customers.length > 0) {
+            customers = data.customers;
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
 
     // Fallback: If static hosting or API offline, fetch /data/customers.json
     if (!customers || customers.length === 0) {
@@ -2742,8 +2828,8 @@ async function loadAdminCustomers() {
       } catch (_) {}
     }
 
-    // Merge any real customers from orders
-    const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+    // Merge any real customers from unified orders (Cloud Firestore + local)
+    const localOrders = fetchAllOrdersRealtime();
     const customerMap = new Map();
     
     (customers || []).forEach(c => {
@@ -2836,13 +2922,15 @@ async function deleteCustomer(email, id) {
 async function loadCategoriesList() {
   try {
     let cats = null;
-    try {
-      const res = await fetch(`${API_BASE}/admin/categories`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.categories)) cats = data.categories;
-      }
-    } catch (_) {}
+    if (!window.isStaticHosting) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/categories`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.categories)) cats = data.categories;
+        }
+      } catch (_) {}
+    }
 
     if (!cats || cats.length === 0) {
       const savedCats = localStorage.getItem('rj_custom_categories');
@@ -2884,15 +2972,17 @@ async function loadAdminCategories() {
 
   try {
     let cats = null;
-    try {
-      const res = await fetch(`${API_BASE}/admin/categories`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.categories) && data.categories.length > 0) {
-          cats = data.categories;
+    if (!window.isStaticHosting) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/categories`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.categories) && data.categories.length > 0) {
+            cats = data.categories;
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
 
     if (!cats || cats.length === 0) {
       const savedCats = localStorage.getItem('rj_custom_categories');
@@ -3026,15 +3116,17 @@ async function loadAdminBanners() {
 
   try {
     let banners = null;
-    try {
-      const res = await fetch(`${API_BASE}/admin/banners`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.banners) && data.banners.length > 0) {
-          banners = data.banners;
+    if (!window.isStaticHosting) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/banners`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.banners) && data.banners.length > 0) {
+            banners = data.banners;
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
 
     if (!banners || banners.length === 0) {
       const savedBanners = localStorage.getItem('rj_custom_banners');
@@ -4154,16 +4246,18 @@ function loadAdminReports() {
 // 11. Active Store Settings Module (Persistence & Firestore sync)
 // ─────────────────────────────────────────────────────────────
 async function loadAdminSettings() {
-  try {
-    const res = await fetch('/api/admin/settings');
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.settings) {
-        applySettingsToForm(data.settings);
-        return;
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch('/api/admin/settings');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.settings) {
+          applySettingsToForm(data.settings);
+          return;
+        }
       }
-    }
-  } catch (_) {}
+    } catch (_) {}
+  }
 
   // Fallback to localStorage
   const saved = localStorage.getItem('rj_store_settings');
@@ -4175,44 +4269,47 @@ async function loadAdminSettings() {
 }
 
 function applySettingsToForm(s) {
-  if (document.getElementById('set-store-name')) document.getElementById('set-store-name').value = s.store_name || 'RJ Fashion Collection';
-  if (document.getElementById('set-store-phone')) document.getElementById('set-store-phone').value = s.store_phone || '+91 78940 93586';
-  if (document.getElementById('set-store-email')) document.getElementById('set-store-email').value = s.store_email || 'contact@rjfashion.com';
-  if (document.getElementById('set-store-address')) document.getElementById('set-store-address').value = s.store_address || 'Bhubaneswar, Odisha, India';
-  if (document.getElementById('set-store-upi')) document.getElementById('set-store-upi').value = s.upi_id || '7894093586@upi';
-  if (document.getElementById('set-store-whatsapp')) document.getElementById('set-store-whatsapp').value = s.whatsapp_number || '+91 78940 93586';
-  if (document.getElementById('set-shipping-threshold')) document.getElementById('set-shipping-threshold').value = s.free_shipping_threshold || 999;
-  if (document.getElementById('set-shipping-fee')) document.getElementById('set-shipping-fee').value = s.shipping_fee || 99;
-    }
+  const el = (a, b) => document.getElementById(a) || (b ? document.getElementById(b) : null);
+  if (el('set-store-name')) el('set-store-name').value = s.store_name || 'RJ Fashion Collection';
+  if (el('set-store-phone', 'set-support-phone')) el('set-store-phone', 'set-support-phone').value = s.store_phone || '+91 78940 93586';
+  if (el('set-store-email', 'set-support-email')) el('set-store-email', 'set-support-email').value = s.store_email || 'omvinayakwork@gmail.com';
+  if (el('set-store-address')) el('set-store-address').value = s.store_address || 'Bhubaneswar, Odisha, India';
+  if (el('set-store-upi', 'set-upi-id')) el('set-store-upi', 'set-upi-id').value = s.upi_id || 'Q070080131@ybl';
+  if (el('set-store-whatsapp')) el('set-store-whatsapp').value = s.whatsapp_number || '+91 78940 93586';
+  if (el('set-shipping-threshold', 'set-free-shipping')) el('set-shipping-threshold', 'set-free-shipping').value = s.free_shipping_threshold || 999;
+  if (el('set-shipping-fee')) el('set-shipping-fee').value = s.shipping_fee || 99;
+}
 
 async function handleSettingsFormSubmit(e) {
   if (e) e.preventDefault();
+  const val = (a, b, fb) => (document.getElementById(a)?.value || (b ? document.getElementById(b)?.value : '') || fb).toString().trim();
 
   const settingsPayload = {
-    store_name: document.getElementById('set-store-name')?.value?.trim() || 'RJ Fashion Collection',
-    store_phone: document.getElementById('set-store-phone')?.value?.trim() || '+91 78940 93586',
-    store_email: document.getElementById('set-store-email')?.value?.trim() || 'contact@rjfashion.com',
-    store_address: document.getElementById('set-store-address')?.value?.trim() || 'Bhubaneswar, Odisha, India',
-    upi_id: document.getElementById('set-store-upi')?.value?.trim() || '7894093586@upi',
-    whatsapp_number: document.getElementById('set-store-whatsapp')?.value?.trim() || '+91 78940 93586',
-    free_shipping_threshold: Number(document.getElementById('set-shipping-threshold')?.value) || 999,
-    shipping_fee: Number(document.getElementById('set-shipping-fee')?.value) || 99,
-          };
+    store_name: val('set-store-name', null, 'RJ Fashion Collection'),
+    store_phone: val('set-store-phone', 'set-support-phone', '+91 78940 93586'),
+    store_email: val('set-store-email', 'set-support-email', 'omvinayakwork@gmail.com'),
+    store_address: val('set-store-address', null, 'Bhubaneswar, Odisha, India'),
+    upi_id: val('set-store-upi', 'set-upi-id', 'Q070080131@ybl'),
+    whatsapp_number: val('set-store-whatsapp', null, '+91 78940 93586'),
+    free_shipping_threshold: Number(val('set-shipping-threshold', 'set-free-shipping', '999')) || 999,
+    shipping_fee: Number(val('set-shipping-fee', null, '99')) || 99
+  };
 
-  try {
-    const res = await fetch('/api/admin/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settingsPayload)
-    });
-    if (res.ok) {
-      localStorage.setItem('rj_store_settings', JSON.stringify(settingsPayload));
-      showToast('Store settings saved successfully! ⚙️', 'success');
-      return;
-    }
-  } catch (_) {}
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settingsPayload)
+      });
+      if (res.ok) {
+        localStorage.setItem('rj_store_settings', JSON.stringify(settingsPayload));
+        showToast('Store settings saved successfully! ⚙️', 'success');
+        return;
+      }
+    } catch (_) {}
+  }
 
-  // Fallback
   localStorage.setItem('rj_store_settings', JSON.stringify(settingsPayload));
   showToast('Store settings saved locally! ⚙️', 'success');
 }
@@ -4271,17 +4368,19 @@ async function loadAdminPromotions() {
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">Loading promotional campaigns...</td></tr>';
 
-  try {
-    const res = await fetch(`${API_BASE}/admin/promotions`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && Array.isArray(data.promotions)) {
-        currentPromotions = data.promotions;
-        renderPromotionsTable(currentPromotions);
-        return;
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/promotions`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.promotions)) {
+          currentPromotions = data.promotions;
+          renderPromotionsTable(currentPromotions);
+          return;
+        }
       }
-    }
-  } catch (_) {}
+    } catch (_) {}
+  }
 
   // Fallback defaults
   currentPromotions = [

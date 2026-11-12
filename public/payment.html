@@ -673,20 +673,26 @@
     async function checkGatewayConnectivity() {
       var noticeEl = document.getElementById('gateway-status-notice');
       var reasonEl = document.getElementById('gateway-status-reason');
-      try {
-        var res = await fetch('/api/payment/phonepe/config', { credentials: 'include' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        var cfg = await res.json();
-        if (cfg && cfg.success && cfg.enabled) {
-          orderData.apiOnline = true;
-          orderData.isLiveGateway = Boolean(cfg.isLive);
-          if (!cfg.isLive && noticeEl && reasonEl) {
-            noticeEl.style.display = 'block';
-            reasonEl.textContent = 'Gateway backend is running in SANDBOX TEST mode (' + (cfg.env || 'sandbox') + '). Real money payments require approved PhonePe production credentials.';
+      var h = (typeof window !== 'undefined' && window.location) ? window.location.hostname : '';
+      var p = (typeof window !== 'undefined' && window.location) ? window.location.port : '';
+      var isStaticHost = h.endsWith('web.app') || h.endsWith('firebaseapp.com') || window.location.protocol === 'file:' || ((h === '127.0.0.1' || h === 'localhost') && p !== '3000');
+
+      if (!isStaticHost) {
+        try {
+          var res = await fetch('/api/payment/phonepe/config', { credentials: 'include' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          var cfg = await res.json();
+          if (cfg && cfg.success && cfg.enabled) {
+            orderData.apiOnline = true;
+            orderData.isLiveGateway = Boolean(cfg.isLive);
+            if (!cfg.isLive && noticeEl && reasonEl) {
+              noticeEl.style.display = 'block';
+              reasonEl.textContent = 'Gateway backend is running in SANDBOX TEST mode (' + (cfg.env || 'sandbox') + '). Real money payments require approved PhonePe production credentials.';
+            }
+            return;
           }
-          return;
-        }
-      } catch (_) {}
+        } catch (_) {}
+      }
 
       orderData.apiOnline = false;
       orderData.isLiveGateway = false;
