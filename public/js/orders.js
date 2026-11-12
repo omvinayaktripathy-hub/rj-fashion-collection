@@ -11,53 +11,28 @@ async function loadMyOrders() {
 
   let orders = [];
 
-  const orderMap = new Map();
-  const upsertOrder = (o) => {
-    if (!o) return;
-    const key = String(o.order_number || o.id || '');
-    if (!key) return;
-    const prev = orderMap.get(key) || {};
-    orderMap.set(key, { ...prev, ...o });
-  };
-
-  // 1. Load cached local orders first
-  try {
-    const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
-    if (Array.isArray(localOrders)) localOrders.forEach(upsertOrder);
-  } catch (_) {}
-
-  // 2. Merge live Cloud Firestore orders for authenticated Firebase customer (automatic token sync)
-  try {
-    if (typeof firebase !== 'undefined' && firebase.auth && firebase.firestore) {
-      const fbUser = firebase.auth().currentUser;
-      if (fbUser && fbUser.uid) {
-        const snap = await firebase.firestore()
-          .collection('orders')
-          .where('userId', '==', fbUser.uid)
-          .get();
-        snap.forEach((doc) => upsertOrder({ id: doc.id, ...doc.data() }));
-      }
-    }
-  } catch (_) {}
-
-  // 3. Merge server API orders (authoritative backend & webhook updates override cached states)
+  // 1. Try server API
   if (!window.isStaticHosting) {
     try {
       const res = await fetch(`${API_BASE}/orders`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.orders)) {
-          data.orders.forEach(upsertOrder);
-        }
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+        orders = data.orders;
       }
+    }
     } catch (_) {}
   }
 
-  orders = Array.from(orderMap.values()).sort((a, b) => {
-    const ta = new Date(a.created_at || 0).getTime() || 0;
-    const tb = new Date(b.created_at || 0).getTime() || 0;
-    return tb - ta;
-  });
+  // 2. Fallback to localStorage saved orders
+  if (orders.length === 0) {
+    try {
+      const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+      if (Array.isArray(localOrders) && localOrders.length > 0) {
+        orders = localOrders;
+      }
+    } catch (_) {}
+  }
 
   // If no orders found
   if (orders.length === 0) {
@@ -85,8 +60,7 @@ async function loadMyOrders() {
     const items = Array.isArray(order.items) ? order.items : [];
     const shippingAddr = order.shipping_address || order.delivery_address || 'Delivery Address on file';
     const payMethod = order.payment_method || 'Cash on Delivery';
-    const payStatus = order.payment_status || (payMethod === 'Cash on Delivery' ? 'Pay on Delivery' : 'Pending');
-    const paymentToken = order.payment_token || order.phonepe_transaction_id || '';
+    const payStatus = order.payment_status || (payMethod === 'Cash on Delivery' ? 'Pay on Delivery' : 'Pending Verification');
     const orderTotal = Number(order.total) || items.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.quantity) || 1)), 0);
 
     return `
@@ -175,8 +149,7 @@ async function loadMyOrders() {
               <span style="font-weight: 700; color: var(--deliv-text-primary);">📍 Delivery Address:</span> ${shippingAddr}
             </div>
             <div style="font-size: 0.85rem; color: var(--deliv-text-muted); margin-top: 4px;">
-              <span style="font-weight: 700; color: var(--deliv-text-primary);">💳 Payment:</span> ${escapeHtml(payMethod)} (${escapeHtml(payStatus)})
-              ${paymentToken ? `<span style="margin-left: 8px; font-family: monospace; font-size: 0.78rem; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 1px 7px; border-radius: 9999px; font-weight: 700;">Token: ${escapeHtml(paymentToken)}</span>` : ''}
+              <span style="font-weight: 700; color: var(--deliv-text-primary);">💳 Payment:</span> ${payMethod} (${payStatus})
             </div>
           </div>
 

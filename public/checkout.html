@@ -1006,7 +1006,7 @@
                       <span style="font-size: 0.7rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 1px 7px; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">Fast &amp; Free</span>
                     </div>
                     <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin-top: 3px;">
-                      Instant checkout via any UPI App or Enter your UPI ID • Zero Convenience Fee
+                      Open directly in UPI App (GPay, PhonePe, Paytm, BHIM) • Zero Convenience Fee
                     </div>
                   </div>
                 </div>
@@ -1019,31 +1019,48 @@
                 </div>
               </div>
 
-              <!-- Expanded Active UPI Details (Open Directly in UPI App Only) -->
+              <!-- Expanded Active UPI Details (Open & Pay Directly) -->
               <div class="payment-extra-detail" style="display: block;">
                 <div style="display: flex; flex-direction: column; gap: 12px; background: rgba(95, 37, 159, 0.02); border: 1px solid rgba(95, 37, 159, 0.12); border-radius: 10px; padding: 14px;">
                   
-                  <!-- Direct UPI App Launch -->
+                  <!-- Option A: Open Directly in UPI App -->
                   <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <div style="font-size: 1.3rem;">⚡</div>
                     <div style="flex: 1;">
-                      <div style="font-size: 0.88rem; font-weight: 700; color: var(--deliv-text-primary);">
-                        Open directly in UPI App &amp; Pay
+                      <div style="font-size: 0.86rem; font-weight: 700; color: var(--deliv-text-primary);">
+                        Open directly in UPI App &amp; Automatic Confirmation
                       </div>
-                      <div style="font-size: 0.8rem; color: var(--deliv-text-secondary); margin-top: 2px; line-height: 1.45;">
-                        Supports GPay, PhonePe, Paytm, BHIM &amp; all UPI apps. Click <strong>Pay &amp; Complete Order</strong> to open your UPI app directly — once payment reaches the merchant account, your confirmation token updates automatically in your order history.
+                      <div style="font-size: 0.8rem; color: var(--deliv-text-secondary); margin-top: 2px; line-height: 1.4;">
+                        Tap <strong>Pay &amp; Complete Order</strong> to open your UPI app directly (Supports GPay, PhonePe, Paytm, BHIM) or any online payment method. No manual UTR or QR scanning needed — once payment settles, your order confirms automatically in your account.
                       </div>
                     </div>
+                  </div>
+
+                  <!-- Option B: Enter Customer's Personal UPI ID (Flipkart Style) -->
+                  <div style="padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;" onclick="event.stopPropagation()">
+                    <div style="font-size: 0.84rem; font-weight: 700; color: var(--deliv-text-primary); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                      <span>Or Pay by your UPI ID</span>
+                      <span style="font-size: 0.72rem; color: #64748b; font-weight: 500;">(e.g. mobile@upi, name@okhdfcbank)</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <div style="position: relative; flex: 1;">
+                        <input type="text" id="customer-upi-id-input" placeholder="Enter your UPI ID (e.g. 9876543210@paytm)" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; background: #fdfdfe;" oninput="if(window.validateCustomerUpiInput)validateCustomerUpiInput(this)" onclick="event.stopPropagation()">
+                      </div>
+                      <button type="button" id="btn-verify-customer-upi" onclick="if(window.verifyCustomerUpi)verifyCustomerUpi(event)" style="padding: 8px 16px; background: #5f259f; color: #ffffff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+                        Verify
+                      </button>
+                    </div>
+                    <div id="customer-upi-feedback" style="display: none; font-size: 0.76rem; margin-top: 6px; font-weight: 600;"></div>
                   </div>
 
                   <!-- Enterprise Trust & Security Footnote -->
                   <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.76rem; color: #64748b; padding-top: 2px;">
                     <span style="display: inline-flex; align-items: center; gap: 5px;">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                      <strong>100% Safe &amp; Secure</strong> • Direct Merchant Account Settlement
+                      <strong>100% Safe &amp; Secure</strong> • Powered by Official PhonePe Payment Gateway
                     </span>
                     <span style="color: #047857; font-weight: 700; background: #ecfdf5; padding: 2px 8px; border-radius: 4px; border: 1px solid #a7f3d0;">
-                      🔒 Instant Token Sync
+                      🔒 PCI-DSS Certified
                     </span>
                   </div>
 
@@ -1128,7 +1145,7 @@
                       <span style="font-size: 0.7rem; background: #f4f4f5; color: #52525b; border: 1px solid #e4e4e7; padding: 1px 7px; border-radius: 9999px; font-weight: 700; text-transform: uppercase;">Doorstep Inspection</span>
                     </div>
                     <div style="font-size: 0.82rem; color: var(--deliv-text-secondary); margin-top: 3px;">
-                      Pay Cash or UPI on delivery • Zero advance payment required
+                      Pay via Cash or QR at delivery • Zero advance payment required
                     </div>
                   </div>
                 </div>
@@ -1137,7 +1154,7 @@
               <!-- Expanded Active COD State -->
               <div class="payment-extra-detail" style="display: none;">
                 <div style="background: rgba(254, 243, 199, 0.45); border: 1px solid rgba(251, 191, 36, 0.4); border-radius: 8px; padding: 12px 14px; font-size: 0.82rem; color: #78350f; line-height: 1.5;">
-                  <strong>Doorstep Peace of Mind:</strong> Pay securely to the courier partner upon package inspection via Cash or contactless UPI payment at arrival.
+                  <strong>Doorstep Peace of Mind:</strong> Pay securely to the courier partner by cash or digital payment upon package arrival.
                 </div>
               </div>
             </div>
@@ -1329,7 +1346,7 @@
 
   <script src="/firebase-config.js?v=20261109-waf-active"></script>
   <script src="/js/app.js?v=20261109-waf-active"></script>
-  <script src="/js/checkout.js?v=20261112-open-direct-upi"></script>
+  <script src="/js/checkout.js?v=20261110-fix-checkout"></script>
   <script src="/js/mobile-nav.js?v=20261109-waf-active" defer></script>
   <script src="/js/analytics.js" defer></script>
 <script src="/js/shadcn-ui.js?v=20261109-waf-active" defer></script>

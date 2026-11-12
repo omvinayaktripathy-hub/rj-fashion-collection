@@ -367,36 +367,87 @@
         </div>
       </div>
 
-      <!-- VIEW 1: Direct UPI App & All Payment Methods -->
+      <!-- VIEW 1: Application Chooser (Initial State) -->
       <div id="view-app-chooser" class="payment-body">
         
         <div class="section-headline">
-          <span>Open &amp; Pay Directly (All Payment Methods)</span>
-          <span style="font-size: 0.72rem; color: #047857; font-weight: 700;">🔒 Direct Settlement &amp; Auto Token</span>
+          <span>Open Directly in UPI App</span>
+          <span style="font-size: 0.72rem; color: #047857; font-weight: 700;">🔒 Auto-Confirms After Payment</span>
         </div>
 
         <div class="upi-apps-grid">
-          
-          <!-- Primary Hero Action: Open Directly in Any UPI App -->
-          <div id="btn-open-direct-upi" class="upi-app-btn featured-phonepe" onclick="handleOpenDirectlyUpi()" role="button" tabindex="0">
+
+          <!-- Primary Direct UPI App Launcher -->
+          <div class="upi-app-btn featured-phonepe" id="btn-open-direct-upi" onclick="handleSelectUpiApp('upi')" role="button" tabindex="0">
             <div class="upi-app-left">
-              <div class="upi-app-icon-wrap" style="background: #5f259f; color: #ffffff;">
+              <div class="upi-app-icon-wrap" style="background: #4f46e5; color: #ffffff;">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               </div>
               <div>
-                <div class="upi-app-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
-                  <span style="color: #4c1d95;">Open directly in UPI App</span>
-                  <span class="badge-recommended">Instant Pay</span>
+                <div class="upi-app-title">
+                  <span style="color: #4338ca; text-decoration: underline; text-underline-offset: 3px;">Open directly in UPI App</span>
+                  <span class="badge-recommended">Open &amp; Pay</span>
                 </div>
-                <div class="upi-app-desc" style="margin-top: 4px;">
-                  Supports GPay, PhonePe, Paytm, BHIM &amp; all UPI apps • Confirmation token updates automatically in your account after payment
+                <div class="upi-app-desc">Supports GPay, PhonePe, Paytm, BHIM &amp; all UPI apps</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+          
+          <!-- 1. PhonePe -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('phonepe')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #5f259f;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5h-2V13H8v-2h3V9.5h2V11h3v2h-3v3.5z"/></svg>
+              </div>
+              <div>
+                <div class="upi-app-title">
+                  <span>PhonePe</span>
+                  <span class="badge-recommended">Recommended</span>
                 </div>
-                <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px;">
-                  <span style="font-size: 0.65rem; font-weight: 800; background: #5f259f; color: #ffffff; padding: 2px 7px; border-radius: 4px;">PhonePe</span>
-                  <span style="font-size: 0.65rem; font-weight: 700; background: #f4f4f5; color: #27272a; border: 1px solid #e4e4e7; padding: 2px 7px; border-radius: 4px;">GPay</span>
-                  <span style="font-size: 0.65rem; font-weight: 700; background: #f0f9ff; color: #0c4a6e; border: 1px solid #bae6fd; padding: 2px 7px; border-radius: 4px;">Paytm</span>
-                  <span style="font-size: 0.65rem; font-weight: 700; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 2px 7px; border-radius: 4px;">BHIM &amp; All UPI</span>
-                </div>
+                <div class="upi-app-desc">Tap to launch PhonePe app &amp; complete payment</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+          <!-- 2. Google Pay -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('gpay')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #ffffff; border-color: #cbd5e1;">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.04h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.04c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.41 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.28c-.25-.72-.38-1.49-.38-2.28s.13-1.56.38-2.28V6.59H1.24C.45 8.16 0 9.97 0 12c0 2.03.45 3.84 1.24 5.41l4.04-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.59 1.24 6.59l4.04 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/></svg>
+              </div>
+              <div>
+                <div class="upi-app-title">Google Pay (GPay)</div>
+                <div class="upi-app-desc">Tap to launch Google Pay app &amp; complete payment</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+          <!-- 3. Paytm -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('paytm')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #00b9f1;">
+                <span style="font-weight: 900; color: #ffffff; font-size: 0.78rem;">Paytm</span>
+              </div>
+              <div>
+                <div class="upi-app-title">Paytm UPI</div>
+                <div class="upi-app-desc">Tap to launch Paytm app &amp; complete payment</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+          <!-- 4. BHIM / Any UPI App -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('upi')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #f8fafc; border-color: #cbd5e1;">
+                <span style="font-weight: 800; color: #0F382A; font-size: 0.82rem;">UPI</span>
+              </div>
+              <div>
+                <div class="upi-app-title">Any Other UPI App</div>
+                <div class="upi-app-desc">CRED, BHIM, WhatsApp, Amazon Pay, Axis Pay</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
@@ -408,33 +459,33 @@
         <div id="gateway-status-notice" style="display: none; margin-bottom: 18px; padding: 14px 16px; border-radius: 10px; border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.08); font-size: 0.84rem; line-height: 1.5; color: var(--pay-text-primary);">
           <div style="font-weight: 700; margin-bottom: 4px; color: #b45309;">⚠️ Live Online Payment Gateway Server Not Connected Yet</div>
           <div id="gateway-status-reason" style="color: var(--pay-text-secondary); margin-bottom: 10px;">
-            Real-time direct bank settlement &amp; automatic account token updates require your deployed backend API + live PhonePe/Razorpay merchant credentials. We do not simulate fake payments.
+            Real-time UPI app verification requires your live PhonePe PG API credentials &amp; backend server endpoint. We do not simulate fake payments.
           </div>
           <button type="button" onclick="switchPendingOrderToCOD()" style="width: 100%; padding: 10px 14px; background: #0F382A; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
             Complete Order via Cash on Delivery (COD) ➔
           </button>
         </div>
 
-        <!-- Support All Payment Methods: Cards, Net Banking & Wallets -->
+        <!-- Alternative: Cards, Net Banking & All Online Payment Methods -->
         <div style="border-top: 1px solid var(--pay-card-border); padding-top: 18px; margin-top: 10px;">
           <div class="section-headline">
-            <span>Other Supported Payment Methods</span>
+            <span>All Other Online Payment Methods (Cards, Net Banking, Wallets)</span>
           </div>
           <button type="button" onclick="handleOpenPhonePeWebGateway()" style="width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: rgba(0,0,0,0.02); border: 1px solid var(--pay-card-border); border-radius: 10px; cursor: pointer; color: inherit; font-size: 0.88rem; font-weight: 600;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <span>💳</span>
-              <span>Credit / Debit Cards, Net Banking &amp; Wallets</span>
+              <span>Credit / Debit Cards, Net Banking, Wallets &amp; UPI</span>
             </div>
-            <span style="color: #5f259f; font-weight: 700;">Pay Now ➔</span>
+            <span style="color: #5f259f; font-weight: 700;">Open &amp; Pay ➔</span>
           </button>
         </div>
 
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; font-size: 0.78rem; color: var(--pay-text-muted);">
           <span>🔒 256-Bit Bank Encryption</span>
           <span>•</span>
-          <span>Direct Bank Settlement</span>
+          <span>Zero Payment Surcharges</span>
           <span>•</span>
-          <span>Auto Account Token Sync</span>
+          <span>PCI-DSS Certified</span>
         </div>
 
       </div>
@@ -518,10 +569,6 @@
           <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
             <span style="color: var(--pay-text-secondary);">Payment Mode:</span>
             <span id="confirmed-mode">UPI Instant Payment</span>
-          </div>
-          <div id="confirmed-token-row" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <span style="color: var(--pay-text-secondary);">Confirmation Token:</span>
-            <strong id="confirmed-payment-token" style="font-family: monospace; color: #047857;">Auto-Synced</strong>
           </div>
           <div style="display: flex; justify-content: space-between;">
             <span style="color: var(--pay-text-secondary);">Transit SLA:</span>
@@ -660,18 +707,7 @@
       }, 1000);
     }
 
-    async function getOptionalAuthHeaders() {
-      var headers = { 'Content-Type': 'application/json' };
-      try {
-        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-          var token = await firebase.auth().currentUser.getIdToken();
-          if (token) headers['Authorization'] = 'Bearer ' + token;
-        }
-      } catch (_) {}
-      return headers;
-    }
-
-    // 2. Initiate Server-Signed Gateway Intent / All-Method Checkout (Never raw unverified P2P UPI links)
+    // 2. Initiate Server-Signed Gateway Intent / Standard Checkout (Never raw unverified P2P UPI links)
     async function initiateGatewaySession(mode, targetApp) {
       var pending = {};
       try {
@@ -679,18 +715,17 @@
       } catch (_) {}
 
       var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-      var headers = await getOptionalAuthHeaders();
       var res = await fetch('/api/payment/phonepe/create-payment', {
         method: 'POST',
         credentials: 'include',
-        headers: headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderNumber: pending.serverOrderNumber || undefined,
           addressId: pending.addressId || null,
           coupon: pending.coupon || null,
           notes: pending.notes || '',
           paymentType: mode,
-          targetApp: targetApp || 'OPEN_DIRECTLY',
+          targetApp: targetApp || '',
           deviceOS: isIOS ? 'IOS' : 'ANDROID'
         })
       });
@@ -702,13 +737,9 @@
       return await res.json();
     }
 
-    // 3. Open Directly in Installed UPI App (Supports GPay, PhonePe, Paytm, BHIM & All UPI)
-    function handleOpenDirectlyUpi() {
-      return handleSelectUpiApp('open_directly');
-    }
-
+    // 3. User Selects a UPI App (PhonePe, GPay, Paytm, Any UPI)
     async function handleSelectUpiApp(appName) {
-      orderData.activeApp = appName || 'open_directly';
+      orderData.activeApp = appName;
       var appLabel = appName === 'phonepe' ? 'PhonePe' : (appName === 'gpay' ? 'Google Pay' : (appName === 'paytm' ? 'Paytm' : 'UPI'));
       var lblEl = document.getElementById('verify-app-name-display');
       if (lblEl) lblEl.textContent = appLabel;
@@ -720,7 +751,7 @@
 
       try {
         showView('verifying');
-        var data = await initiateGatewaySession('UPI_INTENT', String(appName || 'OPEN_DIRECTLY').toUpperCase());
+        var data = await initiateGatewaySession('UPI_INTENT', appName.toUpperCase());
         if (data.orderNumber) orderData.orderNumber = data.orderNumber;
 
         if (data.intentUrl) {
@@ -789,16 +820,13 @@
 
       var subEl = document.getElementById('verify-status-subtext');
       try {
-        var headers = await getOptionalAuthHeaders();
         var res = await fetch('/api/payment/phonepe/status/' + encodeURIComponent(orderData.orderNumber), {
-          credentials: 'include',
-          headers: headers
+          credentials: 'include'
         });
         var data = await res.json().catch(function() { return {}; });
 
         if (res.ok && data.verified === true && data.payment_status === 'Paid') {
-          var tokenRef = data.payment_token || data.phonepe_transaction_id || '';
-          markOrderAsVerifiedPaid(data.payment_mode || 'UPI Instant Pay', tokenRef);
+          markOrderAsVerifiedPaid(data.payment_mode || ('UPI (' + orderData.activeApp.toUpperCase() + ')'));
           return;
         }
 
@@ -862,11 +890,10 @@
       }
     });
 
-    function markOrderAsVerifiedPaid(paymentModeLabel, paymentToken) {
+    function markOrderAsVerifiedPaid(paymentModeLabel) {
       clearInterval(countdownInterval);
       stopAutoPolling();
 
-      var verifiedToken = paymentToken || '';
       try {
         var orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
         var found = false;
@@ -874,11 +901,7 @@
           if (orders[i].order_number === orderData.orderNumber) {
             orders[i].payment_status = 'Paid';
             orders[i].status = 'Confirmed';
-            orders[i].payment_method = paymentModeLabel || 'UPI Verified';
-            if (verifiedToken) {
-              orders[i].payment_token = verifiedToken;
-              orders[i].phonepe_transaction_id = verifiedToken;
-            }
+            orders[i].payment_method = paymentModeLabel || 'PhonePe Verified';
             orders[i].paid_at = new Date().toISOString();
             found = true;
             break;
@@ -890,11 +913,7 @@
           pending.total = orderData.amount || pending.total || 0;
           pending.payment_status = 'Paid';
           pending.status = 'Confirmed';
-          pending.payment_method = paymentModeLabel || 'UPI Verified';
-          if (verifiedToken) {
-            pending.payment_token = verifiedToken;
-            pending.phonepe_transaction_id = verifiedToken;
-          }
+          pending.payment_method = paymentModeLabel || 'PhonePe Verified';
           pending.paid_at = new Date().toISOString();
           orders.unshift(pending);
         }
@@ -913,14 +932,12 @@
       var cOrd = document.getElementById('confirmed-order-number');
       var cAmt = document.getElementById('confirmed-amount');
       var cMode = document.getElementById('confirmed-mode');
-      var cTok = document.getElementById('confirmed-payment-token');
       var cBtn = document.getElementById('btn-view-orders');
       if (cBadge) cBadge.textContent = 'Payment Verified & Confirmed';
-      if (cDesc) cDesc.innerHTML = 'Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your payment settled directly to the merchant gateway and your confirmation token is reflected in your account.';
+      if (cDesc) cDesc.innerHTML = 'Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your transaction has been verified with the bank gateway and express packing is initiated.';
       if (cOrd) cOrd.textContent = orderData.orderNumber;
       if (cAmt) cAmt.textContent = '₹' + Math.round(orderData.amount).toLocaleString('en-IN');
       if (cMode) cMode.textContent = paymentModeLabel || 'UPI Instant Payment';
-      if (cTok) cTok.textContent = verifiedToken || orderData.orderNumber;
       if (cBtn) cBtn.href = '/orders.html?order=' + encodeURIComponent(orderData.orderNumber);
 
       showView('confirmed');
@@ -992,14 +1009,12 @@
       var cOrd = document.getElementById('confirmed-order-number');
       var cAmt = document.getElementById('confirmed-amount');
       var cMode = document.getElementById('confirmed-mode');
-      var cTokRow = document.getElementById('confirmed-token-row');
       var cBtn = document.getElementById('btn-view-orders');
       if (cBadge) cBadge.textContent = 'Cash on Delivery Confirmed';
-      if (cDesc) cDesc.innerHTML = 'Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your Cash on Delivery order is confirmed; pay via Cash or UPI at delivery.';
+      if (cDesc) cDesc.innerHTML = 'Thank you for shopping with <strong>RJ Fashion Collection</strong>. Your Cash on Delivery order is confirmed; pay upon package arrival.';
       if (cOrd) cOrd.textContent = finalOrderNumber;
       if (cAmt) cAmt.textContent = '₹' + Math.round(orderData.amount).toLocaleString('en-IN') + ' (Pay at Delivery)';
       if (cMode) cMode.textContent = 'Cash on Delivery (COD)';
-      if (cTokRow) cTokRow.style.display = 'none';
       if (cBtn) cBtn.href = '/orders.html?order=' + encodeURIComponent(finalOrderNumber);
 
       showView('confirmed');

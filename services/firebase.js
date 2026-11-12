@@ -176,14 +176,27 @@ async function sendPushNotification(token, title, body, data = {}) {
 // Cloud Sync: Sync Orders to Firestore
 // ─────────────────────────────────────────────────────────────
 async function syncOrderToFirestore(order) {
-  const { db, isReady } = initFirebase();
+  const { db, auth: fbAuth, isReady } = initFirebase();
   if (!isReady || !db) return false;
 
   try {
-    await db.collection('orders').doc(order.order_number).set({
+    let resolvedUserId = order.userId || order.firebase_uid || null;
+    if (!resolvedUserId && fbAuth && order.customer_email) {
+      try {
+        const fbUser = await fbAuth.getUserByEmail(String(order.customer_email).trim());
+        if (fbUser && fbUser.uid) resolvedUserId = fbUser.uid;
+      } catch (_) {}
+    }
+
+    const payload = {
       ...order,
       synced_at: new Date().toISOString()
-    }, { merge: true });
+    };
+    if (resolvedUserId) {
+      payload.userId = resolvedUserId;
+    }
+
+    await db.collection('orders').doc(order.order_number).set(payload, { merge: true });
     console.log(`[Firestore] Synced order #${order.order_number}`);
     return true;
   } catch (err) {
