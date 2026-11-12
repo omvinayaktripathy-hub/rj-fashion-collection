@@ -371,7 +371,7 @@
       <div id="view-app-chooser" class="payment-body">
         
         <div class="section-headline">
-          <span>Open Directly in UPI App</span>
+          <span>1-Click Direct UPI App Launch</span>
           <span style="font-size: 0.72rem; color: #047857; font-weight: 700;">🔒 Auto-Confirms After Payment</span>
         </div>
 
@@ -393,8 +393,22 @@
             </div>
             <div class="upi-app-arrow">➔</div>
           </div>
-          
-          <!-- 1. PhonePe -->
+
+          <!-- 1. Google Pay -->
+          <div class="upi-app-btn" onclick="handleSelectUpiApp('gpay')" role="button" tabindex="0">
+            <div class="upi-app-left">
+              <div class="upi-app-icon-wrap" style="background: #ffffff; border-color: #cbd5e1;">
+                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.04h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.04c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.41 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.28c-.25-.72-.38-1.49-.38-2.28s.13-1.56.38-2.28V6.59H1.24C.45 8.16 0 9.97 0 12c0 2.03.45 3.84 1.24 5.41l4.04-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.59 1.24 6.59l4.04 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/></svg>
+              </div>
+              <div>
+                <div class="upi-app-title">Google Pay</div>
+                <div class="upi-app-desc">Opens GPay app directly with amount pre-filled</div>
+              </div>
+            </div>
+            <div class="upi-app-arrow">➔</div>
+          </div>
+
+          <!-- 2. PhonePe -->
           <div class="upi-app-btn" onclick="handleSelectUpiApp('phonepe')" role="button" tabindex="0">
             <div class="upi-app-left">
               <div class="upi-app-icon-wrap" style="background: #5f259f;">
@@ -403,29 +417,15 @@
               <div>
                 <div class="upi-app-title">
                   <span>PhonePe</span>
-                  <span class="badge-recommended">Recommended</span>
+                  <span class="badge-recommended">Instant</span>
                 </div>
-                <div class="upi-app-desc">Tap to launch PhonePe app &amp; complete payment</div>
+                <div class="upi-app-desc">Opens PhonePe app directly with amount pre-filled</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
           </div>
 
-          <!-- 2. Google Pay -->
-          <div class="upi-app-btn" onclick="handleSelectUpiApp('gpay')" role="button" tabindex="0">
-            <div class="upi-app-left">
-              <div class="upi-app-icon-wrap" style="background: #ffffff; border-color: #cbd5e1;">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.66v3.04h3.88c2.27-2.09 3.665-5.17 3.665-9.14z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.04c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.13C3.26 21.41 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.28c-.25-.72-.38-1.49-.38-2.28s.13-1.56.38-2.28V6.59H1.24C.45 8.16 0 9.97 0 12c0 2.03.45 3.84 1.24 5.41l4.04-3.13z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.59 1.24 6.59l4.04 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/></svg>
-              </div>
-              <div>
-                <div class="upi-app-title">Google Pay (GPay)</div>
-                <div class="upi-app-desc">Tap to launch Google Pay app &amp; complete payment</div>
-              </div>
-            </div>
-            <div class="upi-app-arrow">➔</div>
-          </div>
-
-          <!-- 3. Paytm -->
+          <!-- 3. Paytm UPI -->
           <div class="upi-app-btn" onclick="handleSelectUpiApp('paytm')" role="button" tabindex="0">
             <div class="upi-app-left">
               <div class="upi-app-icon-wrap" style="background: #00b9f1;">
@@ -433,21 +433,21 @@
               </div>
               <div>
                 <div class="upi-app-title">Paytm UPI</div>
-                <div class="upi-app-desc">Tap to launch Paytm app &amp; complete payment</div>
+                <div class="upi-app-desc">Opens Paytm app directly with amount pre-filled</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
           </div>
 
-          <!-- 4. BHIM / Any UPI App -->
+          <!-- 4. Any UPI App -->
           <div class="upi-app-btn" onclick="handleSelectUpiApp('upi')" role="button" tabindex="0">
             <div class="upi-app-left">
-              <div class="upi-app-icon-wrap" style="background: #f8fafc; border-color: #cbd5e1;">
-                <span style="font-weight: 800; color: #0F382A; font-size: 0.82rem;">UPI</span>
+              <div class="upi-app-icon-wrap" style="background: #ecfdf5; border-color: #a7f3d0;">
+                <span style="font-weight: 800; color: #047857; font-size: 0.82rem;">UPI</span>
               </div>
               <div>
-                <div class="upi-app-title">Any Other UPI App</div>
-                <div class="upi-app-desc">CRED, BHIM, WhatsApp, Amazon Pay, Axis Pay</div>
+                <div class="upi-app-title">Any UPI App</div>
+                <div class="upi-app-desc">Universal chooser: BHIM, CRED, Amazon Pay, or any bank UPI app</div>
               </div>
             </div>
             <div class="upi-app-arrow">➔</div>
@@ -455,11 +455,11 @@
 
         </div>
 
-        <!-- Live Gateway Connectivity Notice (Shown automatically if /api backend is offline/unconfigured) -->
+        <!-- Live Gateway / Firebase Connectivity Notice -->
         <div id="gateway-status-notice" style="display: none; margin-bottom: 18px; padding: 14px 16px; border-radius: 10px; border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.08); font-size: 0.84rem; line-height: 1.5; color: var(--pay-text-primary);">
-          <div style="font-weight: 700; margin-bottom: 4px; color: #b45309;">⚠️ Live Online Payment Gateway Server Not Connected Yet</div>
+          <div style="font-weight: 700; margin-bottom: 4px; color: #b45309;">Direct UPI App Launch (Firebase Live Sync Mode)</div>
           <div id="gateway-status-reason" style="color: var(--pay-text-secondary); margin-bottom: 10px;">
-            Real-time UPI app verification requires your live PhonePe PG API credentials &amp; backend server endpoint. We do not simulate fake payments.
+            Tap Google Pay, PhonePe, Paytm, or Any UPI App above to open directly. Confirmation updates automatically in real time via Firebase once payment verification completes.
           </div>
           <button type="button" onclick="switchPendingOrderToCOD()" style="width: 100%; padding: 10px 14px; background: #0F382A; color: #ffffff; border: none; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
             Complete Order via Cash on Delivery (COD) ➔
@@ -591,8 +591,13 @@
 
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="/firebase-config.js?v=20261112-fb"></script>
   <script>
     // State
+    var DEFAULT_STORE_VPA = 'Q070080131@ybl';
     var orderData = {
       orderNumber: '',
       amount: 0,
@@ -607,6 +612,7 @@
     var sessionSeconds = 600; // 10 minutes
     var countdownInterval = null;
     var autoPollInterval = null;
+    var firestoreUnsub = null;
     var isCheckingStatus = false;
 
     // 1. Initialize Order Parameters & Probe Live Gateway Health
@@ -737,35 +743,146 @@
       return await res.json();
     }
 
-    // 3. User Selects a UPI App (PhonePe, GPay, Paytm, Any UPI)
+    async function resolveStoreUpiVpa() {
+      return DEFAULT_STORE_VPA;
+    }
+
+    function buildUpiDeepLink(appName, vpa, orderNumber, amount) {
+      var safeAmt = (Number(amount) > 0 ? Number(amount) : 1).toFixed(2);
+      var query = [
+        'pa=' + encodeURIComponent(vpa),
+        'pn=' + encodeURIComponent('RJ Fashion Collection'),
+        'tr=' + encodeURIComponent(orderNumber),
+        'tn=' + encodeURIComponent('Order ' + orderNumber),
+        'am=' + encodeURIComponent(safeAmt),
+        'cu=INR'
+      ].join('&');
+
+      if (appName === 'gpay') return 'tez://upi/pay?' + query;
+      if (appName === 'phonepe') return 'phonepe://pay?' + query;
+      if (appName === 'paytm') return 'paytmmp://pay?' + query;
+      return 'upi://pay?' + query;
+    }
+
+    async function ensurePendingOrderInFirestore() {
+      try {
+        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) return;
+        var fbUser = firebase.auth().currentUser;
+        if (!fbUser || !fbUser.uid || !orderData.orderNumber) return;
+
+        var docRef = firebase.firestore().collection('orders').doc(orderData.orderNumber);
+        var existing = await docRef.get();
+        if (existing && existing.exists) return;
+
+        var pending = {};
+        try {
+          pending = JSON.parse(sessionStorage.getItem('rj_pending_order') || localStorage.getItem('rj_pending_order') || '{}');
+        } catch (_) {}
+
+        var rawItems = Array.isArray(pending.items) && pending.items.length > 0
+          ? pending.items
+          : [{ product_name: 'RJ Fashion Order', quantity: 1, price: Number(orderData.amount) || 0, total: Number(orderData.amount) || 0 }];
+
+        await docRef.set({
+          order_number: String(orderData.orderNumber),
+          userId: fbUser.uid,
+          customer_name: String(pending.customer_name || orderData.customerName || fbUser.displayName || 'Customer'),
+          customer_email: String(pending.customer_email || fbUser.email || ''),
+          customer_phone: String(pending.customer_phone || orderData.customerPhone || ''),
+          delivery_address: String(pending.delivery_address || pending.shipping_address || ''),
+          shipping_address: String(pending.shipping_address || pending.delivery_address || ''),
+          items: rawItems,
+          total: Number(orderData.amount || pending.total || 0),
+          payment_method: String(pending.payment_method || 'UPI Direct Pay'),
+          payment_status: 'Pending',
+          status: 'Pending',
+          created_at: pending.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn('[Firestore] Pending order sync notice:', err && err.message ? err.message : err);
+      }
+    }
+
+    function startFirestoreOrderListener() {
+      stopFirestoreOrderListener();
+      try {
+        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) return;
+        if (!orderData.orderNumber) return;
+
+        var attach = function(fbUser) {
+          if (!fbUser || firestoreUnsub) return;
+          firestoreUnsub = firebase.firestore().collection('orders').doc(orderData.orderNumber)
+            .onSnapshot(function(snap) {
+              if (!snap || !snap.exists) return;
+              var d = snap.data() || {};
+              if (d.payment_status === 'Paid') {
+                markOrderAsVerifiedPaid(d.payment_method || ('UPI (' + orderData.activeApp.toUpperCase() + ')'));
+              } else if (d.payment_status === 'Failed' || String(d.status || '').toLowerCase() === 'cancelled') {
+                showFailedScreen('Payment could not be verified or order was cancelled.');
+              }
+            }, function() {});
+        };
+
+        var cur = firebase.auth().currentUser;
+        if (cur) {
+          attach(cur);
+        } else {
+          firebase.auth().onAuthStateChanged(function(u) { if (u) attach(u); });
+        }
+      } catch (_) {}
+    }
+
+    function stopFirestoreOrderListener() {
+      if (typeof firestoreUnsub === 'function') {
+        try { firestoreUnsub(); } catch (_) {}
+      }
+      firestoreUnsub = null;
+    }
+
+    // 3. User Selects a UPI App (Google Pay, PhonePe, Paytm, Any UPI)
     async function handleSelectUpiApp(appName) {
       orderData.activeApp = appName;
       var appLabel = appName === 'phonepe' ? 'PhonePe' : (appName === 'gpay' ? 'Google Pay' : (appName === 'paytm' ? 'Paytm' : 'UPI'));
       var lblEl = document.getElementById('verify-app-name-display');
       if (lblEl) lblEl.textContent = appLabel;
 
-      if (!orderData.apiOnline) {
-        showFailedScreen('Live payment gateway backend is not deployed yet on this hosting environment (API endpoints return 404). Complete your order via Cash on Delivery or deploy the backend API with approved merchant keys.');
+      if (orderData.apiOnline) {
+        try {
+          showView('verifying');
+          var data = await initiateGatewaySession('UPI_INTENT', appName.toUpperCase());
+          if (data.orderNumber) orderData.orderNumber = data.orderNumber;
+
+          if (data.intentUrl) {
+            orderData.lastIntentUrl = data.intentUrl;
+            window.location.href = data.intentUrl;
+            startAutoPolling();
+          } else if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+          } else {
+            throw new Error('Gateway did not return an app launch URL.');
+          }
+        } catch (err) {
+          showFailedScreen(err.message || 'Unable to connect to payment gateway. Please try again or use Cash on Delivery.');
+        }
         return;
       }
 
-      try {
-        showView('verifying');
-        var data = await initiateGatewaySession('UPI_INTENT', appName.toUpperCase());
-        if (data.orderNumber) orderData.orderNumber = data.orderNumber;
+      // Firebase-Only Direct UPI App Launch Mode
+      showView('verifying');
+      await ensurePendingOrderInFirestore();
+      var vpa = await resolveStoreUpiVpa();
+      var deepLinkUrl = buildUpiDeepLink(appName, vpa, orderData.orderNumber, orderData.amount);
+      orderData.lastIntentUrl = deepLinkUrl;
 
-        if (data.intentUrl) {
-          orderData.lastIntentUrl = data.intentUrl;
-          window.location.href = data.intentUrl;
-          startAutoPolling();
-        } else if (data.redirectUrl) {
-          window.location.href = data.redirectUrl;
-        } else {
-          throw new Error('Gateway did not return an app launch URL.');
-        }
-      } catch (err) {
-        showFailedScreen(err.message || 'Unable to connect to payment gateway. Please try again or use Cash on Delivery.');
+      var subEl = document.getElementById('verify-status-subtext');
+      if (subEl) {
+        subEl.innerHTML = 'Opening <strong>' + appLabel + '</strong> for <strong>₹' + Math.round(orderData.amount).toLocaleString('en-IN') + '</strong>. Once your payment is received and verified in Firebase, this page and your <strong>My Orders</strong> account will automatically confirm.';
       }
+
+      startFirestoreOrderListener();
+      startAutoPolling();
+      window.location.href = deepLinkUrl;
     }
 
     function relaunchSelectedUpiApp() {
@@ -778,7 +895,7 @@
 
     async function handleOpenPhonePeWebGateway() {
       if (!orderData.apiOnline) {
-        showFailedScreen('Live PhonePe Web Gateway requires an active backend API server and approved merchant API keys. Use Cash on Delivery below or configure backend hosting.');
+        showFailedScreen('Cards, Net Banking & Wallets checkout requires a live PhonePe PG backend API server. For Firebase-only UPI direct pay, choose Google Pay, PhonePe, Paytm, or Any UPI App above, or switch to Cash on Delivery.');
         return;
       }
       try {
@@ -808,38 +925,58 @@
 
     function showFailedScreen(reason) {
       stopAutoPolling();
+      stopFirestoreOrderListener();
       var reasonEl = document.getElementById('failed-reason-text');
       if (reasonEl && reason) reasonEl.textContent = reason;
       showView('failed');
     }
 
-    // 5. Real Server-Authoritative Verification & Auto-Detection Polling
+    // 5. Real Server-Authoritative / Firestore Verification Polling
     async function checkRealPaymentStatus() {
-      if (isCheckingStatus || !orderData.orderNumber || !orderData.apiOnline) return;
+      if (isCheckingStatus || !orderData.orderNumber) return;
       isCheckingStatus = true;
 
       var subEl = document.getElementById('verify-status-subtext');
       try {
-        var res = await fetch('/api/payment/phonepe/status/' + encodeURIComponent(orderData.orderNumber), {
-          credentials: 'include'
-        });
-        var data = await res.json().catch(function() { return {}; });
+        if (orderData.apiOnline) {
+          var res = await fetch('/api/payment/phonepe/status/' + encodeURIComponent(orderData.orderNumber), {
+            credentials: 'include'
+          });
+          var data = await res.json().catch(function() { return {}; });
 
-        if (res.ok && data.verified === true && data.payment_status === 'Paid') {
-          markOrderAsVerifiedPaid(data.payment_mode || ('UPI (' + orderData.activeApp.toUpperCase() + ')'));
+          if (res.ok && data.verified === true && data.payment_status === 'Paid') {
+            markOrderAsVerifiedPaid(data.payment_mode || ('UPI (' + orderData.activeApp.toUpperCase() + ')'));
+            return;
+          }
+
+          if (data && data.payment_status === 'Failed') {
+            showFailedScreen(data.message || 'Payment failed or was cancelled in your UPI app.');
+            return;
+          }
+
+          if (subEl) {
+            subEl.textContent = data.message || 'Waiting for confirmation from PhonePe & bank servers...';
+          }
           return;
         }
 
-        if (data && data.payment_status === 'Failed') {
-          showFailedScreen(data.message || 'Payment failed or was cancelled in your UPI app.');
-          return;
-        }
-
-        if (subEl) {
-          subEl.textContent = data.message || 'Waiting for confirmation from PhonePe & bank servers...';
+        // Firebase-only mode: poll Cloud Firestore order document safely
+        if (typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+          var snap = await firebase.firestore().collection('orders').doc(orderData.orderNumber).get();
+          if (snap && snap.exists) {
+            var docData = snap.data() || {};
+            if (docData.payment_status === 'Paid') {
+              markOrderAsVerifiedPaid(docData.payment_method || ('UPI (' + orderData.activeApp.toUpperCase() + ')'));
+              return;
+            }
+            if (docData.payment_status === 'Failed' || String(docData.status || '').toLowerCase() === 'cancelled') {
+              showFailedScreen('Payment was declined or order was cancelled.');
+              return;
+            }
+          }
         }
       } catch (err) {
-        if (subEl) subEl.textContent = 'Checking gateway connectivity...';
+        if (subEl) subEl.textContent = 'Checking payment confirmation status...';
       } finally {
         isCheckingStatus = false;
       }
@@ -893,6 +1030,7 @@
     function markOrderAsVerifiedPaid(paymentModeLabel) {
       clearInterval(countdownInterval);
       stopAutoPolling();
+      stopFirestoreOrderListener();
 
       try {
         var orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');

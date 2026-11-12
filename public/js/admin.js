@@ -88,7 +88,51 @@ async function initAdmin() {
     }
   } catch (err) {}
 
-  // 2. Strict Display Check: only show admin if session confirmed by HttpOnly cookie /api/me
+  // 2. Firebase-only Super Admin session restore (for Firebase Hosting & Google SSO)
+  try {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      const fbUser = await new Promise((resolve) => {
+        const cur = firebase.auth().currentUser;
+        if (cur) return resolve(cur);
+        const timer = setTimeout(() => resolve(null), 2000);
+        const unsub = firebase.auth().onAuthStateChanged(u => {
+          clearTimeout(timer);
+          if (typeof unsub === 'function') unsub();
+          resolve(u || null);
+        });
+      });
+
+      const fbEmail = (fbUser && fbUser.email ? fbUser.email.toLowerCase().trim() : '');
+      const isSuperAdminIdentity = Boolean(
+        fbUser && (
+          fbEmail === 'omvinayakwork@gmail.com' ||
+          fbUser.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1'
+        )
+      );
+
+      if (isSuperAdminIdentity) {
+        adminUser = {
+          id: 1,
+          name: fbUser.displayName || 'RJ Fashion Admin (Om Vinayak)',
+          email: fbUser.email,
+          role: 'admin',
+          uid: fbUser.uid
+        };
+        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+        hideAdminLoginScreen();
+        const topbarEl = document.getElementById('admin-topbar-username');
+        if (topbarEl) topbarEl.textContent = adminUser.name;
+        setupSidebarCollapseState();
+        loadDashboardStats();
+        loadCategoriesList();
+        loadAdminProducts();
+        startRealtimeSync();
+        return;
+      }
+    }
+  } catch (err) {}
+
+  // 3. Otherwise require interactive sign-in
   showAdminLoginScreen();
 }
 
@@ -474,8 +518,11 @@ async function handleAdminGoogle2FA() {
     if (topbar) topbar.textContent = adminUser.name;
 
     showToast('Welcome, Om Vinayak! Google Two-Step Verification Successful 👑', 'success');
+    setupSidebarCollapseState();
     loadDashboardStats();
+    loadCategoriesList();
     loadAdminProducts();
+    startRealtimeSync();
 
   } catch (err) {
     if (errEl) {
@@ -1073,8 +1120,23 @@ function fetchAllOrdersRealtime() {
     }
   } catch (_) {}
 
-  // 3. Initial authentic seed royal orders if store is brand new
-  if (orders.length === 0) {
+  // 3. Merge live Cloud Firestore orders cleanly (if loaded)
+  if (Array.isArray(window._firestoreOrders) && window._firestoreOrders.length > 0) {
+    const seedIds = new Set(['RJ-2026-9841', 'RJ-2026-9842', 'RJ-2026-9843', 'RJ-2026-9844']);
+    const mergedMap = new Map();
+    orders.forEach(o => {
+      if (o && o.order_number && !seedIds.has(o.order_number)) {
+        mergedMap.set(o.order_number, o);
+      }
+    });
+    window._firestoreOrders.forEach(o => {
+      if (o && o.order_number) {
+        const prev = mergedMap.get(o.order_number) || {};
+        mergedMap.set(o.order_number, { ...prev, ...o, id: o.id || o.order_number });
+      }
+    });
+    orders = Array.from(mergedMap.values()).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+  } else if (orders.length === 0 && !window._firestoreOrdersLoaded) {
     const seed = [
       {
         id: 1727400001,
@@ -1147,9 +1209,46 @@ function fetchAllOrdersRealtime() {
   return orders;
 }
 
-// Real-Time Heartbeat & Cross-Tab Storage Listener
+// Real-Time Heartbeat, Cross-Tab Storage & Firebase Firestore Snapshot Listener
+let firestoreAdminOrdersUnsub = null;
 function startRealtimeSync() {
   if (realtimeSyncInterval) clearInterval(realtimeSyncInterval);
+
+  if (typeof firestoreAdminOrdersUnsub === 'function') {
+    try { firestoreAdminOrdersUnsub(); } catch (_) {}
+    firestoreAdminOrdersUnsub = null;
+  }
+
+  // Attach live Cloud Firestore orders listener for Super Admin
+  try {
+    if (typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+      firestoreAdminOrdersUnsub = firebase.firestore().collection('orders').onSnapshot(snap => {
+        const list = [];
+        snap.forEach(doc => list.push({ id: doc.id, firestoreId: doc.id, ...doc.data() }));
+        list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+        const prevCount = Array.isArray(window._firestoreOrders) ? window._firestoreOrders.length : 0;
+        const wasLoaded = Boolean(window._firestoreOrdersLoaded);
+        window._firestoreOrders = list;
+        window._firestoreOrdersLoaded = true;
+
+        if (wasLoaded && list.length > prevCount && list[0]) {
+          playRoyalChime();
+          showToast(`🔔 New Order Received! #${list[0].order_number} by ${list[0].customer_name || 'Customer'} (${formatPrice(list[0].total)})`, 'success');
+        }
+
+        lastKnownOrderCount = list.length;
+        lastKnownLatestOrderId = list[0]?.order_number || list[0]?.id || null;
+        loadDashboardStats();
+        if (document.getElementById('pane-orders')?.style.display !== 'none') {
+          loadAdminOrders();
+        }
+        updateSyncStatusIndicator();
+      }, err => {
+        console.warn('[Firestore Admin Orders Listener]', err && err.message ? err.message : err);
+      });
+    }
+  } catch (_) {}
 
   // Storage listener for instant cross-tab sync
   window.addEventListener('storage', (e) => {
@@ -2289,20 +2388,36 @@ async function loadAdminOrders() {
   tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:#64748b;">Loading customer orders...</td></tr>`;
 
   try {
-    // 1. Fetch from unified real-time store
+    // 1. Pull live Cloud Firestore orders first if signed into Firebase Auth
+    if (!window._firestoreOrdersLoaded && typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+      try {
+        const snap = await firebase.firestore().collection('orders').get();
+        const fsOrders = [];
+        snap.forEach(doc => fsOrders.push({ id: doc.id, firestoreId: doc.id, ...doc.data() }));
+        fsOrders.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        window._firestoreOrders = fsOrders;
+        window._firestoreOrdersLoaded = true;
+      } catch (fsErr) {
+        console.warn('[Firestore Admin Orders]', fsErr && fsErr.message ? fsErr.message : fsErr);
+      }
+    }
+
+    // 2. Fetch from unified real-time store (Firestore + non-seed local)
     let ordersList = fetchAllOrdersRealtime();
 
-    // 2. Also try API if available
-    try {
-      const url = statusFilter !== 'All' ? `${API_BASE}/admin/orders?status=${encodeURIComponent(statusFilter)}` : `${API_BASE}/admin/orders`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
-          ordersList = data.orders;
+    // 3. Also try API if available
+    if (!window.isStaticHosting) {
+      try {
+        const url = statusFilter !== 'All' ? `${API_BASE}/admin/orders?status=${encodeURIComponent(statusFilter)}` : `${API_BASE}/admin/orders`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+            ordersList = data.orders;
+          }
         }
-      }
-    } catch (_) {}
+      } catch (_) {}
+    }
 
     // Apply Client-Side Search Filter
     if (searchTerm) {
@@ -2343,6 +2458,18 @@ async function loadAdminOrders() {
       const waMsg = encodeURIComponent(`Hello ${o.customer_name}! Thank you for shopping with RJ Fashion Collection. We are updating you regarding your order #${o.order_number} (Status: ${o.status}). Total: ${formatPrice(o.total)}. Let us know if you need assistance!`);
       const waUrl = cleanPhone ? `https://wa.me/91${cleanPhone.slice(-10)}?text=${waMsg}` : `https://wa.me/917894093586?text=${waMsg}`;
 
+      const payMethod = o.payment_method || 'Online';
+      const payStatus = o.payment_status || (payMethod.toLowerCase().includes('cash') ? 'Pay on Delivery' : 'Pending');
+      const isPaid = payStatus === 'Paid';
+      const isCancelled = (o.status || '').toLowerCase() === 'cancelled';
+      const isCod = payMethod.toLowerCase().includes('cash');
+      const orderRefId = o.order_number || String(o.id || '');
+      const payBadgeHtml = isPaid
+        ? `<span style="display:inline-block; margin-top:3px; padding:2px 7px; font-size:0.7rem; font-weight:700; border-radius:999px; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">✓ Paid</span>`
+        : (isCod
+          ? `<span style="display:inline-block; margin-top:3px; padding:2px 7px; font-size:0.7rem; font-weight:700; border-radius:999px; background:#f1f5f9; color:#475569;">COD</span>`
+          : `<span style="display:inline-block; margin-top:3px; padding:2px 7px; font-size:0.7rem; font-weight:700; border-radius:999px; background:#fef3c7; color:#b45309; border:1px solid #fde68a;">⏳ Pending</span>`);
+
       return `
         <tr>
           <td style="font-weight:700; color:var(--admin-primary);">${safeOrderNum}</td>
@@ -2360,16 +2487,24 @@ async function loadAdminOrders() {
           </td>
           <td>${o.created_at ? escapeHtml(new Date(o.created_at).toLocaleDateString()) : 'Today'}</td>
           <td style="font-weight:700; color:#1e293b;">${formatPrice(o.total)}</td>
-          <td><span style="font-size:0.78rem; font-weight:600; color:#475569;">${escapeHtml(o.payment_method || 'Online')}</span></td>
           <td>
-            <select onchange="updateOrderStatus('${escapeHtml(String(o.id))}', this.value)" style="padding:5px 8px; font-size:0.8rem; border-radius:6px; border:1px solid #cbd5e1; font-weight:700; background:#fff; cursor:pointer;">
+            <div style="font-size:0.78rem; font-weight:600; color:#475569;">${escapeHtml(payMethod)}</div>
+            <div>${payBadgeHtml}</div>
+            ${(!isPaid && !isCod && !isCancelled && orderRefId) ? `
+              <button onclick="confirmOrderPaymentReceived('${escapeHtml(orderRefId)}')" style="margin-top:5px; padding:4px 8px; font-size:0.72rem; font-weight:700; border:none; border-radius:5px; background:#047857; color:#ffffff; cursor:pointer;" title="Mark UPI/Online payment as received in your bank account & confirm customer order automatically">
+                ✓ Confirm Payment
+              </button>
+            ` : ''}
+          </td>
+          <td>
+            <select onchange="updateOrderStatus('${escapeHtml(String(o.order_number || o.id))}', this.value)" style="padding:5px 8px; font-size:0.8rem; border-radius:6px; border:1px solid #cbd5e1; font-weight:700; background:#fff; cursor:pointer;">
               ${statuses.map(st => `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`).join('')}
             </select>
           </td>
           <td>
             <div style="display:flex; gap:6px;">
-              <button onclick="viewOrderModal('${escapeHtml(String(o.id))}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;" title="View ordered items">View</button>
-              <button onclick="openPrintOrderInvoice('${escapeHtml(String(o.id))}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Print Packing Slip / Branded Invoice">🖨️ Invoice</button>
+              <button onclick="viewOrderModal('${escapeHtml(String(o.order_number || o.id))}')" class="btn btn-outline-primary" style="padding:4px 8px; font-size:0.75rem;" title="View ordered items">View</button>
+              <button onclick="openPrintOrderInvoice('${escapeHtml(String(o.order_number || o.id))}')" class="btn btn-outline" style="padding:4px 8px; font-size:0.75rem;" title="Print Packing Slip / Branded Invoice">🖨️ Invoice</button>
             </div>
           </td>
         </tr>
@@ -2381,33 +2516,122 @@ async function loadAdminOrders() {
   }
 }
 
-async function updateOrderStatus(orderId, newStatus) {
+async function confirmOrderPaymentReceived(orderNumber) {
+  if (!orderNumber) return;
   let updated = false;
+  const nowIso = new Date().toISOString();
 
-  // 1. Update in local storage
+  // 1. Update Cloud Firestore immediately (syncs automatically to customer's /payment and /orders UI!)
+  try {
+    if (typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+      await firebase.firestore().collection('orders').doc(String(orderNumber)).set({
+        payment_status: 'Paid',
+        status: 'Confirmed',
+        payment_verified_by: 'admin_firebase',
+        verified_at: nowIso,
+        updated_at: nowIso
+      }, { merge: true });
+      updated = true;
+    }
+  } catch (fsErr) {
+    showToast('Firestore error: ' + (fsErr && fsErr.message ? fsErr.message : 'Permission denied'), 'error');
+    return;
+  }
+
+  // 2. Update local cache & localStorage
+  if (Array.isArray(window._firestoreOrders)) {
+    const fMatch = window._firestoreOrders.find(o => o.order_number === orderNumber || String(o.id) === String(orderNumber));
+    if (fMatch) {
+      fMatch.payment_status = 'Paid';
+      fMatch.status = 'Confirmed';
+      fMatch.updated_at = nowIso;
+    }
+  }
   try {
     let orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
-    const match = orders.find(o => String(o.id) === String(orderId) || String(o.order_number) === String(orderId));
+    const match = orders.find(o => String(o.order_number) === String(orderNumber) || String(o.id) === String(orderNumber));
     if (match) {
-      match.status = newStatus;
-      match.updated_at = new Date().toISOString();
+      match.payment_status = 'Paid';
+      match.status = 'Confirmed';
+      match.updated_at = nowIso;
       localStorage.setItem('rj_orders', JSON.stringify(orders));
       updated = true;
     }
   } catch (_) {}
 
-  // 2. Also try API
+  // 3. Also notify backend API if online
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/orders/${encodeURIComponent(orderNumber)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_status: 'Paid', status: 'Confirmed' })
+      });
+      if (res.ok) updated = true;
+    } catch (_) {}
+  }
+
+  if (updated) {
+    showToast(`✓ Payment marked Received for #${orderNumber}! Customer account confirmed automatically.`, 'success');
+    loadDashboardStats();
+    loadAdminOrders();
+  } else {
+    showToast('Could not confirm payment. Check Firebase Admin sign-in.', 'error');
+  }
+}
+window.confirmOrderPaymentReceived = confirmOrderPaymentReceived;
+
+async function updateOrderStatus(orderId, newStatus) {
+  let updated = false;
+  const nowIso = new Date().toISOString();
+
+  // 1. Update Cloud Firestore directly when signed in as Super Admin
   try {
-    const res = await fetch(`${API_BASE}/admin/orders/${orderId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success) updated = true;
+    if (typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+      await firebase.firestore().collection('orders').doc(String(orderId)).update({
+        status: newStatus,
+        updated_at: nowIso
+      });
+      updated = true;
+    }
+  } catch (fsErr) {
+    console.warn('[Firestore] Order status update notice:', fsErr && fsErr.message ? fsErr.message : fsErr);
+  }
+
+  // 2. Update in local cache & storage
+  if (Array.isArray(window._firestoreOrders)) {
+    const fMatch = window._firestoreOrders.find(o => String(o.order_number) === String(orderId) || String(o.id) === String(orderId));
+    if (fMatch) {
+      fMatch.status = newStatus;
+      fMatch.updated_at = nowIso;
+      updated = true;
+    }
+  }
+  try {
+    let orders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+    const match = orders.find(o => String(o.id) === String(orderId) || String(o.order_number) === String(orderId));
+    if (match) {
+      match.status = newStatus;
+      match.updated_at = nowIso;
+      localStorage.setItem('rj_orders', JSON.stringify(orders));
+      updated = true;
     }
   } catch (_) {}
+
+  // 3. Also try API
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/admin/orders/${encodeURIComponent(orderId)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) updated = true;
+      }
+    } catch (_) {}
+  }
 
   if (updated) {
     showToast(`Order status updated to "${newStatus}"`, 'success');

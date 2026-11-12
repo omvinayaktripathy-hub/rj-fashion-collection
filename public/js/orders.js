@@ -2,6 +2,63 @@ var escapeHtml = window.escapeHtml || (str => String(str == null ? '' : str).rep
 // RJ FASHION COLLECTION - ORDERS CONTROLLER (WITH LOCALSTORAGE PERSISTENCE)
 
 let activeCancelOrderNumber = null;
+let customerOrdersFirestoreUnsub = null;
+let firestoreCustomerOrdersCache = [];
+
+function mergeOrdersByNumber(lists) {
+  const map = new Map();
+  lists.forEach(arr => {
+    if (!Array.isArray(arr)) return;
+    arr.forEach(o => {
+      if (!o) return;
+      const key = o.order_number || String(o.id || '');
+      if (!key) return;
+      const prev = map.get(key);
+      if (!prev) {
+        map.set(key, o);
+      } else {
+        map.set(key, {
+          ...prev,
+          ...o,
+          items: (Array.isArray(o.items) && o.items.length > 0) ? o.items : prev.items
+        });
+      }
+    });
+  });
+  return Array.from(map.values()).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+}
+
+function initCustomerOrdersRealtimeSync() {
+  if (typeof firebase === 'undefined' || !firebase.auth || !firebase.firestore) return;
+  try {
+    firebase.auth().onAuthStateChanged(fbUser => {
+      if (typeof customerOrdersFirestoreUnsub === 'function') {
+        try { customerOrdersFirestoreUnsub(); } catch (_) {}
+        customerOrdersFirestoreUnsub = null;
+      }
+      if (!fbUser || !fbUser.uid) {
+        firestoreCustomerOrdersCache = [];
+        return;
+      }
+      customerOrdersFirestoreUnsub = firebase.firestore()
+        .collection('orders')
+        .where('userId', '==', fbUser.uid)
+        .onSnapshot(snap => {
+          const list = [];
+          snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+          firestoreCustomerOrdersCache = list;
+          try {
+            const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+            const merged = mergeOrdersByNumber([localOrders, list]);
+            localStorage.setItem('rj_orders', JSON.stringify(merged));
+          } catch (_) {}
+          loadMyOrders();
+        }, err => {
+          console.warn('[Firestore] Customer orders listener notice:', err && err.message ? err.message : err);
+        });
+    });
+  } catch (_) {}
+}
 
 async function loadMyOrders() {
   const container = document.getElementById('orders-list-container');
@@ -9,30 +66,42 @@ async function loadMyOrders() {
 
   if (!container) return;
 
-  let orders = [];
+  let apiOrders = [];
+  let localOrders = [];
 
   // 1. Try server API
   if (!window.isStaticHosting) {
     try {
       const res = await fetch(`${API_BASE}/orders`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
-        orders = data.orders;
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+          apiOrders = data.orders;
+        }
       }
-    }
     } catch (_) {}
   }
 
-  // 2. Fallback to localStorage saved orders
-  if (orders.length === 0) {
+  // 2. One-time Cloud Firestore read if cache is empty & user signed in
+  if (firestoreCustomerOrdersCache.length === 0 && typeof firebase !== 'undefined' && firebase.auth && firebase.firestore) {
     try {
-      const localOrders = JSON.parse(localStorage.getItem('rj_orders') || '[]');
-      if (Array.isArray(localOrders) && localOrders.length > 0) {
-        orders = localOrders;
+      const fbUser = firebase.auth().currentUser;
+      if (fbUser && fbUser.uid) {
+        const snap = await firebase.firestore().collection('orders').where('userId', '==', fbUser.uid).get();
+        const fetched = [];
+        snap.forEach(doc => fetched.push({ id: doc.id, ...doc.data() }));
+        firestoreCustomerOrdersCache = fetched;
       }
     } catch (_) {}
   }
+
+  // 3. Read localStorage saved orders
+  try {
+    const rawLocal = JSON.parse(localStorage.getItem('rj_orders') || '[]');
+    if (Array.isArray(rawLocal)) localOrders = rawLocal;
+  } catch (_) {}
+
+  const orders = mergeOrdersByNumber([localOrders, apiOrders, firestoreCustomerOrdersCache]);
 
   // If no orders found
   if (orders.length === 0) {
@@ -228,7 +297,11 @@ async function submitOrderCancellation() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadMyOrders);
+  document.addEventListener('DOMContentLoaded', () => {
+    initCustomerOrdersRealtimeSync();
+    loadMyOrders();
+  });
 } else {
+  initCustomerOrdersRealtimeSync();
   loadMyOrders();
 }
