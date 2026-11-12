@@ -411,28 +411,17 @@
         <div style="text-align: center; margin-bottom: 18px;">
           <div class="admin-sso-badge" style="margin-bottom: 8px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            <span>VERIFIED OWNER FIREBASE ACCESS</span>
+            <span>AUTHENTICATOR &amp; PASSWORD PROTECTED</span>
           </div>
           <p style="font-size: 0.8rem; color: #94a3b8; margin: 4px 0 0;">
-            Sign in with Google or password for <strong style="color: #f1f5f9;">omvinayakwork@gmail.com</strong>.
+            Enter your administrator credentials to unlock or verify with your 6-digit Authenticator code.
           </p>
-        </div>
-
-        <button type="button" id="admin-google-auth-btn" onclick="handleAdminGoogleLogin()" class="btn btn-block" style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 16px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; margin-bottom: 16px;">
-          <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-          <span>Authenticate with Google (omvinayakwork@gmail.com)</span>
-        </button>
-
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: #64748b; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em;">
-          <span style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></span>
-          <span>OR WITH ADMIN PASSWORD</span>
-          <span style="flex: 1; height: 1px; background: rgba(255,255,255,0.1);"></span>
         </div>
 
         <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
           <div class="form-group" style="margin-bottom: 16px;">
             <label style="color: #cbd5e1; font-size: 0.82rem; font-weight: 600; display: block; margin-bottom: 6px;">Administrator Email</label>
-            <input type="email" id="admin-email" required value="omvinayakwork@gmail.com" autocomplete="email" style="background: #0f172a; border-color: #334155; color: #fff; width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; font-size: 0.9rem;">
+            <input type="email" id="admin-email" required placeholder="Enter administrator email" autocomplete="email" style="background: #0f172a; border-color: #334155; color: #fff; width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155; font-size: 0.9rem;">
           </div>
 
           <div class="form-group" style="margin-bottom: 20px;">
@@ -449,16 +438,16 @@
           </div>
 
           <button type="submit" id="admin-login-btn" class="btn btn-primary btn-block" style="padding: 13px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px;">
-            Verify Credentials &amp; Proceed to Step 2 →
+            Verify Credentials &amp; Continue to Authenticator →
           </button>
         </form>
 
         <div class="admin-auth-security-strip" style="margin-top: 20px; text-align: center; font-size: 0.72rem; color: #64748b; line-height: 1.5; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px;">
-          <span>🛡️ 256-Bit SSL • Rate-Limited Access • HttpOnly Session Cookie • © 2026 RJ Fashion Collection</span>
+          <span>🛡️ 256-Bit SSL • TOTP Authenticator MFA • Firebase Admin Verification • © 2026 RJ Fashion Collection</span>
         </div>
       </div>
 
-      <!-- Step 2: Two-Step Verification Form (Google Authenticator / 6-Digit Code) -->
+      <!-- Step 2: Two-Step Verification Form (Google Authenticator / TOTP 6-Digit Code) -->
       <div id="admin-2fa-container" style="display: none;">
         <div class="admin-2fa-shield-icon" style="text-align: center; margin-bottom: 12px;">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block;">
@@ -470,11 +459,11 @@
         <div style="text-align: center; margin-bottom: 18px;">
           <div class="admin-sso-badge" style="margin-bottom: 8px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            <span>STEP 2 OF 2: GOOGLE AUTHENTICATOR / 2FA VERIFICATION</span>
+            <span>STEP 2 OF 2: GOOGLE AUTHENTICATOR VERIFICATION</span>
           </div>
-          <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: #fff; margin: 6px 0 6px;">Two-Step Verification</h3>
-          <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin: 0;">
-            Enter 6-digit code sent to your email or from Authenticator:
+          <h3 style="font-family: var(--font-serif); font-size: 1.35rem; color: #fff; margin: 6px 0 6px;">Authenticator Verification</h3>
+          <p id="admin-2fa-subtitle" style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin: 0;">
+            Enter the 6-digit code from your Authenticator app:
           </p>
         </div>
 
@@ -539,15 +528,14 @@
       
       <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid #334155; border-radius: 8px; padding: 12px; margin-bottom: 18px; text-align: left; font-size: 0.78rem;">
         <div style="color: #64748b; margin-bottom: 3px;">Strict Owner Enforcement:</div>
-        <div style="color: #f1f5f9; font-weight: 600;">Authorized Account: <span style="color: #D4AF37;">omvinayakwork@gmail.com</span></div>
-        <div style="color: #fca5a5; font-size: 0.72rem; margin-top: 4px;">⚠️ Any other Google account will be strictly blocked.</div>
+        <div style="color: #f1f5f9; font-weight: 600;">Authorized Account: <span style="color: #D4AF37;">Verified Store Owner</span></div>
+        <div style="color: #fca5a5; font-size: 0.72rem; margin-top: 4px;">⚠️ Any unauthorized account will be strictly blocked.</div>
       </div>
 
       <div id="mobile-auth-status-box" style="display: none; margin-bottom: 16px; padding: 12px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4;"></div>
 
       <button type="button" id="mobile-auth-confirm-btn" onclick="executeMobileScanApproval()" class="btn btn-primary btn-block" style="padding: 12px; font-weight: 700; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-        <span>Authorize as omvinayakwork@gmail.com</span>
+        <span>Authorize Owner Session</span>
       </button>
 
       <div style="font-size: 0.74rem; color: #64748b; margin-top: 14px;">
@@ -1354,6 +1342,48 @@
               </button>
             </div>
           </form>
+
+          <!-- Authenticator (TOTP 2FA) Security Card -->
+          <div id="admin-authenticator-settings-card" class="settings-card" style="margin-top: 24px; border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+              <div>
+                <h4 style="margin: 0 0 4px;">🔐 Google Authenticator (TOTP 2FA)</h4>
+                <span style="font-size: 0.8rem; color: #64748b;">Protect admin logins with a 6-digit rotating Authenticator code (Google Authenticator / Authy)</span>
+              </div>
+              <span id="admin-mfa-status-badge" style="padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; background: #f1f5f9; color: #475569;">Checking status...</span>
+            </div>
+
+            <div id="admin-mfa-info-msg" style="font-size: 0.82rem; color: #475569; margin-bottom: 12px; line-height: 1.5;"></div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+              <button type="button" id="admin-mfa-setup-btn" onclick="startAdminTotpSetup()" class="btn btn-primary" style="padding: 9px 18px; font-size: 0.85rem; font-weight: 700;">
+                🔑 Set Up Google Authenticator
+              </button>
+              <button type="button" onclick="refreshAdminMfaStatus()" class="btn btn-outline" style="padding: 9px 14px; font-size: 0.82rem;">
+                ↻ Refresh Status
+              </button>
+            </div>
+
+            <div id="admin-mfa-enroll-box" style="display: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-top: 10px;">
+              <p style="font-size: 0.84rem; color: #1e293b; font-weight: 600; margin: 0 0 10px;">
+                1. Open <strong>Google Authenticator</strong> (or Authy) and either tap the button below or add the setup key manually:
+              </p>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
+                <code id="admin-totp-secret-display" style="background: #0f172a; color: #f8fafc; padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; letter-spacing: 1px; user-select: all;"></code>
+                <button type="button" onclick="copyAdminTotpSecret()" class="btn btn-outline" style="padding: 7px 12px; font-size: 0.8rem;">📋 Copy Setup Key</button>
+                <a id="admin-totp-uri-link" href="#" class="btn btn-primary" style="padding: 7px 12px; font-size: 0.8rem; text-decoration: none;">📲 Open Authenticator App</a>
+              </div>
+              <p style="font-size: 0.84rem; color: #1e293b; font-weight: 600; margin: 0 0 8px;">
+                2. Enter the 6-digit code shown in your Authenticator app to activate:
+              </p>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="admin-totp-verify-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="123456" style="width: 150px; padding: 8px 12px; border: 1px solid #94a3b8; border-radius: 6px; font-size: 1rem; letter-spacing: 3px; text-align: center;">
+                <button type="button" id="admin-totp-confirm-btn" onclick="verifyAdminTotpSetup()" class="btn btn-primary" style="padding: 9px 18px; font-size: 0.85rem; font-weight: 700;">
+                  ✓ Verify &amp; Enable Authenticator
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1916,9 +1946,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
-  <script src="/firebase-config.js?v=20261112-fix2"></script>
-  <script src="/js/app.js?v=20261112-fix2"></script>
-  <script src="/js/admin.js?v=20261112-fix2"></script>
+  <script src="/firebase-config.js?v=20261112-fix3"></script>
+  <script src="/js/app.js?v=20261112-fix3"></script>
+  <script src="/js/admin.js?v=20261112-fix3"></script>
   <!-- CREATE PROMO CODE MODAL -->
   <div id="promo-modal" class="modal-backdrop">
     <div class="modal-window" style="max-width: 500px;">

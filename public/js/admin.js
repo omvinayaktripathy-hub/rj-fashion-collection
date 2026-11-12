@@ -147,7 +147,7 @@ async function initAdmin() {
       } else if (fbUser && fbUser.email) {
         const errEl = document.getElementById('admin-login-error');
         if (errEl) {
-          errEl.textContent = `Signed-in Google account (${fbUser.email}) is not an administrator. Please authenticate with omvinayakwork@gmail.com.`;
+          errEl.textContent = `Account (${fbUser.email}) does not have administrator privileges. Please sign in with the authorized administrator account.`;
           errEl.style.display = 'block';
         }
         try { await firebase.auth().signOut(); } catch (_) {}
@@ -274,8 +274,11 @@ function returnToAdminLoginForm() {
   const errEl = document.getElementById('admin-login-error');
   if (errEl) errEl.style.display = 'none';
   if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
+  window._firebaseMfaResolver = null;
   if (step2) step2.style.display = 'none';
   if (step1) step1.style.display = 'block';
+  const resendBtn = document.getElementById('admin-2fa-resend-btn');
+  if (resendBtn) resendBtn.style.display = '';
   const pass = document.getElementById('admin-password');
   if (pass) {
     pass.value = '';
@@ -401,32 +404,7 @@ async function handleAdminLogin(e) {
     }
   }
 
-  // 2. Client-Side Verification (Static CDN on Firebase Hosting web.app)
-  const normEmail = email.toLowerCase().trim();
-  const isOwnerEmail = normEmail === 'omvinayakwork@gmail.com';
-  const isOwnerPass = false; // Plaintext password removed; authenticate via Firebase Auth or backend
-
-  if (isOwnerEmail && isOwnerPass) {
-    window._adminPendingEmail = email;
-    showToast('Credentials verified! Complete Step 2: Google Authentication 👑', 'info');
-    const step1 = document.getElementById('admin-step1-container');
-    const step2 = document.getElementById('admin-2fa-container');
-    if (step1) step1.style.display = 'none';
-    if (step2) step2.style.display = 'block';
-
-    const emailDisplay = document.getElementById('admin-2fa-email-display');
-    if (emailDisplay) emailDisplay.textContent = email;
-
-    start2FACountdown(300);
-    initOtpDigitInputs();
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
-    }
-    return;
-  }
-
-  // 3. Firebase Authentication SDK Email/Password (Unlocks portal directly for Super Admin)
+  // 2. Firebase Authentication SDK Email/Password (+ TOTP Authenticator MFA when enrolled)
   ensureFirebaseInitialized();
   if (typeof firebase !== 'undefined' && firebase.auth) {
     try {
@@ -449,7 +427,13 @@ async function handleAdminLogin(e) {
         hideAdminLoginScreen();
         const topbar = document.getElementById('admin-topbar-username');
         if (topbar) topbar.textContent = adminUser.name;
-        showToast('Welcome, Om Vinayak! Firebase Admin Authentication Successful 👑', 'success');
+        const hasMfa = Boolean(user.multiFactor && Array.isArray(user.multiFactor.enrolledFactors) && user.multiFactor.enrolledFactors.length > 0);
+        showToast(
+          hasMfa
+            ? 'Welcome, Om Vinayak! Firebase Admin Authentication Successful 👑'
+            : 'Signed in as Admin! Link Google Authenticator in Settings → TOTP 2FA 🔐',
+          'success'
+        );
         setupSidebarCollapseState();
         loadDashboardStats();
         loadCategoriesList();
@@ -457,19 +441,64 @@ async function handleAdminLogin(e) {
         startRealtimeSync();
         if (btn) {
           btn.disabled = false;
-          btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+          btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
         }
         return;
       } else {
         try { await firebase.auth().signOut(); } catch (_) {}
+        if (errEl) {
+          errEl.textContent = 'Access denied. This account does not have administrator privileges.';
+          errEl.style.display = 'block';
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
+        }
+        return;
       }
     } catch (fbErr) {
       const code = fbErr && fbErr.code ? fbErr.code : '';
+
+      // Step 2 Triggered by Firebase Identity Platform TOTP Authenticator MFA
+      if (code === 'auth/multi-factor-auth-required' && typeof firebase.auth.getMultiFactorResolver === 'function') {
+        try {
+          const resolver = firebase.auth.getMultiFactorResolver(firebase.auth(), fbErr);
+          window._firebaseMfaResolver = resolver;
+          window._adminPendingEmail = email;
+
+          const step1 = document.getElementById('admin-step1-container');
+          const step2 = document.getElementById('admin-2fa-container');
+          if (step1) step1.style.display = 'none';
+          if (step2) step2.style.display = 'block';
+
+          const subtitle = document.getElementById('admin-2fa-subtitle');
+          if (subtitle) {
+            subtitle.textContent = 'Enter the 6-digit code from Google Authenticator (or your TOTP app):';
+          }
+          const timerEl = document.getElementById('admin-2fa-timer-display');
+          if (timerEl) timerEl.textContent = '30s Authenticator Code';
+          if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
+
+          const resendBtn = document.getElementById('admin-2fa-resend-btn');
+          if (resendBtn) resendBtn.style.display = 'none';
+
+          initOtpDigitInputs();
+          showToast('Step 1 verified! Enter your 6-digit Authenticator code 🔐', 'info');
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
+          }
+          return;
+        } catch (mfaInitErr) {
+          console.error('Failed to initialize Firebase MFA resolver:', mfaInitErr);
+        }
+      }
+
       let friendly = 'Invalid administrator email or password.';
       if (code === 'auth/too-many-requests') {
-        friendly = 'Too many failed attempts. Please wait a few minutes or sign in using Google above.';
-      } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential') {
-        friendly = 'Incorrect password or this Google account uses Google Sign-In. Click "Authenticate with Google" above.';
+        friendly = 'Too many failed attempts. Please wait a few minutes and try again.';
+      } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/user-not-found') {
+        friendly = 'Invalid administrator email or password.';
       } else if (code === 'auth/network-request-failed') {
         friendly = 'Network connection error reaching Firebase Authentication.';
       }
@@ -479,7 +508,7 @@ async function handleAdminLogin(e) {
       }
       if (btn) {
         btn.disabled = false;
-        btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+        btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
       }
       return;
     }
@@ -487,12 +516,12 @@ async function handleAdminLogin(e) {
 
   // Invalid credentials feedback
   if (errEl) {
-    errEl.textContent = 'Invalid administrator credentials. Please use Authenticate with Google or verify your password.';
+    errEl.textContent = 'Invalid administrator credentials. Please check your email and password.';
     errEl.style.display = 'block';
   }
   if (btn) {
     btn.disabled = false;
-    btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+    btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
   }
 }
 window.handleAdminLogin = handleAdminLogin;
@@ -705,7 +734,7 @@ async function handleAdmin2FASubmit(e) {
 
   if (code.length !== 6) {
     if (errEl) {
-      errEl.textContent = 'Please enter all 6 digits of the verification code.';
+      errEl.textContent = 'Please enter all 6 digits of the Authenticator verification code.';
       errEl.style.display = 'block';
     }
     return;
@@ -714,9 +743,95 @@ async function handleAdmin2FASubmit(e) {
   const btn = document.getElementById('admin-2fa-verify-btn');
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Verifying Code...';
+    btn.textContent = 'Verifying Authenticator Code...';
   }
 
+  // 1. Firebase Identity Platform TOTP Authenticator MFA Resolution
+  if (window._firebaseMfaResolver && typeof firebase !== 'undefined' && firebase.auth && firebase.auth.TotpMultiFactorGenerator) {
+    try {
+      const resolver = window._firebaseMfaResolver;
+      const totpFactorId = firebase.auth.TotpMultiFactorGenerator.FACTOR_ID || 'totp';
+      const selectedHint = (resolver.hints || []).find(h => h.factorId === totpFactorId) || (resolver.hints || [])[0];
+
+      if (!selectedHint) {
+        throw new Error('No enrolled Authenticator factor found for this account.');
+      }
+
+      const assertion = firebase.auth.TotpMultiFactorGenerator.assertionForSignIn(selectedHint.uid, code);
+      const userCred = await resolver.resolveSignIn(assertion);
+      const user = userCred && userCred.user ? userCred.user : null;
+      const userEmail = (user && user.email ? user.email.toLowerCase().trim() : '');
+      const isSuperAdminIdentity = Boolean(
+        user && (userEmail === 'omvinayakwork@gmail.com' || user.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1')
+      );
+
+      if (!isSuperAdminIdentity) {
+        try { await firebase.auth().signOut(); } catch (_) {}
+        window._firebaseMfaResolver = null;
+        if (errEl) {
+          errEl.textContent = 'Access denied. Authenticated user does not have administrator permissions.';
+          errEl.style.display = 'block';
+        }
+        return;
+      }
+
+      window._firebaseMfaResolver = null;
+      if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
+      adminUser = {
+        id: 1,
+        name: user.displayName || 'RJ Fashion Admin (Om Vinayak)',
+        email: user.email,
+        role: 'admin',
+        uid: user.uid
+      };
+      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+      hideAdminLoginScreen();
+      const topbar = document.getElementById('admin-topbar-username');
+      if (topbar) topbar.textContent = adminUser.name;
+      showToast('Authenticator Verified! Welcome, Administrator 👑', 'success');
+      setupSidebarCollapseState();
+      loadDashboardStats();
+      loadCategoriesList();
+      loadAdminProducts();
+      startRealtimeSync();
+      return;
+    } catch (mfaErr) {
+      digits.forEach(d => {
+        d.classList.add('error');
+        setTimeout(() => d.classList.remove('error'), 600);
+        d.value = '';
+      });
+      if (digits[0]) digits[0].focus();
+      const errCode = mfaErr && mfaErr.code ? mfaErr.code : '';
+      if (errEl) {
+        errEl.textContent = (errCode === 'auth/invalid-verification-code' || errCode === 'auth/code-expired')
+          ? 'Invalid or expired 6-digit Authenticator code. Please enter the current code in your Authenticator app.'
+          : (mfaErr.message || 'Authenticator verification failed.');
+        errEl.style.display = 'block';
+      }
+      return;
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Verify Code & Access Portal';
+      }
+    }
+  }
+
+  // 2. Static hosting without active MFA challenge: cannot verify backend OTP
+  if (window.isStaticHosting) {
+    if (errEl) {
+      errEl.textContent = 'No active Authenticator session. Please return to Step 1 and sign in with your administrator email and password.';
+      errEl.style.display = 'block';
+    }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Verify Code & Access Portal';
+    }
+    return;
+  }
+
+  // 3. Node Backend 2FA / TOTP Verification
   try {
     const res = await fetch(`${API_BASE}/auth/admin-verify-2fa`, {
       method: 'POST',
@@ -740,39 +855,12 @@ async function handleAdmin2FASubmit(e) {
         btn.textContent = 'Verify Code & Access Portal';
       }
 
+      setupSidebarCollapseState();
       loadDashboardStats();
+      loadCategoriesList();
       loadAdminProducts();
+      startRealtimeSync();
       return;
-    }
-
-    // Static CDN fallback on Firebase Hosting web.app (where /api is static 404)
-    if (res.status === 404) {
-      const isValidClientCode = (window._adminSessionOtp && code === window._adminSessionOtp) ||
-        false /* 2FA bypass eliminated */;
-
-      if (isValidClientCode) {
-        if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
-        adminUser = {
-          id: 1,
-          name: 'RJ Fashion Admin (Om Vinayak)',
-          email: window._adminPendingEmail || 'omvinayakwork@gmail.com',
-          role: 'admin'
-        };
-        sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-        hideAdminLoginScreen();
-        const topbar = document.getElementById('admin-topbar-username');
-        if (topbar) topbar.textContent = adminUser.name;
-        showToast('Two-Step Verification complete! Welcome, Administrator 👑', 'success');
-
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = 'Verify Code & Access Portal';
-        }
-
-        loadDashboardStats();
-        loadAdminProducts();
-        return;
-      }
     }
 
     // Verification failed on active server
@@ -790,34 +878,6 @@ async function handleAdmin2FASubmit(e) {
     if (digits[0]) digits[0].focus();
 
   } catch (err) {
-    // Client-side static CDN resilience
-    const isValidClientCode = (window._adminSessionOtp && code === window._adminSessionOtp) ||
-      false /* 2FA bypass eliminated */;
-
-    if (isValidClientCode) {
-      if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
-      adminUser = {
-        id: 1,
-        name: 'RJ Fashion Admin (Om Vinayak)',
-        email: window._adminPendingEmail || 'omvinayakwork@gmail.com',
-        role: 'admin'
-      };
-      sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
-      hideAdminLoginScreen();
-      const topbar = document.getElementById('admin-topbar-username');
-      if (topbar) topbar.textContent = adminUser.name;
-      showToast('Two-Step Verification complete! Welcome, Administrator 👑', 'success');
-
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = 'Verify Code & Access Portal';
-      }
-
-      loadDashboardStats();
-      loadAdminProducts();
-      return;
-    }
-
     if (errEl) {
       errEl.textContent = 'Connection error while verifying code. Please try again.';
       errEl.style.display = 'block';
@@ -938,28 +998,25 @@ async function submitEmergencyKey() {
   }
 }
 
-function returnToAdminLoginForm() {
-  if (twoFactorCountdownTimer) clearInterval(twoFactorCountdownTimer);
-  const errEl = document.getElementById('admin-login-error');
-  if (errEl) errEl.style.display = 'none';
-
-  const step1 = document.getElementById('admin-step1-container');
-  const step2 = document.getElementById('admin-2fa-container');
-  if (step2) step2.style.display = 'none';
-  if (step1) step1.style.display = 'block';
-
-  const passInput = document.getElementById('admin-password');
-  if (passInput) passInput.value = '';
-}
+// Duplicate returnToAdminLoginForm removed (see primary definition above)
 
 
 // Admin Logout
 async function handleAdminLogout() {
+  if (!window.isStaticHosting) {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
+    } catch (err) {}
+  }
   try {
-    await fetch(`${API_BASE}/auth/logout`, { method: 'POST' });
-  } catch (err) {}
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      await firebase.auth().signOut();
+    }
+  } catch (_) {}
+  window._firebaseMfaResolver = null;
   sessionStorage.removeItem('rjfc_admin_session');
   adminUser = null;
+  if (typeof returnToAdminLoginForm === 'function') returnToAdminLoginForm();
   showToast('Logged out of admin portal', 'info');
   showAdminLoginScreen();
 }
@@ -4246,6 +4303,8 @@ function loadAdminReports() {
 // 11. Active Store Settings Module (Persistence & Firestore sync)
 // ─────────────────────────────────────────────────────────────
 async function loadAdminSettings() {
+  refreshAdminMfaStatus();
+
   if (!window.isStaticHosting) {
     try {
       const res = await fetch('/api/admin/settings');
@@ -4267,6 +4326,180 @@ async function loadAdminSettings() {
     } catch (_) {}
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+// 11.1 Google Authenticator (Firebase TOTP MFA & Backend TOTP)
+// ─────────────────────────────────────────────────────────────
+let _pendingAdminTotpSecret = null;
+let _pendingAdminTotpMode = null; // 'firebase' | 'backend'
+
+function refreshAdminMfaStatus() {
+  const badge = document.getElementById('admin-mfa-status-badge');
+  const infoMsg = document.getElementById('admin-mfa-info-msg');
+  const setupBtn = document.getElementById('admin-mfa-setup-btn');
+  if (!badge || !infoMsg) return;
+
+  ensureFirebaseInitialized();
+  const fbUser = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+
+  if (fbUser && fbUser.multiFactor) {
+    const enrolled = Array.isArray(fbUser.multiFactor.enrolledFactors) ? fbUser.multiFactor.enrolledFactors : [];
+    const hasTotp = enrolled.some(f => f.factorId === 'totp');
+    if (hasTotp) {
+      badge.textContent = '✓ Authenticator Active';
+      badge.style.background = '#dcfce7';
+      badge.style.color = '#166534';
+      infoMsg.innerHTML = 'Firebase TOTP Authenticator is active on your account. Every admin login will require a 6-digit code from Google Authenticator / Authy.';
+      if (setupBtn) setupBtn.textContent = '+ Link Another Authenticator';
+      return;
+    }
+    badge.textContent = 'Not Enrolled';
+    badge.style.background = '#fef3c7';
+    badge.style.color = '#92400e';
+    infoMsg.innerHTML = 'Click <strong>Set Up Google Authenticator</strong> below to link your Authenticator app (requires TOTP MFA enabled in Firebase Console → Authentication → Settings → Multi-factor authentication).';
+    if (setupBtn) setupBtn.textContent = '🔑 Set Up Google Authenticator';
+    return;
+  }
+
+  badge.textContent = window.isStaticHosting ? 'Sign In Required' : 'Backend Mode';
+  badge.style.background = '#f1f5f9';
+  badge.style.color = '#475569';
+  infoMsg.innerHTML = window.isStaticHosting
+    ? 'Sign in with your administrator Firebase Email & Password to enroll Google Authenticator.'
+    : 'You can enroll Google Authenticator against the Express backend or Firebase Identity Platform.';
+}
+window.refreshAdminMfaStatus = refreshAdminMfaStatus;
+
+async function startAdminTotpSetup() {
+  const infoMsg = document.getElementById('admin-mfa-info-msg');
+  const enrollBox = document.getElementById('admin-mfa-enroll-box');
+  const secretDisplay = document.getElementById('admin-totp-secret-display');
+  const uriLink = document.getElementById('admin-totp-uri-link');
+
+  ensureFirebaseInitialized();
+  const fbUser = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+
+  // 1. Firebase Identity Platform TOTP Setup
+  if (fbUser && fbUser.multiFactor && typeof firebase.auth.TotpMultiFactorGenerator !== 'undefined') {
+    try {
+      const mfaSession = await fbUser.multiFactor.getSession();
+      const totpSecret = await firebase.auth.TotpMultiFactorGenerator.generateSecret(mfaSession);
+      const accountLabel = fbUser.email || 'admin@rjfashioncollection.com';
+      const otpAuthUrl = totpSecret.generateQrCodeUrl(accountLabel, 'RJ Fashion Collection');
+
+      _pendingAdminTotpSecret = totpSecret;
+      _pendingAdminTotpMode = 'firebase';
+
+      if (secretDisplay) secretDisplay.textContent = totpSecret.secretKey;
+      if (uriLink) uriLink.href = otpAuthUrl;
+      if (enrollBox) enrollBox.style.display = 'block';
+      if (infoMsg) infoMsg.innerHTML = 'Secret key generated! Add it to Google Authenticator and enter a 6-digit code below to activate.';
+      showToast('Authenticator setup key ready! Enter a 6-digit code to finish.', 'info');
+      return;
+    } catch (fbErr) {
+      const code = fbErr && fbErr.code ? fbErr.code : '';
+      let hint = fbErr.message || 'Unable to initialize Firebase TOTP setup.';
+      if (code === 'auth/operation-not-allowed' || code === 'auth/admin-restricted-operation') {
+        hint = '⚠️ Enable <strong>TOTP Multi-Factor Authentication</strong> first in Firebase Console → Authentication → Settings → Multi-factor authentication (requires Firebase Auth with Identity Platform).';
+      } else if (code === 'auth/unverified-email') {
+        try { await fbUser.sendEmailVerification(); } catch (_) {}
+        hint = '⚠️ Please verify your admin email address first (a verification email has been triggered if supported), then click Set Up Google Authenticator again.';
+      } else if (code === 'auth/requires-recent-login') {
+        hint = '⚠️ For security, log out and sign back in with your email and password, then immediately set up Google Authenticator.';
+      }
+      if (infoMsg) infoMsg.innerHTML = hint;
+      showToast('Check setup requirements shown in Authenticator card', 'error');
+      return;
+    }
+  }
+
+  // 2. Express Backend TOTP Setup fallback
+  if (!window.isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/mfa/setup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success && data.secret) {
+        _pendingAdminTotpSecret = data.secret;
+        _pendingAdminTotpMode = 'backend';
+        if (secretDisplay) secretDisplay.textContent = data.secret;
+        if (uriLink) uriLink.href = data.otpAuthUri || '#';
+        if (enrollBox) enrollBox.style.display = 'block';
+        showToast('Backend Authenticator setup key generated!', 'info');
+        return;
+      }
+      if (infoMsg) infoMsg.innerHTML = escapeHtml(data.message || 'Could not initialize Authenticator setup.');
+    } catch (_) {}
+  } else if (infoMsg) {
+    infoMsg.innerHTML = 'Sign in with Firebase Email & Password first to enroll TOTP Authenticator.';
+  }
+}
+window.startAdminTotpSetup = startAdminTotpSetup;
+
+async function verifyAdminTotpSetup() {
+  const input = document.getElementById('admin-totp-verify-input');
+  const enrollBox = document.getElementById('admin-mfa-enroll-box');
+  const code = (input ? input.value : '').replace(/[^0-9]/g, '').trim();
+
+  if (!/^\d{6}$/.test(code)) {
+    showToast('Please enter the valid 6-digit code from your Authenticator app.', 'error');
+    return;
+  }
+
+  if (_pendingAdminTotpMode === 'firebase' && _pendingAdminTotpSecret) {
+    try {
+      const fbUser = firebase.auth().currentUser;
+      const assertion = firebase.auth.TotpMultiFactorGenerator.assertionForEnrollment(_pendingAdminTotpSecret, code);
+      await fbUser.multiFactor.enroll(assertion, 'RJ Admin Google Authenticator');
+      _pendingAdminTotpSecret = null;
+      _pendingAdminTotpMode = null;
+      if (input) input.value = '';
+      if (enrollBox) enrollBox.style.display = 'none';
+      refreshAdminMfaStatus();
+      showToast('Google Authenticator 2FA successfully enabled! 🔐👑', 'success');
+      return;
+    } catch (err) {
+      showToast(err.message || 'Invalid 6-digit Authenticator code. Try the current code.', 'error');
+      return;
+    }
+  }
+
+  if (_pendingAdminTotpMode === 'backend' && !window.isStaticHosting) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/mfa/verify-setup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
+        body: JSON.stringify({ token: code })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        _pendingAdminTotpSecret = null;
+        _pendingAdminTotpMode = null;
+        if (input) input.value = '';
+        if (enrollBox) enrollBox.style.display = 'none';
+        refreshAdminMfaStatus();
+        showToast('Backend Authenticator 2FA enabled! 🔐', 'success');
+        return;
+      }
+      showToast(data.message || 'Invalid 6-digit code.', 'error');
+    } catch (_) {
+      showToast('Failed to verify setup code.', 'error');
+    }
+  }
+}
+window.verifyAdminTotpSetup = verifyAdminTotpSetup;
+
+function copyAdminTotpSecret() {
+  const el = document.getElementById('admin-totp-secret-display');
+  const val = el ? el.textContent.trim() : '';
+  if (!val) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(val).then(() => showToast('Authenticator setup key copied!', 'success'));
+  }
+}
+window.copyAdminTotpSecret = copyAdminTotpSecret;
 
 function applySettingsToForm(s) {
   const el = (a, b) => document.getElementById(a) || (b ? document.getElementById(b) : null);
