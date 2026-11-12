@@ -503,10 +503,24 @@ async function applyPromoCode(codeOverride) {
 // ─────────────────────────────────────────────────────────────
 // Execute Place Order with Instant Validation & Confirmation
 // ─────────────────────────────────────────────────────────────
+async function waitForFirebaseAuthUser(timeoutMs = 1800) {
+  if (typeof firebase === 'undefined' || !firebase.auth) return null;
+  const auth = firebase.auth();
+  if (auth.currentUser) return auth.currentUser;
+  return await new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(auth.currentUser || null), timeoutMs);
+    const unsub = auth.onAuthStateChanged((u) => {
+      clearTimeout(timer);
+      if (typeof unsub === 'function') unsub();
+      resolve(u || null);
+    });
+  });
+}
+
 async function persistOrderToFirestore(orderObj, overridePayStatus) {
   try {
     if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) return false;
-    const fbUser = firebase.auth().currentUser;
+    const fbUser = await waitForFirebaseAuthUser();
     if (!fbUser || !fbUser.uid) return false;
 
     const cleanItems = (Array.isArray(orderObj.items) ? orderObj.items : []).map(it => ({
@@ -520,6 +534,10 @@ async function persistOrderToFirestore(orderObj, overridePayStatus) {
       total: (Number(it.price) || 0) * (Number(it.quantity) || 1)
     }));
     if (cleanItems.length === 0) return false;
+
+    const docRef = firebase.firestore().collection('orders').doc(String(orderObj.order_number));
+    const existing = await docRef.get().catch(() => null);
+    if (existing && existing.exists) return true;
 
     const docData = {
       order_number: String(orderObj.order_number),
@@ -541,7 +559,7 @@ async function persistOrderToFirestore(orderObj, overridePayStatus) {
       updated_at: new Date().toISOString()
     };
 
-    await firebase.firestore().collection('orders').doc(docData.order_number).set(docData, { merge: true });
+    await docRef.set(docData);
     return true;
   } catch (err) {
     console.warn('[Firestore] Order save notice:', err && err.message ? err.message : err);

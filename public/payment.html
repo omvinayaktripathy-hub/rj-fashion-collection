@@ -764,15 +764,29 @@
       return 'upi://pay?' + query;
     }
 
+    async function waitForFirebaseUser(timeoutMs) {
+      if (typeof firebase === 'undefined' || !firebase.auth) return null;
+      var auth = firebase.auth();
+      if (auth.currentUser) return auth.currentUser;
+      return await new Promise(function(resolve) {
+        var timer = setTimeout(function() { resolve(auth.currentUser || null); }, timeoutMs || 1800);
+        var unsub = auth.onAuthStateChanged(function(u) {
+          clearTimeout(timer);
+          if (typeof unsub === 'function') unsub();
+          resolve(u || null);
+        });
+      });
+    }
+
     async function ensurePendingOrderInFirestore() {
       try {
-        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) return;
-        var fbUser = firebase.auth().currentUser;
-        if (!fbUser || !fbUser.uid || !orderData.orderNumber) return;
+        if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) return 'unavailable';
+        var fbUser = await waitForFirebaseUser(1800);
+        if (!fbUser || !fbUser.uid || !orderData.orderNumber) return 'guest';
 
         var docRef = firebase.firestore().collection('orders').doc(orderData.orderNumber);
         var existing = await docRef.get();
-        if (existing && existing.exists) return;
+        if (existing && existing.exists) return 'saved';
 
         var pending = {};
         try {
@@ -799,8 +813,10 @@
           created_at: pending.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
+        return 'saved';
       } catch (err) {
         console.warn('[Firestore] Pending order sync notice:', err && err.message ? err.message : err);
+        return 'error';
       }
     }
 
@@ -870,14 +886,18 @@
 
       // Firebase-Only Direct UPI App Launch Mode
       showView('verifying');
-      await ensurePendingOrderInFirestore();
+      var syncState = await ensurePendingOrderInFirestore();
       var vpa = await resolveStoreUpiVpa();
       var deepLinkUrl = buildUpiDeepLink(appName, vpa, orderData.orderNumber, orderData.amount);
       orderData.lastIntentUrl = deepLinkUrl;
 
       var subEl = document.getElementById('verify-status-subtext');
       if (subEl) {
-        subEl.innerHTML = 'Opening <strong>' + appLabel + '</strong> for <strong>₹' + Math.round(orderData.amount).toLocaleString('en-IN') + '</strong>. Once your payment is received and verified in Firebase, this page and your <strong>My Orders</strong> account will automatically confirm.';
+        if (syncState === 'saved') {
+          subEl.innerHTML = 'Opened <strong>' + appLabel + '</strong> for <strong>₹' + Math.round(orderData.amount).toLocaleString('en-IN') + '</strong> (Order <strong>' + orderData.orderNumber + '</strong>). Waiting for Admin / gateway payment confirmation in Firebase — once confirmed, this screen and <strong>My Orders</strong> update automatically.';
+        } else {
+          subEl.innerHTML = 'Opened <strong>' + appLabel + '</strong> for <strong>₹' + Math.round(orderData.amount).toLocaleString('en-IN') + '</strong> (Order <strong>' + orderData.orderNumber + '</strong>). <strong>Note:</strong> Live Firebase auto-sync requires signing into your account first; without an active PG webhook or Firebase login, confirm via store Admin/WhatsApp concierge.';
+        }
       }
 
       startFirestoreOrderListener();
@@ -960,8 +980,9 @@
           return;
         }
 
-        // Firebase-only mode: poll Cloud Firestore order document safely
-        if (typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+        // Firebase-only mode: poll Cloud Firestore order document safely after hydrating auth
+        var fbUser = await waitForFirebaseUser(1500);
+        if (typeof firebase !== 'undefined' && firebase.firestore && fbUser && fbUser.uid) {
           var snap = await firebase.firestore().collection('orders').doc(orderData.orderNumber).get();
           if (snap && snap.exists) {
             var docData = snap.data() || {};
@@ -973,7 +994,12 @@
               showFailedScreen('Payment was declined or order was cancelled.');
               return;
             }
+            if (subEl) {
+              subEl.innerHTML = 'Order <strong>' + orderData.orderNumber + '</strong> is saved in Firebase (Status: <strong>Pending Payment Confirmation</strong>). Once your merchant / gateway confirms receipt in Firebase, this screen confirms automatically.';
+            }
           }
+        } else if (subEl) {
+          subEl.innerHTML = 'Not signed into Firebase Auth in this browser, so live Firestore confirmation cannot run for <strong>' + orderData.orderNumber + '</strong>. Please sign in on <a href="/login.html">Login</a> or message concierge with your Order ID.';
         }
       } catch (err) {
         if (subEl) subEl.textContent = 'Checking payment confirmation status...';
