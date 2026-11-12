@@ -485,10 +485,14 @@
           </p>
         </div>
 
-        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
-          <div style="font-size: 0.72rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">1. Open Google Authenticator → + → Enter a setup key (Time-based):</div>
+        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; padding: 14px; margin-bottom: 16px; text-align: center;">
+          <div style="font-size: 0.75rem; color: #cbd5e1; margin-bottom: 10px; font-weight: 600;">
+            1. Open Google Authenticator → <strong style="color:#D4AF37;">+</strong> → <strong>Scan a QR code</strong> (shown once only):
+          </div>
+          <div id="admin-mandatory-totp-qr" style="background: #ffffff; padding: 12px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; min-width: 196px; min-height: 196px; margin: 0 auto 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.45);"></div>
+          <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 6px; text-align: left;">Can&apos;t scan? Use setup key manually:</div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-            <code id="admin-mandatory-totp-secret" style="flex: 1; background: #020617; color: #D4AF37; padding: 8px 10px; border-radius: 6px; font-size: 0.8rem; word-break: break-all; user-select: all; border: 1px solid #334155;"></code>
+            <code id="admin-mandatory-totp-secret" style="flex: 1; background: #020617; color: #D4AF37; padding: 8px 10px; border-radius: 6px; font-size: 0.78rem; word-break: break-all; user-select: all; border: 1px solid #334155; text-align: left;"></code>
             <button type="button" onclick="copyMandatoryTotpSecret()" style="background: #334155; border: none; color: #fff; padding: 7px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">Copy</button>
           </div>
           <a id="admin-mandatory-totp-uri" href="#" class="btn btn-outline btn-block" style="display: block; text-align: center; padding: 8px; font-size: 0.78rem; color: #D4AF37; border-color: rgba(212,175,55,0.45); text-decoration: none;">
@@ -1432,8 +1436,9 @@
 
             <div id="admin-mfa-enroll-box" style="display: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-top: 10px;">
               <p style="font-size: 0.84rem; color: #1e293b; font-weight: 600; margin: 0 0 10px;">
-                1. Open <strong>Google Authenticator</strong> (or Authy) and either tap the button below or add the setup key manually:
+                1. Scan this one-time QR code in <strong>Google Authenticator</strong> (or use the setup key below):
               </p>
+              <div id="admin-settings-totp-qr" style="background: #ffffff; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; min-width: 184px; min-height: 184px; margin-bottom: 12px;"></div>
               <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px;">
                 <code id="admin-totp-secret-display" style="background: #0f172a; color: #f8fafc; padding: 8px 12px; border-radius: 6px; font-size: 0.88rem; letter-spacing: 1px; user-select: all;"></code>
                 <button type="button" onclick="copyAdminTotpSecret()" class="btn btn-outline" style="padding: 7px 12px; font-size: 0.8rem;">📋 Copy Setup Key</button>
@@ -2012,9 +2017,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
-  <script src="/firebase-config.js?v=20261112-fix5"></script>
-  <script src="/js/app.js?v=20261112-fix5"></script>
-  <script src="/js/admin.js?v=20261112-fix5"></script>
+  <script src="/firebase-config.js?v=20261112-fix6"></script>
+  <script src="/js/qrcode.min.js?v=20261112-fix6"></script>
+  <script src="/js/app.js?v=20261112-fix6"></script>
+  <script src="/js/admin.js?v=20261112-fix6"></script>
   <!-- CREATE PROMO CODE MODAL -->
   <div id="promo-modal" class="modal-backdrop">
     <div class="modal-window" style="max-width: 500px;">

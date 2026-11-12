@@ -418,6 +418,33 @@ function returnToAdminLoginForm() {
 }
 window.returnToAdminLoginForm = returnToAdminLoginForm;
 
+function renderTotpQrCode(containerId, otpAuthUri) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  if (typeof QRCode === 'function' && otpAuthUri) {
+    try {
+      new QRCode(el, {
+        text: otpAuthUri,
+        width: 172,
+        height: 172,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.M : 0
+      });
+      return;
+    } catch (err) {
+      console.warn('[AdminTOTP] Local QR render notice:', err && err.message ? err.message : err);
+    }
+  }
+  el.innerHTML = '<span style="font-size:0.74rem;color:#334155;">Copy setup key below into Google Authenticator.</span>';
+}
+
+function clearTotpQrCode(containerId) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = '';
+}
+
 // First-Time Mandatory Google Authenticator Enrollment (Keeps Dashboard Locked Until Verified)
 function openMandatoryTotpSetup(user) {
   const step1 = document.getElementById('admin-step1-container');
@@ -430,18 +457,20 @@ function openMandatoryTotpSetup(user) {
   if (setupBox) setupBox.style.display = 'block';
 
   const secret = generateTotpSecretBase32(32);
+  const otpAuthUri = buildTotpOtpAuthUri(secret, user && user.email);
   window._pendingMandatoryTotp = { secret, user };
 
   const secretEl = document.getElementById('admin-mandatory-totp-secret');
   const uriEl = document.getElementById('admin-mandatory-totp-uri');
   const codeInput = document.getElementById('admin-mandatory-totp-code');
+  renderTotpQrCode('admin-mandatory-totp-qr', otpAuthUri);
   if (secretEl) secretEl.textContent = secret;
-  if (uriEl) uriEl.href = buildTotpOtpAuthUri(secret, user && user.email);
+  if (uriEl) uriEl.href = otpAuthUri;
   if (codeInput) {
     codeInput.value = '';
     setTimeout(() => codeInput.focus(), 150);
   }
-  showToast('First-time security setup: Link Google Authenticator before continuing 🔐', 'info');
+  showToast('Scan this QR code once in Google Authenticator, then enter the 6-digit code 🔐', 'info');
 }
 
 function copyMandatoryTotpSecret() {
@@ -499,6 +528,9 @@ async function completeMandatoryTotpSetup(e) {
     await saveAdminFirestoreTotp(pending.secret, pending.user.email);
     const verifiedUser = pending.user;
     window._pendingMandatoryTotp = null;
+    clearTotpQrCode('admin-mandatory-totp-qr');
+    const secretEl = document.getElementById('admin-mandatory-totp-secret');
+    if (secretEl) secretEl.textContent = '';
     if (input) input.value = '';
     grantAdminPortalAccess(verifiedUser, 'Google Authenticator linked & verified! Welcome 👑');
   } catch (err) {
@@ -517,6 +549,9 @@ window.completeMandatoryTotpSetup = completeMandatoryTotpSetup;
 
 async function cancelMandatoryTotpSetup() {
   window._pendingMandatoryTotp = null;
+  clearTotpQrCode('admin-mandatory-totp-qr');
+  const secretEl = document.getElementById('admin-mandatory-totp-secret');
+  if (secretEl) secretEl.textContent = '';
   sessionStorage.removeItem('rjfc_admin_session');
   sessionStorage.removeItem('rjfc_admin_totp_verified');
   try {
@@ -4742,9 +4777,10 @@ async function startAdminTotpSetup() {
 
       if (secretDisplay) secretDisplay.textContent = totpSecret.secretKey;
       if (uriLink) uriLink.href = otpAuthUrl;
+      renderTotpQrCode('admin-settings-totp-qr', otpAuthUrl);
       if (enrollBox) enrollBox.style.display = 'block';
-      if (infoMsg) infoMsg.innerHTML = 'Secret key generated! Add it to Google Authenticator and enter a 6-digit code below to activate.';
-      showToast('Authenticator setup key ready! Enter a 6-digit code to finish.', 'info');
+      if (infoMsg) infoMsg.innerHTML = 'Scan the one-time QR code in Google Authenticator and enter a 6-digit code below to activate.';
+      showToast('Authenticator QR code ready! Scan & enter 6-digit code to finish.', 'info');
       return;
     } catch (_) {
       // Identity Platform not enabled on Spark -> use Firestore TOTP seamlessly
@@ -4753,13 +4789,15 @@ async function startAdminTotpSetup() {
 
   if (fbUser) {
     const newSecret = generateTotpSecretBase32(32);
+    const otpAuthUrl = buildTotpOtpAuthUri(newSecret, fbUser.email);
     _pendingAdminTotpSecret = newSecret;
     _pendingAdminTotpMode = 'firestore';
     if (secretDisplay) secretDisplay.textContent = newSecret;
-    if (uriLink) uriLink.href = buildTotpOtpAuthUri(newSecret, fbUser.email);
+    if (uriLink) uriLink.href = otpAuthUrl;
+    renderTotpQrCode('admin-settings-totp-qr', otpAuthUrl);
     if (enrollBox) enrollBox.style.display = 'block';
-    if (infoMsg) infoMsg.innerHTML = 'New Google Authenticator key generated! Add it to Google Authenticator and enter a 6-digit code below to activate.';
-    showToast('New Google Authenticator setup key ready!', 'info');
+    if (infoMsg) infoMsg.innerHTML = 'Scan the one-time QR code in Google Authenticator and enter a 6-digit code below to activate.';
+    showToast('New Google Authenticator QR code ready!', 'info');
     return;
   }
 
@@ -4776,8 +4814,9 @@ async function startAdminTotpSetup() {
         _pendingAdminTotpMode = 'backend';
         if (secretDisplay) secretDisplay.textContent = data.secret;
         if (uriLink) uriLink.href = data.otpAuthUri || '#';
+        renderTotpQrCode('admin-settings-totp-qr', data.otpAuthUri);
         if (enrollBox) enrollBox.style.display = 'block';
-        showToast('Backend Authenticator setup key generated!', 'info');
+        showToast('Backend Authenticator QR code generated!', 'info');
         return;
       }
       if (infoMsg) infoMsg.innerHTML = escapeHtml(data.message || 'Could not initialize Authenticator setup.');
@@ -4809,6 +4848,7 @@ async function verifyAdminTotpSetup() {
       await saveAdminFirestoreTotp(_pendingAdminTotpSecret, fbUser && fbUser.email);
       _pendingAdminTotpSecret = null;
       _pendingAdminTotpMode = null;
+      clearTotpQrCode('admin-settings-totp-qr');
       if (input) input.value = '';
       if (enrollBox) enrollBox.style.display = 'none';
       refreshAdminMfaStatus();
@@ -4827,6 +4867,7 @@ async function verifyAdminTotpSetup() {
       await fbUser.multiFactor.enroll(assertion, 'RJ Admin Google Authenticator');
       _pendingAdminTotpSecret = null;
       _pendingAdminTotpMode = null;
+      clearTotpQrCode('admin-settings-totp-qr');
       if (input) input.value = '';
       if (enrollBox) enrollBox.style.display = 'none';
       refreshAdminMfaStatus();
