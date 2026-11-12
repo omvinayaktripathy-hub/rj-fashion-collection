@@ -216,6 +216,7 @@ async function unusedInitBlock() {
 function showAdminLoginScreen() {
   const screen = document.getElementById('admin-login-overlay');
   if (screen) screen.style.display = 'flex';
+  if (typeof initStep1OtpDigitInputs === 'function') initStep1OtpDigitInputs();
 }
 
 function hideAdminLoginScreen() {
@@ -310,6 +311,7 @@ async function handleAdminLogin(e) {
   const passInput = document.getElementById('admin-password');
   const email = (emailInput ? emailInput.value : '').trim();
   const password = passInput ? passInput.value : '';
+  const step1TotpCode = getStep1TotpCode();
 
   if (!email || !password) {
     if (errEl) {
@@ -318,7 +320,7 @@ async function handleAdminLogin(e) {
     }
     if (btn) {
       btn.disabled = false;
-      btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+      btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
     }
     return;
   }
@@ -326,13 +328,15 @@ async function handleAdminLogin(e) {
   // 1. First attempt verification via Server API (only when Node backend is running)
   if (!window.isStaticHosting) {
     try {
+      const payload = { email, password, require2FA: true };
+      if (step1TotpCode.length === 6) payload.code = step1TotpCode;
       const res = await fetch(`${API_BASE}/auth/admin-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-admin-portal': 'true'
         },
-        body: JSON.stringify({ email, password, require2FA: true })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json().catch(() => ({}));
@@ -345,7 +349,7 @@ async function handleAdminLogin(e) {
         }
         if (btn) {
           btn.disabled = false;
-          btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+          btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
         }
         return;
       }
@@ -353,7 +357,7 @@ async function handleAdminLogin(e) {
       // Step 2: 2-Step Verification Challenge Required (Normal Portal Login)
       if (res.ok && (data.mfaRequired || data.step === 2)) {
         window._adminPendingEmail = email;
-        showToast('Step 1 credentials verified! Please authenticate with Google 👑', 'info');
+        showToast('Credentials verified! Enter your 6-digit Authenticator code 🔐', 'info');
         const step1 = document.getElementById('admin-step1-container');
         const step2 = document.getElementById('admin-2fa-container');
         if (step1) step1.style.display = 'none';
@@ -366,7 +370,7 @@ async function handleAdminLogin(e) {
         initOtpDigitInputs();
         if (btn) {
           btn.disabled = false;
-          btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+          btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
         }
         return;
       }
@@ -395,7 +399,7 @@ async function handleAdminLogin(e) {
         }
         if (btn) {
           btn.disabled = false;
-          btn.textContent = origBtnText || 'Verify Credentials & Proceed to Step 2 →';
+          btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
         }
         return;
       }
@@ -441,7 +445,7 @@ async function handleAdminLogin(e) {
         startRealtimeSync();
         if (btn) {
           btn.disabled = false;
-          btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
+          btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
         }
         return;
       } else {
@@ -452,7 +456,7 @@ async function handleAdminLogin(e) {
         }
         if (btn) {
           btn.disabled = false;
-          btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
+          btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
         }
         return;
       }
@@ -465,6 +469,55 @@ async function handleAdminLogin(e) {
           const resolver = firebase.auth.getMultiFactorResolver(firebase.auth(), fbErr);
           window._firebaseMfaResolver = resolver;
           window._adminPendingEmail = email;
+
+          // If user already entered 6 digits in Step 1's Google Authenticator box, verify immediately!
+          if (step1TotpCode.length === 6 && firebase.auth.TotpMultiFactorGenerator) {
+            try {
+              const totpFactorId = firebase.auth.TotpMultiFactorGenerator.FACTOR_ID || 'totp';
+              const selectedHint = (resolver.hints || []).find(h => h.factorId === totpFactorId) || (resolver.hints || [])[0];
+              if (selectedHint) {
+                const assertion = firebase.auth.TotpMultiFactorGenerator.assertionForSignIn(selectedHint.uid, step1TotpCode);
+                const mfaCred = await resolver.resolveSignIn(assertion);
+                const mfaUser = mfaCred && mfaCred.user ? mfaCred.user : null;
+                const mfaEmail = (mfaUser && mfaUser.email ? mfaUser.email.toLowerCase().trim() : '');
+                if (mfaUser && (mfaEmail === 'omvinayakwork@gmail.com' || mfaUser.uid === 'aJC901OkCjU5UvqUUF9tvaqpdbn1')) {
+                  window._firebaseMfaResolver = null;
+                  adminUser = {
+                    id: 1,
+                    name: mfaUser.displayName || 'RJ Fashion Admin (Om Vinayak)',
+                    email: mfaUser.email,
+                    role: 'admin',
+                    uid: mfaUser.uid
+                  };
+                  sessionStorage.setItem('rjfc_admin_session', JSON.stringify(adminUser));
+                  hideAdminLoginScreen();
+                  const topbar = document.getElementById('admin-topbar-username');
+                  if (topbar) topbar.textContent = adminUser.name;
+                  showToast('Password & Google Authenticator Verified! Welcome 👑', 'success');
+                  setupSidebarCollapseState();
+                  loadDashboardStats();
+                  loadCategoriesList();
+                  loadAdminProducts();
+                  startRealtimeSync();
+                  if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
+                  }
+                  return;
+                }
+              }
+            } catch (directTotpErr) {
+              if (errEl) {
+                errEl.textContent = 'Invalid 6-digit Google Authenticator code. Please enter the fresh code from your Authenticator app.';
+                errEl.style.display = 'block';
+              }
+              document.querySelectorAll('#admin-step1-otp-boxes .admin-step1-otp-digit').forEach(d => {
+                d.value = '';
+                d.classList.add('error');
+                setTimeout(() => d.classList.remove('error'), 600);
+              });
+            }
+          }
 
           const step1 = document.getElementById('admin-step1-container');
           const step2 = document.getElementById('admin-2fa-container');
@@ -483,10 +536,10 @@ async function handleAdminLogin(e) {
           if (resendBtn) resendBtn.style.display = 'none';
 
           initOtpDigitInputs();
-          showToast('Step 1 verified! Enter your 6-digit Authenticator code 🔐', 'info');
+          showToast('Password verified! Enter your 6-digit Google Authenticator code 🔐', 'info');
           if (btn) {
             btn.disabled = false;
-            btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
+            btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
           }
           return;
         } catch (mfaInitErr) {
@@ -498,7 +551,7 @@ async function handleAdminLogin(e) {
       if (code === 'auth/too-many-requests') {
         friendly = 'Too many failed attempts. Please wait a few minutes and try again.';
       } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/user-not-found') {
-        friendly = 'Invalid administrator email or password.';
+        friendly = 'Invalid administrator email or password. Use "Set / Reset Password" if you need to configure a password for this email.';
       } else if (code === 'auth/network-request-failed') {
         friendly = 'Network connection error reaching Firebase Authentication.';
       }
@@ -508,7 +561,7 @@ async function handleAdminLogin(e) {
       }
       if (btn) {
         btn.disabled = false;
-        btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
+        btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
       }
       return;
     }
@@ -521,7 +574,7 @@ async function handleAdminLogin(e) {
   }
   if (btn) {
     btn.disabled = false;
-    btn.textContent = origBtnText || 'Verify Credentials & Continue to Authenticator →';
+    btn.textContent = origBtnText || '🔐 Verify Password & Authenticator';
   }
 }
 window.handleAdminLogin = handleAdminLogin;
@@ -644,53 +697,91 @@ window.handleAdminGoogle2FA = handleAdminGoogle2FA;
 window.handleAdminGoogleLogin = handleAdminGoogle2FA;
 
 // ===================================================================
-// ADMIN 2-STEP VERIFICATION HANDLERS (STEP 2)
+// ADMIN 2-STEP VERIFICATION HANDLERS (STEP 1 & STEP 2 AUTHENTICATOR)
 // ===================================================================
-function initOtpDigitInputs() {
-  const digits = document.querySelectorAll('.admin-otp-digit');
+function wireOtpBoxes(selector, options = {}) {
+  const digits = document.querySelectorAll(selector);
   digits.forEach(d => { d.value = ''; d.classList.remove('error'); });
 
-  if (digits[0]) {
+  if (options.autofocus && digits[0]) {
     setTimeout(() => digits[0].focus(), 150);
   }
 
   digits.forEach((input, idx) => {
-    // Remove prior event listeners by cloning
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
 
     newInput.addEventListener('input', (e) => {
       const val = e.target.value.replace(/[^0-9]/g, '');
       e.target.value = val ? val[0] : '';
-      if (val && idx < digits.length - 1) {
-        document.querySelectorAll('.admin-otp-digit')[idx + 1].focus();
+      const currentBoxes = document.querySelectorAll(selector);
+      if (val && idx < currentBoxes.length - 1) {
+        currentBoxes[idx + 1].focus();
       }
-      checkAutoSubmitOtp();
+      if (options.autoSubmit) checkAutoSubmitOtp();
     });
 
     newInput.addEventListener('keydown', (e) => {
       if (e.key === 'Backspace' && !e.target.value && idx > 0) {
-        document.querySelectorAll('.admin-otp-digit')[idx - 1].focus();
+        document.querySelectorAll(selector)[idx - 1].focus();
       }
     });
 
     newInput.addEventListener('paste', (e) => {
       e.preventDefault();
       const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
-      const allBoxes = document.querySelectorAll('.admin-otp-digit');
+      const allBoxes = document.querySelectorAll(selector);
       for (let i = 0; i < pasteData.length; i++) {
         if (allBoxes[i]) allBoxes[i].value = pasteData[i];
       }
       if (pasteData.length < 6 && allBoxes[pasteData.length]) {
         allBoxes[pasteData.length].focus();
       }
-      checkAutoSubmitOtp();
+      if (options.autoSubmit) checkAutoSubmitOtp();
     });
   });
 }
 
+function initStep1OtpDigitInputs() {
+  wireOtpBoxes('#admin-step1-otp-boxes .admin-step1-otp-digit', { autofocus: false, autoSubmit: false });
+}
+window.initStep1OtpDigitInputs = initStep1OtpDigitInputs;
+
+function getStep1TotpCode() {
+  return Array.from(document.querySelectorAll('#admin-step1-otp-boxes .admin-step1-otp-digit')).map(d => d.value).join('');
+}
+
+async function handleAdminForgotPassword() {
+  const errEl = document.getElementById('admin-login-error');
+  const email = (document.getElementById('admin-email')?.value || '').trim();
+  if (!email) {
+    if (errEl) {
+      errEl.textContent = 'Enter your administrator email first, then click Set / Reset Password.';
+      errEl.style.display = 'block';
+    }
+    return;
+  }
+  ensureFirebaseInitialized();
+  if (typeof firebase === 'undefined' || !firebase.auth) return;
+  try {
+    await firebase.auth().sendPasswordResetEmail(email);
+    if (errEl) errEl.style.display = 'none';
+    showToast(`Password setup/reset email sent to ${email}! Check your inbox.`, 'success');
+  } catch (err) {
+    if (errEl) {
+      errEl.textContent = err.message || 'Unable to send password reset email.';
+      errEl.style.display = 'block';
+    }
+  }
+}
+window.handleAdminForgotPassword = handleAdminForgotPassword;
+
+function initOtpDigitInputs() {
+  wireOtpBoxes('#admin-2fa-container .admin-otp-digit', { autofocus: true, autoSubmit: true });
+}
+
 function checkAutoSubmitOtp() {
-  const code = Array.from(document.querySelectorAll('.admin-otp-digit')).map(d => d.value).join('');
+  const code = Array.from(document.querySelectorAll('#admin-2fa-container .admin-otp-digit')).map(d => d.value).join('');
   if (code.length === 6) {
     handleAdmin2FASubmit();
   }
@@ -729,7 +820,7 @@ async function handleAdmin2FASubmit(e) {
   const errEl = document.getElementById('admin-login-error');
   if (errEl) errEl.style.display = 'none';
 
-  const digits = Array.from(document.querySelectorAll('.admin-otp-digit'));
+  const digits = Array.from(document.querySelectorAll('#admin-2fa-container .admin-otp-digit'));
   const code = digits.map(d => d.value).join('');
 
   if (code.length !== 6) {
